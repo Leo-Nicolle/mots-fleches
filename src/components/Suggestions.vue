@@ -1,5 +1,5 @@
 <template>
-    <div class="suggestions column">
+    <div class="suggestions">
         <b-field>
             <b-button class="is-primary" @click="$emit('switchdirection')">{{direction}}</b-button>
         </b-field>
@@ -46,6 +46,10 @@ export default {
     flex-direction: column;
     align-items: stretch;
     margin-left: 30px;
+
+    max-width: 344px;
+    min-width: 344px;
+
 }
 
 table td:hover {
@@ -54,59 +58,5 @@ table td:hover {
 
 table td:hover {
     font-size: 20px;
-}
-
-ul {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    overflow-y: scroll;
-    max-height: 56vh;
-    min-width: 145px;
-    margin-left: 0;
-}
-
-button {
-    margin-bottom: 2px;
-}
-
-.scrollbar {
-    float: left;
-    background: #F5F5F5;
-    overflow-y: scroll;
-    margin-bottom: 25px;
-    margin-left: 0;
-}
-
-.scrollbar::-webkit-scrollbar-track {
-    border-radius: 10px;
-    background-color: #F5F5F5;
-}
-
-.scrollbar::-webkit-scrollbar {
-    width: 12px;
-    background-color: #F5F5F5;
-}
-
-.scrollbar::-webkit-scrollbar-thumb {
-    border-radius: 10px;
-    background-color: #555;
-}
-
-li {
-    font: 200 20px/1.5 Helvetica, Verdana, sans-serif;
-    border-bottom: 1px solid #ccc;
-    cursor: pointer;
-    padding: 8px 0;
-}
-
-li:last-child {
-    border: none;
-    padding: 2px;
-}
-
-li:hover {
-    font-size: 22px;
-    background: #f6f6f6;
 }
 </style>

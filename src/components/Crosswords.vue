@@ -1,6 +1,13 @@
 <template>
-<div class="container section" @keyup="onKeyUp">
-  <div class="crosswords">
+<div class="container section columns" @keyup="onKeyUp">
+  <Suggestions
+    :suggestions="suggestions"
+    :direction="direction"
+    @switchdirection="onSwitchDirection"
+    @wordhover="onWordHover"
+    class="column"
+  />
+  <div class="crosswords column scrollbar">
     <div v-for="(row,i) in cellValues" class="columns" :key="i">
       <div v-for="(col,j) in row" :key="j" class="column is-narrow cell">
         <textbox
@@ -13,7 +20,6 @@
       </div>
     </div>
   </div>
-  <Suggestions :suggestions="suggestions" :direction="direction" @switchdirection="onSwitchDirection" @wordhover="onWordHover" />
 </div>
 </template>
 
@@ -192,8 +198,16 @@ export default {
 <style scoped>
 .container {
   display: flex;
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 0;
 }
-
+.crosswords{
+  overflow: scroll;
+  min-height: calc(100vh - 767px);
+  max-height: calc(100vh - 290px);
+  min-width: calc(100vw - 442px);
+}
 .row {
   display: flex;
   margin-bottom: 20px;
