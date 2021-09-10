@@ -1,6 +1,6 @@
 <template>
   <div class = "textbox" @click="$emit('click')">
-    <input v-if="!isDefinition" :class="getClass()" type="text" v-model="model" />
+    <input v-if="!isDefinition" :class="getClass()" type="text" v-model="model" @keyup="onKeyPress"/>
     <textarea v-else :class="getClass()" type="text" v-model="definition" />
     <button class="switch" @click="onClick()"  tabindex="-1">x</button>
   </div>
@@ -56,6 +56,10 @@ export default {
         this.model = '';
         this.$emit('input', '');
       }
+    },
+    onKeyPress(evt) {
+      if (evt.code !== 'Backspace') return;
+      this.$emit('change', evt.target.value);
     },
   },
 };

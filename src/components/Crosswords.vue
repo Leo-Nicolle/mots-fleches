@@ -5,7 +5,7 @@
       <div v-for="(col,j) in row" :key="j" class="column is-narrow cell">
         <textbox
           v-model="cells[getCoords(i,j)]"
-          @click="onClick(i,j)"
+          @click="onSelectCell(i,j)"
           @input="onChange(i,j)"
           :highlighted="isHighlighted(i,j)"
           >
@@ -46,6 +46,9 @@ export default {
       this.setupCells();
       this.refresh();
     },
+    focusedCell() {
+      this.searchSuggestions();
+    },
   },
   computed: {
 
@@ -83,19 +86,33 @@ export default {
     refresh() {
       this.cellValues = this.getCellValues();
     },
-    onChange(row, col) {
-      const coords = this.getCoords(row, col);
-      if (!coords) return;
-      const value = this.cells[coords];
-      this.cells[coords] = value ? value.slice(value.length - 1) : '';
-      this.refresh();
+    isHighlighted(row, col) {
+      if (!this.selectedCells.length) return false;
+      return !!this.selectedCells.find((cell) => cell.x === col && cell.y === row);
     },
-    onClick(row, col) {
-      crosswords.findWords({
+    moveCursor(direction) {
+      const children = [...this.$el.querySelectorAll('.cell input')];
+      const focused = document.activeElement;
+      const evtIndex = children.findIndex((c) => c === focused);
+      if (evtIndex < 0) return;
+      const col = evtIndex % this.cols;
+      const row = Math.floor(evtIndex / this.cols);
+      const newCol = Math.max(Math.min(col + direction.y, this.cols - 1), 0);
+      const newRow = Math.max(Math.min(row + direction.x, this.rows - 1), 0);
+      children[newCol + newRow * this.cols].focus();
+      this.refresh();
+      this.focusedCell = {
+        x: newCol,
+        y: newRow,
+      };
+    },
+    searchSuggestions() {
+      if (!this.focusedCell) return Promise.resolve();
+      return crosswords.findWords({
         grid: this.cellValues,
         coord: {
-          x: col,
-          y: row,
+          x: this.focusedCell.x,
+          y: this.focusedCell.y,
         },
         dir: this.direction,
       }).then(({
@@ -104,33 +121,44 @@ export default {
       }) => {
         this.suggestions = words.slice(0, 100).map((word) => ({ word }));
         this.selectedCells = cells;
-        this.focusedCell = { x: col, y: row };
       });
+    },
+    onSelectCell(row, col) {
+      const coords = this.getCoords(row, col);
+      if (!coords) return;
+      const value = this.cells[coords];
+      this.cells[coords] = value ? value.slice(value.length - 1) : '';
+      this.focusedCell = { x: col, y: row };
+    },
+    onChange(row, col) {
+      const coords = this.getCoords(row, col);
+      const factor = this.cells[coords] === '' ? -1 : 1;
+      const vector = this.direction === 'horizontal'
+        ? { x: 0, y: factor }
+        : { x: factor, y: 0 };
+      this.moveCursor(vector);
     },
     onKeyUp(evt) {
       if (!this.focusedCell) {
         this.focusedCell = { x: 0, y: 0 };
       }
-      const children = [...this.$el.querySelectorAll('.cell input')];
-      const evtIndex = children.findIndex((c) => c === evt.target);
-      if (evtIndex < 0) return;
-      let col = evtIndex % this.cols;
-      let row = Math.floor(evtIndex / this.cols);
+      let y = 0;
+      let x = 0;
 
       if (evt.code === 'ArrowDown') {
-        row = Math.min(this.rows - 1, row + 1);
+        x = 1;
       }
       if (evt.code === 'ArrowUp') {
-        row = Math.max(0, row - 1);
+        x = -1;
       }
       if (evt.code === 'ArrowRight') {
-        col = Math.min(this.cols - 1, col + 1);
+        y = 1;
       }
       if (evt.code === 'ArrowLeft') {
-        col = Math.max(0, col - 1);
+        y = -1;
       }
-      children[col + row * this.cols].focus();
-      this.focusedCell = { x: col, y: row };
+      if (x === 0 && y === 0) return;
+      this.moveCursor({ x, y });
     },
     onSwitchDirection() {
       if (this.direction === 'horizontal') {
@@ -139,7 +167,7 @@ export default {
         this.direction = 'horizontal';
       }
       if (this.focusedCell) {
-        this.onClick(this.focusedCell.y, this.focusedCell.x);
+        this.focusedCell = { ...this.focusedCell };
       }
     },
     onWordHover(word) {
@@ -149,10 +177,6 @@ export default {
       }, i) => {
         this.cells[this.getCoords(y, x)] = word.slice(i, i + 1);
       });
-    },
-    isHighlighted(row, col) {
-      if (!this.selectedCells.length) return false;
-      return !!this.selectedCells.find((cell) => cell.x === col && cell.y === row);
     },
   },
   components: {

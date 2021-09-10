@@ -1,7 +1,7 @@
 <template>
   <div id="app">
-    <Crosswords :rows="rows" :cols="cols"/>
     <Settings @change="onChange"/>
+    <Crosswords :rows="rows" :cols="cols"/>
 
   </div>
 </template>
