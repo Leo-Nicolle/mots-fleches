@@ -4,7 +4,14 @@
             <b-button class="is-primary" @click="$emit('switchdirection')">{{direction}}</b-button>
         </b-field>
         <b-field>
-            <b-input placeholder="Recherche" type="search" icon="magnify" icon-clickable @icon-click="onSearch">
+            <b-input
+              placeholder="Recherche"
+              type="search"
+              icon="magnify"
+              icon-clickable
+              v-model="dataQuery"
+              @icon-click="onSearch"
+              @input="onSearch">
             </b-input>
         </b-field>
         <b-table :data="suggestions" :columns="columns" :paginated="true" :per-page="10" :pagination-simple="true" :selected.sync="selected" hoverable clickable />
@@ -17,6 +24,7 @@ export default {
   data() {
     return {
       selected: null,
+      dataQuery: '',
       columns: [{
         field: 'word',
         label: 'Suggestions',
@@ -24,15 +32,18 @@ export default {
       }],
     };
   },
-  props: ['suggestions', 'direction'],
+  props: ['suggestions', 'direction', 'query'],
   watch: {
     selected(newValue) {
       this.$emit('wordhover', newValue.word);
     },
+    query(newValue) {
+      this.dataQuery = newValue;
+    },
   },
   methods: {
-    onSearch() {
-      console.log('onSearch');
+    onSearch(value) {
+      this.$emit('search', value);
     },
   },
 };

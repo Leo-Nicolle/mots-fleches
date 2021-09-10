@@ -70,7 +70,9 @@ export default class Crosswords {
       && grid[coord.y][coord.x] !== '\n';
   }
 
-  static findBoundaries({ grid, coord, dir }) {
+  static findBoundaries({
+    grid, coord, dir,
+  }) {
     let vec = { x: 1, y: 0 };
     let curr = { ...coord };
     let start = { ...coord };
@@ -108,7 +110,9 @@ export default class Crosswords {
     };
   }
 
-  findWords({ grid, coord, dir }) {
+  findWords({
+    grid, coord, dir, query,
+  }) {
     const {
       start, vec, length,
     } = Crosswords.findBoundaries({ grid, coord, dir });
@@ -124,17 +128,26 @@ export default class Crosswords {
       cells.push(current);
     }
     // transform str into regexp:
-    const reg = new RegExp(`^${str.split('').reduce((reg, char) => (char === '*'
-      ? `${reg}\\w?`
-      : `${reg}${char}`),
-    '')}$`, 'i');
-    console.log('Reg', reg);
+    let reg;
+    if (!query.length) {
+      reg = new RegExp(`^${str.split('').reduce((reg, char) => (char === '*'
+        ? `${reg}\\w?`
+        : `${reg}${char}`),
+      '')}$`, 'i');
+    } else {
+      reg = new RegExp(`^${query.split('').reduce((reg, char) => (char === '*'
+        ? `${reg}\\w?`
+        : `${reg}${char}`),
+      '')}$`, 'i');
+    }
+    const regString = reg.toString();
+    console.log('Reg', regString, regString.replaceAll('/', ''));
     return this.getWords()
       .then((words) => words
         .filter((word) => word.length <= length && word.match(reg))
         .sort((a, b) => Math.abs(a.length - length) - Math.abs(b.length - length)))
       .then((words) => ({
-        words, cells,
+        words, cells, query: regString.replace(/\/i?|\^|\$/g, '').replace(/\\w\?/g, '*'),
       }));
   }
 }

@@ -3,8 +3,10 @@
   <Suggestions
     :suggestions="suggestions"
     :direction="direction"
+    :query="query"
     @switchdirection="onSwitchDirection"
     @wordhover="onWordHover"
+    @search="onSearch"
     class="column"
   />
   <div class="crosswords column scrollbar">
@@ -41,6 +43,7 @@ export default {
       suggestions: [],
       focusedCell: null,
       selectedCells: [],
+      query: '',
     };
   },
   watch: {
@@ -121,12 +124,15 @@ export default {
           y: this.focusedCell.y,
         },
         dir: this.direction,
+        query: this.query,
       }).then(({
         words,
         cells,
+        query,
       }) => {
         this.suggestions = words.slice(0, 100).map((word) => ({ word }));
         this.selectedCells = cells;
+        this.query = query;
       });
     },
     onSelectCell(row, col) {
@@ -183,6 +189,10 @@ export default {
       }, i) => {
         this.cells[this.getCoords(y, x)] = word.slice(i, i + 1);
       });
+    },
+    onSearch(value) {
+      this.query = value;
+      this.searchSuggestions();
     },
   },
   components: {
