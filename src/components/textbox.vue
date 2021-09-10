@@ -25,7 +25,7 @@ export default {
       this.model = this.value;
     },
     model() {
-      if (!this.isDefinition && this.model.length > 1) {
+      if (!this.isDefinition && this.model && this.model.length > 1) {
         this.model = this.model.slice(this.model.length - 1);
       }
       if (!this.isDefinition) {

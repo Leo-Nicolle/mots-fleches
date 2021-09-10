@@ -26,10 +26,9 @@ const crosswords = new Crosswords();
 
 export default {
   name: 'Crosswords',
+  props: ['rows', 'cols'],
   data() {
     return {
-      rows: 10,
-      cols: 10,
       cells: {},
       direction: 'horizontal',
       cellValues: [],
@@ -41,9 +40,11 @@ export default {
   watch: {
     rows() {
       this.setupCells();
+      this.refresh();
     },
     cols() {
       this.setupCells();
+      this.refresh();
     },
   },
   computed: {
@@ -84,8 +85,9 @@ export default {
     },
     onChange(row, col) {
       const coords = this.getCoords(row, col);
+      if (!coords) return;
       const value = this.cells[coords];
-      this.cells[coords] = value.slice(value.length - 1);
+      this.cells[coords] = value ? value.slice(value.length - 1) : '';
       this.refresh();
     },
     onClick(row, col) {
@@ -135,6 +137,9 @@ export default {
         this.direction = 'vertical';
       } else {
         this.direction = 'horizontal';
+      }
+      if (this.focusedCell) {
+        this.onClick(this.focusedCell.y, this.focusedCell.x);
       }
     },
     onWordHover(word) {

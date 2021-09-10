@@ -1,6 +1,6 @@
 <template>
 <div class="suggestions column">
-  <b-button @click="$emit('switchdirection')">{{direction}}</b-button>
+  <b-button class="is-primary" @click="$emit('switchdirection')">{{direction}}</b-button>
   <b-table
     :data="suggestions"
     :columns="columns"

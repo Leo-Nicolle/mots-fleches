@@ -63,9 +63,9 @@ export default class Crosswords {
   }
 
   static coordValid(grid, coord) {
-    return coord.y < grid[0].length
+    return coord.y < grid.length
       && coord.y >= 0
-      && coord.x < grid.length
+      && coord.x < grid[0].length
       && coord.x >= 0
       && grid[coord.y][coord.x] !== '\n';
   }

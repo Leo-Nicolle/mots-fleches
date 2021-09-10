@@ -1,18 +1,25 @@
 <template>
 <div class="settings">
-  <button @click="$emit('switchdirection')">{{direction}}</button>
-  <ul class="suggestions scrollbar">
-    <li v-for="(suggestion,i) in suggestions" :key="i" @mouseover="$emit('wordhover', suggestion)">
-      {{suggestion}}
-    </li>
-  </ul>
+  <b-field>
+    <b-numberinput v-model="cols" @input="$emit('change', {rows,cols})"></b-numberinput>
+  </b-field>
+
+  <b-field>
+    <b-numberinput v-model="rows" @input="$emit('change', {rows,cols})"></b-numberinput>
+  </b-field>
+
 </div>
 </template>
 
 <script>
 export default {
-  name: 'Crosswords',
-  props: ['suggestions', 'direction'],
+  name: 'Settings',
+  data() {
+    return {
+      rows: 10,
+      cols: 10,
+    };
+  },
 };
 </script>
 
