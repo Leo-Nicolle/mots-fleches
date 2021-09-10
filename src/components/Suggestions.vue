@@ -1,24 +1,44 @@
 <template>
-<div class="suggestions">
-  <button @click="$emit('switchdirection')">{{direction}}</button>
-  <ul class="suggestions scrollbar">
-    <li v-for="(suggestion,i) in suggestions" :key="i" @mouseover="$emit('wordhover', suggestion)">
-      {{suggestion}}
-    </li>
-  </ul>
+<div class="suggestions column">
+  <b-button @click="$emit('switchdirection')">{{direction}}</b-button>
+  <b-table
+    :data="suggestions"
+    :columns="columns"
+    :paginated="true"
+    :per-page="10"
+    :pagination-simple="true"
+    :selected.sync="selected"
+    hoverable
+    clickable
+  />
 </div>
 </template>
 
 <script>
 export default {
   name: 'Crosswords',
+  data() {
+    return {
+      selected: null,
+      columns: [{
+        field: 'word',
+        label: 'Suggestions',
+        width: '40',
+      }],
+    };
+  },
   props: ['suggestions', 'direction'],
+  watch: {
+    selected(newValue) {
+      this.$emit('wordhover', newValue.word);
+    },
+  },
 };
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 
-<style scoped>
+<style>
 .suggestions {
   display: flex;
   flex-direction: column;
@@ -26,12 +46,19 @@ export default {
   margin-left: 30px;
 }
 
+table td:hover{
+  cursor: pointer;
+}
+table td:hover{
+  font-size: 20px;
+}
+
 ul {
   list-style-type: none;
   margin: 0;
   padding: 0;
   overflow-y: scroll;
-  max-height: 85vh;
+  max-height: 56vh;
   min-width: 145px;
   margin-left: 0;
 }

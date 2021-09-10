@@ -1,9 +1,8 @@
 <template>
   <div class = "textbox" @click="$emit('click')">
-
-    <input v-if="!isDefinition" :class="getClass()" type="text" v-model="model" @keypress="$emit('keypress')"/>
-    <textarea v-else :class="getClass()" type="text" v-model="definition" @keypress="$emit('keypress')"/>
-    <button class="switch" @click="onClick()">x</button>
+    <input v-if="!isDefinition" :class="getClass()" type="text" v-model="model" />
+    <textarea v-else :class="getClass()" type="text" v-model="definition" />
+    <button class="switch" @click="onClick()"  tabindex="-1">x</button>
   </div>
 </template>
 
@@ -12,6 +11,7 @@ export default {
   name: 'textbox',
   props: {
     value: String,
+    highlighted: Boolean,
   },
   data() {
     return {
@@ -44,7 +44,8 @@ export default {
   // },
   methods: {
     getClass() {
-      return `input ${this.isDefinition ? 'definition' : 'letter'}`;
+      const highlight = `${this.highlighted ? 'is-primary' : ''}`;
+      return `input ${this.isDefinition ? 'is-info definition' : 'letter'} ${highlight}`;
     },
     onClick() {
       this.isDefinition = !this.isDefinition;
@@ -74,19 +75,28 @@ export default {
   text-align: center;
   text-overflow: clip;
   text-transform: uppercase;
-  border: 1px solid;
 }
 .letter {
   font-size: 45px;
+  max-width: 50px;
+  min-width: 50px;
+  min-height: 50px;
+  max-height: 50px;
 }
 .definition {
   font-size: 12px;
-  background-color: #9dede8;
+  background-color: #167df0;
+  color: white;
+  overflow: hidden;
   text-transform: lowercase;
+  max-width: 50px;
+  min-width: 50px;
+  min-height: 50px;
+  max-height: 50px;
 }
 
 .switch {
-  transform: translate(-8px, 45px);
+  transform: translate(-8px, 40px);
   border-radius: 10px;
   border: none;
   cursor: pointer;

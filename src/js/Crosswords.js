@@ -18,28 +18,40 @@ export default class Crosswords {
 
   loadDictionary() {
     if (this.loadingPromise) return this.loadingPromise;
-    Promise.all(
-      [
-        axios.get('http://localhost:3010/result-complete-A.txt'),
-        axios.get('http://localhost:3010/result-A.txt'),
-      ],
-    )
-      .then((datasets) => {
-        const [a, b] = datasets
-          .map(({ data }) => data.split(/,|\n/).reduce((map, word) => map.set(word, true), new Map()));
-        const aNotB = [...a.keys()].reduce((aNotB, word) => (b.has(word) ? aNotB : aNotB.concat(word)), []);
-        const bNotA = [...b.keys()].reduce((bNotA, word) => (a.has(word) ? bNotA : bNotA.concat(word)), []);
-        console.log('aNotB', aNotB);
-        console.log('bNotA', bNotA);
-      });
-    this.loadingPromise = Promise.all(
-      new Array(26).fill(0)
+    // Promise.all(
+    //   [
+    //     axios.get('http://localhost:3010/result-complete-A.txt'),
+    //     axios.get('http://localhost:3010/result-A.txt'),
+    //   ],
+    // )
+    //   .then((datasets) => {
+    //     const [a, b] = datasets
+    //       .map(({ data }) => data.split(/,|\n/).reduce((map, word) => map.set(word, true), new Map()));
+    //     const aNotB = [...a.keys()].reduce((aNotB, word) => (b.has(word) ? aNotB : aNotB.concat(word)), []);
+    //     const bNotA = [...b.keys()].reduce((bNotA, word) => (a.has(word) ? bNotA : bNotA.concat(word)), []);
+    //     console.log('aNotB', aNotB);
+    //     console.log('bNotA', bNotA);
+    //   });
+    const wordsMap = new Map();
+    this.loadingPromise = Promise.all([
+      ...new Array(26).fill(0)
         .map((_, i) => String.fromCharCode('A'.charCodeAt(0) + i))
         .map((letter) => axios.get(`http://localhost:3010/result-${letter}.txt`)),
-    )
+      axios.get('http://localhost:3010/allwords.txt'),
+    ])
       .then((responses) => {
         responses.forEach(({ data }) => {
-          this.words.push(...data.split(',').map((w) => w.trim()));
+          data.split(/,|\n/)
+            .map((w) => w
+              .trim()
+              .normalize('NFD')
+              .replace(/[\u0300-\u036f]/g, '')
+              .toUpperCase())
+            .forEach((word) => {
+              if (wordsMap.has(word)) return;
+              wordsMap.set(word, true);
+              this.words.push(word);
+            });
         });
       });
     return this.loadingPromise;
@@ -115,7 +127,7 @@ export default class Crosswords {
     const reg = new RegExp(`^${str.split('').reduce((reg, char) => (char === '*'
       ? `${reg}\\w?`
       : `${reg}${char}`),
-    '')}$`);
+    '')}$`, 'i');
     console.log('Reg', reg);
     return this.getWords()
       .then((words) => words
