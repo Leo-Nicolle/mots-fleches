@@ -2,6 +2,7 @@
   <div id="app">
     <Settings @change="onChange"/>
     <Crosswords :rows="rows" :cols="cols"/>
+    <AddWord />
 
   </div>
 </template>
@@ -9,6 +10,7 @@
 <script>
 import Crosswords from './components/Crosswords.vue';
 import Settings from './components/Settings.vue';
+import AddWord from './components/AddWord.vue';
 
 export default {
   name: 'App',
@@ -21,6 +23,7 @@ export default {
   components: {
     Crosswords,
     Settings,
+    AddWord,
   },
   methods: {
     onChange({ rows, cols }) {
