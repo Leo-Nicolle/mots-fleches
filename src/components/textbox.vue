@@ -24,24 +24,20 @@ export default {
     value() {
       this.model = this.value;
     },
-    model() {
-      if (!this.isDefinition && this.model && this.model.length > 1) {
+    model(newValue, oldValue) {
+      if (this.definition) return;
+      if (!newValue.localeCompare(' ')) {
+        this.model = '';
+        return;
+      }
+      if (this.model && this.model.length > 1) {
         this.model = this.model.slice(this.model.length - 1);
       }
-      if (!this.isDefinition) {
-        this.$emit('input', this.model);
+      if (this.model.length && oldValue.localeCompare(this.model)) {
+        this.$emit('type', this.model);
       }
     },
   },
-  // computed: {
-  //   model: {
-  //     get() { return this.value; },
-  //     set(v) {
-  //       this.$emit('input', v);
-  //       this.value = v;
-  //     },
-  //   },
-  // },
   methods: {
     getClass() {
       const highlight = `${this.highlighted ? 'is-primary' : ''}`;
@@ -51,15 +47,15 @@ export default {
       this.isDefinition = !this.isDefinition;
       if (this.isDefinition) {
         this.model = String.fromCharCode(10);
-        this.$emit('input', String.fromCharCode(10));
+        this.$emit('switch', this.isDefinition);
       } else {
         this.model = '';
-        this.$emit('input', '');
+        this.$emit('switch', this.isDefinition);
       }
     },
     onKeyPress(evt) {
-      if (evt.code !== 'Backspace') return;
-      this.$emit('change', evt.target.value);
+      if (!this.isDefinition) return;
+      evt.stopPropagation();
     },
   },
 };

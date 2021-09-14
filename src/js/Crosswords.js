@@ -87,19 +87,21 @@ export default class Crosswords {
     let lookingForStart = true;
     let currValid = Crosswords.coordValid(grid, curr);
     // eslint-disable-next-line no-cond-assign
-    while (currValid || lookingForStart) {
-      if (lookingForStart) {
-        if (currValid) {
-          start = { ...curr };
-        } else {
-          vec = { x: vec.x * -1, y: vec.y * -1 };
-          lookingForStart = false;
-        }
-      } else if (currValid) {
-        end = { ...curr };
-      } else { break; }
-      curr = { x: curr.x + vec.x, y: curr.y + vec.y };
-      currValid = Crosswords.coordValid(grid, curr);
+    if (currValid) {
+      while (currValid || lookingForStart) {
+        if (lookingForStart) {
+          if (currValid) {
+            start = { ...curr };
+          } else {
+            vec = { x: vec.x * -1, y: vec.y * -1 };
+            lookingForStart = false;
+          }
+        } else if (currValid) {
+          end = { ...curr };
+        } else { break; }
+        curr = { x: curr.x + vec.x, y: curr.y + vec.y };
+        currValid = Crosswords.coordValid(grid, curr);
+      }
     }
 
     return {
@@ -108,6 +110,35 @@ export default class Crosswords {
       vec,
       length: end.x - start.x + end.y - start.y + 1,
     };
+  }
+
+  computeScores() {
+    if (this.scoresPromise || true) return Promise.resolve(this.scores);
+    const aCharCode = 'a'.charCodeAt(0);
+    const frequencies = new Array(26).fill(0).reduce((acc, _, i) => {
+      acc[String.fromCharCode(aCharCode + i)] = new Array(40).fill(0);
+      return acc;
+    }, {});
+
+    this.scoresPromise = this.getWords()
+      .then((words) => {
+        words.forEach((w) => {
+          w.split('').forEach((letter, i) => {
+            const arr = frequencies[letter.toLowerCase()];
+            if (!arr) return;
+            arr[i] += 1;
+          });
+        });
+        Object.values(frequencies).forEach((freqByPos) => {
+          freqByPos.forEach((freq) => { freq /= this.words.length; });
+        });
+
+        this.scores = this.words.reduce((map, w) => map.set(w, w.split('')
+          .reduce((score, letter, i) => (score + frequencies[letter.toLowerCase()] ? frequencies[letter.toLowerCase()][i] : 0),
+            0)), new Map());
+        return this.scores;
+      });
+    return this.scoresPromise;
   }
 
   findWords({
@@ -127,9 +158,10 @@ export default class Crosswords {
       str += letter.length ? letter.toLowerCase() : '*';
       cells.push(current);
     }
+    if (cells.length < 2) return Promise.resolve();
     // transform str into regexp:
     let reg;
-    if (!query.length) {
+    if (true || !query.length) {
       reg = new RegExp(`^${str.split('').reduce((reg, char) => (char === '*'
         ? `${reg}\\w?`
         : `${reg}${char}`),
@@ -142,10 +174,13 @@ export default class Crosswords {
     }
     const regString = reg.toString();
     console.log('Reg', regString, regString.replaceAll('/', ''));
-    return this.getWords()
+    return this.computeScores()
+      .then(() => this.getWords())
       .then((words) => words
-        .filter((word) => word.length <= length && word.match(reg))
+        .filter((word) => word.length === length && word.match(reg))
+        // .sort((a, b) => Math.abs(a.length - length) - Math.abs(b.length - length)))
         .sort((a, b) => Math.abs(a.length - length) - Math.abs(b.length - length)))
+
       .then((words) => ({
         words, cells, query: regString.replace(/\/i?|\^|\$/g, '').replace(/\\w\?/g, '*'),
       }));

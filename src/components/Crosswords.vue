@@ -4,6 +4,7 @@
     :suggestions="suggestions"
     :direction="direction"
     :query="query"
+    :loading="loadingSuggestions"
     @switchdirection="onSwitchDirection"
     @wordhover="onWordHover"
     @search="onSearch"
@@ -13,9 +14,10 @@
     <div v-for="(row,i) in cellValues" class="columns" :key="i">
       <div v-for="(col,j) in row" :key="j" class="column is-narrow cell">
         <textbox
-          v-model="cells[getCoords(i,j)]"
-          @click="onSelectCell(i,j)"
-          @input="onChange(i,j)"
+          @click="onSelectCell(i, j)"
+          @switch="onSwitch($event, i, j)"
+          @type="onType($event,i, j)"
+          :value="col"
           :highlighted="isHighlighted(i,j)"
           >
         </textbox>
@@ -43,6 +45,8 @@ export default {
       suggestions: [],
       focusedCell: null,
       selectedCells: [],
+      loadingSuggestions: false,
+      findWordPromise: Promise.resolve(),
       query: '',
     };
   },
@@ -64,9 +68,6 @@ export default {
   },
   mounted() {
     this.setupCells();
-    // window.addEventListener('keyup', (e) => {
-    //   console.log(e.keyCode);
-    // });
     this.refresh();
   },
   methods: {
@@ -110,6 +111,7 @@ export default {
       const newRow = Math.max(Math.min(row + direction.x, this.rows - 1), 0);
       children[newCol + newRow * this.cols].focus();
       this.refresh();
+      this.query = '';
       this.focusedCell = {
         x: newCol,
         y: newRow,
@@ -117,23 +119,34 @@ export default {
     },
     searchSuggestions() {
       if (!this.focusedCell) return Promise.resolve();
-      return crosswords.findWords({
-        grid: this.cellValues,
-        coord: {
-          x: this.focusedCell.x,
-          y: this.focusedCell.y,
-        },
-        dir: this.direction,
-        query: this.query,
+      this.findWordPromise = this.findWordPromise.then(() => {
+        this.loadingSuggestions = true;
+        return new Promise((resolve) => setTimeout(() => resolve(), 200))
+          .then(() => crosswords.findWords({
+            grid: this.cellValues,
+            coord: {
+              x: this.focusedCell.x,
+              y: this.focusedCell.y,
+            },
+            dir: this.direction,
+            query: this.query,
+          }));
       }).then(({
         words,
         cells,
         query,
       }) => {
+        if (!words) return;
+        this.loadingSuggestions = false;
         this.suggestions = words.slice(0, 100).map((word) => ({ word }));
         this.selectedCells = cells;
         this.query = query;
+      }).catch((e) => {
+        this.selectedCells = [];
+        this.suggestions = [];
+        this.loadingSuggestions = false;
       });
+      return this.findWordPromise;
     },
     onSelectCell(row, col) {
       const coords = this.getCoords(row, col);
@@ -142,13 +155,18 @@ export default {
       this.cells[coords] = value ? value.slice(value.length - 1) : '';
       this.focusedCell = { x: col, y: row };
     },
-    onChange(row, col) {
+    onSwitch(isDefinition, row, col) {
+      const newChar = isDefinition
+        ? String.fromCharCode(10)
+        : '';
       const coords = this.getCoords(row, col);
-      const factor = this.cells[coords] === '' ? -1 : 1;
-      const vector = this.direction === 'horizontal'
-        ? { x: 0, y: factor }
-        : { x: factor, y: 0 };
-      this.moveCursor(vector);
+      this.cells[coords] = newChar;
+      this.selectedCells = [];
+      this.refresh();
+    },
+    onType(evt, row, col) {
+      const coords = this.getCoords(row, col);
+      this.cells[coords] = evt;
     },
     onKeyUp(evt) {
       if (!this.focusedCell) {
@@ -159,16 +177,26 @@ export default {
 
       if (evt.code === 'ArrowDown') {
         x = 1;
-      }
-      if (evt.code === 'ArrowUp') {
+      } else if (evt.code === 'ArrowUp') {
         x = -1;
-      }
-      if (evt.code === 'ArrowRight') {
+      } else if (evt.code === 'ArrowRight') {
         y = 1;
-      }
-      if (evt.code === 'ArrowLeft') {
+      } else if (evt.code === 'ArrowLeft') {
         y = -1;
+      } else if (evt.code === 'Backspace') {
+        if (this.direction === 'horizontal') {
+          y = -1;
+        } else {
+          x = -1;
+        }
+      } else if (evt.key.match(/\w/)) {
+        if (this.direction === 'horizontal') {
+          y = 1;
+        } else {
+          x = 1;
+        }
       }
+
       if (x === 0 && y === 0) return;
       this.moveCursor({ x, y });
     },
@@ -189,6 +217,7 @@ export default {
       }, i) => {
         this.cells[this.getCoords(y, x)] = word.slice(i, i + 1);
       });
+      this.refresh();
     },
     onSearch(value) {
       this.query = value;
