@@ -6,42 +6,87 @@ import path from "path"
 class Database {
 
   constructor(){
-    this.words = []
-    this.loaddingPromise = fs.mkdir(path.dirname(process.env.DB_PATH), {recursive: true})
-    .then(() => fs.access(process.env.DB_PATH, constants.F_OK))
-    .catch((e) => e.message.includes(process.env.DB_PATH) ?  fs.writeFile(process.env.DB_PATH, "") : Promise.reject(e))
-    .then(() => fs.readFile(process.env.DB_PATH,'utf-8'))
-    .then(data => {
-      console.log(data, typeof data)
-        // this.words = []
-      this.words = data.split(',').map(w => w.trim()).filter(e => e.length)
-  
+    this.words = [];
+    this.grids = [];
+    this.loadingPromise = Promise.all([
+      this.loadFile(process.env.WORDS_PATH),
+      this.loadFile(process.env.GRIDS_PATH),
+    ])
+    .then(([words, grids]) => {
+      this.words = words.split(',').map(w => w.trim()).filter(e => e.length)
+      this.grids = grids && grids.length ?  JSON.parse(grids) : [];
     })
+  }
+
+  loadFile(file){
+    return fs.mkdir(path.dirname(file), {recursive: true})
+    .then(() => fs.access(file, constants.F_OK))
+    .catch((e) => e.message.includes(file) ?  fs.writeFile(file, file.match(/\.json/) ? '[]' : '') : Promise.reject(e))
+    .then(() => fs.readFile(file,'utf-8'))
   }
 
   getWords(){
-    return this.loaddingPromise.then(() => this.words)
+    return this.loadingPromise.then(() => this.words)
   }
-  save(){
+  saveWords(){
     return this.getWords()
-    .then((words) => fs.writeFile(process.env.DB_PATH, words.join(',')))
+    .then((words) => fs.writeFile(process.env.WORDS_PATH, words.join(',')))
   }
-  push(word){
+  pushWord(word){
     return this.getWords()
     .then(words => {
       words.push(word);
-      return this.save();
+      return this.saveWords();
     })
   }
-  delete(word){
+  deleteWord(word){
     return this.getWords()
     .then(words => {
       this.words = words.filter(w => word.localeCompare(w));
-      return this.save();
+      return this.saveWords();
     })
-
   }
 
+  getGrids(){
+    return this.loadingPromise.then(() => this.grids)
+  }
+
+  getGrid(id){
+    return this.getGrids()
+    .then(grids => grids.find(grid => grid.id === id));
+  }
+
+  saveGrids(){
+    return this.getGrids()
+    .then((grids) => fs.writeFile(process.env.GRIDS_PATH, JSON.stringify(grids)))
+  }
+  pushGrid(grid){
+    return this.getGrids()
+    .then(grids => {
+      grids.push(grid);
+      return this.saveGrids();
+    })
+  }
+  updateGrid(grid){
+    return this.getGrids()
+    .then(grids => {
+      const oldGrid = grids.find(({id}) => id === grid.id);
+      const newGrid = {
+        ...oldGrid, 
+        ...grid
+      }
+      this.grids = this.grids.filter(({id}) => id !== grid.id);
+      this.grids.push(newGrid);
+      return this.saveGrids();
+    })
+  }
+  deleteGrid(grid){
+    return this.getGrids()
+    .then(grids => {
+      this.grids = grids.filter(({id}) => id === grid.id);
+      return this.saveWords();
+    })
+  }
 }
 
 const db = new Database();

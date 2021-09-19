@@ -3,17 +3,6 @@
         <b-field>
             <b-button class="is-primary" @click="$emit('switchdirection')">{{direction}}</b-button>
         </b-field>
-        <b-field>
-            <b-input
-              placeholder="Recherche"
-              type="search"
-              icon="magnify"
-              icon-clickable
-              v-model="dataQuery"
-              @icon-click="onSearch"
-              @input="onSearch">
-            </b-input>
-        </b-field>
 
         <div v-if="loading" class="loading">
           <svg class="spinner" viewBox="0 0 50 50">
@@ -21,6 +10,9 @@
           </svg>
         </div>
         <b-table v-else :data="suggestions" :columns="columns" :paginated="true" :per-page="10" :pagination-simple="true" :selected.sync="selected" hoverable clickable />
+        <p>
+          Resultats: <b>{{resultLength}}</b>
+        </p>
     </div>
 </template>
 
@@ -30,7 +22,6 @@ export default {
   data() {
     return {
       selected: null,
-      dataQuery: '',
       columns: [{
         field: 'word',
         label: 'Suggestions',
@@ -38,18 +29,10 @@ export default {
       }],
     };
   },
-  props: ['suggestions', 'direction', 'query', 'loading'],
+  props: ['suggestions', 'direction', 'loading', 'resultLength'],
   watch: {
     selected(newValue) {
       this.$emit('wordhover', newValue.word);
-    },
-    query(newValue) {
-      this.dataQuery = newValue;
-    },
-  },
-  methods: {
-    onSearch(value) {
-      this.$emit('search', value);
     },
   },
 };

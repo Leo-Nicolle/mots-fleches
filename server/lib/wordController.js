@@ -18,15 +18,15 @@ export default function wordController({ app, db }) {
       const exists = (await db.getWords()).find(w => !w.localeCompare(word))
 
       if(exists){
-        return res.status(422).json({ errors: [{msg:'exists already'}] });
+        return res.status(500).json({ errors: [{msg:'exists already'}] });
       }
       if (!errors.isEmpty()) {
-        return res.status(422).json({ errors: errors.array() });
+        return res.status(500).json({ errors: errors.array() });
       }
       try {
-        await db.push(word);
+        await db.pushWord(word);
       }catch (e) {
-        return res.status(422).send(e.message);
+        return res.status(500).send(e.message);
       }
       res.sendStatus(200);
     },

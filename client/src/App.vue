@@ -1,15 +1,12 @@
 <template>
   <div id="app">
-    <Settings @change="onChange"/>
-    <Crosswords :rows="rows" :cols="cols"/>
+    <Crosswords :id="gridId" />
     <AddWord />
-
   </div>
 </template>
 
 <script>
 import Crosswords from './components/Crosswords.vue';
-import Settings from './components/Settings.vue';
 import AddWord from './components/AddWord.vue';
 
 export default {
@@ -18,18 +15,15 @@ export default {
     return {
       rows: 13,
       cols: 10,
+      gridId: 'c8d01be9-88d8-45ea-a0fa-30b85db6af68',
     };
   },
   components: {
     Crosswords,
-    Settings,
     AddWord,
   },
   methods: {
-    onChange({ rows, cols }) {
-      this.rows = rows;
-      this.cols = cols;
-    },
+
   },
 };
 </script>

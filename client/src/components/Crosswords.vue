@@ -1,13 +1,24 @@
 <template>
+<div>
+  <div class="section head">
+  <span></span>
+  </div>
+  <div class="level">
+    <Settings  class="level-item has-text-centered" @change="onSettingsChange"/>
+    <p class="title level-item has-text-centered" >{{name}}</p>
+    <p class="level-item has-text-centered"></p>
+    <b-button class="level-item has-text-centered" @click="upload">sauvegarder</b-button>
+
+  </div>
 <div class="container section columns" @keyup="onKeyUp">
+
   <Suggestions
     :suggestions="suggestions"
     :direction="direction"
-    :query="query"
     :loading="loadingSuggestions"
+    :resultLength="resultLength"
     @switchdirection="onSwitchDirection"
     @wordhover="onWordHover"
-    @search="onSearch"
     class="column"
   />
   <div class="crosswords column scrollbar">
@@ -25,27 +36,30 @@
     </div>
   </div>
 </div>
+</div>
+
 </template>
 
 <script>
+import apiMixin from '../js/apiMixin';
+import gridMixin from '../js/gridMixin';
 import crosswords from '../js/Crosswords';
+import Settings from './Settings.vue';
 import Suggestions from './Suggestions.vue';
 import textbox from './textbox.vue';
 
 export default {
   name: 'Crosswords',
-  props: ['rows', 'cols'],
+  mixins: [gridMixin, apiMixin],
   data() {
     return {
-      cells: {},
+      resultLength: 0,
       direction: 'horizontal',
-      cellValues: [],
       suggestions: [],
       focusedCell: null,
       selectedCells: [],
       loadingSuggestions: false,
       findWordPromise: Promise.resolve(),
-      query: '',
     };
   },
   watch: {
@@ -64,36 +78,8 @@ export default {
   computed: {
 
   },
-  mounted() {
-    this.setupCells();
-    this.refresh();
-  },
   methods: {
-    getCoords(row, col) {
-      return `${row},${col}`;
-    },
-    setupCells() {
-      this.cells = new Array(this.rows).fill(0).map(() => new Array(this.cols).fill(''))
-        .reduce((acc, row, i) => {
-          row.forEach((cell, j) => {
-            const coords = this.getCoords(i, j);
-            acc[coords] = this.cells[coords] || '';
-          });
-          return acc;
-        }, {});
-    },
-    getCellValues() {
-      const res = new Array(this.rows).fill(0).map(() => new Array(this.cols).fill(''));
-      Object.entries(this.cells)
-        .forEach(([coord, value]) => {
-          const [row, col] = coord.split(',');
-          res[row][col] = value;
-        });
-      return res;
-    },
-    refresh() {
-      this.cellValues = this.getCellValues();
-    },
+
     isHighlighted(row, col) {
       if (!this.selectedCells.length) return false;
       return !!this.selectedCells.find((cell) => cell.x === col && cell.y === row);
@@ -109,7 +95,6 @@ export default {
       const newRow = Math.max(Math.min(row + direction.x, this.rows - 1), 0);
       children[newCol + newRow * this.cols].focus();
       this.refresh();
-      this.query = '';
       this.focusedCell = {
         x: newCol,
         y: newRow,
@@ -127,18 +112,17 @@ export default {
               y: this.focusedCell.y,
             },
             dir: this.direction,
-            query: this.query,
+            query: '',
           }));
       }).then(({
         words,
         cells,
-        query,
       }) => {
         if (!words) return;
         this.loadingSuggestions = false;
+        this.resultLength = words.length;
         this.suggestions = words.slice(0, 100).map((word) => ({ word }));
         this.selectedCells = cells;
-        this.query = query;
       }).catch((e) => {
         this.selectedCells = [];
         this.suggestions = [];
@@ -218,20 +202,25 @@ export default {
       });
       this.refresh();
     },
-    onSearch(value) {
-      this.query = value;
-      this.searchSuggestions();
+    onSettingsChange({ rows, cols }) {
+      this.rows = rows;
+      this.cols = cols;
     },
   },
   components: {
     textbox,
     Suggestions,
+    Settings,
   },
 
 };
 </script>
 
 <style scoped>
+.head{
+  display: flex;
+  justify-content: space-between;
+}
 .container {
   display: flex;
   margin-left: 0;

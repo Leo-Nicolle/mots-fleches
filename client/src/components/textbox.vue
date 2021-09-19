@@ -21,8 +21,9 @@ export default {
     };
   },
   watch: {
-    value() {
-      this.model = this.value;
+    value: {
+      immediate: true,
+      handler(newVal) { this.model = newVal; },
     },
     model(newValue, oldValue) {
       if (this.definition) return;

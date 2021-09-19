@@ -25,12 +25,12 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 
 
 ## TODO: 
- - ajouter/enlever des mots  au dico 5
- - mettre combien de mots existent 1
+ - [x] ajouter/enlever des mots  au dico 5
+ - [x] mettre combien de mots existent 1
  - faire un export de la grille avec des fleches. 4
  - ajouter fonction point median et fleches 4
  - ordre alphabetique inverse 1
  - ajouter la definition des mots en infobulle ? 2
- - sauvergarder la grille en localstorage 5
+ - sauvergarder la grille 5
  - gerer plusieur grilles en meme temps 3
  - case de commentaire sur chaque page 3

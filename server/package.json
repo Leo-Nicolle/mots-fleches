@@ -5,7 +5,7 @@
   "main": "dist/server.cjs.js",
   "module": "dist/server.esm.js",
   "scripts": {
-    "watch": "rollup -c -w",
+    "watch": "rollup -c -w --sourcemap",
     "build": "rollup -c",
     "test": "mocha -r dotenv/config test/*.test.js dotenv_config_path=.env.test --require @babel/register",
     "pretest": "rollup -c && mkdir -p dist/test/db && cp ./config.json dist/test/db/config.json",
@@ -24,6 +24,7 @@
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "express-validator": "^6.12.1",
-    "lowdb": "^3.0.0"
+    "lowdb": "^3.0.0",
+    "uuid": "^8.3.2"
   }
 }

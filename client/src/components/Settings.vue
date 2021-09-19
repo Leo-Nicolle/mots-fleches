@@ -1,5 +1,5 @@
 <template>
-    <section class="section">
+    <span >
         <b-button class="is-primary" @click="visible=true">Parametres</b-button>
 
         <b-modal v-model="visible" has-modal-card trap-focus :destroy-on-hide="false" aria-role="dialog" aria-label="Parametres" aria-modal>
@@ -29,7 +29,7 @@
                 </form>
             </template>
         </b-modal>
-    </section>
+    </span>
 </template>
 
 <script>
