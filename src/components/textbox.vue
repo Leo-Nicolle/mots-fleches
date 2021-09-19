@@ -42,7 +42,7 @@ export default {
   methods: {
     getClass() {
       const highlight = `${this.highlighted ? 'is-primary' : ''}`;
-      return `input ${this.isDefinition ? 'is-info definition' : 'letter'} ${highlight}`;
+      return `input ${this.isDefinition ? 'definition' : 'letter'} ${highlight}`;
     },
     onClick() {
       this.isDefinition = !this.isDefinition;

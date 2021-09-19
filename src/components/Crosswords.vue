@@ -101,7 +101,7 @@ export default {
       return !!this.selectedCells.find((cell) => cell.x === col && cell.y === row);
     },
     moveCursor(direction) {
-      const children = [...this.$el.querySelectorAll('.cell input')];
+      const children = [...this.$el.querySelectorAll('.definition,.letter')];
       const focused = document.activeElement;
       const evtIndex = children.findIndex((c) => c === focused);
       if (evtIndex < 0) return;
