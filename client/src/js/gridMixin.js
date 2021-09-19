@@ -22,6 +22,12 @@ export default {
       // this.upload();
     }, 2000);
   },
+  watch: {
+    id: {
+      immediate: true,
+      handler() { this.fetch(); },
+    },
+  },
   methods: {
     getCoords(row, col) {
       return `${row},${col}`;
@@ -58,12 +64,16 @@ export default {
       this.name = 'nouvelle grille';
       this.setupCells();
       this.refresh();
-      this.upload();
+      // this.upload();
     },
     fetch() {
       return axios.get(this.getUrl(`grid/${this.id}`))
         .then((response) => {
           this.unserializeGrid(response);
+        })
+        .catch((e) => {
+          console.error(e);
+          this.new();
         });
     },
     upload() {
@@ -88,9 +98,12 @@ export default {
       this.rows = data.rows;
       this.cols = data.cols;
       this.name = data.name;
-      this.cells = data.cells;
+      if (Object.keys(data.cells).length) {
+        this.cells = data.cells;
+      } else {
+        this.setupCells();
+      }
       this.comment = data.comment;
-
       this.refresh();
     },
   },

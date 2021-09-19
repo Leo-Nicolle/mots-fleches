@@ -30,16 +30,19 @@ export default function gridController({ app, db }) {
       if (!errors.isEmpty()) {
         return res.status(500).json({ errors: errors.array() });
       }
+      let id;
       try {
-        console.log("has id ", req.body.id)
         if(req.body.id){
+          id = req.body.id;
           await db.updateGrid({
             ...req.body
           });
         }else{
+          id = uuid();
+
           await db.pushGrid({
             ...req.body,
-            id: uuid(),
+            id,
           });
 
         }
@@ -47,7 +50,7 @@ export default function gridController({ app, db }) {
         console.log('error', e)
         return res.status(500).send(e.message);
       }
-      res.sendStatus(200);
+      res.status(200).send(id);
     },
   );
   app.delete('/grid/:grid',  async (req, res) => {
