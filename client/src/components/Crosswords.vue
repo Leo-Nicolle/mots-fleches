@@ -28,11 +28,9 @@
 </template>
 
 <script>
-import Crosswords from '../js/Crosswords';
+import crosswords from '../js/Crosswords';
 import Suggestions from './Suggestions.vue';
 import textbox from './textbox.vue';
-
-const crosswords = new Crosswords();
 
 export default {
   name: 'Crosswords',

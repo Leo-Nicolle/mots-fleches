@@ -1,6 +1,7 @@
 import axios from 'axios';
+import apiMixin from './apiMixin';
 
-export default class Crosswords {
+class Crosswords {
   constructor() {
     this.dico = [
       'abc',
@@ -9,6 +10,7 @@ export default class Crosswords {
       'bac',
     ];
     this.words = [];
+    this.wordsMap = new Map();
     this.loadingPromise = null;
     this.loadDictionary();
     this.getWords().then((words) => {
@@ -18,43 +20,45 @@ export default class Crosswords {
 
   loadDictionary() {
     if (this.loadingPromise) return this.loadingPromise;
-    // Promise.all(
-    //   [
-    //     axios.get('http://localhost:3010/result-complete-A.txt'),
-    //     axios.get('http://localhost:3010/result-A.txt'),
-    //   ],
-    // )
-    //   .then((datasets) => {
-    //     const [a, b] = datasets
-    //       .map(({ data }) => data.split(/,|\n/).reduce((map, word) => map.set(word, true), new Map()));
-    //     const aNotB = [...a.keys()].reduce((aNotB, word) => (b.has(word) ? aNotB : aNotB.concat(word)), []);
-    //     const bNotA = [...b.keys()].reduce((bNotA, word) => (a.has(word) ? bNotA : bNotA.concat(word)), []);
-    //     console.log('aNotB', aNotB);
-    //     console.log('bNotA', bNotA);
-    //   });
-    const wordsMap = new Map();
     this.loadingPromise = Promise.all([
       ...new Array(26).fill(0)
         .map((_, i) => String.fromCharCode('A'.charCodeAt(0) + i))
         .map((letter) => axios.get(`http://localhost:3010/result-${letter}.txt`)),
       axios.get('http://localhost:3010/allwords.txt'),
+      axios.get(apiMixin.methods.getUrl('word')),
     ])
       .then((responses) => {
-        responses.forEach(({ data }) => {
-          data.split(/,|\n/)
-            .map((w) => w
-              .trim()
-              .normalize('NFD')
-              .replace(/[\u0300-\u036f]/g, '')
-              .toUpperCase())
-            .forEach((word) => {
-              if (wordsMap.has(word)) return;
-              wordsMap.set(word, true);
-              this.words.push(word);
-            });
+        responses.forEach((response) => {
+          this.addWordsToDictionnary(response);
         });
       });
     return this.loadingPromise;
+  }
+
+  addWordsToDictionnary(response) {
+    const { data } = response;
+    const { wordsMap } = this;
+    let rawWords = [];
+    if (typeof data === 'string') {
+      rawWords = data.split(/,|\n/);
+    } else {
+      rawWords = data;
+    }
+    rawWords.map((w) => w
+      .trim()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toUpperCase())
+      .forEach((word) => {
+        if (wordsMap.has(word)) return;
+        wordsMap.set(word, true);
+        this.words.push(word);
+      });
+  }
+
+  refreshDictionnary() {
+    axios.get(apiMixin.methods.getUrl('word'))
+      .then((response) => this.addWordsToDictionnary(response));
   }
 
   getWords() {
@@ -186,3 +190,7 @@ export default class Crosswords {
       }));
   }
 }
+
+const crosswords = new Crosswords();
+
+export default crosswords;
