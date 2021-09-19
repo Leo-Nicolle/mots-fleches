@@ -8,6 +8,7 @@ export default {
       cols: 10,
       name: '',
       comment: '',
+      uploadInterval: null,
       cellValues: [],
       cells: {},
     };
@@ -18,9 +19,12 @@ export default {
     } else {
       this.new();
     }
-    setTimeout(() => {
-      // this.upload();
-    }, 2000);
+    this.uploadInterval = setInterval(() => {
+      if (this.id && this.id.length) this.upload();
+    }, 5000);
+  },
+  beforeDestroy() {
+    clearInterval(this.uploadInterval);
   },
   watch: {
     id: {
