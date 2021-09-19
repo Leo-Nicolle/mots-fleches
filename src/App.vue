@@ -16,7 +16,7 @@ export default {
   name: 'App',
   data() {
     return {
-      rows: 10,
+      rows: 13,
       cols: 10,
     };
   },

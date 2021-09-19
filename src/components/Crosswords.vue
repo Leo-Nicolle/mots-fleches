@@ -166,6 +166,7 @@ export default {
     },
     onType(evt, row, col) {
       const coords = this.getCoords(row, col);
+      console.log('evt', evt);
       this.cells[coords] = evt;
     },
     onKeyUp(evt) {

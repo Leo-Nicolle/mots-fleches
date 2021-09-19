@@ -33,7 +33,8 @@ export default {
       if (this.model && this.model.length > 1) {
         this.model = this.model.slice(this.model.length - 1);
       }
-      if (this.model.length && oldValue.localeCompare(this.model)) {
+      if (this.model.length && oldValue.localeCompare(this.model)
+       || !newValue.length && oldValue.length) {
         this.$emit('type', this.model);
       }
     },

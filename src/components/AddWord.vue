@@ -7,7 +7,7 @@
 
          <b-field label="Supprimer un  mot" horizontal>
             <b-input v-model="word"></b-input>
-            <b-button @click="onClick()">+</b-button>
+            <b-button @click="onClick()">x</b-button>
         </b-field>
     </section>
 </template>
