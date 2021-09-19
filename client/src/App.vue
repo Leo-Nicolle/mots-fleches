@@ -18,7 +18,7 @@
         </b-tab-item>
       </template>
     </b-tabs>
-    <Crosswords v-if="activeGrid.length" :id="activeGrid" />
+    <Crosswords v-if="activeGrid.length" :id="activeGrid" @refresh-grids="onRefreshGrids" @delete="onDelete"/>
     <AddWord />
   </div>
 </template>
@@ -47,7 +47,6 @@ export default {
   methods: {
     fetch() {
       return axios.get(this.getUrl('grid')).then(({ data }) => {
-        console.log('grids', data);
         this.grids = data
           .map((g) => ({
             name: g.name,
@@ -57,6 +56,9 @@ export default {
             name: '+',
             id: '',
           });
+        return Promise.resolve();
+      }).catch((e) => {
+        console.error('E', e);
       });
     },
     createGrid() {
@@ -81,12 +83,25 @@ export default {
           });
       }
     },
+    onRefreshGrids() {
+      this.fetch();
+    },
+    onDelete() {
+      this.fetch().then(() => {
+        this.activeGrid = this.grids[0] && this.grids[0].id || '';
+      });
+    },
   },
 
   mounted() {
     this.fetch().then(() => {
-      // eslint-disable-next-line prefer-destructuring
-      this.activeGrid = this.grids[0].id;
+      if (this.grids.length < 2) {
+        return this.createGrid()
+          .then(() => this.fetch());
+      }
+      return Promise.resolve();
+    }).then(() => {
+      this.activeGrid = this.grids[0] && this.grids[0].id || '';
     });
   },
 };

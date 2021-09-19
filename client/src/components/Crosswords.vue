@@ -1,43 +1,50 @@
 <template>
-<div>
-  <div class="section head">
-  <span></span>
-  </div>
-  <div class="level">
-    <Settings  class="level-item has-text-centered" @change="onSettingsChange"/>
-    <p class="title level-item has-text-centered" >{{name}}</p>
-    <p class="level-item has-text-centered"></p>
-    <b-button class="level-item has-text-centered" @click="upload">sauvegarder</b-button>
-
-  </div>
-<div class="container section columns" @keyup="onKeyUp">
-
-  <Suggestions
-    :suggestions="suggestions"
-    :direction="direction"
-    :loading="loadingSuggestions"
-    :resultLength="resultLength"
-    @switchdirection="onSwitchDirection"
-    @wordhover="onWordHover"
-    class="column"
-  />
-  <div class="crosswords column scrollbar">
-    <div v-for="(row,i) in cellValues" class="columns" :key="i">
-      <div v-for="(col,j) in row" :key="j" class="column is-narrow cell">
-        <textbox
-          @click="onSelectCell(i, j)"
-          @switch="onSwitch($event, i, j)"
-          @type="onType($event,i, j)"
-          :value="col"
-          :highlighted="isHighlighted(i,j)"
-          >
-        </textbox>
+  <div>
+    <div class="section head">
+      <span></span>
+    </div>
+    <div class="level">
+      <Settings
+        class="level-item has-text-centered"
+        @change="onSettingsChange"
+        @close="onSettingsClose"
+        @delete="onDeleteGrid"
+        :rowP="rows"
+        :colP="cols"
+        :nameP="name"
+      />
+      <p class="title level-item has-text-centered">{{ name }}</p>
+      <p class="level-item has-text-centered"></p>
+      <b-button class="level-item has-text-centered" @click="upload"
+        >sauvegarder</b-button
+      >
+    </div>
+    <div class="container section columns" @keyup="onKeyUp">
+      <Suggestions
+        :suggestions="suggestions"
+        :direction="direction"
+        :loading="loadingSuggestions"
+        :resultLength="resultLength"
+        @switchdirection="onSwitchDirection"
+        @wordhover="onWordHover"
+        class="column"
+      />
+      <div class="crosswords column scrollbar">
+        <div v-for="(row, i) in cellValues" class="columns" :key="i">
+          <div v-for="(col, j) in row" :key="j" class="column is-narrow cell">
+            <textbox
+              @click="onSelectCell(i, j)"
+              @switch="onSwitch($event, i, j)"
+              @type="onType($event, i, j)"
+              :value="col"
+              :highlighted="isHighlighted(i, j)"
+            >
+            </textbox>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-</div>
-</div>
-
 </template>
 
 <script>
@@ -75,14 +82,13 @@ export default {
       this.searchSuggestions();
     },
   },
-  computed: {
-
-  },
+  computed: {},
   methods: {
-
     isHighlighted(row, col) {
       if (!this.selectedCells.length) return false;
-      return !!this.selectedCells.find((cell) => cell.x === col && cell.y === row);
+      return !!this.selectedCells.find(
+        (cell) => cell.x === col && cell.y === row,
+      );
     },
     moveCursor(direction) {
       const children = [...this.$el.querySelectorAll('.definition,.letter')];
@@ -102,10 +108,10 @@ export default {
     },
     searchSuggestions() {
       if (!this.focusedCell) return Promise.resolve();
-      this.findWordPromise = this.findWordPromise.then(() => {
-        this.loadingSuggestions = true;
-        return new Promise((resolve) => setTimeout(() => resolve(), 200))
-          .then(() => crosswords.findWords({
+      this.findWordPromise = this.findWordPromise
+        .then(() => {
+          this.loadingSuggestions = true;
+          return new Promise((resolve) => setTimeout(() => resolve(), 200)).then(() => crosswords.findWords({
             grid: this.cellValues,
             coord: {
               x: this.focusedCell.x,
@@ -114,20 +120,19 @@ export default {
             dir: this.direction,
             query: '',
           }));
-      }).then(({
-        words,
-        cells,
-      }) => {
-        if (!words) return;
-        this.loadingSuggestions = false;
-        this.resultLength = words.length;
-        this.suggestions = words.slice(0, 100).map((word) => ({ word }));
-        this.selectedCells = cells;
-      }).catch((e) => {
-        this.selectedCells = [];
-        this.suggestions = [];
-        this.loadingSuggestions = false;
-      });
+        })
+        .then(({ words, cells }) => {
+          if (!words) return;
+          this.loadingSuggestions = false;
+          this.resultLength = words.length;
+          this.suggestions = words.slice(0, 100).map((word) => ({ word }));
+          this.selectedCells = cells;
+        })
+        .catch((e) => {
+          this.selectedCells = [];
+          this.suggestions = [];
+          this.loadingSuggestions = false;
+        });
       return this.findWordPromise;
     },
     onSelectCell(row, col) {
@@ -138,9 +143,7 @@ export default {
       this.focusedCell = { x: col, y: row };
     },
     onSwitch(isDefinition, row, col) {
-      const newChar = isDefinition
-        ? String.fromCharCode(10)
-        : '';
+      const newChar = isDefinition ? String.fromCharCode(10) : '';
       const coords = this.getCoords(row, col);
       this.cells[coords] = newChar;
       this.selectedCells = [];
@@ -194,17 +197,24 @@ export default {
       }
     },
     onWordHover(word) {
-      this.selectedCells.forEach(({
-        x,
-        y,
-      }, i) => {
+      this.selectedCells.forEach(({ x, y }, i) => {
         this.cells[this.getCoords(y, x)] = word.slice(i, i + 1);
       });
       this.refresh();
     },
-    onSettingsChange({ rows, cols }) {
+    onSettingsChange({ rows, cols, name }) {
       this.rows = rows;
       this.cols = cols;
+      this.name = name;
+    },
+    onSettingsClose() {
+      this.upload().then(() => this.$emit('refresh-grids'));
+    },
+    onDeleteGrid() {
+      this.delete(this.getUrl(`grid/${this.id}`))
+        .then(() => {
+          this.$emit('delete');
+        });
     },
   },
   components: {
@@ -212,12 +222,11 @@ export default {
     Suggestions,
     Settings,
   },
-
 };
 </script>
 
 <style scoped>
-.head{
+.head {
   display: flex;
   justify-content: space-between;
 }
@@ -227,7 +236,7 @@ export default {
   margin-right: 0;
   padding-left: 0;
 }
-.crosswords{
+.crosswords {
   overflow: scroll;
   min-height: calc(100vh - 767px);
   max-height: calc(100vh - 290px);
@@ -253,7 +262,7 @@ export default {
   text-align: center;
   text-overflow: clip;
 }
-.cell{
+.cell {
   padding: 4px;
 }
 </style>

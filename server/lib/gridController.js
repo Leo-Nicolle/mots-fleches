@@ -54,7 +54,8 @@ export default function gridController({ app, db }) {
     },
   );
   app.delete('/grid/:grid',  async (req, res) => {
-    await db.delete(req.params.grid)
+    console.log('ICI DELETE', req.params.grid)
+    await db.deleteGrid(req.params.grid)
     res.sendStatus(200);
   });
 }

@@ -80,11 +80,11 @@ class Database {
       return this.saveGrids();
     })
   }
-  deleteGrid(grid){
+  deleteGrid(gridId){
     return this.getGrids()
     .then(grids => {
-      this.grids = grids.filter(({id}) => id === grid.id);
-      return this.saveWords();
+      this.grids = grids.filter(({id}) => id !== gridId);
+      return this.saveGrids();
     })
   }
 }

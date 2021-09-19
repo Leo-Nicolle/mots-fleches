@@ -77,10 +77,15 @@ export default {
         });
     },
     upload() {
-      console.log('url', this.getUrl('grid'));
       return axios.post(this.getUrl('grid'), this.serializeGrid())
         .catch((e) => {
-          console.log(e.response.data.errors);
+          // console.log(e.response.data.errors);
+        });
+    },
+    delete() {
+      return axios.delete(this.getUrl(`grid/${this.id}`))
+        .catch((e) => {
+          // console.log(e.response.data.errors);
         });
     },
     serializeGrid() {
