@@ -1,4 +1,7 @@
-node_modules/
-dist/
-public/result*  
-public/allwords*  
+client/node_modules/
+client/dist/
+client/public/result*  
+client/public/allwords*  
+
+server/node_modules
+server/dist
