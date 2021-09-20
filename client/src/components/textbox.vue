@@ -12,18 +12,24 @@ export default {
   props: {
     value: String,
     highlighted: Boolean,
+    isDefinition: Boolean,
   },
   data() {
     return {
       model: '',
       definition: '',
-      isDefinition: false,
     };
   },
   watch: {
     value: {
       immediate: true,
-      handler(newVal) { this.model = newVal; },
+      handler(newVal) {
+        if (this.isDefinition) {
+          this.definition = newVal;
+        } else {
+          this.model = newVal;
+        }
+      },
     },
     model(newValue, oldValue) {
       if (this.definition) return;
@@ -46,13 +52,13 @@ export default {
       return `input ${this.isDefinition ? 'definition' : 'letter'} ${highlight}`;
     },
     onClick() {
-      this.isDefinition = !this.isDefinition;
-      if (this.isDefinition) {
-        this.model = String.fromCharCode(10);
-        this.$emit('switch', this.isDefinition);
+      const isDefinition = !this.isDefinition;
+      if (isDefinition) {
+        this.model = '';
+        this.$emit('switch', isDefinition);
       } else {
         this.model = '';
-        this.$emit('switch', this.isDefinition);
+        this.$emit('switch', isDefinition);
       }
     },
     onKeyPress(evt) {

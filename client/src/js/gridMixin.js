@@ -10,6 +10,7 @@ export default {
       comment: '',
       uploadInterval: null,
       cellValues: [],
+      isDefinition: [],
       cells: {},
     };
   },
@@ -20,7 +21,7 @@ export default {
       this.new();
     }
     this.uploadInterval = setInterval(() => {
-      if (this.id && this.id.length) this.upload();
+      // if (this.id && this.id.length) this.upload();
     }, 5000);
   },
   beforeDestroy() {
@@ -36,6 +37,13 @@ export default {
     getCoords(row, col) {
       return `${row},${col}`;
     },
+    coordToXY(coords) {
+      const [y, x] = coords.match(/(\d+),(\d+)/).slice(1).map((n) => +n);
+      return { x, y };
+    },
+    xyToIndex({ x, y }) {
+      return y * this.cols + x;
+    },
 
     setupCells() {
       this.cells = new Array(this.rows).fill(0).map(() => new Array(this.cols).fill(''))
@@ -46,6 +54,7 @@ export default {
           });
           return acc;
         }, {});
+      this.isDefinition = new Array(this.rows).fill(0).map(() => new Array(this.cols).fill(false));
     },
     getCellValues() {
       const res = new Array(this.rows).fill(0).map(() => new Array(this.cols).fill(''));
@@ -93,11 +102,22 @@ export default {
         });
     },
     serializeGrid() {
+      const inputs = [...this.$el.querySelectorAll('.definition,.letter')];
+      const cells = Object.keys(this.cells)
+        .reduce((cells, coord) => {
+          const { x, y } = this.coordToXY(coord);
+          const index = this.xyToIndex({ x, y });
+          cells[coord] = {
+            isDefinition: this.isDefinition[y][x],
+            value: inputs[index].value,
+          };
+          return cells;
+        }, {});
       return {
         rows: this.rows,
         cols: this.cols,
         name: this.name,
-        cells: this.cells,
+        cells,
         comment: this.comment,
         id: this.id,
       };
@@ -106,9 +126,23 @@ export default {
       const { data } = response;
       this.rows = data.rows;
       this.cols = data.cols;
+
       this.name = data.name;
+      const isDefinition = new Array(this.rows)
+        .fill(0).map(() => new Array(this.cols).fill(false));
+
       if (Object.keys(data.cells).length) {
-        this.cells = data.cells;
+        this.isDefinition = isDefinition;
+        this.cells = Object.entries(data.cells)
+          .reduce((cells, [coord, value]) => {
+            const isDef = value.isDefinition;
+            if (isDef) {
+              const { x, y } = this.coordToXY(coord);
+              isDefinition[y][x] = true;
+            }
+            cells[coord] = value.value;
+            return cells;
+          }, {});
       } else {
         this.setupCells();
       }

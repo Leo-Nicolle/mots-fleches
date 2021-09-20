@@ -66,16 +66,16 @@ class Crosswords {
       .then(() => this.words);
   }
 
-  static coordValid(grid, coord) {
+  static coordValid(grid, isDefinition, coord) {
     return coord.y < grid.length
       && coord.y >= 0
       && coord.x < grid[0].length
       && coord.x >= 0
-      && grid[coord.y][coord.x] !== '\n';
+      && !isDefinition[coord.y][coord.x];
   }
 
   static findBoundaries({
-    grid, coord, dir,
+    grid, isDefinition, coord, dir,
   }) {
     let vec = { x: 1, y: 0 };
     let curr = { ...coord };
@@ -89,7 +89,7 @@ class Crosswords {
       vec.y = 0;
     }
     let lookingForStart = true;
-    let currValid = Crosswords.coordValid(grid, curr);
+    let currValid = Crosswords.coordValid(grid, isDefinition, curr);
     // eslint-disable-next-line no-cond-assign
     if (currValid) {
       while (currValid || lookingForStart) {
@@ -104,7 +104,7 @@ class Crosswords {
           end = { ...curr };
         } else { break; }
         curr = { x: curr.x + vec.x, y: curr.y + vec.y };
-        currValid = Crosswords.coordValid(grid, curr);
+        currValid = Crosswords.coordValid(grid, isDefinition, curr);
       }
     }
 
@@ -146,11 +146,13 @@ class Crosswords {
   }
 
   findWords({
-    grid, coord, dir, query,
+    grid, isDefinition, coord, dir, query,
   }) {
     const {
       start, vec, length,
-    } = Crosswords.findBoundaries({ grid, coord, dir });
+    } = Crosswords.findBoundaries({
+      grid, coord, dir, isDefinition,
+    });
     let str = '';
     const cells = [];
     for (let i = 0; i < length; i++) {

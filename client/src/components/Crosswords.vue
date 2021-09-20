@@ -37,12 +37,18 @@
               @switch="onSwitch($event, i, j)"
               @type="onType($event, i, j)"
               :value="col"
+              :isDefinition="isDefinition[i][j]"
               :highlighted="isHighlighted(i, j)"
             >
             </textbox>
           </div>
         </div>
       </div>
+    </div>
+    <div class = "section">
+       <b-field label="Commentaire">
+            <b-input maxlength="500" v-model="comment" type="textarea"></b-input>
+        </b-field>
     </div>
   </div>
 </template>
@@ -113,6 +119,7 @@ export default {
           this.loadingSuggestions = true;
           return new Promise((resolve) => setTimeout(() => resolve(), 200)).then(() => crosswords.findWords({
             grid: this.cellValues,
+            isDefinition: this.isDefinition,
             coord: {
               x: this.focusedCell.x,
               y: this.focusedCell.y,
@@ -144,6 +151,7 @@ export default {
     },
     onSwitch(isDefinition, row, col) {
       const newChar = isDefinition ? String.fromCharCode(10) : '';
+      this.isDefinition[row][col] = isDefinition;
       const coords = this.getCoords(row, col);
       this.cells[coords] = newChar;
       this.selectedCells = [];
@@ -151,13 +159,14 @@ export default {
     },
     onType(evt, row, col) {
       const coords = this.getCoords(row, col);
-      console.log('evt', evt);
+      if (this.isDefinition[row][col]) return;
       this.cells[coords] = evt;
     },
     onKeyUp(evt) {
       if (!this.focusedCell) {
         this.focusedCell = { x: 0, y: 0 };
       }
+      const isDef = this.isDefinition[this.focusedCell.y][this.focusedCell.x];
       let y = 0;
       let x = 0;
 
@@ -169,13 +178,13 @@ export default {
         y = 1;
       } else if (evt.code === 'ArrowLeft') {
         y = -1;
-      } else if (evt.code === 'Backspace') {
+      } else if (!isDef && evt.code === 'Backspace') {
         if (this.direction === 'horizontal') {
           y = -1;
         } else {
           x = -1;
         }
-      } else if (evt.key.match(/\w/)) {
+      } else if (!isDef && evt.key.match(/\w/)) {
         if (this.direction === 'horizontal') {
           y = 1;
         } else {
