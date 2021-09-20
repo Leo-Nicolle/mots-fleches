@@ -136,6 +136,7 @@ export default {
           this.selectedCells = cells;
         })
         .catch((e) => {
+          console.error(e);
           this.selectedCells = [];
           this.suggestions = [];
           this.loadingSuggestions = false;
