@@ -1,3 +1,5 @@
+/* eslint-disable no-unreachable */
+/* eslint-disable no-continue */
 /* eslint-disable no-nested-ternary */
 /* eslint-disable no-loop-func */
 import axios from 'axios';
@@ -13,6 +15,7 @@ class Crosswords {
     ];
     this.words = [];
     this.wordsMap = new Map();
+    this.wordsLengthMap = new Map();
     this.loadingPromise = null;
     this.loadDictionary();
     this.getWords().then((words) => {
@@ -20,11 +23,15 @@ class Crosswords {
     });
   }
 
+  static getAlphabet() {
+    return new Array(26).fill(0)
+      .map((_, i) => String.fromCharCode('A'.charCodeAt(0) + i));
+  }
+
   loadDictionary() {
     if (this.loadingPromise) return this.loadingPromise;
     this.loadingPromise = Promise.all([
-      ...new Array(26).fill(0)
-        .map((_, i) => String.fromCharCode('A'.charCodeAt(0) + i))
+      ...Crosswords.getAlphabet()
         .map((letter) => axios.get(`http://localhost:3010/result-${letter}.txt`)),
       axios.get('http://localhost:3010/allwords.txt'),
       axios.get(apiMixin.methods.getUrl('word')),
@@ -48,7 +55,7 @@ class Crosswords {
 
   addWordsToDictionnary(response) {
     const { data } = response;
-    const { wordsMap } = this;
+    const { wordsMap, wordsLengthMap } = this;
     let rawWords = [];
     if (typeof data === 'string') {
       rawWords = data.split(/,|\n/);
@@ -63,9 +70,10 @@ class Crosswords {
       .forEach((word) => {
         if (wordsMap.has(word)) return;
         wordsMap.set(word, true);
-        if (this.words.length < 10000) {
-          this.words.push(word);
-        }
+        // wordsLengthMap.set(this.words.length - 1, word.length);
+        // if (word.length === 3 || Math.random() < 0.4) {
+        this.words.push(word);
+        // }
       });
   }
 
@@ -153,30 +161,58 @@ class Crosswords {
   }
 
   getBestWords(words, lemmes) {
-    // const valids = new Map();
-    return words.map((w, i) => ({ score: 0, index: i }))
-      .filter((match, i) => {
-        const word = words[match.index];
-        return word.split('')
-          .every((letter, j) => {
-            const ls = lemmes.filter((l) => l.indexWord === j);
-            return !ls.length || ls.every((l) => {
-              const lemme = l.lemme.replace('.', letter);
-              const reg = Crosswords.strToReg(lemme, '+');
-              const entries = Object.entries(this.occurencies[lemme.length - 2]);
-              const occs = entries.find(([l, o]) => l.match(reg));
-              // console.log(lemme, occs && occs[1][l.indexLemme].map((i) => this.words[i]), word);
-              return occs && occs[1][l.indexLemme];
-            });
-          });
-      }).sort((a, b) => b.score - a.score)
-      .map((match) => words[match.index]);
+    if (!words.length) return [];
+    // find all the words that could fit on each crossing
+    const possibleLetters = new Array(words[0].length).fill().map((e) => new Map());
+    const impossibleLetters = new Array(words[0].length).fill().map((e) => new Map());
+    return words.filter((word) => {
+      for (let i = 0; i < word.length; i++) {
+        const letter = word[i];
+        if (impossibleLetters[i].get(letter)) return false;
+        if (possibleLetters[i].get(letter)) continue;
+        const lemmesForIndex = lemmes.filter((l) => l.indexWord === i);
+        if (!lemmesForIndex.length) continue;
+        let impossibleLetter = false;
+        const possibleWords = lemmesForIndex.reduce((occurencies, lemme) => {
+          if (impossibleLetter) return false;
+          const reg = Crosswords.strToReg(lemme.lemme.replace('.', letter), '');
+          const entries = Object.entries(this.occurencies[lemme.length - 2] || {});
+          const occs = entries.filter(([l, o]) => l.match(reg));
+          if (!entries.length || !occs.length) {
+            impossibleLetter = true;
+            return false;
+          }
+          if (!occurencies) {
+            return [...occs.reduce((indexes, [_, maps]) => {
+              const map = maps[lemme.indexLemme];
+              if (!map) return indexes;
+              [...map.keys()].forEach((k) => {
+                if (this.words[k].length === lemme.totalLength) indexes.set(k, true);
+              });
+              return indexes;
+            }, new Map()).keys()];
+          }
+
+          return occurencies.filter((o) => occs.some(([_, maps]) => maps[lemme.indexLemme] && maps[lemme.indexLemme].get(o, true)));
+        }, false);
+        if (impossibleLetter) {
+          impossibleLetters[i].set(letter, true);
+          return false;
+        }
+        if (possibleWords && possibleWords.length) {
+          possibleLetters[i].set(letter, true);
+        } else {
+          impossibleLetters[i].set(letter, true);
+          return false;
+        }
+      }
+      return true;
+    });
   }
 
   static countOccurences(words, length = 1) {
     const occurencies = {};
     words.forEach((word, i) => {
-      // const letters = word.split('')
       for (let j = 0; j < word.length; j++) {
         const lemme = word.slice(j, j + length);
         if (lemme.length < length) return;
@@ -184,10 +220,9 @@ class Crosswords {
           occurencies[lemme] = {};
         }
         if (!occurencies[lemme][j]) {
-          occurencies[lemme][j] = [i];
-        } else {
-          occurencies[lemme][j].push(i);
+          occurencies[lemme][j] = new Map();
         }
+        occurencies[lemme][j].set(i, true);
       }
     });
     return occurencies;
@@ -222,22 +257,28 @@ class Crosswords {
               y: start.y + perp.y * (k + j),
               x: start.x + perp.x * (k + j),
             };
-            return Crosswords.distance(coord, current) === 0
-              && grid[coord.y][coord.x].match(/\w+/)
-              ? '.'
-              : grid[coord.y][coord.x].match(/\w+/)
-                ? grid[coord.y][coord.x]
-                : '*';
+            let letter = '';
+            if (Crosswords.distance(coord, current) === 0) {
+              if (grid[coord.y][coord.x].match(/\w+/i)) {
+                letter = grid[coord.y][coord.x];
+              } else {
+                letter = '.';
+              }
+            } else if (grid[coord.y][coord.x].match(/\w+/i)) {
+              letter = grid[coord.y][coord.x];
+            } else {
+              letter = '*';
+            }
+            return letter;
           });
         lemmes.push({
           indexLemme: j,
           indexWord: i,
           takeIndex: letters.findIndex((l) => l === '.'),
-          length,
+          length: letters.length,
+          totalLength: length,
           lemme: letters.join(''),
         });
-
-        // grid[current.y + perp.y][current.x + perp.x];
       }
     }
 
@@ -276,12 +317,17 @@ class Crosswords {
     return this.getWords()
       .then((words) => {
         const matches = words
-          .filter((word) => word.length === length && word.match(reg));
-        const w1 = this.getBestWords(matches, lemmes, length);
-        console.log(w1.length - matches.length);
-        return w1;
+          .reduce((acc, word, i) => {
+            if (word.length === length && word.match(reg)) {
+              acc.push(word);
+            }
+            return acc;
+          }, []);
+        return Promise.race([
+          this.getBestWords(matches, lemmes, length),
+          new Promise((resolve) => setTimeout(() => resolve(matches), 3000)),
+        ]);
       })
-      // .then((words) =>
       .then((words) => ({
         words, cells, query: regString.replace(/\/i?|\^|\$/g, '').replace(/\\w\?/g, '*'),
       }));
