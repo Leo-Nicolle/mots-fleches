@@ -1,3 +1,5 @@
+/* eslint-disable no-nested-ternary */
+/* eslint-disable no-loop-func */
 import axios from 'axios';
 import apiMixin from './apiMixin';
 
@@ -61,7 +63,9 @@ class Crosswords {
       .forEach((word) => {
         if (wordsMap.has(word)) return;
         wordsMap.set(word, true);
-        this.words.push(word);
+        if (this.words.length < 10000) {
+          this.words.push(word);
+        }
       });
   }
 
@@ -150,30 +154,6 @@ class Crosswords {
 
   getBestWords(words, lemmes) {
     // const valids = new Map();
-    const bestLettersByPosition = [];
-    lemmes.forEach(({
-      indexLemme,
-      takeIndex,
-      indexWord,
-      length,
-      lemme,
-    }, i) => {
-      const reg = Crosswords.strToReg(lemme, '+');
-      const bestLetters = {};
-      Object.entries(this.occurencies[0])
-        // find how many words could fit
-        .filter(([l, o]) => l.match(reg) && o[indexLemme])
-        .forEach(([l, o]) => {
-          const letter = l[takeIndex];
-          if (!bestLetters[letter]) {
-            bestLetters[letter] = o[indexLemme].length;
-          } else {
-            bestLetters[letter] += o[indexLemme].length;
-          }
-        });
-      bestLettersByPosition.push(bestLetters);
-    });
-
     return words.map((w, i) => ({ score: 0, index: i }))
       .filter((match, i) => {
         const word = words[match.index];
@@ -181,10 +161,11 @@ class Crosswords {
           .every((letter, j) => {
             const ls = lemmes.filter((l) => l.indexWord === j);
             return !ls.length || ls.every((l) => {
-              const lemme = l.lemme.slice(0, l.takeIndex) + letter + l.lemme.slice(l.takeIndex + 1);
+              const lemme = l.lemme.replace('.', letter);
               const reg = Crosswords.strToReg(lemme, '+');
               const entries = Object.entries(this.occurencies[lemme.length - 2]);
               const occs = entries.find(([l, o]) => l.match(reg));
+              // console.log(lemme, occs && occs[1][l.indexLemme].map((i) => this.words[i]), word);
               return occs && occs[1][l.indexLemme];
             });
           });
@@ -213,69 +194,54 @@ class Crosswords {
   }
 
   static getLemmes({
-    grid, isDefinition, start, length, vec,
+    grid, isDefinition, coord, wordLength, vec,
   }) {
     const lemmes = [];
-    for (let i = 0; i < length; i++) {
+    const perp = {
+      x: vec.y,
+      y: vec.x,
+    };
+
+    for (let i = 0; i < wordLength; i++) {
       const current = {
-        x: start.x + vec.x * i,
-        y: start.y + vec.y * i,
+        x: coord.x + vec.x * i,
+        y: coord.y + vec.y * i,
       };
-      const n1 = {
-        x: current.x + vec.y,
-        y: current.y + vec.x,
-      };
-      const n2 = {
-        x: current.x - vec.y,
-        y: current.y - vec.x,
-      };
-      const currLetter = grid[current.y][current.x].length
-        ? grid[current.y][current.x]
-        : '*';
-      if (Crosswords.coordValid(grid, isDefinition, n1)
-        && grid[n1.y][n1.x].match(/^\w+$/)
-      ) {
-        const b1 = Crosswords.findBoundaries({
-          grid,
-          isDefinition,
-          coord: n1,
-          vec: {
-            x: vec.y,
-            y: vec.x,
-          },
-        });
-        const indexLemme = Crosswords.distance(b1.start, current);
+      const { start, length } = Crosswords.findBoundaries({
+        grid,
+        isDefinition,
+        coord: current,
+        vec: perp,
+      });
+      for (let j = 0; j < length; j++) {
+        const letters = new Array(Math.max(0, Math.min(3, length - j)))
+          .fill(0)
+          .map((_e, k) => {
+            // @eslint-disable
+            const coord = {
+              y: start.y + perp.y * (k + j),
+              x: start.x + perp.x * (k + j),
+            };
+            return Crosswords.distance(coord, current) === 0
+              && grid[coord.y][coord.x].match(/\w+/)
+              ? '.'
+              : grid[coord.y][coord.x].match(/\w+/)
+                ? grid[coord.y][coord.x]
+                : '*';
+          });
         lemmes.push({
-          indexLemme,
+          indexLemme: j,
           indexWord: i,
-          takeIndex: 0,
-          length: b1.length,
-          lemme: currLetter + grid[n1.y][n1.x],
+          takeIndex: letters.findIndex((l) => l === '.'),
+          length,
+          lemme: letters.join(''),
         });
-      }
-      if (Crosswords.coordValid(grid, isDefinition, n2)
-        && grid[n2.y][n2.x].match(/^\w+$/)
-      ) {
-        const b1 = Crosswords.findBoundaries({
-          grid,
-          isDefinition,
-          coord: n2,
-          vec: {
-            x: vec.y,
-            y: vec.x,
-          },
-        });
-        const indexLemme = Crosswords.distance(b1.start, n2);
-        lemmes.push({
-          indexLemme,
-          takeIndex: 1,
-          indexWord: i,
-          length: b1.length,
-          lemme: grid[n2.y][n2.x] + currLetter,
-        });
+
+        // grid[current.y + perp.y][current.x + perp.x];
       }
     }
-    return lemmes;
+
+    return lemmes.filter((l) => l.lemme.length > 1 && l.lemme.match(/(\w)+/));
   }
 
   findWords({
@@ -305,7 +271,7 @@ class Crosswords {
     const regString = reg.toString();
     // console.log('Reg', regString, regString.replaceAll('/', ''));
     const lemmes = Crosswords.getLemmes({
-      grid, isDefinition, start, length, vec,
+      grid, isDefinition, coord: start, wordLength: length, vec,
     });
     return this.getWords()
       .then((words) => {
