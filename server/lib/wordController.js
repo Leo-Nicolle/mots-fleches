@@ -29,12 +29,14 @@ export default function wordController({ app, db }) {
       }catch (e) {
         return res.status(500).send(e.message);
       }
-      crosswords.addWordsToDictionnary([word])
+      crosswords.addWordsToDictionnary([word], true)
       res.sendStatus(200);
     },
   );
   app.delete('/word/:word',  async (req, res) => {
-    await db.delete(req.params.word)
+    const word = req.params.word.trim();
+    await db.deleteWord(req.params.word)
+    crosswords.removeWordsFromDictionary([word])
     res.sendStatus(200);
   });
 }

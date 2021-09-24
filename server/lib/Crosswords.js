@@ -54,8 +54,47 @@ class Crosswords {
     return this.loadingPromise;
   }
 
-  addWordsToDictionnary(data) {
-    const { wordsMap, wordsLengthMap } = this;
+  addWordsToDictionnary(data,countOccurences = false) {
+    const { wordsMap } = this;
+    let rawWords = [];
+    if (typeof data === 'string') {
+      rawWords = data.split(/,|\n/);
+    } else {
+      rawWords = data;
+    }
+    const minIndex = this.words.length;
+    rawWords.map((w) => w
+      .trim()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toUpperCase())
+      .forEach((word) => {
+        if (wordsMap.has(word)) return;
+        wordsMap.set(word, this.words.length + 1);
+        this.words.push(word);
+      });
+
+    if(!countOccurences) return;
+    this.words.slice(minIndex)
+    .forEach((word, i) => {
+      const occurencies = Crosswords.countOccurences([word])
+      Object.entries(occurencies)
+      .forEach(([lemme, occs]) => {
+        Object.keys(occs)
+        .forEach(j => {
+          if(!this.occurencies[lemme]){
+            this.occurencies[lemme] = {}
+          }
+          if(!this.occurencies[lemme][j]){
+            this.occurencies[lemme][j] = new Map()
+          }
+          this.occurencies[lemme][j].set(i + minIndex, true);
+        })
+      })
+    })
+  }
+  removeWordsFromDictionary(data){
+    const { wordsMap } = this;
     let rawWords = [];
     if (typeof data === 'string') {
       rawWords = data.split(/,|\n/);
@@ -68,15 +107,20 @@ class Crosswords {
       .replace(/[\u0300-\u036f]/g, '')
       .toUpperCase())
       .forEach((word) => {
-        if (wordsMap.has(word)) return;
-        wordsMap.set(word, true);
-        // wordsLengthMap.set(this.words.length - 1, word.length);
-        // if (word.length === 3 || Math.random() < 0.4) {
-        this.words.push(word);
-        // }
+        if (!wordsMap.has(word)) return;
+        const index = wordsMap.get(word) - 1; 
+        this.words.splice(index,index);
+        wordsMap.set(word, false);
+        const occurencies = Crosswords.countOccurences([word])
+        Object.entries(occurencies)
+        .forEach(([lemme, occs]) => {
+          Object.keys(occs)
+          .forEach(j => {
+            this.occurencies[lemme][j].set(index, false);
+          })
+        })
       });
   }
-
 
   getWords() {
     return this.loadDictionary()
