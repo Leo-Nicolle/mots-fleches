@@ -9,7 +9,6 @@
 import axios from 'axios';
 import WordField from './WordField.vue';
 import apiMixin from '../js/apiMixin';
-import crosswords from '../js/Crosswords';
 
 export default {
   name: 'AddWord',
@@ -27,7 +26,6 @@ export default {
   },
   methods: {
     onRefresh() {
-      crosswords.refreshDictionnary();
       this.getWords();
     },
     getWords() {

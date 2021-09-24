@@ -3,7 +3,8 @@
 /* eslint-disable no-nested-ternary */
 /* eslint-disable no-loop-func */
 import axios from 'axios';
-import apiMixin from './apiMixin';
+import apiMixin from '../../client/src/js/apiMixin';
+import fs from "fs/promises";
 
 class Crosswords {
   constructor() {
@@ -32,9 +33,9 @@ class Crosswords {
     if (this.loadingPromise) return this.loadingPromise;
     this.loadingPromise = Promise.all([
       ...Crosswords.getAlphabet()
-        .map((letter) => axios.get(`http://localhost:3010/result-${letter}.txt`)),
-      axios.get('http://localhost:3010/allwords.txt'),
-      axios.get(apiMixin.methods.getUrl('word')),
+        .map((letter) => fs.readFile(`./public/result-${letter}.txt`, 'utf-8')),
+        fs.readFile('./public/allwords.txt','utf-8'),
+      // axios.get("./public/word.txt"),
     ])
       .then((responses) => {
         responses.forEach((response) => {
@@ -53,8 +54,7 @@ class Crosswords {
     return this.loadingPromise;
   }
 
-  addWordsToDictionnary(response) {
-    const { data } = response;
+  addWordsToDictionnary(data) {
     const { wordsMap, wordsLengthMap } = this;
     let rawWords = [];
     if (typeof data === 'string') {
@@ -77,10 +77,6 @@ class Crosswords {
       });
   }
 
-  refreshDictionnary() {
-    axios.get(apiMixin.methods.getUrl('word'))
-      .then((response) => this.addWordsToDictionnary(response));
-  }
 
   getWords() {
     return this.loadDictionary()

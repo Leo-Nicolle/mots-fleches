@@ -1,5 +1,6 @@
 
 import { body, validationResult } from 'express-validator';
+import crosswords from './Crosswords';
 
 
 export default function wordController({ app, db }) {
@@ -28,6 +29,7 @@ export default function wordController({ app, db }) {
       }catch (e) {
         return res.status(500).send(e.message);
       }
+      crosswords.addWordsToDictionnary([word])
       res.sendStatus(200);
     },
   );

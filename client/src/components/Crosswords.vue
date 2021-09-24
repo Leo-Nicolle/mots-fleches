@@ -55,9 +55,9 @@
 </template>
 
 <script>
+import axios from 'axios';
 import apiMixin from '../js/apiMixin';
 import gridMixin from '../js/gridMixin';
-import crosswords from '../js/Crosswords';
 import Settings from './Settings.vue';
 import Suggestions from './Suggestions.vue';
 import textbox from './textbox.vue';
@@ -123,18 +123,25 @@ export default {
       this.findWordPromise = this.findWordPromise
         .then(() => {
           this.loadingSuggestions = true;
-          return new Promise((resolve) => setTimeout(() => resolve(), 200)).then(() => crosswords.findWords({
-            grid: this.cellValues,
-            isDefinition: this.isDefinition,
-            coord: {
-              x: this.focusedCell.x,
-              y: this.focusedCell.y,
-            },
-            dir: this.direction,
-            query: '',
-          }));
+          return new Promise((resolve) => setTimeout(() => resolve(), 200))
+            .then(() => axios.post(this.getUrl('search'), {
+              grid: this.cellValues,
+              isDefinition: this.isDefinition,
+              coord: {
+                x: this.focusedCell.x,
+                y: this.focusedCell.y,
+              },
+              dir: this.direction,
+              query: '',
+              max: 100,
+            }));
+        })
+        .then((response) => {
+          console.log(response);
+          return response.data;
         })
         .then(({ words, cells, impossible }) => {
+          console.log(words, cells, impossible);
           if (!words) return;
           this.loadingSuggestions = false;
           this.resultLength = words.length;
