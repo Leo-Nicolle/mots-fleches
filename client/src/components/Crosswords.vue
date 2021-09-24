@@ -51,6 +51,7 @@
             <b-input maxlength="500" v-model="comment" type="textarea"></b-input>
         </b-field>
     </div>
+    <Export v-if="!!rows" :cols="cols" :rows="rows" :cellValues="cellValues" :grid="this.serializeGrid().cells" :isDefinition="isDefinition" />
   </div>
 </template>
 
@@ -61,6 +62,7 @@ import gridMixin from '../js/gridMixin';
 import Settings from './Settings.vue';
 import Suggestions from './Suggestions.vue';
 import textbox from './textbox.vue';
+import Export from './Export.vue';
 
 export default {
   name: 'Crosswords',
@@ -136,12 +138,8 @@ export default {
               max: 100,
             }));
         })
-        .then((response) => {
-          console.log(response);
-          return response.data;
-        })
+        .then((response) => response.data)
         .then(({ words, cells, impossible }) => {
-          console.log(words, cells, impossible);
           if (!words) return;
           this.loadingSuggestions = false;
           this.resultLength = words.length;
@@ -245,6 +243,7 @@ export default {
     textbox,
     Suggestions,
     Settings,
+    Export,
   },
 };
 </script>

@@ -102,7 +102,9 @@ export default {
         });
     },
     serializeGrid() {
+      if (!this.$el) return {};
       const inputs = [...this.$el.querySelectorAll('.definition,.letter')];
+      if (!inputs.length) return {};
       const cells = Object.keys(this.cells)
         .reduce((cells, coord) => {
           const { x, y } = this.coordToXY(coord);
