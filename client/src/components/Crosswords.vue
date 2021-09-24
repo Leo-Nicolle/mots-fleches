@@ -38,6 +38,7 @@
               @type="onType($event, i, j)"
               :value="col"
               :isDefinition="isDefinition[i][j]"
+              :isImpossible = "isImpossible(i,j)"
               :highlighted="isHighlighted(i, j)"
             >
             </textbox>
@@ -69,7 +70,9 @@ export default {
       resultLength: 0,
       direction: 'horizontal',
       suggestions: [],
+      impossibleLetters: [],
       focusedCell: null,
+      method: 'fastest',
       selectedCells: [],
       loadingSuggestions: false,
       findWordPromise: Promise.resolve(),
@@ -90,6 +93,9 @@ export default {
   },
   computed: {},
   methods: {
+    isImpossible(i, j) {
+      return !!this.impossibleLetters.find((coord) => coord.y === i && coord.x === j);
+    },
     isHighlighted(row, col) {
       if (!this.selectedCells.length) return false;
       return !!this.selectedCells.find(
@@ -128,11 +134,12 @@ export default {
             query: '',
           }));
         })
-        .then(({ words, cells }) => {
+        .then(({ words, cells, impossible }) => {
           if (!words) return;
           this.loadingSuggestions = false;
           this.resultLength = words.length;
           this.suggestions = words.slice(0, 100).map((word) => ({ word }));
+          this.impossibleLetters = impossible;
           this.selectedCells = cells;
         })
         .catch((e) => {

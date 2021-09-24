@@ -160,12 +160,25 @@ class Crosswords {
     };
   }
 
-  getBestWords(words, lemmes) {
-    if (!words.length) return [];
+  static getCooords({ start, length, vec }) {
+    const coords = [];
+    for (let i = 0; i < length; i++) {
+      coords.push({
+        x: start.x + vec.x * i,
+        y: start.y + vec.y * i,
+      });
+    }
+    return coords;
+  }
+
+  getBestWords({
+    words, lemmes, grid, start, length, vec,
+  }) {
+    if (!words.length) return { words: [], impossible: Crosswords.getCooords({ start, length, vec }) };
     // find all the words that could fit on each crossing
     const possibleLetters = new Array(words[0].length).fill().map((e) => new Map());
     const impossibleLetters = new Array(words[0].length).fill().map((e) => new Map());
-    return words.filter((word) => {
+    const bestWords = words.filter((word) => {
       for (let i = 0; i < word.length; i++) {
         const letter = word[i];
         if (impossibleLetters[i].get(letter)) return false;
@@ -208,6 +221,17 @@ class Crosswords {
       }
       return true;
     });
+    const impossible = Crosswords.getCooords({ start, length, vec })
+      .filter((coords, i) => {
+        const letter = grid[coords.y][coords.x];
+        if (!letter.length || !letter.match(/\w/i)) return false;
+        if (!impossibleLetters[i].get(letter.toUpperCase())) return false;
+        return true;
+      });
+    return {
+      words: bestWords,
+      impossible,
+    };
   }
 
   static countOccurences(words, length = 1) {
@@ -286,7 +310,7 @@ class Crosswords {
   }
 
   findWords({
-    grid, isDefinition, coord, dir,
+    grid, isDefinition, coord, dir, method = 'fastest',
   }) {
     const vec = Crosswords.getVector(dir);
     const {
@@ -323,13 +347,22 @@ class Crosswords {
             }
             return acc;
           }, []);
-        return Promise.race([
-          this.getBestWords(matches, lemmes, length),
-          new Promise((resolve) => setTimeout(() => resolve(matches), 3000)),
-        ]);
+        if (method === 'fastest') {
+          return Promise.race([
+            this.getBestWords({
+              words: matches, lemmes, grid, start, length, vec,
+            }),
+            new Promise((resolve) => setTimeout(() => resolve({ words: matches, impossible: [] }), 3000)),
+          ]);
+        } if (method === 'simple') {
+          return { words: matches, impossible: [] };
+        }
+        return this.getBestWords({
+          words: matches, lemmes, grid, start, length, vec,
+        });
       })
-      .then((words) => ({
-        words, cells, query: regString.replace(/\/i?|\^|\$/g, '').replace(/\\w\?/g, '*'),
+      .then(({ words, impossible }) => ({
+        words, impossible, cells, query: regString.replace(/\/i?|\^|\$/g, '').replace(/\\w\?/g, '*'),
       }));
   }
 }

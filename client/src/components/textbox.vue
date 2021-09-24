@@ -13,6 +13,7 @@ export default {
     value: String,
     highlighted: Boolean,
     isDefinition: Boolean,
+    isImpossible: Boolean,
   },
   data() {
     return {
@@ -48,8 +49,9 @@ export default {
   },
   methods: {
     getClass() {
+      const impossible = this.isImpossible ? 'is-danger' : '';
       const highlight = `${this.highlighted ? 'is-primary' : ''}`;
-      return `input ${this.isDefinition ? 'definition' : 'letter'} ${highlight}`;
+      return `input ${this.isDefinition ? 'definition' : 'letter'} ${highlight} ${impossible}`;
     },
     onClick() {
       const isDefinition = !this.isDefinition;
