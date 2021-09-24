@@ -1,5 +1,12 @@
 <template>
   <section class="section">
+    <div v-if="visible" id="export-grid" class="wrapper">
+      <ul class="grid" :style="getTemapleColumn()">
+        <li v-for="(item, i) in flatCells" :class="getClass(item.key)" :key="i">
+          {{ item.value }}
+        </li>
+      </ul>
+    </div>
     <span>
       <b-button class="is-primary" @click="visible = true">export</b-button>
       <b-modal
@@ -19,20 +26,10 @@
                 <button type="button" class="delete" @click="visible = false" />
               </header>
               <section class="modal-card-body">
-                <div id="export-grid" class="wrapper">
-                  <ul class="grid" :style="getTemapleColumn()">
-                    <li
-                      v-for="(item, i) in flatCells"
-                      :class="getClass(item.key)"
-                      :key="i"
-                    >
-                      {{ item.value }}
-                    </li>
-                  </ul>
-                </div>
+                <img :src="dataUrl" />
               </section>
               <footer class="modal-card-foot">
-                <b-button class="is-primary" @click="visible = false"
+                <b-button class="is-primary" @click="onClick"
                   >export</b-button
                 >
               </footer>
@@ -54,9 +51,12 @@ export default {
   components: {},
   mixins: [gridMixin],
   watch: {
-    grid: {
+    visible: {
       handler() {
-        this.export();
+        this.$nextTick()
+          .then(() => {
+            this.export();
+          });
       },
     },
   },
@@ -76,11 +76,23 @@ export default {
       return {
         gridTemplateColumns: new Array(this.cols)
           .fill(0)
-          .map(() => '50px')
+          .map(() => '200px')
           .join(' '),
       };
     },
-
+    onClick() {
+      fetch(this.dataUrl)
+        .then((res) => res.blob())
+        .then((blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', 'file.png'); // or any other extension
+          // document.body.appendChild(link);
+          link.click();
+          this.visible = false;
+        });
+    },
     export() {
       domtoimage
         .toPng(document.getElementById('export-grid'))
@@ -108,9 +120,9 @@ export default {
   list-style-type: none;
   text-align: center;
   text-transform: capitalize;
-  font-size: 45px;
-  min-height: 50px;
-  max-height: 50px;
+  font-size: 180px;
+  min-height: 200px;
+  max-height: 200px;
   display: flex;
   align-items: center;
   justify-content: space-around;
@@ -125,7 +137,7 @@ export default {
   font-family: "Montserrat", sans-serif;
 }
 .grid li.definition {
-  font-size: 12px;
+  font-size: 50px;
   text-transform: none;
 }
 </style>
