@@ -43,13 +43,11 @@
 
 <script>
 import domtoimage from 'dom-to-image';
-import gridMixin from '../js/gridMixin';
 
 export default {
   name: 'Export',
   props: ['grid', 'rows', 'cols', 'isDefinition', 'cellValues', 'name'],
   components: {},
-  mixins: [gridMixin],
   watch: {
     visible: {
       handler() {
@@ -69,7 +67,7 @@ export default {
   },
   methods: {
     getClass(coords) {
-      const { x, y } = this.coordToXY(coords);
+      const [y, x] = coords.match(/(\d+),(\d+)/).slice(1).map((n) => +n);
       return `${this.isDefinition[y][x] ? 'definition' : ''}`;
     },
     getTemapleColumn() {

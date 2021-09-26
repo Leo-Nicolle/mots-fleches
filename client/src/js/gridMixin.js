@@ -54,7 +54,8 @@ export default {
           });
           return acc;
         }, {});
-      this.isDefinition = new Array(this.rows).fill(0).map(() => new Array(this.cols).fill(false));
+      this.isDefinition = new Array(this.rows).fill(0).map(() => new Array(this.cols).fill(false))
+        .map((e, i) => e.map((_, j) => this.isDefinition[i] && this.isDefinition[i][j]));
     },
     getCellValues() {
       const res = new Array(this.rows).fill(0).map(() => new Array(this.cols).fill(''));

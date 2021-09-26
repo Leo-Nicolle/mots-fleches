@@ -1,9 +1,13 @@
 <template>
     <div class="suggestions">
+      <span>
+        <b-field>
+            <b-button class="is-primary" :icon-right="getIcon()" @click="$emit('switchordering')" />
+        </b-field>
         <b-field>
             <b-button class="is-primary" @click="$emit('switchdirection')">{{direction}}</b-button>
         </b-field>
-
+      </span>
         <div v-if="loading" class="loading">
           <svg class="spinner" viewBox="0 0 50 50">
             <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
@@ -29,10 +33,15 @@ export default {
       }],
     };
   },
-  props: ['suggestions', 'direction', 'loading', 'resultLength'],
+  props: ['suggestions', 'direction', 'loading', 'resultLength', 'ordering'],
   watch: {
     selected(newValue) {
       this.$emit('wordhover', newValue.word);
+    },
+  },
+  methods: {
+    getIcon() {
+      return this.ordering === 'ASC' ? 'arrow-up' : 'arrow-down';
     },
   },
 };
@@ -47,6 +56,11 @@ export default {
 
     max-width: 344px;
     min-width: 344px;
+}
+.suggestions > span{
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
 }
 .loading{
   height: 470px;

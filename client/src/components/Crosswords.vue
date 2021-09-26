@@ -30,12 +30,15 @@
     </div>
     <div class="container section columns" @keyup="onKeyUp">
       <Suggestions
-        :suggestions="suggestions"
         :direction="direction"
         :loading="loadingSuggestions"
+        :ordering="ordering"
         :resultLength="resultLength"
+        :suggestions="suggestions"
         @switchdirection="onSwitchDirection"
+        @switchordering="onSwitchOrdering"
         @wordhover="onWordHover"
+        @sort="console.log('SORT')"
         class="column"
       />
 
@@ -88,6 +91,7 @@ export default {
       impossibleLetters: [],
       focusedCell: null,
       method: 'fastest',
+      ordering: 'ASC',
       selectedCells: [],
       loadingSuggestions: false,
       findWordPromise: Promise.resolve(),
@@ -173,6 +177,7 @@ export default {
               y: this.focusedCell.y,
             },
             dir: this.direction,
+            ordering: this.ordering,
             query: '',
             max: 100,
           }));
@@ -254,6 +259,16 @@ export default {
         this.direction = 'vertical';
       } else {
         this.direction = 'horizontal';
+      }
+      if (this.focusedCell) {
+        this.focusedCell = { ...this.focusedCell };
+      }
+    },
+    onSwitchOrdering() {
+      if (this.ordering === 'ASC') {
+        this.ordering = 'DSC';
+      } else {
+        this.ordering = 'ASC';
       }
       if (this.focusedCell) {
         this.focusedCell = { ...this.focusedCell };
