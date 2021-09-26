@@ -2,15 +2,14 @@
 import fs from "fs/promises"
 import { constants } from "fs"
 import path from "path"
-
 class Database {
 
   constructor(){
     this.words = [];
     this.grids = [];
     this.loadingPromise = Promise.all([
-      this.loadFile(process.env.WORDS_PATH),
-      this.loadFile(process.env.GRIDS_PATH),
+      this.loadFile(process.env.APP_CROSSWORDS_WORDS_PATH),
+      this.loadFile(process.env.APP_CROSSWORDS_GRIDS_PATH),
     ])
     .then(([words, grids]) => {
       this.words = words.split(',').map(w => w.trim()).filter(e => e.length)
@@ -30,7 +29,7 @@ class Database {
   }
   saveWords(){
     return this.getWords()
-    .then((words) => fs.writeFile(process.env.WORDS_PATH, words.join(',')))
+    .then((words) => fs.writeFile(process.env.APP_CROSSWORDS_WORDS_PATH, words.join(',')))
   }
   pushWord(word){
     return this.getWords()
@@ -58,7 +57,7 @@ class Database {
 
   saveGrids(){
     return this.getGrids()
-    .then((grids) => fs.writeFile(process.env.GRIDS_PATH, JSON.stringify(grids)))
+    .then((grids) => fs.writeFile(process.env.APP_CROSSWORDS_GRIDS_PATH, JSON.stringify(grids)))
   }
   pushGrid(grid){
     return this.getGrids()

@@ -1,7 +1,6 @@
 
 import { body, validationResult } from 'express-validator';
-import { v4 as uuid } from 'uuid';
-
+import  crypto from "crypto";
 
 export default function gridController({ app, db }) {
 
@@ -38,7 +37,7 @@ export default function gridController({ app, db }) {
             ...req.body
           });
         }else{
-          id = uuid();
+          id = crypto.randomBytes(16).toString("hex");;
 
           await db.pushGrid({
             ...req.body,
