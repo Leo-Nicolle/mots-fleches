@@ -117,6 +117,7 @@ export default {
       this.refresh();
     },
     focusedCell() {
+      if (this.isDefinition[this.focusedCell.y][this.focusedCell.x]) return;
       this.searchSuggestions();
     },
   },
