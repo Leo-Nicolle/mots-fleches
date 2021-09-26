@@ -6,7 +6,7 @@
   "module": "dist/server.esm.js",
   "scripts": {
     "watch": "rollup -c -w --sourcemap",
-    "build": "rollup -c",
+    "build": "MODE=production rollup -c",
     "test": "mocha -r dotenv/config test/*.test.js dotenv_config_path=.env.test --require @babel/register",
     "pretest": "rollup -c && mkdir -p dist/test/db && cp ./config.json dist/test/db/config.json",
     "nodemon": "nodemon -r dotenv/config dist/server.cjs.js --watch dist/",
@@ -15,6 +15,10 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^20.0.0",
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^13.0.5",
+    "@rollup/plugin-replace": "^3.0.0",
     "nodemon": "^2.0.12",
     "rollup": "^2.56.3"
   },
@@ -25,7 +29,6 @@
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "express-validator": "^6.12.1",
-    "lowdb": "^3.0.0",
-    "uuid": "^8.3.2"
+    "lowdb": "^3.0.0"
   }
 }
