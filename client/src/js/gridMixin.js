@@ -102,7 +102,7 @@ export default {
         });
     },
     serializeGrid() {
-      if (!this.$el) return {};
+      if (!this.$el || !this.$el.querySelectorAll) return {};
       const inputs = [...this.$el.querySelectorAll('.definition,.letter')];
       if (!inputs.length) return {};
       const cells = Object.keys(this.cells)
@@ -110,8 +110,9 @@ export default {
           const { x, y } = this.coordToXY(coord);
           const index = this.xyToIndex({ x, y });
           cells[coord] = {
-            isDefinition: this.isDefinition[y][x],
-            value: inputs[index].value,
+            isDefinition: this.isDefinition[y] && this.isDefinition[y][x]
+              ? this.isDefinition[y][x] : false,
+            value: inputs[index] ? inputs[index].value : '',
           };
           return cells;
         }, {});

@@ -18,6 +18,14 @@
       <b-button class="level-item has-text-centered" @click="upload"
         >sauvegarder</b-button
       >
+      <Export
+        v-if="!!rows"
+        :cols="cols"
+        :rows="rows"
+        :cellValues="cellValues"
+        :grid="this.serializeGrid().cells"
+        :isDefinition="isDefinition"
+      />
     </div>
     <div class="container section columns" @keyup="onKeyUp">
       <Suggestions
@@ -29,29 +37,33 @@
         @wordhover="onWordHover"
         class="column"
       />
-      <div class="crosswords column scrollbar">
-        <div v-for="(row, i) in cellValues" class="columns" :key="i">
-          <div v-for="(col, j) in row" :key="j" class="column is-narrow cell">
+
+      <div class="wrapper column is-full scrollbar">
+        <ul class="grid" :style="getTemapleColumn()">
+          <li
+            v-for="(item, i) in flatCells"
+            :class="getClass(item.key)"
+            :key="i"
+          >
             <textbox
-              @click="onSelectCell(i, j)"
-              @switch="onSwitch($event, i, j)"
-              @type="onType($event, i, j)"
-              :value="col"
-              :isDefinition="isDefinition[i][j]"
-              :isImpossible = "isImpossible(i,j)"
-              :highlighted="isHighlighted(i, j)"
+              @click="onSelectCell(item.i, item.j)"
+              @switch="onSwitch($event, item.i, item.j)"
+              @type="onType($event, item.i, item.j)"
+              :value="item.value"
+              :isDefinition="isDefinition[item.i][item.j]"
+              :isImpossible="isImpossible(item.i, item.j)"
+              :highlighted="isHighlighted(item.i, item.j)"
             >
             </textbox>
-          </div>
-        </div>
+          </li>
+        </ul>
       </div>
     </div>
-    <div class = "section">
-       <b-field label="Commentaire">
-            <b-input maxlength="500" v-model="comment" type="textarea"></b-input>
-        </b-field>
+    <div class="section">
+      <b-field label="Commentaire">
+        <b-input maxlength="500" v-model="comment" type="textarea"></b-input>
+      </b-field>
     </div>
-    <Export v-if="!!rows" :cols="cols" :rows="rows" :cellValues="cellValues" :grid="this.serializeGrid().cells" :isDefinition="isDefinition" />
   </div>
 </template>
 
@@ -80,6 +92,20 @@ export default {
       findWordPromise: Promise.resolve(),
     };
   },
+  computed: {
+    flatCells() {
+      return this.cells
+        ? Object.entries(this.cells).map(([key, value]) => {
+          const { x, y } = this.coordToXY(key);
+          return {
+            i: y,
+            j: x,
+            ...value,
+          };
+        })
+        : [];
+    },
+  },
   watch: {
     rows() {
       this.setupCells();
@@ -93,10 +119,22 @@ export default {
       this.searchSuggestions();
     },
   },
-  computed: {},
   methods: {
+    getTemapleColumn() {
+      return {
+        gridTemplateColumns: new Array(this.cols)
+          .fill(0)
+          .map(() => '50px')
+          .join(' '),
+      };
+    },
+    getClass() {
+      return '';
+    },
     isImpossible(i, j) {
-      return !!this.impossibleLetters.find((coord) => coord.y === i && coord.x === j);
+      return !!this.impossibleLetters.find(
+        (coord) => coord.y === i && coord.x === j,
+      );
     },
     isHighlighted(row, col) {
       if (!this.selectedCells.length) return false;
@@ -125,18 +163,17 @@ export default {
       this.findWordPromise = this.findWordPromise
         .then(() => {
           this.loadingSuggestions = true;
-          return new Promise((resolve) => setTimeout(() => resolve(), 200))
-            .then(() => axios.post(this.getUrl('search'), {
-              grid: this.cellValues,
-              isDefinition: this.isDefinition,
-              coord: {
-                x: this.focusedCell.x,
-                y: this.focusedCell.y,
-              },
-              dir: this.direction,
-              query: '',
-              max: 100,
-            }));
+          return new Promise((resolve) => setTimeout(() => resolve(), 200)).then(() => axios.post(this.getUrl('search'), {
+            grid: this.cellValues,
+            isDefinition: this.isDefinition,
+            coord: {
+              x: this.focusedCell.x,
+              y: this.focusedCell.y,
+            },
+            dir: this.direction,
+            query: '',
+            max: 100,
+          }));
         })
         .then((response) => response.data)
         .then(({ words, cells, impossible }) => {
@@ -233,10 +270,9 @@ export default {
       this.upload().then(() => this.$emit('refresh-grids'));
     },
     onDeleteGrid() {
-      this.delete(this.getUrl(`grid/${this.id}`))
-        .then(() => {
-          this.$emit('delete');
-        });
+      this.delete(this.getUrl(`grid/${this.id}`)).then(() => {
+        this.$emit('delete');
+      });
     },
   },
   components: {
@@ -259,33 +295,36 @@ export default {
   margin-right: 0;
   padding-left: 0;
 }
-.crosswords {
-  overflow: scroll;
-  min-height: calc(100vh - 767px);
-  max-height: calc(100vh - 290px);
-  min-width: calc(100vw - 442px);
-}
-.row {
-  display: flex;
-  margin-bottom: 20px;
-  width: 100%;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  justify-content: space-evenly;
-  align-items: center;
-  align-content: center;
-}
 
-.input-letter {
-  min-width: 46px;
-  max-width: 46px;
-
-  padding: 0;
-  min-height: 46px;
+.grid li {
+  list-style-type: none;
   text-align: center;
-  text-overflow: clip;
+  text-transform: capitalize;
+  font-size: 45px;
+  min-height: 50px;
+  max-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  word-break: break-all;
 }
-.cell {
-  padding: 4px;
+.grid {
+  width: 100%;
+  display: grid;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  grid-column-gap: 10px;
+  grid-row-gap: 10px;
+  font-family: "Montserrat", sans-serif;
+}
+.grid li.definition {
+  font-size: 12px;
+  text-transform: none;
+}
+.wrapper {
+  max-width: 100vw;
+  max-height: 685px;
+  padding: 10px 16px;
 }
 </style>

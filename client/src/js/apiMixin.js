@@ -1,7 +1,7 @@
 export default {
   methods: {
     getUrl(param) {
-      return `http://localhost:3011/${param}`;
+      return `http://localhost:${process.env.VUE_APP_APIPORT}/${param}`;
     },
   },
 };

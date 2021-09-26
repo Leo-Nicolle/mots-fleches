@@ -108,10 +108,13 @@ export default {
 </script>
 
 <style>
+.bottom{
+  transform: rotate(90);
+}
 .scrollbar {
   float: left;
   background: #f5f5f5;
-  overflow-y: scroll;
+  overflow-x: scroll;
   margin-bottom: 25px;
   margin-left: 0;
 }
