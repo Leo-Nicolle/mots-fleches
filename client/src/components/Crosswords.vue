@@ -22,6 +22,7 @@
         v-if="!!rows"
         :cols="cols"
         :rows="rows"
+        :name="name"
         :cellValues="cellValues"
         :grid="this.serializeGrid().cells"
         :isDefinition="isDefinition"
@@ -100,7 +101,7 @@ export default {
           return {
             i: y,
             j: x,
-            ...value,
+            value,
           };
         })
         : [];
@@ -176,10 +177,12 @@ export default {
           }));
         })
         .then((response) => response.data)
-        .then(({ words, cells, impossible }) => {
+        .then(({
+          words, cells, impossible, nbRestuls,
+        }) => {
           if (!words) return;
           this.loadingSuggestions = false;
-          this.resultLength = words.length;
+          this.resultLength = nbRestuls;
           this.suggestions = words.slice(0, 100).map((word) => ({ word }));
           this.impossibleLetters = impossible;
           this.selectedCells = cells;
@@ -259,7 +262,7 @@ export default {
       this.selectedCells.forEach(({ x, y }, i) => {
         this.cells[this.getCoords(y, x)] = word.slice(i, i + 1);
       });
-      this.refresh();
+      // this.refresh();
     },
     onSettingsChange({ rows, cols, name }) {
       this.rows = rows;

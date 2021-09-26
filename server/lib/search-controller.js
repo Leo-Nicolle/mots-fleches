@@ -26,7 +26,7 @@ export default function wordController({ app, db }) {
       dir,
       query,
     })
-    res.send({words: words.slice(0,max), cells,impossible});
+    res.send({nbRestuls:words.length, words: words.slice(0,max), cells,impossible});
   });
 
 }

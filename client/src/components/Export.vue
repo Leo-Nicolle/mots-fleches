@@ -47,7 +47,7 @@ import gridMixin from '../js/gridMixin';
 
 export default {
   name: 'Export',
-  props: ['grid', 'rows', 'cols', 'isDefinition', 'cellValues'],
+  props: ['grid', 'rows', 'cols', 'isDefinition', 'cellValues', 'name'],
   components: {},
   mixins: [gridMixin],
   watch: {
@@ -87,7 +87,7 @@ export default {
           const url = window.URL.createObjectURL(blob);
           const link = document.createElement('a');
           link.href = url;
-          link.setAttribute('download', 'file.png'); // or any other extension
+          link.setAttribute('download', `${this.name}.png`); // or any other extension
           // document.body.appendChild(link);
           link.click();
           this.visible = false;
