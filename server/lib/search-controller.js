@@ -18,23 +18,29 @@ export default function wordController({ app, db }) {
         ordering,
         dir,
         query,
+        method,
         max
       } = req.body;
-    const { words, cells, impossible } = await crosswords.findWords({
-      grid,
-      isDefinition,
-      coord,
-      dir,
-      query
-    })
-    console.log("ORDERING", ordering)
-    const wordsToSend =
-      ordering === 'DSC'
+      try{
+
+        const { words, cells, impossible } = await crosswords.findWords({
+          grid,
+          isDefinition,
+          method,
+          coord,
+          dir,
+          query
+        })
+        const wordsToSend =
+        ordering === 'DSC'
         ? words.slice(Math.max(0, words.length - max))
-               .sort((a, b) => b.localeCompare(a))
+        .sort((a, b) => b.localeCompare(a))
         : words.slice(0, max)
-               .sort((a, b) => a.localeCompare(b));
-    res.send({ nbRestuls: words.length, words: wordsToSend, cells, impossible });
+        .sort((a, b) => a.localeCompare(b));
+        res.send({ method, nbRestuls: words.length, words: wordsToSend, cells, impossible });
+      }catch(e){
+        res.send(500);
+      }
   });
 
 }

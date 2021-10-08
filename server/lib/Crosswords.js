@@ -5,7 +5,7 @@
 import axios from 'axios';
 import apiMixin from '../../client/src/js/apiMixin';
 import fs from "fs/promises";
-
+import path from 'path'
 class Crosswords {
   constructor() {
     this.dico = [
@@ -33,9 +33,8 @@ class Crosswords {
     if (this.loadingPromise) return this.loadingPromise;
     this.loadingPromise = Promise.all([
       ...Crosswords.getAlphabet()
-        .map((letter) => fs.readFile(`./public/result-${letter}.txt`, 'utf-8')),
-        fs.readFile('./public/allwords.txt','utf-8'),
-      // axios.get("./public/word.txt"),
+        .map((letter) => fs.readFile(path.resolve(`./public/result-${letter}.txt`), 'utf-8')),
+        fs.readFile(path.resolve('./public/allwords.txt'),'utf-8'),
     ])
       .then((responses) => {
         responses.forEach((response) => {
@@ -350,7 +349,7 @@ class Crosswords {
   }
 
   findWords({
-    grid, isDefinition, coord, dir, method = 'fastest',
+    grid, isDefinition, coord, dir, method = '',
   }) {
     const vec = Crosswords.getVector(dir);
     const {

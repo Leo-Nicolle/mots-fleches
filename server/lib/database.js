@@ -19,9 +19,9 @@ class Database {
 
   loadFile(file){
     return fs.mkdir(path.dirname(file), {recursive: true})
-    .then(() => fs.access(file, constants.F_OK))
-    .catch((e) => e.message.includes(file) ?  fs.writeFile(file, file.match(/\.json/) ? '[]' : '') : Promise.reject(e))
-    .then(() => fs.readFile(file,'utf-8'))
+    .then(() => fs.access(path.resolve(file), constants.F_OK))
+    .catch((e) => fs.writeFile(path.resolve(file), file.match(/\.json/) ? '[]' : ''))
+    .then(() => fs.readFile(path.resolve(file),'utf-8'))
   }
 
   getWords(){
@@ -29,7 +29,7 @@ class Database {
   }
   saveWords(){
     return this.getWords()
-    .then((words) => fs.writeFile(process.env.APP_CROSSWORDS_WORDS_PATH, words.join(',')))
+    .then((words) => fs.writeFile(path.resolve(process.env.APP_CROSSWORDS_WORDS_PATH), words.join(',')))
   }
   pushWord(word){
     return this.getWords()
@@ -57,7 +57,7 @@ class Database {
 
   saveGrids(){
     return this.getGrids()
-    .then((grids) => fs.writeFile(process.env.APP_CROSSWORDS_GRIDS_PATH, JSON.stringify(grids)))
+    .then((grids) => fs.writeFile(path.resolve(process.env.APP_CROSSWORDS_GRIDS_PATH), JSON.stringify(grids)))
   }
   pushGrid(grid){
     return this.getGrids()
