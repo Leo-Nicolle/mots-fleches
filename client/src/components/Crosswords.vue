@@ -15,7 +15,7 @@
       />
       <p class="title level-item has-text-centered">{{ name }}</p>
       <p class="level-item has-text-centered"></p>
-      <b-button class="level-item has-text-centered" @click="upload"
+      <b-button :class="getClassSave()" @click="save"
         >sauvegarder</b-button
       >
       <Export
@@ -35,8 +35,11 @@
         :ordering="ordering"
         :resultLength="resultLength"
         :suggestions="suggestions"
+        :method="method"
+        :statusSearch="statusSearch"
         @switchdirection="onSwitchDirection"
         @switchordering="onSwitchOrdering"
+        @switchmethod="onSwitchMethod"
         @wordhover="onWordHover"
         @sort="console.log('SORT')"
         class="column"
@@ -80,6 +83,7 @@ import Suggestions from './Suggestions.vue';
 import textbox from './textbox.vue';
 import Export from './Export.vue';
 
+let throttleLock = false;
 export default {
   name: 'Crosswords',
   mixins: [gridMixin, apiMixin],
@@ -89,6 +93,8 @@ export default {
       direction: 'horizontal',
       suggestions: [],
       impossibleLetters: [],
+      statusSave: null,
+      statusSearch: 'ok',
       focusedCell: null,
       method: 'fastest',
       ordering: 'ASC',
@@ -122,7 +128,12 @@ export default {
     },
     focusedCell() {
       if (this.isDefinition[this.focusedCell.y][this.focusedCell.x]) return;
+      if (throttleLock) return;
       this.searchSuggestions();
+      throttleLock = true;
+      setTimeout(() => {
+        throttleLock = false;
+      }, 200);
     },
   },
   methods: {
@@ -136,6 +147,14 @@ export default {
     },
     getClass() {
       return '';
+    },
+    getClassSave() {
+      const status = this.statusSave === 'ok'
+        ? 'is-success'
+        : this.statusSave === 'error'
+          ? 'is-danger'
+          : '';
+      return `level-item has-text-centered ${status}`;
     },
     isImpossible(i, j) {
       return !!this.impossibleLetters.find(
@@ -179,6 +198,7 @@ export default {
             dir: this.direction,
             ordering: this.ordering,
             query: '',
+            method: this.method,
             max: 100,
           }));
         })
@@ -189,16 +209,24 @@ export default {
           if (!words) return;
           this.loadingSuggestions = false;
           this.resultLength = nbRestuls;
-          this.suggestions = words.slice(0, 100).map((word) => ({ word }));
+          this.suggestions = words.slice(0, 100).map((word) => ({
+            word,
+            link: `https://google.com/search?q=${word}+definition`,
+          }));
           this.impossibleLetters = impossible;
           this.selectedCells = cells;
+          this.statusSearch = 'ok';
         })
         .catch((e) => {
           console.error(e);
+          this.statusSearch = 'error';
+          this.resultLength = 0;
           this.selectedCells = [];
           this.suggestions = [];
+          this.impossibleLetters = [];
           this.loadingSuggestions = false;
         });
+
       return this.findWordPromise;
     },
     onSelectCell(row, col) {
@@ -274,11 +302,18 @@ export default {
         this.focusedCell = { ...this.focusedCell };
       }
     },
+    onSwitchMethod() {
+      if (this.method === 'fastest') {
+        this.method = 'simple';
+      } else {
+        this.method = 'fastest';
+      }
+    },
     onWordHover(word) {
       this.selectedCells.forEach(({ x, y }, i) => {
         this.cells[this.getCoords(y, x)] = word.slice(i, i + 1);
       });
-      // this.refresh();
+      this.refresh();
     },
     onSettingsChange({ rows, cols, name }) {
       this.rows = rows;
@@ -287,6 +322,18 @@ export default {
     },
     onSettingsClose() {
       this.upload().then(() => this.$emit('refresh-grids'));
+    },
+    save() {
+      this.upload()
+        .then(() => {
+          this.statusSave = 'ok';
+        })
+        .catch(() => {
+          this.statusSave = 'error';
+        });
+      setTimeout(() => {
+        this.statusSave = '';
+      }, 800);
     },
     onDeleteGrid() {
       this.delete(this.getUrl(`grid/${this.id}`)).then(() => {

@@ -21,7 +21,7 @@ export default {
       this.new();
     }
     this.uploadInterval = setInterval(() => {
-      // if (this.id && this.id.length) this.upload();
+      if (this.id && this.id.length) this.upload();
     }, 5000);
   },
   beforeDestroy() {
@@ -91,10 +91,7 @@ export default {
         });
     },
     upload() {
-      return axios.post(this.getUrl('grid'), this.serializeGrid())
-        .catch((e) => {
-          // console.log(e.response.data.errors);
-        });
+      return axios.post(this.getUrl('grid'), this.serializeGrid());
     },
     delete() {
       return axios.delete(this.getUrl(`grid/${this.id}`))
