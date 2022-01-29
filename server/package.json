@@ -6,7 +6,7 @@
   "module": "dist/server.esm.js",
   "scripts": {
     "watch": "rollup -c -w --sourcemap",
-    "build": "MODE=production rollup -c",
+    "build": "rollup -c",
     "test": "mocha -r dotenv/config test/*.test.js dotenv_config_path=.env.test --require @babel/register",
     "pretest": "rollup -c && mkdir -p dist/test/db && cp ./config.json dist/test/db/config.json",
     "nodemon": "nodemon -r dotenv/config dist/server.cjs.js --watch dist/server.cjs.js",
@@ -19,8 +19,12 @@
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^13.0.5",
     "@rollup/plugin-replace": "^3.0.0",
+    "@rollup/plugin-typescript": "^8.3.0",
+    "@typescript-eslint/parser": "^5.10.1",
     "nodemon": "^2.0.12",
-    "rollup": "^2.56.3"
+    "rollup": "^2.56.3",
+    "tslib": "^2.3.1",
+    "typescript": "^4.5.5"
   },
   "dependencies": {
     "axios": "^0.21.4",

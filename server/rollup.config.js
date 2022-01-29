@@ -5,6 +5,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
 import replace from '@rollup/plugin-replace';
 import dotenv from 'dotenv';
+import typescript from '@rollup/plugin-typescript';
 
 dotenv.config();
 console.log('building in mode:', process.env.MODE)
@@ -16,15 +17,14 @@ const variablesToReplace = Object.entries(process.env)
 	}, {})
 	console.log('variables to replace:', variablesToReplace)
 
-	// const plugins = process.env.MODE === 'production'
-	// ? 
 	const plugins =[
 		replace(variablesToReplace),
 		resolve(),
 		json(),
+		typescript(),
 		commonjs(),
 	]
-	//  []
+
 export default {
 	input: 'lib/index.js',
 	output: [

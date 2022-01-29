@@ -39,7 +39,7 @@ export default function wordController({ app, db }) {
         .sort((a, b) => a.localeCompare(b));
         res.send({ method, nbRestuls: words.length, words: wordsToSend, cells, impossible });
       }catch(e){
-        res.send(500);
+        res.status(500).send(e);
       }
   });
 

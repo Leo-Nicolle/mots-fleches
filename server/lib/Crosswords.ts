@@ -2,11 +2,35 @@
 /* eslint-disable no-continue */
 /* eslint-disable no-nested-ternary */
 /* eslint-disable no-loop-func */
+import fs from "fs/promises";
+import path from "path";
 import axios from 'axios';
 import apiMixin from '../../client/src/js/apiMixin';
-import fs from "fs/promises";
-import path from 'path'
+interface Point{
+  x: number;
+  y: number;
+}
+type Char = string  & { length: 1 };
+type Grid = Char[][] 
+type BoolGrid = Boolean[][]
+type DicoIndex = number;
+type OccurenceMap = Record<string, Record<number, Map<number, boolean>>>;
+
+type Lemme = {
+    indexLemme: number;
+    indexWord: number;
+    takeIndex: number;
+    length: number,
+    totalLength: number,
+    lemme: string,
+}
 class Crosswords {
+  private dico: string[] = [];
+  private words: string[] = [];
+  private wordsMap: Map<string, number> = new Map();
+  private wordsLengthMap: Map<number, string[]> = new Map();
+  private loadingPromise: Promise<void> | null;
+  private occurencies: OccurenceMap[];
   constructor() {
     this.dico = [
       'abc',
@@ -34,7 +58,7 @@ class Crosswords {
     this.loadingPromise = Promise.all([
       ...Crosswords.getAlphabet()
         .map((letter) => fs.readFile(path.resolve(`./public/result-${letter}.txt`), 'utf-8')),
-        fs.readFile(path.resolve('./public/allwords.txt'),'utf-8'),
+      fs.readFile(path.resolve('./public/allwords.txt'), 'utf-8'),
     ])
       .then((responses) => {
         responses.forEach((response) => {
@@ -53,9 +77,9 @@ class Crosswords {
     return this.loadingPromise;
   }
 
-  addWordsToDictionnary(data,countOccurences = false) {
+  addWordsToDictionnary(data: string, countOccurences = false) {
     const { wordsMap } = this;
-    let rawWords = [];
+    let rawWords: string[] = [];
     if (typeof data === 'string') {
       rawWords = data.split(/,|\n/);
     } else {
@@ -69,55 +93,63 @@ class Crosswords {
       .toUpperCase())
       .forEach((word) => {
         if (wordsMap.has(word)) return;
-        wordsMap.set(word, this.words.length + 1);
+        wordsMap.set(word, this.words.length);
         this.words.push(word);
       });
 
-    if(!countOccurences) return;
+    if (!countOccurences) return;
     this.words.slice(minIndex)
-    .forEach((word, i) => {
-      const occurencies = Crosswords.countOccurences([word])
-      Object.entries(occurencies)
-      .forEach(([lemme, occs]) => {
-        Object.keys(occs)
-        .forEach(j => {
-          if(!this.occurencies[lemme]){
-            this.occurencies[lemme] = {}
-          }
-          if(!this.occurencies[lemme][j]){
-            this.occurencies[lemme][j] = new Map()
-          }
-          this.occurencies[lemme][j].set(i + minIndex, true);
-        })
+      .forEach((word, i) => {
+        for(let l = 0; l < 2; l++) {
+          const occurencies = Crosswords.countOccurences([word], l+2)
+          Object.entries(occurencies)
+            .forEach(([lemme, occs]) => {
+              Object.keys(occs)
+                .forEach(j => {
+                  if (!this.occurencies[l][lemme]) {
+                    this.occurencies[l][lemme] = {}
+                  }
+                  if (!this.occurencies[l][lemme][j]) {
+                    this.occurencies[l][lemme][j] = new Map()
+                  }
+                  this.occurencies[l][lemme][j].set(i + minIndex, true);
+                })
+            })
+        }
       })
-    })
   }
-  removeWordsFromDictionary(data){
+  removeWordsFromDictionary(data) {
     const { wordsMap } = this;
-    let rawWords = [];
+    let rawWords: string[] = [];
     if (typeof data === 'string') {
       rawWords = data.split(/,|\n/);
     } else {
       rawWords = data;
     }
+    const offset = this.words.length
     rawWords.map((w) => w
       .trim()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .toUpperCase())
       .forEach((word) => {
-        if (!wordsMap.has(word)) return;
-        const index = wordsMap.get(word) - 1; 
-        this.words.splice(index,index);
-        wordsMap.set(word, false);
-        const occurencies = Crosswords.countOccurences([word])
-        Object.entries(occurencies)
-        .forEach(([lemme, occs]) => {
-          Object.keys(occs)
-          .forEach(j => {
-            this.occurencies[lemme][j].set(index, false);
-          })
-        })
+        if (!wordsMap.get(word)) return;
+        const index = wordsMap.get(word) as number;
+        this.words.splice(index, 1);
+        wordsMap.set(word, 0);
+        for (let l = 0; l < 2; l++) {
+          const occurencies = Crosswords.countOccurences([word], l+2)
+          Object.entries(occurencies)
+            .forEach(([lemme, occs]) => {
+              Object.keys(occs)
+                .forEach(j => {
+                  if (!this.occurencies[l] 
+                    ||!this.occurencies[l][lemme] 
+                    || !this.occurencies[l][lemme][j]) return;
+                  this.occurencies[l][lemme][j].set(index, false);
+                })
+            })
+        }
       });
   }
 
@@ -154,7 +186,7 @@ class Crosswords {
     return new RegExp(`^${str.split('').reduce((reg, char) => (char === '*'
       ? `${reg}\\w${n}`
       : `${reg}${char}`),
-    '')}$`, 'i');
+      '')}$`, 'i');
   }
 
   static scale(v, factor = 1) {
@@ -200,7 +232,7 @@ class Crosswords {
   }
 
   static getCooords({ start, length, vec }) {
-    const coords = [];
+    const coords: Point[] = [];
     for (let i = 0; i < length; i++) {
       coords.push({
         x: start.x + vec.x * i,
@@ -212,21 +244,25 @@ class Crosswords {
 
   getBestWords({
     words, lemmes, grid, start, length, vec,
+  }: {
+    words: string[], lemmes: Lemme[], grid: Grid, start: Point, length: number, vec: Point,
   }) {
     if (!words.length) return { words: [], impossible: Crosswords.getCooords({ start, length, vec }) };
     // find all the words that could fit on each crossing
-    const possibleLetters = new Array(words[0].length).fill().map((e) => new Map());
-    const impossibleLetters = new Array(words[0].length).fill().map((e) => new Map());
+    const possibleLetters: Map<Char, boolean>[] = new Array(words[0].length).fill(0).map((e) => new Map());
+    const impossibleLetters: Map<Char, boolean>[] = new Array(words[0].length).fill(0).map((e) => new Map());
     const bestWords = words.filter((word) => {
       for (let i = 0; i < word.length; i++) {
-        const letter = word[i];
+        const letter = word[i] as Char;
         if (impossibleLetters[i].get(letter)) return false;
         if (possibleLetters[i].get(letter)) continue;
         const lemmesForIndex = lemmes.filter((l) => l.indexWord === i);
         if (!lemmesForIndex.length) continue;
         let impossibleLetter = false;
-        const possibleWords = lemmesForIndex.reduce((occurencies, lemme) => {
-          if (impossibleLetter) return false;
+        const possibleWords = lemmesForIndex.reduce((occurencies: null | false | DicoIndex[] , lemme) => {
+          if (occurencies === false 
+            || impossibleLetter
+            || (Array.isArray(occurencies) && !occurencies.length)) return false;
           const reg = Crosswords.strToReg(lemme.lemme.replace('.', letter), '');
           const entries = Object.entries(this.occurencies[lemme.length - 2] || {});
           const occs = entries.filter(([l, o]) => l.match(reg));
@@ -234,19 +270,21 @@ class Crosswords {
             impossibleLetter = true;
             return false;
           }
-          if (!occurencies) {
+          if (occurencies === null) {
             return [...occs.reduce((indexes, [_, maps]) => {
               const map = maps[lemme.indexLemme];
               if (!map) return indexes;
               [...map.keys()].forEach((k) => {
-                if (this.words[k].length === lemme.totalLength) indexes.set(k, true);
+                if (this.words[k] && 
+                  this.words[k].length === lemme.totalLength) indexes.set(k, true);
               });
               return indexes;
             }, new Map()).keys()];
           }
 
-          return occurencies.filter((o) => occs.some(([_, maps]) => maps[lemme.indexLemme] && maps[lemme.indexLemme].get(o, true)));
-        }, false);
+          return occurencies
+            .filter((o) => occs.some(([_, maps]) => maps[lemme.indexLemme] && maps[lemme.indexLemme].get(o)));
+        }, null);
         if (impossibleLetter) {
           impossibleLetters[i].set(letter, true);
           return false;
@@ -264,7 +302,7 @@ class Crosswords {
       .filter((coords, i) => {
         const letter = grid[coords.y][coords.x];
         if (!letter.length || !letter.match(/\w/i)) return false;
-        if (!impossibleLetters[i].get(letter.toUpperCase())) return false;
+        if (!impossibleLetters[i].get(letter.toUpperCase() as Char)) return false;
         return true;
       });
     return {
@@ -273,7 +311,7 @@ class Crosswords {
     };
   }
 
-  static countOccurences(words, length = 1) {
+  static countOccurences(words: string[], length = 1, offset = 0): OccurenceMap {
     const occurencies = {};
     words.forEach((word, i) => {
       for (let j = 0; j < word.length; j++) {
@@ -285,7 +323,7 @@ class Crosswords {
         if (!occurencies[lemme][j]) {
           occurencies[lemme][j] = new Map();
         }
-        occurencies[lemme][j].set(i, true);
+        occurencies[lemme][j].set(i + offset, true);
       }
     });
     return occurencies;
@@ -293,8 +331,8 @@ class Crosswords {
 
   static getLemmes({
     grid, isDefinition, coord, wordLength, vec,
-  }) {
-    const lemmes = [];
+  }: {grid: Grid, isDefinition:BoolGrid, coord: Point, wordLength: number, vec: Point}) {
+    const lemmes: Lemme[] = [];
     const perp = {
       x: vec.y,
       y: vec.x,
@@ -358,7 +396,7 @@ class Crosswords {
       grid, coord, vec, isDefinition,
     });
     let str = '';
-    const cells = [];
+    const cells: Point[] = [];
     for (let i = 0; i < length; i++) {
       const current = {
         x: start.x + vec.x * i,
@@ -385,7 +423,7 @@ class Crosswords {
               acc.push(word);
             }
             return acc;
-          }, []);
+          }, [] as string[]);
         if (method === 'fastest') {
           return Promise.race([
             this.getBestWords({

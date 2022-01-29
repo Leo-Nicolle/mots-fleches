@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+      "baseUrl": ".",
+      "outDir": "./dist",
+      "target": "es5",
+      "module": "ES6",
+      "moduleResolution": "node",
+      "downlevelIteration": true,
+      "allowSyntheticDefaultImports": true,
+      "lib": [
+          "ES5",
+          "ES6",
+          "ES2017"
+      ],
+      "stripInternal": true,
+      "removeComments": false,
+      "sourceMap": true,
+      "strictNullChecks": true
+  },
+  "include": [
+      "./lib/**/*.ts",
+      "./src/**/*.d.ts"
+  ]
+}
