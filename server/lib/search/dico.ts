@@ -7,7 +7,7 @@ class Dico {
   private words: string[] = [];
   private wordsMap: Map<string, number> = new Map();
   private loadingPromise: Promise<void> | null;
-  private occurencies: OccurenceMap[];
+  public occurencies: OccurenceMap[];
   constructor() {
     this.words = [];
     this.wordsMap = new Map();
@@ -15,11 +15,12 @@ class Dico {
     this.loadDictionary();
   }
 
-  static countOccurences(
-    words: string[],
-    length = 1,
-    offset = 0
-  ): OccurenceMap {
+  /**
+   * @param words the list of words you want to count occurences of
+   * @param length The length of the lemmes you want to count
+   * @returns The occurence map of the words
+   */
+  static countOccurences(words: string[], length = 1): OccurenceMap {
     const occurencies = {};
     words.forEach((word, i) => {
       for (let j = 0; j < word.length; j++) {
@@ -28,10 +29,13 @@ class Dico {
         if (!occurencies[lemme]) {
           occurencies[lemme] = {};
         }
+        // j is the place of the lemme start in the word: 
+        //  for lemme "or" in the word word, j = 1
         if (!occurencies[lemme][j]) {
-          occurencies[lemme][j] = new Map();
+          occurencies[lemme][j] = new Set();
         }
-        occurencies[lemme][j].set(i + offset, true);
+        // store the index of that word in the array of words
+        occurencies[lemme][j].add(i);
       }
     });
     return occurencies;
@@ -97,7 +101,7 @@ class Dico {
             if (!this.occurencies[l][lemme][j]) {
               this.occurencies[l][lemme][j] = new Map();
             }
-            this.occurencies[l][lemme][j].set(i + minIndex, true);
+            this.occurencies[l][lemme][j].add(i + minIndex);
           });
         });
       }
@@ -134,7 +138,7 @@ class Dico {
                 !this.occurencies[l][lemme][j]
               )
                 return;
-              this.occurencies[l][lemme][j].set(index, false);
+              this.occurencies[l][lemme][j].delete(index);
             });
           });
         }

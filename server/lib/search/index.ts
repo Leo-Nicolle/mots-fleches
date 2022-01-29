@@ -7,6 +7,7 @@ import {
   BoolGrid,
   Grid,
   DicoIndex,
+  OccurenceByIndex,
 } from "./types";
 import {
   getCoords,
@@ -16,8 +17,15 @@ import {
   distance,
 } from "./utils";
 class Crosswords {
-  private occurencies: OccurenceMap[];
-
+  /**
+   *
+   * @param words: the list of words candidates to be returned (they match simple criteria)
+   * @param lemmes: The list of lemmes in the perpendicular direction words have to match with
+   * @param grid: the grid
+   * @param start: the starting point of the word
+   * @param length: the length of the candidate words
+   * @returns a list of words that match the perpandicular lemmes
+   */
   getBestWords({
     words,
     lemmes,
@@ -37,10 +45,12 @@ class Crosswords {
       return { words: [], impossible: getCoords({ start, length, vec }) };
     // No need to wait for the loading: we already have the words
     const allWords = dico.getWordsSync();
-    // find all the words that could fit on each crossing
+
+    // map to avoid redoing work: if a letter at a position is known as possible, no need to check again
     const possibleLetters: Map<Char, boolean>[] = new Array(words[0].length)
       .fill(0)
       .map((e) => new Map());
+    // map to avoid redoing work: if a letter at a position is known as impossible, no need to check again
     const impossibleLetters: Map<Char, boolean>[] = new Array(words[0].length)
       .fill(0)
       .map((e) => new Map());
@@ -49,11 +59,14 @@ class Crosswords {
         const letter = word[i] as Char;
         if (impossibleLetters[i].get(letter)) return false;
         if (possibleLetters[i].get(letter)) continue;
+        // TODO: avoid this filter for a O(1) check
         const lemmesForIndex = lemmes.filter((l) => l.indexWord === i);
         if (!lemmesForIndex.length) continue;
         let impossibleLetter = false;
+        // check for possible words if this letter is set
         const possibleWords = lemmesForIndex.reduce(
           (occurencies: null | false | DicoIndex[], lemme) => {
+            // if we had a for loop here, we could break => faster ?
             if (
               occurencies === false ||
               impossibleLetter ||
@@ -61,21 +74,22 @@ class Crosswords {
             )
               return false;
             const reg = strToReg(lemme.lemme.replace(".", letter), "");
-            const entries = Object.entries(
-              this.occurencies[lemme.length - 2] || {}
-            );
-            const occs = entries.filter(([l, o]) => l.match(reg));
-            if (!entries.length || !occs.length) {
+            // TODO: find a way to avoid this filter
+            const occs: [string, OccurenceByIndex][] = Object.entries(
+              dico.occurencies[lemme.length - 2] || {}
+            ).filter(([l]) => l.match(reg));
+            if (!occs.length) {
               impossibleLetter = true;
               return false;
             }
+            // if we are in the first iteration, we can return the occurencies
             if (occurencies === null) {
               return [
                 ...occs
-                  .reduce((indexes, [_, maps]) => {
-                    const map = maps[lemme.indexLemme];
-                    if (!map) return indexes;
-                    [...map.keys()].forEach((k: DicoIndex) => {
+                  .reduce((indexes, [_, sets]) => {
+                    const set = sets[lemme.indexLemme];
+                    if (!set) return indexes;
+                    [...set.keys()].forEach((k: DicoIndex) => {
                       if (
                         allWords[k] &&
                         allWords[k].length === lemme.totalLength
@@ -88,10 +102,11 @@ class Crosswords {
               ];
             }
 
+            // this is quadratic, make it linear.
             return occurencies.filter((o) =>
               occs.some(
                 ([_, maps]) =>
-                  maps[lemme.indexLemme] && maps[lemme.indexLemme].get(o)
+                  maps[lemme.indexLemme] && maps[lemme.indexLemme].has(o)
               )
             );
           },
@@ -110,6 +125,7 @@ class Crosswords {
       }
       return true;
     });
+    // iterate through all the word's positions and get where an impossible flag was set
     const impossible = getCoords({ start, length, vec }).filter((coords, i) => {
       const letter = grid[coords.y][coords.x];
       if (!letter.length || !letter.match(/\w/i)) return false;
@@ -168,6 +184,8 @@ class Crosswords {
               } else {
                 letter = ".";
               }
+              // seems like here we are pushing too many lemmes:
+              // we want only the ones which overlap with the word
             } else if (grid[coord.y][coord.x].match(/\w+/i)) {
               letter = grid[coord.y][coord.x];
             } else {
@@ -178,7 +196,6 @@ class Crosswords {
         lemmes.push({
           indexLemme: j,
           indexWord: i,
-          takeIndex: letters.findIndex((l) => l === "."),
           length: letters.length,
           totalLength: length,
           lemme: letters.join(""),
