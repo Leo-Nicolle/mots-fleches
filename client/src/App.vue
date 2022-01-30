@@ -133,4 +133,16 @@ export default {
   border-radius: 10px;
   background-color: #555;
 }
+
+.icon-arrow.left::before {
+  transform: translate(0%, 40%) rotate(180deg);
+}
+
+.icon-arrow.up::before {
+  transform: translate(-33%, 20%) rotate(-90deg);
+}
+.icon-arrow.down::before {
+  transform: translate(33%, 20%) rotate(90deg);
+}
+
 </style>

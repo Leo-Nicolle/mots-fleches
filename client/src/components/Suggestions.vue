@@ -4,17 +4,18 @@
       <b-field>
         <b-button
           class="is-primary"
-          pack="fad"
-          :icon-right="getIcon()"
           @click="$emit('switchordering')"
-        />
+        >
+        <i :class="getIcon()"></i>
+        </b-button>
       </b-field>
       <b-field>
         <b-button
           class="is-primary"
-          :icon-right="getIconMethod()"
           @click="$emit('switchmethod')"
-        />
+        >
+            <i :class="getIconMethod()"></i>
+        </b-button>
       </b-field>
       <b-field>
         <b-button class="is-primary" @click="$emit('switchdirection')">{{
@@ -57,23 +58,11 @@
             :href="props.row.link"
             target="_blank"
           >
-            <b-icon size="is-small" icon="help"> </b-icon>
+            ?
           </a>
         </span>
       </b-table-column>
     </b-table>
-
-    <!-- <b-table
-      v-else
-      :data="suggestions"
-      :columns="columns"
-      :paginated="true"
-      :per-page="10"
-      :pagination-simple="true"
-      :selected.sync="selected"
-      hoverable
-      clickable
-    /> -->
     <p>
       Resultats: <b>{{ resultLength }}</b>
     </p>
@@ -117,10 +106,10 @@ export default {
         : 'error';
     },
     getIcon() {
-      return this.ordering === 'ASC' ? 'arrow-up' : 'arrow-down';
+      return `icon icon-arrow ${this.ordering === 'ASC' ? 'up' : 'down'}`;
     },
     getIconMethod() {
-      return this.method === 'fastest' ? 'elephant' : 'dog';
+      return `icon icon-${this.method === 'fastest' ? 'elephant' : 'dog translated'}`;
     },
     onHelpClick(evt) {
       evt.stopPropagation();
@@ -130,6 +119,12 @@ export default {
 </script>
 
 <style>
+i::before{
+  font-size: 2.5em;
+}
+i.translated::before{
+  transform: translate(-50%, 0);
+}
 .suggestions {
   display: flex;
   flex-direction: column;
@@ -190,6 +185,13 @@ table td:hover {
 }
 .helplink:hover {
   cursor: help;
+  border: 1px solid black;
+  border-radius: 20px;
+  min-width: 25px;
+  min-height: 25px;
+  max-width: 25px;
+  max-height: 25px;
+  text-align: center;
 }
 td > span{
   display: flex;
