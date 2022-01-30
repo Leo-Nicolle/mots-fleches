@@ -16,6 +16,8 @@ import {
   getVector,
   distance,
 } from "./utils";
+
+let count = 0;
 class Crosswords {
   /**
    *
@@ -207,6 +209,9 @@ class Crosswords {
   }
 
   findWords({ grid, isDefinition, coord, dir, method = "" }) {
+    console.log("COUNT START", count);
+
+    count++;
     const vec = getVector(dir);
     const { start, length } = findBoundaries({
       grid,
@@ -277,12 +282,16 @@ class Crosswords {
           vec,
         });
       })
-      .then(({ words, impossible }) => ({
-        words,
-        impossible,
-        cells,
-        query: regString.replace(/\/i?|\^|\$/g, "").replace(/\\w\?/g, "*"),
-      }));
+      .then(({ words, impossible }) => {
+        count--;
+        console.log("COUNT END", count);
+        return {
+          words,
+          impossible,
+          cells,
+          query: regString.replace(/\/i?|\^|\$/g, "").replace(/\\w\?/g, "*"),
+        };
+      });
   }
 }
 

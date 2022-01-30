@@ -5,6 +5,12 @@ class Database {
   constructor() {
     this.words = [];
     this.grids = [];
+    console.log('loading database');
+    console.log("path words: ", process.env.APP_CROSSWORDS_WORDS_PATH);
+    console.log("path grids:", process.env.APP_CROSSWORDS_GRIDS_PATH);
+    console.log("path dico:", process.env.APP_CROSSWORDS_DICO_PATH);
+
+
     this.loadingPromise = Promise.all([
       this.loadFile(process.env.APP_CROSSWORDS_WORDS_PATH),
       this.loadFile(process.env.APP_CROSSWORDS_GRIDS_PATH),
