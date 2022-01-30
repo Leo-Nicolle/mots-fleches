@@ -10,11 +10,15 @@
   },
   "dependencies": {
     "@creativebulma/bulma-divider": "^1.1.0",
+    "@fortawesome/fontawesome-svg-core": "^1.2.36",
+    "@fortawesome/free-solid-svg-icons": "^5.15.4",
+    "@fortawesome/vue-fontawesome": "^2.0.6",
     "axios": "^0.21.4",
     "buefy": "^0.9.10",
     "core-js": "^3.6.5",
     "dom-to-image": "^2.6.0",
-    "vue": "^2.6.11"
+    "vue": "^2.6.11",
+    "vue-fontawesome": "0.0.2"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",
@@ -26,6 +30,8 @@
     "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-vue": "^6.2.2",
     "fantasticon": "^1.2.2",
+    "node-sass": "^7.0.1",
+    "sass-loader": "^12.4.0",
     "vue-template-compiler": "^2.6.11"
   },
   "eslintConfig": {
@@ -49,7 +55,8 @@
       "no-useless-constructor": 0,
       "no-empty-function": 0,
       "no-unused-vars": 0,
-      "max-len": 0
+      "max-len": 0,
+      "no-nested-ternary": 0
     }
   },
   "browserslist": [

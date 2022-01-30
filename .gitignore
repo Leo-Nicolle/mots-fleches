@@ -7,3 +7,4 @@ server/node_modules
 server/dist
 server/public
 dist
+*.zip

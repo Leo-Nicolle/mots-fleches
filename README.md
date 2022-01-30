@@ -1,39 +1,28 @@
-# solitaire
+# Mots Fleches - Crosswords
 
 ## Project setup
 ```
-npm install
-```
-
-### Compiles and hot-reloads for development
-```
+cd server
+npm i
+npm run start
+cd ../client npm i
 npm run serve
 ```
-
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
-
 
 ## TODO: 
  - [x] ajouter/enlever des mots  au dico 5
  - [x] mettre combien de mots existent 1
- - faire un export de la grille avec des fleches. 4
- - ajouter fonction point median et fleches 4
+ - [ ] faire un export de la grille avec des fleches. 4
+ - [ ] ajouter fonction point median et fleches 4
  - [x] ordre alphabetique inverse 1
  - [x] ajouter la definition des mots en infobulle ? 2
  - [x] sauvergarder la grille 5
  - [x] gerer plusieur grilles en meme temps 3
  - [x] case de commentaire sur chaque page 3
- - [] montrer les erreurs serveur
+ - [x] montrer les erreurs serveur
  - [ ] fix bug dard digeo
  - [x] sauvergarde notif
+ - [x] tests unitaires serveur
+ - [ ] optims recherche
+ - [ ] clean les fonts/icons  
+ 
