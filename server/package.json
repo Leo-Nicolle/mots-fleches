@@ -8,7 +8,7 @@
     "watch": "rollup -c -w --sourcemap",
     "build": "rollup -c",
     "test": "mocha -r dotenv/config test/*.test.js dotenv_config_path=test/.test.env --require @babel/register",
-    "pretest": "MODE=test rollup -c && mkdir -p dist/test/db",
+    "pretest2": "MODE=test rollup -c && mkdir -p dist/test/db",
     "nodemon": "nodemon -r dotenv/config dist/server.cjs.js --watch dist/server.cjs.js",
     "start": "npm run watch& npm run nodemon"
   },
