@@ -9,6 +9,7 @@ import typescript from "@rollup/plugin-typescript";
 dotenv.config({
   path: process.env.MODE === "test" ? "test/.test.env" : ".env",
 });
+console.log(process.env.MODE);
 const output =
   process.env.MODE === "test" ? "./dist/test/server.js" : "pkg.main";
 const input = process.env.MODE === "test" ? "lib/app.js" : "lib/index.js";

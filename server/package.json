@@ -5,7 +5,7 @@
   "main": "dist/server.cjs.js",
   "module": "dist/server.esm.js",
   "scripts": {
-    "watch": "rollup -c -w --sourcemap",
+    "watch": "MODE=dev rollup -c -w --sourcemap",
     "build": "rollup -c",
     "test": "mocha -r dotenv/config test/*.test.js dotenv_config_path=test/.test.env -r ts-node/register --require @babel/register --timeout 5000",
     "pretest": "MODE=test rollup -c && mkdir -p dist/test/db",
