@@ -1,7 +1,5 @@
 const chai = require("chai");
 import fs from "fs/promises";
-import { getNameOfDeclaration } from "typescript";
-
 const { expect } = chai;
 
 let database;

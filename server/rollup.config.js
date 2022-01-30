@@ -9,9 +9,10 @@ import typescript from "@rollup/plugin-typescript";
 dotenv.config({
   path: process.env.MODE === "test" ? "test/.test.env" : ".env",
 });
-const output = process.env.MODE === "test" 
-  ? './dist/test/server.js'
-  : 'pkg.main'
+const output =
+  process.env.MODE === "test" ? "./dist/test/server.js" : "pkg.main";
+const input = process.env.MODE === "test" ? "lib/app.js" : "lib/index.js";
+
 console.log("building in mode:", process.env.MODE);
 const variablesToReplace = Object.entries(process.env)
   .filter(([key]) => key.match(/APP_CROSSWORDS_.+/))
@@ -30,7 +31,7 @@ const plugins = [
 ];
 
 export default {
-  input: "lib/index.js",
+  input,
   output: [{ file: output, format: "cjs" }],
   plugins,
 };

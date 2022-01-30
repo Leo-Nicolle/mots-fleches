@@ -8,7 +8,7 @@ import gridController from "./controllers/gridController";
 import searchController from "./controllers/search-controller";
 import dico from "./search/dico";
 
-export default function createApp() {
+export function createApp() {
   const app = express();
   app.use(cors());
   app.use(bodyParser.urlencoded({ extended: true }));
@@ -25,11 +25,11 @@ export default function createApp() {
   gridController({ app, db });
   searchController({ app, db });
 
-  if (require.main === module) {
-    const server = app.listen(+process.env.APP_CROSSWORDS_PORT || 3010, () => {
-      console.log(
-        `server running at port http://localhost/${server.address().port}`
-      );
-    });
-  }
+  // if (require.main === module) {
+  const server = app.listen(+process.env.APP_CROSSWORDS_PORT || 3010, () => {
+    console.log(
+      `server running at port http://localhost/${server.address().port}`
+    );
+  });
+  return {app, server};
 }
