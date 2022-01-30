@@ -10,13 +10,12 @@ export default function wordController({ app, db }) {
   app.post("/word", [body("word").isString().notEmpty()], async (req, res) => {
     const word = req.body.word.trim();
     const errors = validationResult(req);
-    const exists = (await db.getWords()).find((w) => !w.localeCompare(word));
-
-    if (exists) {
-      return res.status(500).json({ errors: [{ msg: "exists already" }] });
-    }
     if (!errors.isEmpty()) {
       return res.status(500).json({ errors: errors.array() });
+    }
+    const exists = (await db.getWords()).find((w) => !w.localeCompare(word));
+    if (exists) {
+      return res.status(500).json({ errors: [{ msg: "exists already" }] });
     }
     try {
       await db.pushWord(word);
@@ -25,6 +24,7 @@ export default function wordController({ app, db }) {
     }
     dico.addWordsToDictionnary([word], true);
     res.sendStatus(200);
+    res.send();
   });
   app.delete("/word/:word", async (req, res) => {
     const word = req.params.word.trim();

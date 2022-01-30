@@ -1,6 +1,6 @@
 const chai = require("chai");
 import fs from "fs/promises";
-const words = ["aa", "bb", "cc"].join(",");
+const words = ["aa", "bb", "cc"];
 const grid = {
   comment: "",
   rows: 2,
@@ -12,18 +12,18 @@ const grid = {
     "1,1": { isDefinition: false, value: "C" },
   },
 };
-export { grid as baseGrid };
+export { grid as baseGrid, words as baseWords };
 
 export function sendRequest({ req, callback, method = "get", payload = {} }) {
   if (method !== "get") {
     return new Promise((resolve, reject) => {
       chai
         .request(app)
-      [method](req)
+        [method](req)
         .set("authorization", "token")
         .send(payload)
         .end((err, res) => {
-          resolve(callback ? callback(err, res) : () => { });
+          resolve(callback ? callback(err, res) : () => {});
         });
     });
   }
@@ -46,7 +46,7 @@ export function writeDb({ grids = 2 } = {}) {
     name: "grid" + i,
   }));
   return Promise.all([
-    fs.writeFile(process.env.APP_CROSSWORDS_WORDS_PATH, words),
+    fs.writeFile(process.env.APP_CROSSWORDS_WORDS_PATH, words.join(",")),
     fs.writeFile(process.env.APP_CROSSWORDS_GRIDS_PATH, JSON.stringify(gs)),
   ])
     .then(() => {

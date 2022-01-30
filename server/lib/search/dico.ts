@@ -29,7 +29,7 @@ class Dico {
         if (!occurencies[lemme]) {
           occurencies[lemme] = {};
         }
-        // j is the place of the lemme start in the word: 
+        // j is the place of the lemme start in the word:
         //  for lemme "or" in the word word, j = 1
         if (!occurencies[lemme][j]) {
           occurencies[lemme][j] = new Set();
@@ -43,15 +43,21 @@ class Dico {
 
   loadDictionary() {
     if (this.loadingPromise) return this.loadingPromise;
-    this.loadingPromise = Promise.all([
-      ...getAlphabet().map((letter) =>
-        fs.readFile(path.resolve(`./public/result-${letter}.txt`), "utf-8")
-      ),
-      fs.readFile(path.resolve("./public/allwords.txt"), "utf-8"),
-    ])
+    // TODO: not super good, put all of that in the .env files
+    const paths =
+      process.env.APP_CROSSWORDS_MODE === "test"
+        ? [`./public/result-Z.txt`]
+        : [
+            ...getAlphabet().map((letter) => `./public/result-${letter}.txt`),
+            "./public/allwords.txt",
+          ];
+
+    this.loadingPromise = Promise.all(
+      paths.map((filePath) => fs.readFile(path.resolve(filePath)), "utf-8")
+    )
       .then((responses) => {
         responses.forEach((response) => {
-          this.addWordsToDictionnary(response);
+          this.addWordsToDictionnary(response as any as string);
         });
         return Dico.countOccurences(this.words, 2);
       })
@@ -67,82 +73,86 @@ class Dico {
   }
 
   addWordsToDictionnary(data: string, countOccurences = false) {
-    const { wordsMap } = this;
-    let rawWords: string[] = [];
-    if (typeof data === "string") {
-      rawWords = data.split(/,|\n/);
-    } else {
-      rawWords = data;
-    }
-    const minIndex = this.words.length;
-    rawWords
-      .map((w) =>
-        w
-          .trim()
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
-          .toUpperCase()
-      )
-      .forEach((word) => {
-        if (wordsMap.has(word)) return;
-        wordsMap.set(word, this.words.length);
-        this.words.push(word);
-      });
-
-    if (!countOccurences) return;
-    this.words.slice(minIndex).forEach((word, i) => {
-      for (let l = 0; l < 2; l++) {
-        const occurencies = Dico.countOccurences([word], l + 2);
-        Object.entries(occurencies).forEach(([lemme, occs]) => {
-          Object.keys(occs).forEach((j) => {
-            if (!this.occurencies[l][lemme]) {
-              this.occurencies[l][lemme] = {};
-            }
-            if (!this.occurencies[l][lemme][j]) {
-              this.occurencies[l][lemme][j] = new Map();
-            }
-            this.occurencies[l][lemme][j].add(i + minIndex);
-          });
-        });
+    return this.loadDictionary().then(() => {
+      const { wordsMap } = this;
+      let rawWords: string[] = [];
+      if (typeof data === "string") {
+        rawWords = data.split(/,|\n/);
+      } else {
+        rawWords = data;
       }
-    });
-  }
-  removeWordsFromDictionary(data) {
-    const { wordsMap } = this;
-    let rawWords: string[] = [];
-    if (typeof data === "string") {
-      rawWords = data.split(/,|\n/);
-    } else {
-      rawWords = data;
-    }
-    rawWords
-      .map((w) =>
-        w
-          .trim()
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
-          .toUpperCase()
-      )
-      .forEach((word) => {
-        if (!wordsMap.get(word)) return;
-        const index = wordsMap.get(word) as number;
-        this.words.splice(index, 1);
-        wordsMap.set(word, 0);
+      const minIndex = this.words.length;
+      rawWords
+        .map((w) =>
+          w
+            .trim()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toUpperCase()
+        )
+        .forEach((word) => {
+          if (wordsMap.has(word)) return;
+          wordsMap.set(word, this.words.length);
+          this.words.push(word);
+        });
+
+      if (!countOccurences) return;
+      this.words.slice(minIndex).forEach((word, i) => {
         for (let l = 0; l < 2; l++) {
           const occurencies = Dico.countOccurences([word], l + 2);
           Object.entries(occurencies).forEach(([lemme, occs]) => {
             Object.keys(occs).forEach((j) => {
-              if (
-                !this.occurencies[l] ||
-                !this.occurencies[l][lemme] ||
-                !this.occurencies[l][lemme][j]
-              )
-                return;
-              this.occurencies[l][lemme][j].delete(index);
+              if (!this.occurencies[l][lemme]) {
+                this.occurencies[l][lemme] = {};
+              }
+              if (!this.occurencies[l][lemme][j]) {
+                this.occurencies[l][lemme][j] = new Map();
+              }
+              this.occurencies[l][lemme][j].add(i + minIndex);
             });
           });
         }
       });
+    });
+  }
+  removeWordsFromDictionary(data) {
+    return this.loadDictionary().then(() => {
+      const { wordsMap } = this;
+      let rawWords: string[] = [];
+      if (typeof data === "string") {
+        rawWords = data.split(/,|\n/);
+      } else {
+        rawWords = data;
+      }
+      rawWords
+        .map((w) =>
+          w
+            .trim()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toUpperCase()
+        )
+        .forEach((word) => {
+          if (!wordsMap.get(word)) return;
+          const index = wordsMap.get(word) as number;
+          this.words.splice(index, 1);
+          wordsMap.set(word, 0);
+          for (let l = 0; l < 2; l++) {
+            const occurencies = Dico.countOccurences([word], l + 2);
+            Object.entries(occurencies).forEach(([lemme, occs]) => {
+              Object.keys(occs).forEach((j) => {
+                if (
+                  !this.occurencies[l] ||
+                  !this.occurencies[l][lemme] ||
+                  !this.occurencies[l][lemme][j]
+                )
+                  return;
+                this.occurencies[l][lemme][j].delete(index);
+              });
+            });
+          }
+        });
+    });
   }
 
   getWords() {
