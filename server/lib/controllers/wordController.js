@@ -22,7 +22,7 @@ export default function wordController({ app, db }) {
     } catch (e) {
       return res.status(500).send(e.message);
     }
-    dico.addWordsToDictionnary([word], true);
+    dico.addWordsToDictionnary([word]);
     res.sendStatus(200);
     res.send();
   });

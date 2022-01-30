@@ -3,7 +3,7 @@ import fs from "fs/promises";
 const { expect } = chai;
 
 let database;
-describe("Doors", () => {
+describe("Database", () => {
   before(() => {
     const words = ["aa", "bb", "cc"].join(",");
     const grids = [
