@@ -1,8 +1,5 @@
 <template>
   <div>
-    <div class="section head">
-      <span></span>
-    </div>
     <div class="level">
       <Settings
         class="level-item has-text-centered"
