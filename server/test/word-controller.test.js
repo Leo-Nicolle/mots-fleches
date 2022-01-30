@@ -18,13 +18,17 @@ describe("Word controller", () => {
       const { app, server } = createApp();
       global.app = app;
       global.server = server;
-      done();
+      setTimeout(() => {
+        done();
+      }, 500);
     });
   });
 
   after((done) => {
     global.server.close();
-    done();
+    setTimeout(() => {
+      done();
+    }, 1000);
   });
   // Test to get all students record
   it("should send all the words", () => {
