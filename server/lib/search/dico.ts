@@ -38,7 +38,7 @@ class Dico {
       letterIndex < word.length - length + 1;
       letterIndex++
     ) {
-      const subWord = word.slice(letterIndex, letterIndex + 2);
+      const subWord = word.slice(letterIndex, letterIndex + length);
       if (!occs[subWord]) {
         occs[subWord] = {};
       }
@@ -97,6 +97,7 @@ class Dico {
           .replace(/[\u0300-\u036f]/g, "")
           .toUpperCase()
       )
+      // .sort((a, b) => Math.abs(b.length - 10) - Math.abs(a.length - 10))
       .forEach((word) => {
         if (wordsMap.has(word)) return;
         const dicoIndex = this.words.length;
