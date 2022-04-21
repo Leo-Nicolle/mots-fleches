@@ -96,3 +96,7 @@ export function getAlphabet() {
     .fill(0)
     .map((_, i) => String.fromCharCode("A".charCodeAt(0) + i));
 }
+
+export function cantor(x, y) {
+  return ((x + y) * (x + y + 1)) / 2 + y;
+}

@@ -15,9 +15,10 @@ import {
   findBoundaries,
   getVector,
   distance,
+  cantor,
 } from "./utils";
 
-class Crosswords {
+export class Search {
   /**
    *
    * @param words: the list of words candidates to be returned (they match simple criteria)
@@ -46,7 +47,6 @@ class Crosswords {
       return { words: [], impossible: getCoords({ start, length, vec }) };
     // No need to wait for the loading: we already have the words
     const allWords = dico.getWordsSync();
-
     // map to avoid redoing work: if a letter at a position is known as possible, no need to check again
     const possibleLetters: Map<Char, boolean>[] = new Array(words[0].length)
       .fill(0)
@@ -54,7 +54,29 @@ class Crosswords {
     // map to avoid redoing work: if a letter at a position is known as impossible, no need to check again
     const impossibleLetters: Map<Char, boolean>[] = new Array(words[0].length)
       .fill(0)
-      .map((e) => new Map());
+      .map(() => new Map());
+    // console.log(
+    //   "All occurencies",
+    //   Object.entries(dico.occurencies[1] || {}).forEach(([k, v]) => {
+    //     Object.entries(v).forEach(([k2, v2]) => {
+    //       console.log({
+    //         lemme: k,
+    //         index: k2,
+    //         dicoIndexdes: [...v2.keys()],
+    //       });
+    //     });
+    //   }),
+    //   Object.entries(dico.occurencies[0] || {}).forEach(([k, v]) => {
+    //     Object.entries(v).forEach(([k2, v2]) => {
+    //       console.log({
+    //         lemme: k,
+    //         index: k2,
+    //         dicoIndexdes: [...v2.keys()],
+    //       });
+    //     });
+    //   }),
+    //   JSON.stringify(dico.getWordsSync(), undefined, 3)
+    // );
     const bestWords = words.filter((word) => {
       for (let i = 0; i < word.length; i++) {
         const letter = word[i] as Char;
@@ -89,6 +111,7 @@ class Crosswords {
                 ...occs
                   .reduce((indexes, [_, sets]) => {
                     const set = sets[lemme.indexLemme];
+                    console.log("set", set, lemme.indexLemme);
                     if (!set) return indexes;
                     [...set.keys()].forEach((k: DicoIndex) => {
                       if (
@@ -104,6 +127,7 @@ class Crosswords {
             }
 
             // this is quadratic, make it linear.
+            console.log("la2", occurencies, occs);
             return occurencies.filter((o) =>
               occs.some(
                 ([_, maps]) =>
@@ -133,6 +157,7 @@ class Crosswords {
       if (!impossibleLetters[i].get(letter.toUpperCase() as Char)) return false;
       return true;
     });
+    // console.log({ impossibleLetters,possibleLetters, bestWords });
     return {
       words: bestWords,
       impossible,
@@ -157,7 +182,6 @@ class Crosswords {
       x: vec.y,
       y: vec.x,
     };
-
     for (let i = 0; i < wordLength; i++) {
       const current = {
         x: coord.x + vec.x * i,
@@ -185,8 +209,6 @@ class Crosswords {
               } else {
                 letter = ".";
               }
-              // seems like here we are pushing too many lemmes:
-              // we want only the ones which overlap with the word
             } else if (grid[coord.y][coord.x].match(/\w+/i)) {
               letter = grid[coord.y][coord.x];
             } else {
@@ -204,10 +226,23 @@ class Crosswords {
       }
     }
 
-    return lemmes.filter((l) => l.lemme.length > 1 && l.lemme.match(/(\w)+/));
+    // remove smaller lemmes with the same indexLemme and indexWord:
+    const map = new Map();
+    lemmes
+      .filter((l) => l.lemme.length > 1 && l.lemme.match(/(\w)+/))
+      .forEach((lemme) => {
+        const index = cantor(lemme.indexLemme, lemme.indexWord);
+        if (!map.has(index)) {
+          map.set(index, lemme);
+        } else if (map.get(index).length < lemme.length) {
+          map.set(index, lemme);
+        }
+      });
+    return [...map.values()];
   }
 
   findWords({ grid, isDefinition, coord, dir, method = "" }) {
+    console.log(grid, isDefinition);
     const vec = getVector(dir);
     const { start, length } = findBoundaries({
       grid,
@@ -232,7 +267,7 @@ class Crosswords {
 
     const regString = reg.toString();
     // console.log('Reg', regString, regString.replaceAll('/', ''));
-    const lemmes = Crosswords.getLemmes({
+    const lemmes = Search.getLemmes({
       grid,
       isDefinition,
       coord: start,
@@ -289,6 +324,6 @@ class Crosswords {
   }
 }
 
-const crosswords = new Crosswords();
+const search = new Search();
 
-export default crosswords;
+export default search;

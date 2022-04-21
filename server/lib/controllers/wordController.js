@@ -6,6 +6,21 @@ export default function wordController({ app, db }) {
     const words = await db.getWords();
     res.send(words);
   });
+  app.get("/dico-length", async (req, res) => {
+    res.send(
+      dico.words
+        .reduce((acc, w) => {
+          acc[w.length] += 1;
+          return acc;
+        }, new Array(32).fill(0))
+        .map((e) => (e / dico.words.length) * 100)
+    );
+  });
+
+  app.get("/dico", async (req, res) => {
+    const words = await dico.getWords();
+    res.send(words);
+  });
 
   app.post("/word", [body("word").isString().notEmpty()], async (req, res) => {
     const word = req.body.word.trim();
