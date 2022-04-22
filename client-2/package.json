@@ -8,7 +8,12 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "axios": "^0.26.1",
     "core-js": "^3.8.3",
+    "dom-to-image": "^2.6.0",
+    "primeicons": "^5.0.0",
+    "primevue": "^3.12.5",
+    "random-normal": "^1.0.0",
     "vue": "^3.2.13"
   },
   "devDependencies": {
@@ -38,7 +43,23 @@
     "parserOptions": {
       "parser": "@typescript-eslint/parser"
     },
-    "rules": {}
+    "rules": {
+      "no-mixed-operators": 0,
+      "no-param-reassign": 0,
+      "no-plusplus": 0,
+      "no-shadow": 0,
+      "no-continue": 0,
+      "keyword-spacing": 1,
+      "semi": 1,
+      "padded-blocks": 0,
+      "no-useless-constructor": 0,
+      "no-empty-function": 0,
+      "no-unused-vars": 0,
+      "max-len": 0,
+      "no-nested-ternary": 0,
+      "vue/no-v-for-template-key-on-child": 0,
+      "vue/multi-word-component-names": 0
+    }
   },
   "browserslist": [
     "> 1%",
