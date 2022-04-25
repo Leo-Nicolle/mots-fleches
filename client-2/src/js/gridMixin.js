@@ -11,6 +11,7 @@ export default {
       comment: '',
       uploadInterval: null,
       cellValues: [],
+      distribution: [],
       isDefinition: [],
       cells: {},
     };
@@ -78,12 +79,23 @@ export default {
       this.cellValues = this.getCellValues();
     },
     new() {
-      this.rows = 10;
-      this.cols = 10;
-      this.name = 'nouvelle grille';
-      const isDefinition = mazeGenerator({ rows: this.rows, cols: this.cols });
-      this.setupCells(isDefinition);
-      this.refresh();
+      return axios.get(this.getUrl(`dico-length`))
+      .then(({data}) => {
+        this.distribution = data; 
+      })
+      .then(() => {
+        this.rows = 10;
+        this.cols = 10;
+        this.name = 'nouvelle grille';
+        const isDefinition = mazeGenerator({ 
+          rows: this.rows,
+          cols: this.cols,
+          distribution: this.distribution 
+        });
+        this.setupCells(isDefinition);
+        this.refresh();
+    });
+
       // this.upload();
     },
     fetch() {

@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div class="level">
-      <Settings
+    <!-- <div class="level"> -->
+      <!-- <Settings
         class="level-item has-text-centered"
         @change="onSettingsChange"
         @close="onSettingsClose"
@@ -24,9 +24,9 @@
         :grid="this.serializeGrid().cells"
         :isDefinition="isDefinition"
       />
-    </div>
+    </div> -->
     <div class="container section columns" @keyup="onKeyUp">
-      <Suggestions
+      <!-- <Suggestions
         :direction="direction"
         :loading="loadingSuggestions"
         :ordering="ordering"
@@ -40,7 +40,7 @@
         @wordhover="onWordHover"
         @sort="console.log('SORT')"
         class="column"
-      />
+      />  -->
 
       <div class="wrapper column is-full scrollbar">
         <ul class="grid" :style="getTemapleColumn()">
@@ -63,11 +63,11 @@
         </ul>
       </div>
     </div>
-    <div class="section">
+    <!-- <div class="section">
       <b-field label="Commentaire">
         <b-input maxlength="500" v-model="comment" type="textarea"></b-input>
       </b-field>
-    </div>
+    </div> -->
   </div>
 </template>
 
