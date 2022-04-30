@@ -1,5 +1,6 @@
 import axios from 'axios';
 import mazeGenerator from './maze-generator';
+import generator from './new-generator'
 
 export default {
   props: ['id'],
@@ -67,9 +68,9 @@ export default {
       const res = new Array(this.rows).fill(0).map(() => new Array(this.cols).fill(''));
       Object.entries(this.cells)
         .forEach(([coord, value], i) => {
-          if (i < 3) {
-            console.log('value', i, value);
-          }
+          // if (i < 3) {
+          //   console.log('value', i, value);
+          // }
           const [row, col] = coord.split(',');
           res[row][col] = value;
         });
@@ -94,19 +95,24 @@ export default {
         });
         this.setupCells(isDefinition);
         this.refresh();
+        generator.run(isDefinition, this.cellValues);
     });
 
       // this.upload();
     },
     fetch() {
-      return axios.get(this.getUrl(`grid/${this.id}`))
-        .then((response) => {
-          this.unserializeGrid(response);
+      return Promise.all([
+        axios.get(this.getUrl(`grid/${this.id}`)),
+        axios.get(this.getUrl(`dico`))
+      ])
+        .then(([grid, dico]) => {
+          dico.data.forEach(word => generator.addToDico(word));
+          this.unserializeGrid(grid);
         })
         .catch((e) => {
           console.error(e);
           this.new();
-        });
+        })
     },
     upload() {
       return axios.post(this.getUrl('grid'), this.serializeGrid());

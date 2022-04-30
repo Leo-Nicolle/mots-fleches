@@ -1,6 +1,5 @@
-import randomNormal from 'random-normal';
 
-function getLength({ vec, grid, pos }) {
+export function getLength({ vec, grid, pos }) {
   let length = -1;
   let { x, y } = pos;
   while (grid[y] && grid[y][x] === false) {
@@ -121,7 +120,7 @@ function placeDefinition({minWord, rows, cols, scaledDistib, grid}){
       return acc;
     }, {total: 0, chosen: null}).chosen;
 
-    console.log(actDistrib.reduce((acc, e, i) => Math.abs(e - scaledDistib[i]), 0))
+    // console.log(actDistrib.reduce((acc, e, i) => Math.abs(e - scaledDistib[i]), 0))
     grid[cut.y][cut.x] = true;
 }
 
