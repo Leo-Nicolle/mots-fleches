@@ -1,19 +1,20 @@
 
-import {Position, Lookup, DefGrid, LetterGrid} from './types';
+import {Vec, Lookup, DefGrid, LetterGrid} from './types';
+import {add, subtract, dot} from './utils';
 
 const ACode = 'A'.charCodeAt(0);
-type GWord = {
-  start: Position,
-  end: Position,
-  length: number,
-  letters: Letter[]
-};
+interface Slot {
+  start: Vec;
+  end: Vec;
+  length: number;
+  letters: {letter: Letter, index: number}[];
+}
 type Letter = string  & { length: 1 };
 type Lemme = string  & { length: 2 };
 
 type lengthLookup = Lookup<number[]>;
 type indexLookup = Lookup<lengthLookup>;
-type positionLookup = Lookup<boolean>;
+type slotLookup = Lookup<Slot>;
 
 type Dico = { [key: Lemme]: indexLookup };
 type WildCards = indexLookup[][];
@@ -31,9 +32,13 @@ type ImposedLetter = {
   // position of the imposed letter from the new word start position
   position: number;
 }
+type BestLetter = {
+  letterIndex: number;
+  wordsIndexes: number[];
+}
 
 
-function strToPos(str: string): Position{
+function strToPos(str: string): Vec{
   const [x, y] = str.split(',');
   return {
     x: +x,
@@ -41,27 +46,32 @@ function strToPos(str: string): Position{
   };
 }
 
-function posToStr(pos: Position): string{
+function posToStr(pos: Vec): string{
   return `${pos.x},${pos.y}`;
 }
 
-export function getWord({ vec, defGrid, lGrid, pos, lookup }: {
-  vec: Position,
+export function getSlot({ vec, defGrid, lGrid, pos, lookup }: {
+  vec: Vec,
   defGrid: DefGrid,
   lGrid: LetterGrid,
-  pos: Position,
-  lookup: positionLookup
- }): GWord {
+  pos: Vec,
+  lookup: slotLookup
+ }): Slot {
    let { x, y } = pos;
-   const word: GWord = {
+   const word: Slot = {
      start: pos,
      length: 0,
      letters: [],
      end: pos
    };
    while (defGrid[y] && defGrid[y][x] === false) {
-     lookup[posToStr({x, y})] = true;
-     word.letters.push(lGrid[y][x]);
+     lookup[posToStr({x, y})] = word;
+     if (lGrid[y][x].length){
+       word.letters.push({
+         letter: lGrid[y][x],
+         index: word.length
+       });
+     }
      word.length++;
 
      x += vec.x;
@@ -102,6 +112,7 @@ class Generator {
         .map((key) => this.dico[key as Lemme]));
   }
 
+
   addToDico(word: String) {
     word = word.trim().toUpperCase();
     if (!word.match(/^\w+$/)) return;
@@ -132,21 +143,23 @@ class Generator {
     wordLength: number,
     position: number,
     constraints: Constraint[]
-  }) {
-    const records = (wildCardPosition === 0 ? this.firstWildCard : this.secondWildCard)[imposedLetter.charCodeAt(0) - ACode];
+  }): BestLetter[] {
+    const records = (
+      wildCardPosition === 0 
+      ? this.firstWildCard 
+      : this.secondWildCard)[imposedLetter.charCodeAt(0) - ACode];
     return new Array(26).fill(0).map((e, i) => {
-      const a =records;
-      console.log(a);
       try {
         return {
           letterIndex: i,
-          wordsIndexes: records[i][position][wordLength].filter((wordIndex) => this.satisfiesConstraints(wordIndex, constraints)),
+          wordsIndexes: records[i][position][wordLength]
+            .filter((wordIndex) => this.satisfiesConstraints(wordIndex, constraints)),
         };
       } catch (e) { return {letterIndex: -1, wordsIndexes: []}; }
     })
       .filter((e) => e.wordsIndexes.length)
-      .sort((a, b) => b.wordsIndexes.length - a.wordsIndexes.length)
-      .map((e) => [String.fromCharCode(ACode + e.letterIndex), e.wordsIndexes.map((i) => this.words[i])]);
+      .sort((a, b) => b.wordsIndexes.length - a.wordsIndexes.length);
+      // .map((e) => [String.fromCharCode(ACode + e.letterIndex), e.wordsIndexes.map((i) => this.words[i])]);
   }
 
   satisfiesConstraints(wordIndex: number, constraints = [] as Constraint[]) {
@@ -177,29 +190,117 @@ class Generator {
 
   getSlots(defGrid: DefGrid, lGrid: LetterGrid){
 
-    const visitedH:positionLookup  = {};
-    const visitedV:positionLookup  = {};
-    const wordsH: GWord[] = [];
-    const wordsV: GWord[] = [];
-
+    const lookupH:slotLookup  = {};
+    const lookupV:slotLookup  = {};
+    const slotsH: Slot[] = [];
+    const slotsV: Slot[] = [];
+    // get all the words:
     defGrid.forEach((row, y) => {
       row.forEach((col, x) => {
         const pos = {x,y};
-        if (!visitedH[posToStr(pos)]){
-          wordsH.push(getWord({ pos,vec: {x: 1, y: 0}, defGrid, lGrid, lookup: visitedH }));
+        if (!lookupH[posToStr(pos)]){
+          const word = getSlot({ pos,vec: {x: 1, y: 0}, defGrid, lGrid, lookup: lookupH }); 
+          if (word.length > 1){
+            slotsH.push(word);
+          }
         }
-        if (!visitedV[posToStr(pos)]){
-          wordsV.push(getWord({ pos,vec: {x: 0, y: 1}, defGrid, lGrid,  lookup: visitedV }));
+        if (!lookupV[posToStr(pos)]){
+          const word = getSlot({ pos,vec: {x: 0, y: 1}, defGrid, lGrid,  lookup: lookupV });
+          if (word.length > 1){
+            slotsV.push(word);
+          }
         }
       });
     });
-    return {wordsH: wordsH.filter(({length}) => length > 1), wordsV: wordsV.filter(({length}) => length > 1)};
+
+    // get the candidates for each word: 
+    return {slotsH, slotsV, lookupH, lookupV};
+    // return {wordsH: wordsH.filter(({length}) => length > 1), wordsV: wordsV.filter(({length}) => length > 1)};
   }
 
-  run(isDefinition: DefGrid, grid: LetterGrid) {
-    console.log(this.dico, isDefinition);
+  getNeighborValid(position: Vec, perp: Vec, defGrid: DefGrid){
+    return [
+      add(position, perp),
+      subtract(position, perp)
+    ].filter(({x,y}) => 
+      y < defGrid.length
+      && y >= 0 
+      && x < defGrid[0].length 
+      && x >= 0
+      && !defGrid[y][x]
+    );
+  }
 
-    console.log(this.getSlots(isDefinition, grid));
+  /**
+   * try to place a word within the best spot 
+   */
+  placeWord(word: string, defGrid: DefGrid, lGrid: LetterGrid ){
+    let {slotsH, slotsV, lookupH, lookupV} = this.getSlots(defGrid, lGrid);
+    slotsH = slotsH.filter(({length}) => length === word.length)
+      .map(p => ({
+        ...p,
+        dir: {x: 1, y: 0},
+        lookup: lookupH,
+        perpLookup: lookupV
+
+      }));
+    slotsV = slotsV.filter(({length}) => length === word.length)
+      .map(p => ({
+        ...p,
+        dir: {x: 0, y: 1},
+        lookup: lookupV,
+        perpLookup: lookupH
+      }));
+
+    interface Candidatate extends Slot {
+      dir: Vec;
+      lookup: slotLookup;
+      perpLookup: slotLookup;
+
+    }
+
+    const possibilities = ([...slotsH, ...slotsV] as Candidatate[])
+      .map(candidate => {
+        const perp = {x: candidate.dir.y , y: candidate.dir.x };
+        word.split('')
+        .forEach((letter, index) => {
+          const current = {
+            x: candidate.start.x + index * candidate.dir.x,
+            y: candidate.start.y + index * candidate.dir.y
+          } as Vec;
+          this.getNeighborValid(current, perp, defGrid)
+          .forEach(neighbor => {
+            const perpC = candidate.perpLookup[posToStr(neighbor)];
+            const constraints = perpC.letters.map(e => ({
+              ...e,
+              // dont need position
+              position: -1,
+            }));
+            const bestLetters = this.getBestLetters({
+              // 1 => 0
+              // -1 => 1
+              wildCardPosition: Math.max(0, -dot(subtract(neighbor, current), perp)), 
+              imposedLetter: letter as Letter, 
+              position: index, 
+              wordLength: perpC.length,
+              constraints
+            });
+            return bestLetters.reduce((total, l) =>total + l.wordsIndexes.length , 0);
+            console.log({bestLetters});
+          });
+        });
+      });
+
+  }
+
+  computeProbsGrid(defGrid: DefGrid, lGrid: LetterGrid){
+    // get the empty spots next to 
+  }
+
+  run(defGrid: DefGrid, lGrid: LetterGrid) {
+    // console.log(this.dico, defGrid);
+    this.placeWord('COUCOU', defGrid, lGrid);
+    // console.log(this.getSlots(defGrid, grid));
 
     // over all the grid: 
     //  find the possibilites for each word
@@ -210,6 +311,58 @@ class Generator {
 
   }
 }
+
+
+/*
+
+    wordsH
+    .forEach(word => {
+      const bestLetters = new Array(word.length)
+      .fill(0)
+      .map((_, index) => {
+        const current = {x: word.start.x + index, y: word.start.y} as Vec;
+        const perp = visitedV[posToStr(current)];
+        let constraints:Constraint[] = [];
+        if (perp.length > 1){
+          constraints = perp.letters.map(e => ({
+            index,
+            position: e.index,
+            letter: e.letter
+          }));
+        }
+        type NeighboorSquares = {
+          x: number, y: number, valid?: boolean, letter?: boolean | string,
+          wildCardPosition: 0 | 1 | -1};
+
+        const neighboorSquares: NeighboorSquares[] = ([
+          {x: current.x, y: current.y - 1, wildCardPosition: 0},
+          {x: current.x, y: current.y + 1, wildCardPosition: 1},
+        ] as NeighboorSquares[]).map(c => {
+          c.valid = c.x > 0 && c.y >=0 && c.x < width && c.y < height && !defGrid[c.y][c.x];
+          const charCode = c.valid && lGrid[c.y][c.x].charCodeAt(0);
+          c.letter =  charCode >= ACode && charCode < ACode+ 26;
+          c.wildCardPosition = c.valid ? c.wildCardPosition:  -1;
+          return c;
+        })
+        .filter(c => c.valid);
+
+        if (neighboorSquares.length){
+          const bestLetters = this.getBestLetters({
+              wildCardPosition: neighboorSquares[0].wildCardPosition, 
+              imposedLetter: neighboorSquares[0].letter as Letter, 
+              position: index, 
+              wordLength: word.length,
+              constraints
+            });
+        }else{
+
+        }
+      });
+      // word.bestLetter = word.letters.forEach()
+      // 
+    });
+
+*/
 
 const generator = new Generator();
 export default generator;

@@ -2,6 +2,7 @@ import axios from 'axios';
 import mazeGenerator from './maze-generator';
 import generator from './new-generator'
 
+window.generator = generator;
 export default {
   props: ['id'],
   data() {
