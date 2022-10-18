@@ -57,8 +57,11 @@
       "no-unused-vars": 0,
       "max-len": 0,
       "no-nested-ternary": 0,
+      "prefer-const": 0,
       "vue/no-v-for-template-key-on-child": 0,
-      "vue/multi-word-component-names": 0
+      "vue/multi-word-component-names": 0,
+      "vue/no-unused-components": 0,
+      "no-debugger": 0
     }
   },
   "browserslist": [

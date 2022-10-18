@@ -218,10 +218,10 @@ class Generator {
     // return {wordsH: wordsH.filter(({length}) => length > 1), wordsV: wordsV.filter(({length}) => length > 1)};
   }
 
-  getNeighborValid(position: Vec, perp: Vec, defGrid: DefGrid){
+  getNeighborValid(position: Vec, dir: Vec, defGrid: DefGrid){
     return [
-      add(position, perp),
-      subtract(position, perp)
+      add(position, dir),
+      subtract(position, dir)
     ].filter(({x,y}) => 
       y < defGrid.length
       && y >= 0 
@@ -294,7 +294,32 @@ class Generator {
   }
 
   computeProbsGrid(defGrid: DefGrid, lGrid: LetterGrid){
-    // get the empty spots next to 
+    // split the cells between cells with a filled neighbor and the cells with an empty neighbor:
+    // TODO should take account of the case when a empty cell is between two filled up ones
+      const filledPerDir = [{x: 1, y: 0}, {y: 1, x: 0}]
+      .map(vec => {
+        const filledNeighbors = [];
+        const emptyNeighbors = [];
+        defGrid.forEach((row, y) => {
+          row.forEach((col, x) => {
+            const pos = {x,y};
+            const filled = this.getNeighborValid(pos, vec, defGrid)
+            .filter(p => lGrid[p.y][p.x].length)
+            if(filled.length){
+              filledNeighbors.push({
+                pos,
+                wildCardPosition: dot(subtract(filled[0], pos), vec) > 0 ? 0 : 1
+              })
+            }
+            else{
+              emptyNeighbors.push({
+                pos,
+              })
+            }
+          });
+        });
+      });
+
   }
 
   run(defGrid: DefGrid, lGrid: LetterGrid) {

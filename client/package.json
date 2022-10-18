@@ -17,14 +17,21 @@
     "buefy": "^0.9.10",
     "core-js": "^3.6.5",
     "dom-to-image": "^2.6.0",
+    "random-normal": "^1.0.0",
     "vue": "^2.6.11",
-    "vue-fontawesome": "0.0.2"
+    "vue-class-component": "^7.2.3",
+    "vue-fontawesome": "0.0.2",
+    "vue-property-decorator": "^9.1.2"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.18.0",
+    "@typescript-eslint/parser": "^4.18.0",
     "@vue/cli-plugin-babel": "~4.5.0",
     "@vue/cli-plugin-eslint": "^4.5.12",
+    "@vue/cli-plugin-typescript": "^5.0.4",
     "@vue/cli-service": "~4.5.0",
     "@vue/eslint-config-airbnb": "^5.0.2",
+    "@vue/eslint-config-typescript": "^7.0.0",
     "babel-eslint": "^10.1.0",
     "eslint": "^6.7.2",
     "eslint-plugin-import": "^2.20.2",
@@ -32,6 +39,7 @@
     "fantasticon": "^1.2.2",
     "node-sass": "^7.0.1",
     "sass-loader": "^12.4.0",
+    "typescript": "~4.5.5",
     "vue-template-compiler": "^2.6.11"
   },
   "eslintConfig": {
@@ -42,16 +50,21 @@
     "extends": [
       "plugin:vue/essential",
       "eslint:recommended",
-      "@vue/airbnb"
+      "@vue/airbnb",
+      "@vue/typescript"
     ],
     "parserOptions": {
-      "parser": "babel-eslint"
+      "parser": "@typescript-eslint/parser"
     },
     "rules": {
       "no-mixed-operators": 0,
       "no-param-reassign": 0,
       "no-plusplus": 0,
       "no-shadow": 0,
+      "no-continue": 0,
+      "keyword-spacing": 1,
+      "semi": 1,
+      "padded-blocks": 1,
       "no-useless-constructor": 0,
       "no-empty-function": 0,
       "no-unused-vars": 0,
