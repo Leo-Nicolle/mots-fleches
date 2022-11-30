@@ -1,10 +1,6 @@
 <template>
-  <div id="app">
-     <Crosswords
-      :id="activeGrid"
-      @refresh-grids="onRefreshGrids"
-      @delete="onDelete"
-    />
+  <div id="Crosswords">
+     <EditGrid></EditGrid>
   </div>
 </template>
 
@@ -12,9 +8,15 @@
 import axios from "axios";
 import apiMixin from "./js/apiMixin";
 import Crosswords from "./components/Crosswords.vue";
+import EditGrid from "./components/EditGrid.vue";
 
+{/* <Crosswords
+      :id="activeGrid"
+      @refresh-grids="onRefreshGrids"
+      @delete="onDelete"
+    /> */}
 export default {
-  name: "App",
+  name: "Crosswords",
   mixins: [apiMixin],
   data() {
      return {
@@ -26,6 +28,7 @@ export default {
   },
   components: {
     Crosswords,
+    EditGrid,
 
   },
   methods: {
