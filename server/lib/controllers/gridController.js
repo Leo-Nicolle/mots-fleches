@@ -43,7 +43,6 @@ export default function gridController({ app, db }) {
           });
         }
       } catch (e) {
-        console.log("error", e);
         return res.status(500).send(e.message);
       }
       res.status(200).send(id);

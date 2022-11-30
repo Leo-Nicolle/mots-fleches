@@ -37,7 +37,7 @@ export default function wordController({ app, db }) {
       });
     } catch (e) {
       isBusy = false;
-      console.error(e);
+      // console.error(e);
       res.status(500).send(e);
     }
   });

@@ -111,7 +111,6 @@ export class Search {
                 ...occs
                   .reduce((indexes, [_, sets]) => {
                     const set = sets[lemme.indexLemme];
-                    console.log("set", set, lemme.indexLemme);
                     if (!set) return indexes;
                     [...set.keys()].forEach((k: DicoIndex) => {
                       if (
@@ -127,7 +126,6 @@ export class Search {
             }
 
             // this is quadratic, make it linear.
-            console.log("la2", occurencies, occs);
             return occurencies.filter((o) =>
               occs.some(
                 ([_, maps]) =>
@@ -242,7 +240,6 @@ export class Search {
   }
 
   findWords({ grid, isDefinition, coord, dir, method = "" }) {
-    console.log(grid, isDefinition);
     const vec = getVector(dir);
     const { start, length } = findBoundaries({
       grid,
