@@ -1,0 +1,22 @@
+{
+  "name": "grid",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "types": "tsc --d -emitDeclarationOnly --out dist/index.d.ts",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "typescript": "^4.6.4",
+    "vite": "^3.2.3"
+  },
+  "dependencies": {
+    "@types/uuid": "^9.0.0",
+    "@types/vector2js": "^2.0.0",
+    "uuid": "^9.0.0",
+    "vector2js": "^2.0.1"
+  }
+}
