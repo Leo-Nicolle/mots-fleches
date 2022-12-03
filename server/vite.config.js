@@ -10,28 +10,37 @@ dotenv.config({
 });
 const output = "./dist/server.js";
 console.log(process.env.MODE, output);
-  // process.env.MODE === "test" ? "./dist/test/server.js" : "pkg.main";
-const input = process.env.MODE === "test" ? "lib/app.js" : "lib/index.js";
+// process.env.MODE === "test" ? "./dist/test/server.js" : "pkg.main";
+// const input = process.env.MODE === "test" ? "lib/app.js" : "lib/index.js";
 
-console.log("building in mode:", process.env.MODE);
 const variablesToReplace = Object.entries(process.env)
   .filter(([key]) => key.match(/APP_CROSSWORDS_.+/))
   .reduce((variablesToReplace, [key, value]) => {
     variablesToReplace[`process.env.${key}`] = JSON.stringify(value);
     return variablesToReplace;
   }, {});
-console.log("variables to replace:", variablesToReplace);
-
-const plugins = [
-  replace(variablesToReplace),
-  resolve(),
-  json(),
-  typescript(),
-  commonjs(),
-];
 
 export default {
-  input,
-  output: [{ file: output, format: "cjs" }],
-  plugins,
+  build: {
+    lib: {
+      entry: "lib/app.js",
+      name: "server",
+    },
+    rollupOptions: {
+      output,
+      plugins: [
+        replace(variablesToReplace),
+        resolve(),
+        json(),
+        typescript(),
+        commonjs(),
+      ],
+      // https://rollupjs.org/guide/en/#big-list-of-options
+    },
+  },
+  // resolve: {
+  //   alias: {
+  //     'fs': 'rollup-plugin-node-polyfills'
+  //   }
+  // }
 };

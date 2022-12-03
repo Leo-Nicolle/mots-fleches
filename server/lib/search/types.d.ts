@@ -1,5 +1,12 @@
 import { Cell } from "../../../grid/src/types";
 
+declare global {
+  const APP_CROSSWORDS_PORT: string;
+  const APP_CROSSWORDS_WORDS_PATH: string;
+  const APP_CROSSWORDS_GRIDS_PATH: string;
+  const APP_CROSSWORDS_DICO_PATH: string;
+}
+
 export interface Point {
   x: number;
   y: number;

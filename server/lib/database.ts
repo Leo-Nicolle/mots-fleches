@@ -1,5 +1,4 @@
 import fs from "fs/promises";
-import { constants } from "fs";
 import path from "path";
 import Grid from "../../grid/src/Grid";
 
@@ -11,13 +10,13 @@ export class Database {
     this.words = [];
     this.grids = [];
     console.log("loading database");
-    console.log("path words: ", process.env.APP_CROSSWORDS_WORDS_PATH);
-    console.log("path grids:", process.env.APP_CROSSWORDS_GRIDS_PATH);
-    console.log("path dico:", process.env.APP_CROSSWORDS_DICO_PATH);
+    console.log("path words: ", APP_CROSSWORDS_WORDS_PATH);
+    console.log("path grids:", APP_CROSSWORDS_GRIDS_PATH);
+    console.log("path dico:", APP_CROSSWORDS_DICO_PATH);
 
     this.loadingPromise = Promise.all([
-      this.loadFile(process.env.APP_CROSSWORDS_WORDS_PATH),
-      this.loadFile(process.env.APP_CROSSWORDS_GRIDS_PATH),
+      this.loadFile(APP_CROSSWORDS_WORDS_PATH),
+      this.loadFile(APP_CROSSWORDS_GRIDS_PATH),
     ]).then(([words, grids]) => {
       this.words = words
         .split(",")
@@ -32,7 +31,7 @@ export class Database {
   loadFile(file) {
     return fs
       .mkdir(path.dirname(file), { recursive: true })
-      .then(() => fs.access(path.resolve(file), constants.F_OK))
+      .then(() => fs.access(path.resolve(file), 0))
       .catch((e) =>
         fs.writeFile(path.resolve(file), file.match(/\.json/) ? "[]" : "")
       )
@@ -45,7 +44,7 @@ export class Database {
   saveWords() {
     return this.getWords().then((words) =>
       fs.writeFile(
-        path.resolve(process.env.APP_CROSSWORDS_WORDS_PATH as string),
+        path.resolve(APP_CROSSWORDS_WORDS_PATH as string),
         words.join(",")
       )
     );
@@ -76,7 +75,7 @@ export class Database {
   saveGrids() {
     return this.getGrids().then((grids) =>
       fs.writeFile(
-        path.resolve(process.env.APP_CROSSWORDS_GRIDS_PATH as string),
+        path.resolve(APP_CROSSWORDS_GRIDS_PATH as string),
         JSON.stringify(grids.map((grid) => grid.serialize()))
       )
     );

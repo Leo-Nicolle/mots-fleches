@@ -26,7 +26,7 @@ export function createApp() {
   searchController({ app, db });
 
   // if (require.main === module) {
-  const server = app.listen(+process.env.APP_CROSSWORDS_PORT || 3011, () => {
+  const server = app.listen(+APP_CROSSWORDS_PORT || 3011, () => {
     console.log(
       `server running at port http://localhost:${server.address().port}`
     );
