@@ -31,5 +31,5 @@ export function createApp() {
       `server running at port http://localhost:${server.address().port}`
     );
   });
-  return {app, server};
+  return { app, server };
 }

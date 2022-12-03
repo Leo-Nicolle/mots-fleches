@@ -1,15 +1,19 @@
 import fs from "fs/promises";
 import { constants } from "fs";
 import path from "path";
-class Database {
+import Grid from "../../grid/src/Grid";
+
+export class Database {
+  public words: string[];
+  public grids: Grid[];
+  public loadingPromise: Promise<void>;
   constructor() {
     this.words = [];
     this.grids = [];
-    console.log('loading database');
+    console.log("loading database");
     console.log("path words: ", process.env.APP_CROSSWORDS_WORDS_PATH);
     console.log("path grids:", process.env.APP_CROSSWORDS_GRIDS_PATH);
     console.log("path dico:", process.env.APP_CROSSWORDS_DICO_PATH);
-
 
     this.loadingPromise = Promise.all([
       this.loadFile(process.env.APP_CROSSWORDS_WORDS_PATH),
@@ -19,7 +23,9 @@ class Database {
         .split(",")
         .map((w) => w.trim())
         .filter((e) => e.length);
-      this.grids = grids && grids.length ? JSON.parse(grids) : [];
+      this.grids = (grids && grids.length ? JSON.parse(grids) : []).map((g) =>
+        Grid.unserialize(g)
+      );
     });
   }
 
@@ -39,7 +45,7 @@ class Database {
   saveWords() {
     return this.getWords().then((words) =>
       fs.writeFile(
-        path.resolve(process.env.APP_CROSSWORDS_WORDS_PATH),
+        path.resolve(process.env.APP_CROSSWORDS_WORDS_PATH as string),
         words.join(",")
       )
     );
@@ -70,8 +76,8 @@ class Database {
   saveGrids() {
     return this.getGrids().then((grids) =>
       fs.writeFile(
-        path.resolve(process.env.APP_CROSSWORDS_GRIDS_PATH),
-        JSON.stringify(grids)
+        path.resolve(process.env.APP_CROSSWORDS_GRIDS_PATH as string),
+        JSON.stringify(grids.map((grid) => grid.serialize()))
       )
     );
   }
@@ -81,15 +87,11 @@ class Database {
       return this.saveGrids();
     });
   }
-  updateGrid(grid) {
+  updateGrid(gridstring: string) {
+    const newgrid = Grid.unserialize(gridstring);
     return this.getGrids().then((grids) => {
-      const oldGrid = grids.find(({ id }) => id === grid.id);
-      const newGrid = {
-        ...oldGrid,
-        ...grid,
-      };
-      this.grids = this.grids.filter(({ id }) => id !== grid.id);
-      this.grids.push(newGrid);
+      this.grids = this.grids.filter(({ id }) => id !== newgrid.id);
+      this.grids.push(newgrid);
       return this.saveGrids();
     });
   }

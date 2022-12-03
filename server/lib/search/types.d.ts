@@ -1,13 +1,21 @@
+import { Cell } from "../../../grid/src/types";
+
 export interface Point {
   x: number;
   y: number;
 }
 export type Char = string & { length: 1 };
-export type Grid = Char[][];
 export type BoolGrid = Boolean[][];
 export type DicoIndex = number;
 export type OccurenceByIndex = Record<number, Set<DicoIndex>>;
 export type OccurenceMap = Record<string, OccurenceByIndex>;
+
+export type SearchResult = {
+  words: string[];
+  cells: Cell[];
+  impossible?: string[];
+  query: string;
+};
 
 export type Lemme = {
   // index of the letter in the perpandicular word

@@ -45,41 +45,6 @@ export function scale(v, factor = 1) {
   };
 }
 
-export function findBoundaries({ grid, isDefinition, coord, vec }) {
-  vec = scale(vec, -1);
-  let curr = { ...coord };
-  let start = { ...coord };
-  let end = { ...coord };
-  let lookingForStart = true;
-  let currValid = coordValid(grid, isDefinition, curr);
-  // eslint-disable-next-line no-cond-assign
-  if (currValid) {
-    while (currValid || lookingForStart) {
-      if (lookingForStart) {
-        if (currValid) {
-          start = { ...curr };
-        } else {
-          vec = { x: vec.x * -1, y: vec.y * -1 };
-          lookingForStart = false;
-        }
-      } else if (currValid) {
-        end = { ...curr };
-      } else {
-        break;
-      }
-      curr = { x: curr.x + vec.x, y: curr.y + vec.y };
-      currValid = coordValid(grid, isDefinition, curr);
-    }
-  }
-
-  return {
-    start,
-    end,
-    vec,
-    length: end.x - start.x + end.y - start.y + 1,
-  };
-}
-
 export function getCoords({ start, length, vec }) {
   const coords: Point[] = [];
   for (let i = 0; i < length; i++) {

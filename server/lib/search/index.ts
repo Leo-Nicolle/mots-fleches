@@ -1,22 +1,15 @@
+import Grid from "../../../grid/src/Grid";
+import { Cell, Direction, Vec } from "../../../grid/src/types";
 import dico from "./dico";
 import {
-  OccurenceMap,
   Lemme,
   Point,
   Char,
-  BoolGrid,
-  Grid,
   DicoIndex,
   OccurenceByIndex,
+  SearchResult,
 } from "./types";
-import {
-  getCoords,
-  strToReg,
-  findBoundaries,
-  getVector,
-  distance,
-  cantor,
-} from "./utils";
+import { getCoords, strToReg, distance, cantor } from "./utils";
 
 export class Search {
   /**
@@ -34,15 +27,16 @@ export class Search {
     grid,
     start,
     length,
-    vec,
+    dir,
   }: {
     words: string[];
     lemmes: Lemme[];
     grid: Grid;
     start: Point;
     length: number;
-    vec: Point;
+    dir: Direction;
   }) {
+    const vec = Grid.getDirVec(dir);
     if (!words.length)
       return { words: [], impossible: getCoords({ start, length, vec }) };
     // No need to wait for the loading: we already have the words
@@ -111,7 +105,6 @@ export class Search {
                 ...occs
                   .reduce((indexes, [_, sets]) => {
                     const set = sets[lemme.indexLemme];
-                    console.log("set", set, lemme.indexLemme);
                     if (!set) return indexes;
                     [...set.keys()].forEach((k: DicoIndex) => {
                       if (
@@ -127,7 +120,7 @@ export class Search {
             }
 
             // this is quadratic, make it linear.
-            console.log("la2", occurencies, occs);
+            // console.log("la2", occurencies, occs);
             return occurencies.filter((o) =>
               occs.some(
                 ([_, maps]) =>
@@ -166,18 +159,17 @@ export class Search {
 
   static getLemmes({
     grid,
-    isDefinition,
     coord,
     wordLength,
-    vec,
+    dir,
   }: {
     grid: Grid;
-    isDefinition: BoolGrid;
     coord: Point;
     wordLength: number;
-    vec: Point;
+    dir: Direction;
   }) {
     const lemmes: Lemme[] = [];
+    const vec = Grid.getDirVec(dir);
     const perp = {
       x: vec.y,
       y: vec.x,
@@ -187,12 +179,11 @@ export class Search {
         x: coord.x + vec.x * i,
         y: coord.y + vec.y * i,
       };
-      const { start, length } = findBoundaries({
-        grid,
-        isDefinition,
-        coord: current,
-        vec: perp,
-      });
+      const { start, length } = grid.getBounds(
+        current,
+        Grid.perpendicular(dir)
+      );
+      const { cells } = grid;
       for (let j = 0; j < length; j++) {
         const letters = new Array(Math.max(0, Math.min(3, length - j)))
           .fill(0)
@@ -204,13 +195,13 @@ export class Search {
             };
             let letter = "";
             if (distance(coord, current) === 0) {
-              if (grid[coord.y][coord.x].match(/\w+/i)) {
-                letter = grid[coord.y][coord.x];
+              if (cells[coord.y][coord.x].text.match(/\w+/i)) {
+                letter = cells[coord.y][coord.x].text;
               } else {
                 letter = ".";
               }
-            } else if (grid[coord.y][coord.x].match(/\w+/i)) {
-              letter = grid[coord.y][coord.x];
+            } else if (cells[coord.y][coord.x].text.match(/\w+/i)) {
+              letter = cells[coord.y][coord.x].text;
             } else {
               letter = "*";
             }
@@ -241,15 +232,19 @@ export class Search {
     return [...map.values()];
   }
 
-  findWords({ grid, isDefinition, coord, dir, method = "" }) {
-    console.log(grid, isDefinition);
-    const vec = getVector(dir);
-    const { start, length } = findBoundaries({
-      grid,
-      coord,
-      vec,
-      isDefinition,
-    });
+  findWords({
+    grid,
+    coord,
+    dir,
+    method = "simple",
+  }: {
+    grid: Grid;
+    coord: Vec;
+    dir: Direction;
+    method: "simple" | "fastest";
+  }): Promise<SearchResult> {
+    const vec = Grid.getDirVec(dir);
+    const { start, length } = grid.getBounds(coord, dir);
     let str = "";
     const cells: Point[] = [];
     for (let i = 0; i < length; i++) {
@@ -261,7 +256,13 @@ export class Search {
       str += letter.length ? letter.toLowerCase() : "*";
       cells.push(current);
     }
-    if (cells.length < 2) return Promise.resolve();
+    if (cells.length < 2)
+      return Promise.resolve({
+        words: [] as string[],
+        impossible: [] as string[],
+        cells: [] as Cell[],
+        query: "",
+      });
     // transform str into regexp:
     const reg = strToReg(str);
 
@@ -269,10 +270,9 @@ export class Search {
     // console.log('Reg', regString, regString.replaceAll('/', ''));
     const lemmes = Search.getLemmes({
       grid,
-      isDefinition,
       coord: start,
       wordLength: length,
-      vec,
+      dir,
     });
     return dico
       .getWords()
@@ -291,7 +291,7 @@ export class Search {
               grid,
               start,
               length,
-              vec,
+              dir,
             }),
             new Promise((resolve) =>
               setTimeout(
@@ -310,7 +310,7 @@ export class Search {
           grid,
           start,
           length,
-          vec,
+          dir,
         });
       })
       .then(({ words, impossible }) => {
@@ -319,7 +319,7 @@ export class Search {
           impossible,
           cells,
           query: regString.replace(/\/i?|\^|\$/g, "").replace(/\\w\?/g, "*"),
-        };
+        } as SearchResult;
       });
   }
 }
