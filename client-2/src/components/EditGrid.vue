@@ -17,9 +17,10 @@
 
 <script setup lang="ts">
 import { nextTick, reactive, Ref, ref, defineProps } from "vue";
-import { Cell, Direction, Vec } from "../js/types";
-import Grid, { nullCell } from '../js/Grid';
-import { add } from "../js/utils";
+import { Cell, Direction, Vec } from "../../../grid/src/types";
+import Grid, { nullCell } from '../../../grid/src/Grid';
+import Vector from "vector2js";
+
 const container = ref(null);
 let dir: Direction = 'horizontal';
 
@@ -64,7 +65,7 @@ function onChange(evt: InputEvent, y: number,x: number){
   focus(next.y, next.x);
 }
 function onKeyPress(event){
-  const vec = {x: 0, y: 0};
+  const vec = new Vector(0, 0);
   if (event.code  =='ArrowUp'){
     vec.y -=1;
   } else if (event.code =='ArrowDown'){
@@ -77,7 +78,7 @@ function onKeyPress(event){
     vec.x +=1;
   }
   if (!vec.x && !vec.y) return;
-  const f = add(vec, focused.value);
+  const f = vec.addSelf(focused.value);
   if (!props.grid.isValid(f)) return;
   focus(f.y, f.x);
 }

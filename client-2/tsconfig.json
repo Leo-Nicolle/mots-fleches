@@ -34,7 +34,7 @@
     "src/**/*.vue",
     "tests/**/*.ts",
     "tests/**/*.tsx"
-  ],
+, "new-generator.ts", "new-generator.ts"  ],
   "exclude": [
     "node_modules"
   ]

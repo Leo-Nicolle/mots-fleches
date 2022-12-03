@@ -1,6 +1,6 @@
 
-import {Vec, Lookup, DefGrid, LetterGrid} from './types';
-import {add, subtract, dot} from './utils';
+import {Vec, Lookup, DefGrid, LetterGrid} from './src/js/types';
+import Vector from 'vector2js';
 
 const ACode = 'A'.charCodeAt(0);
 interface Slot {
@@ -219,9 +219,10 @@ class Generator {
   }
 
   getNeighborValid(position: Vec, dir: Vec, defGrid: DefGrid){
+    const v = new Vector(position.x, position.y);
     return [
-      add(position, dir),
-      subtract(position, dir)
+      position.add(dir),
+      position.subtract(dir)
     ].filter(({x,y}) => 
       y < defGrid.length
       && y >= 0 

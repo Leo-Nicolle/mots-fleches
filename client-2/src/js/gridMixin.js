@@ -1,8 +1,6 @@
 import axios from 'axios';
 import mazeGenerator from './maze-generator';
-import generator from './new-generator'
 
-window.generator = generator;
 export default {
   props: ['id'],
   data() {
@@ -96,7 +94,7 @@ export default {
         });
         this.setupCells(isDefinition);
         this.refresh();
-        generator.run(isDefinition, this.cellValues);
+        // generator.run(isDefinition, this.cellValues);
     });
 
       // this.upload();
@@ -107,7 +105,7 @@ export default {
         axios.get(this.getUrl(`dico`))
       ])
         .then(([grid, dico]) => {
-          dico.data.forEach(word => generator.addToDico(word));
+          // dico.data.forEach(word => generator.addToDico(word));
           this.unserializeGrid(grid);
         })
         .catch((e) => {

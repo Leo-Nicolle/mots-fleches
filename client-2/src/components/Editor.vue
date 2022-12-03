@@ -7,8 +7,8 @@
 
 <script setup lang="ts">
 import { nextTick, reactive, Ref, ref } from "vue";
-import Grid from "../js/Grid";
-import { Cell, Direction, Vec } from "../js/types";
+import Grid, { nullCell } from '../../../grid/src/Grid';
+import { Cell, Direction, Vec } from "../../../grid/src/types";
 import EditGrid from './EditGrid.vue';
 const editor = ref(null);
 let dir: Direction = 'horizontal';

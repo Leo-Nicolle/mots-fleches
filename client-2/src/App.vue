@@ -7,13 +7,13 @@
 <script>
 import axios from "axios";
 import apiMixin from "./js/apiMixin";
-import Crosswords from "./components/Crosswords.vue";
+// import Crosswords from "./components/Crosswords.vue";
 import Editor from "./components/Editor.vue";
-import Grid from './js/Grid';
+import Grid from '../../grid/src/Grid';
 
 const g = new Grid(10,10);
 export default {
-  name: "Crosswords",
+  name: "App",
   mixins: [apiMixin],
   data() {
      return {
@@ -25,7 +25,7 @@ export default {
     };
   },
   components: {
-    Crosswords,
+    // Crosswords,
     Editor,
   },
   methods: {
