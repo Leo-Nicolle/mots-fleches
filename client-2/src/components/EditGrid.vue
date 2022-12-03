@@ -1,62 +1,90 @@
 <template>
-    <div class="grid" :style="getTemapleColumn()">
+    <div ref="container" class="grid" :version="version" >
       <div  class="row" v-for="(row, i) in grid.cells" :key="i">
         <div class="cell" v-for="(cell, j) in row" :key="j">
-        <span class="text">{{
-          cell.text
-        }}</span>
-        <button></button>
+          <input type="text" 
+          :class="getClass(cell)" 
+          :value = "cell.text"
+          @click="focus(i,j)"
+          @keyup="onKeyPress"
+          @input="onChange($event, i,j)"
+          />
+          <button @click="onClick(i,j)"></button>
         </div>
       </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import { Grid, Cell } from "../js/types";
+import { nextTick, reactive, Ref, ref, defineProps } from "vue";
+import { Cell, Direction, Vec } from "../js/types";
+import Grid, { nullCell } from '../js/Grid';
+import { add } from "../js/utils";
+const container = ref(null);
+let dir: Direction = 'horizontal';
 
 const cellWidth = ref(`${52}px`);
 const buttonWidth = ref(`${15}px`);
+let focused = ref(nullCell); 
+let highligted: Cell[] = [];
+let version = ref(0);
+const props = defineProps<{ grid: Grid }>();
+// const grid: Grid = new Grid(10,10);
+function focus(i: number,j: number) {
+  focused.value = props.grid.cells[i][j]; 
+  highligted = props.grid.getBounds(focused.value, dir).cells;
+  const row = [...container.value.querySelectorAll('.row')][focused.value.y];
+  const col = [...row.querySelectorAll('.cell')][focused.value.x];
+  col.firstChild.focus(); 
+}
+function getClass(cell: Cell) {
+  const f = focused.value;
+  
+  return Grid.equal(f, cell) 
+  ? 'focus'
+    : props.grid.isDefinition(cell)
+    ? 'definition'
+    : highligted.some(c => Grid.equal(c, cell))
+    ? 'highlight' 
+    : '';
+  }
+function onClick(y: number, x: number){
+  // console.log(click)
+  props.grid.setDefinition({x,y}, !props.grid.getCell({x,y}).definition);
+  highligted = props.grid.getBounds(focused.value, dir).cells;
+  refresh();
+}
+function onChange(evt: InputEvent, y: number,x: number){
+  props.grid.setText({x,y}, (evt.target as HTMLInputElement).value || ''); 
+  if (focused.value.definition) return;
+  const next = props.grid.increment(focused.value, dir);
+  if (next.definition || !props.grid.isValid(next)){
+    return refresh();
+  }
+  focus(next.y, next.x);
+}
+function onKeyPress(event){
+  const vec = {x: 0, y: 0};
+  if (event.code  =='ArrowUp'){
+    vec.y -=1;
+  } else if (event.code =='ArrowDown'){
+    vec.y +=1;
+  }
+  else if (event.code =='ArrowLeft'){
+    vec.x -=1;
+  }
+  else if (event.code =='ArrowRight'){
+    vec.x +=1;
+  }
+  if (!vec.x && !vec.y) return;
+  const f = add(vec, focused.value);
+  if (!props.grid.isValid(f)) return;
+  focus(f.y, f.x);
+}
+function refresh(){
+  version.value++;
+}
 
-
-const grid: Grid = {
-  rows: 10,
-  cols: 10,
-  cells: new Array(10).fill(0).map((_, y) =>
-    new Array(10).fill(0).map((_, x) => ({
-      x,
-      y,
-      definition: false,
-      text: "A",
-    }))
-  ),
-};
-console.log(grid);
-// @click="onSelectCell(item.i, item.j)"
-//           @switch="onSwitch($event, item.i, item.j)"
-//           @type="onType($event, item.i, item.j)"
-//           :value="item.value"
-//           :isDefinition="isDefinition[item.i][item.j]"
-//           :isImpossible="isImpossible(item.i, item.j)"
-//           :highlighted="isHighlighted(item.i, item.j)"
-
-const isDefinition: boolean[][] = [];
-const flatCells: { i: number; j: number; key: string; value: string }[] = [];
-function getTemapleColumn() {
-  return "";
-}
-function getClass(key: string) {
-  return "";
-}
-function onSelectCell(i: number, j: number) {}
-function onType(e: KeyboardEvent, i: number, j: number) {}
-function isImpossible(i: number, j: number): boolean {
-  return false;
-}
-function isHighlighted(i: number, j: number): boolean {
-  return false;
-}
-const rgrid = ref(grid)
 </script>
 
 <style scoped>
@@ -74,11 +102,17 @@ const rgrid = ref(grid)
   border: 1px solid black;
   cursor: text;
 }
-.cell > span{
+.cell > input{
   display: flex;
   align-items: center;
+  width: v-bind(cellWidth);
+  height: v-bind(cellWidth);
+  padding: 0;
+  text-align: center;
+  font-size: v-bind(cellWidth);
+  text-transform: capitalize;
   justify-content: space-around;
-  height: 100%;
+  border: 0;
 }
 .cell > button {
   position: relative;
@@ -93,5 +127,15 @@ const rgrid = ref(grid)
 }
 .cell:hover{
 background: #eee;
+}
+.focus{
+  background: #acf;
+}
+.highlight{
+  background: #def;
+}
+.definition { 
+  background: #aaa;
+  font-size: calc(v-bind(cellWidth) * 0.25);
 }
 </style>
