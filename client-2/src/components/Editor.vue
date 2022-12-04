@@ -4,10 +4,15 @@
       :point="focus"
       :query="''"
       :grid-id="grid.id"
-      @hover="(v) => onHover(v)"
-      @focus="(point: Vec) => (focus = point)"
+      @hover="onHover"
+      @click="onClick"
     ></Suggestion>
-    <EditGrid @type="onType" :grid="props.grid" :suggestion="suggestion" />
+    <EditGrid
+      @type="onType"
+      @focus="(point) => (focus = point)"
+      :grid="props.grid"
+      :suggestion="suggestion"
+    />
   </div>
 </template>
 
@@ -39,7 +44,13 @@ function onType() {
   emit("update", 1);
 }
 function onHover(value: string) {
-  props.grid.suggest([value], [{ x: 0, y: 0 }], ["horizontal"]);
+  props.grid.suggest([value], [focus.value], ["horizontal"]);
+  refresh();
+}
+function onClick(value: string) {
+  console.log('onclick', Grid.getDirVec(dir));
+
+  props.grid.setWord(value, focus.value, dir);
   refresh();
 }
 </script>

@@ -7,6 +7,8 @@ export type Cell = {
   x: number;
   y: number;
   definition: boolean;
+  highlighted: boolean;
+  suggestion: string;
   text: string;
 }
 // export type Grid = {

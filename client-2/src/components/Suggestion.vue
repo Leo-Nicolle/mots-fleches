@@ -33,7 +33,8 @@
         pageSize: 10,
         simple: true,
       }"
-      @mousemove="onHover"
+      @mousemove="onMouseEvt($event, false)"
+      @click="onMouseEvt($event, true)"
     />
   </div>
 </template>
@@ -63,6 +64,8 @@ let loading = false;
 const props = defineProps<{ query: string; gridId: string; point: Vec }>();
 const emit = defineEmits<{
   (event: "hover", value: string): string;
+  (event: "click", value: string): string;
+
 }>();
 
 const suggestion = ref(null);
@@ -80,7 +83,7 @@ setTimeout(() => {
 
 function getSuggestions() {
   if (!props.point) return Promise.resolve();
-  console.log("ordering", ordering.value);
+  console.log("ordering", ordering.value, props.point);
   queryPromise = queryPromise
     .then(() => {
       loading = true;
@@ -122,14 +125,15 @@ function getSuggestions() {
 
   return queryPromise;
 }
-function onHover(evt: MouseEvent) {
+function onMouseEvt(evt: MouseEvent, click = false) {
   const t = evt.target as HTMLDivElement;
   if (!t.classList.contains("n-data-table-td")) return;
   const text = t.innerText;
-  if (text === hovered) return;
+  if (text === hovered && !click) return;
   hovered = text;
-  emit("hover", text);
+  return click ? emit("click", text) : emit("hover", text);
 }
+
 function refresh() {
   version.value++;
 }

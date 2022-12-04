@@ -5,7 +5,7 @@
         <input
           type="text"
           :class="getClass(cell)"
-          :value="cell.suggestion.length ? cell.suggestion: cell.text"
+          :value="cell.suggestion.length ? cell.suggestion : cell.text"
           @click="focus(i, j)"
           @keyup="onKeyPress"
           @input="onChange($event, i, j)"
@@ -36,17 +36,19 @@ let version = ref(0);
 // const grid: Grid = new Grid(10,10);
 function focus(i: number, j: number) {
   focused.value = props.grid.cells[i][j];
-  props.grid.highlight(props.grid.getBounds(focused.value, dir).cells)
+  const cells = props.grid.getBounds(focused.value, dir).cells;
+  props.grid.highlight(cells);
   const row = [...container.value.querySelectorAll(".row")][focused.value.y];
   const col = [...row.querySelectorAll(".cell")][focused.value.x];
   col.firstChild.focus();
-  emit('focus', {x: j, y: i})
+  props.grid.suggest([], [], []);
+  emit("focus", cells[0]);
 }
 function getClass(cell: Cell) {
   const f = focused.value;
   return [
     cell.highlighted ? "highlight" : null,
-    cell.suggestion.length ? "suggest" : null,
+    cell.suggestion.length && !cell.text.length ? "suggest" : null,
 
     Grid.equal(f, cell) ? "focus" : null,
     props.grid.isDefinition(cell) ? "definition" : null,
@@ -54,7 +56,7 @@ function getClass(cell: Cell) {
 }
 function onClick(y: number, x: number) {
   props.grid.setDefinition({ x, y }, !props.grid.getCell({ x, y }).definition);
-  props.grid.highlight(props.grid.getBounds(focused.value, dir).cells)
+  props.grid.highlight(props.grid.getBounds(focused.value, dir).cells);
   emit("type");
   refresh();
 }
@@ -140,7 +142,7 @@ function refresh() {
 .highlight {
   background: #def;
 }
-.suggest{
+.suggest {
   color: #777;
 }
 .definition {

@@ -6,17 +6,23 @@ export const nullCell:Cell = {
   x: -1,
   y: -1,
   definition: false,
+  highlighted: false,
+  suggestion: '',
   text: ''
 };
 
 export default class Grid {
   public rows: number;
   public cols: number;
+  public comment: string;
+  public title: string;
   public cells: Cell[][];
   public id: string;
   constructor(rows: number, cols: number, id?: string) {
     this.cols = cols;
     this.rows = rows;
+    this.comment = '';
+    this.title = '';
     this.id = id || uuid();
     this.cells =  new Array(rows)
       .fill(0)
@@ -26,6 +32,8 @@ export default class Grid {
           x,
           y,
           definition: false,
+          highlighted: false,
+          suggestion: '',
           text: "",
         }))
       );
@@ -52,6 +60,19 @@ export default class Grid {
       cell.text = value.slice(-1);
     }
   }
+
+  setWord(word: string, point : Vec, direction: Direction){
+    const v = Grid.getDirVec(direction);
+    const s = new Vector(point.x, point.y);
+    console.log({s, v})
+    word.split('')
+    .forEach((letter, i) => {
+      const {x, y} = s.add(v.mulScalar(i));
+      this.cells[y][x].text = letter; 
+      this.cells[y][x].suggestion = ''; 
+    });
+  } 
+
   increment(v: Vec, direction: Direction): Cell {
     const {x,y} = new Vector(v.x,v.y).add(Grid.getDirVec(direction));
     if (this.isValid({x,y})) return this.cells[y][x];
@@ -61,6 +82,32 @@ export default class Grid {
     return this.cells[y][x];
   }
 
+  highlight(cells: Cell[]) {
+    this.cells.forEach((row) => {
+      row.forEach((cell) => {
+        cell.highlighted = false;
+      });
+    });
+    cells.forEach((c) => {
+      c.highlighted = true;
+    });
+  }
+  
+  suggest(words: string[], start: Vec[], directions: Direction[]) {
+    this.cells.forEach((row) => {
+      row.forEach((cell) => {
+        cell.suggestion = '';
+      });
+    });
+    words.forEach((word, i) => {
+      const s = new Vector(start[i].x, start[i].y);
+      const v = Grid.getDirVec(directions[i]);
+      word.split('').forEach((letter, j) => {
+        const {x,y} = s.add(v.mulScalar(j));
+        this.cells[y][x].suggestion = letter;
+      });
+    });
+  }
 
   static equal(a: Cell, b: Cell): boolean {
     return a.x === b.x && a.y === b.y;
@@ -70,6 +117,10 @@ export default class Grid {
     return direction === 'horizontal' 
       ? new Vector(1, 0)
       : new Vector(0, 1);
+  }
+
+  static perpendicular(direction: Direction): Direction {
+    return direction === 'vertical' ? 'horizontal' : 'vertical';
   }
 
   getBounds({x, y}: Vec, direction: Direction): Bounds {
@@ -112,22 +163,30 @@ export default class Grid {
       rows: this.rows,
       cols: this.cols,
       cells: this.cells,
+      comment: this.comment,
+      title: this.title
     });
   }
 
   static unserialize(s: string){
-    const {rows, cols, id, cells} = JSON.parse(s) as {
+    const {rows, cols,comment, title, id, cells} = JSON.parse(s) as {
       rows: number,
       cols: number,
       id: string,
+      comment: string,
+      title: string
       cells: Cell[][]
     };
     const res = new Grid(rows, cols, id);
     cells.forEach((row,i ) =>{
       row.forEach((cell, j) => {
+        cell.highlighted = false;
+        cell.suggestion = '';
         res.cells[i][j] = cell;
       });
     });
+    res.title = title;
+    res.comment = comment;
     return res;
   }
 
