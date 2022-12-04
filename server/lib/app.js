@@ -13,6 +13,7 @@ export function createApp() {
   app.use(cors());
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json());
+  console.log(`ICI`);
 
   if (existsSync("public")) {
     console.log("server static");
@@ -24,7 +25,6 @@ export function createApp() {
   wordController({ app, db });
   gridController({ app, db });
   searchController({ app, db });
-
   // if (require.main === module) {
   const server = app.listen(+APP_CROSSWORDS_PORT || 3011, () => {
     console.log(

@@ -23,7 +23,7 @@ export class Database {
         .map((w) => w.trim())
         .filter((e) => e.length);
       this.grids = (grids && grids.length ? JSON.parse(grids) : []).map((g) =>
-        Grid.unserialize(g)
+        Grid.unserialize(JSON.stringify(g))
       );
     });
   }
@@ -76,7 +76,7 @@ export class Database {
     return this.getGrids().then((grids) =>
       fs.writeFile(
         path.resolve(APP_CROSSWORDS_GRIDS_PATH as string),
-        JSON.stringify(grids.map((grid) => grid.serialize()))
+        `[${grids.map((grid) => grid.serialize()).join(", ")}]`
       )
     );
   }

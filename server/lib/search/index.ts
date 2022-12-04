@@ -145,7 +145,7 @@ export class Search {
     });
     // iterate through all the word's positions and get where an impossible flag was set
     const impossible = getCoords({ start, length, vec }).filter((coords, i) => {
-      const letter = grid[coords.y][coords.x];
+      const letter = grid.cells[coords.y][coords.x].text;
       if (!letter.length || !letter.match(/\w/i)) return false;
       if (!impossibleLetters[i].get(letter.toUpperCase() as Char)) return false;
       return true;
@@ -252,7 +252,7 @@ export class Search {
         x: start.x + vec.x * i,
         y: start.y + vec.y * i,
       };
-      const letter = grid[current.y][current.x];
+      const letter = grid.cells[current.y][current.x].text;
       str += letter.length ? letter.toLowerCase() : "*";
       cells.push(current);
     }
