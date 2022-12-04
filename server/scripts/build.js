@@ -14,7 +14,7 @@ const logPlugin = {
 };
 const watch = process.argv.slice(2).some((a) => a === "--watch");
 require("esbuild").build({
-  entryPoints: ["lib/app.js"],
+  entryPoints: ["lib/index.js"],
   bundle: true,
   format: "cjs",
   outfile: "dist/server.js",

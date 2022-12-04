@@ -5,7 +5,7 @@
   "main": "dist/server.cjs.js",
   "module": "dist/server.esm.js",
   "scripts": {
-    "watch": "MODE=dev  scripts/build.js --watch",
+    "watch": "MODE=dev node scripts/build.js --watch",
     "build": "scripts/build.js",
     "ts": "tsc --outDir=dist",
     "test": "mocha -r dotenv/config test/search.test.js dotenv_config_path=test/.test.env -r ts-node/register --require @babel/register --timeout 5000",
