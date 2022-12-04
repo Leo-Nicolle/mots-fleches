@@ -1,6 +1,10 @@
 <template>
   <div id="Crosswords">
-     <Editor></Editor>
+    <Editor
+      v-if="grids[activeGrid]"
+      :grid="grids[activeGrid]"
+      @update="onUpdate"
+    ></Editor>
   </div>
 </template>
 
@@ -9,18 +13,14 @@ import axios from "axios";
 import apiMixin from "./js/apiMixin";
 // import Crosswords from "./components/Crosswords.vue";
 import Editor from "./components/Editor.vue";
-import Grid from '../../grid/src/Grid';
+import Grid from "../../grid/src/Grid";
 
-const g = new Grid(10,10);
 export default {
   name: "App",
   mixins: [apiMixin],
   data() {
-     return {
-      grid: g,
-      rows: 13,
-      cols: 10,
-      activeGrid: "",
+    return {
+      activeGrid: 0,
       grids: [],
     };
   },
@@ -29,33 +29,24 @@ export default {
     Editor,
   },
   methods: {
-       fetch() {
+    fetch() {
       return axios
         .get(this.getUrl("grid"))
         .then(({ data }) => {
-          this.grids = data
-            .map((g) => ({
-              name: g.name,
-              id: g.id,
-            }))
-            .concat({
-              name: "+",
-              id: "",
-            });
-          return Promise.resolve();
+          this.grids = data.map((g) => Grid.unserialize(JSON.stringify(g)));
+          if (this.grids.length === 0) {
+            return this.createGrid().then(() => this.fetch());
+            // .then(() => this.activeGrid= 0)
+          }
         })
         .catch((e) => {
           console.error("E", e);
         });
     },
     createGrid() {
-      return axios.post(this.getUrl("grid"), {
-        name: "nouvelle grille",
-        comment: "",
-        rows: 10,
-        cols: 10,
-        cells: {},
-      });
+      const newGrid = new Grid(10, 10);
+      newGrid.name = "nouvelle grille";
+      return axios.post(this.getUrl("grid"), { grid: newGrid.serialize() });
     },
     onRefreshGrids() {
       this.fetch();
@@ -65,9 +56,15 @@ export default {
         this.activeGrid = (this.grids[0] && this.grids[0].id) || "";
       });
     },
+    onUpdate() {
+      axios.post(this.getUrl("grid"), {
+        grid: this.grids[this.activeGrid].serialize(),
+      });
+    },
   },
 
   mounted() {
+    this.fetch()
   },
 };
 </script>

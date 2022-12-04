@@ -201,11 +201,11 @@ export default {
         })
         .then((response) => response.data)
         .then(({
-          words, cells, impossible, nbRestuls,
+          words, cells, impossible, nbResults,
         }) => {
           if (!words) return;
           this.loadingSuggestions = false;
-          this.resultLength = nbRestuls;
+          this.resultLength = nbResults;
           this.suggestions = words.slice(0, 100).map((word) => ({
             word,
             link: `https://google.com/search?q=${word}+definition`,
