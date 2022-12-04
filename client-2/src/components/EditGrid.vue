@@ -5,7 +5,7 @@
         <input
           type="text"
           :class="getClass(cell)"
-          :value="cell.suggestion.length ? cell.suggestion : cell.text"
+          :value="cell.text.length ? cell.text : cell.suggestion"
           @click="focused = {y:i, x:j}"
           @keyup="onKeyPress"
           @input="onChange($event, i, j)"
