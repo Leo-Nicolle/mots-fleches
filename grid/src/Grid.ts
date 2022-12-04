@@ -64,7 +64,6 @@ export default class Grid {
   setWord(word: string, point : Vec, direction: Direction){
     const v = Grid.getDirVec(direction);
     const s = new Vector(point.x, point.y);
-    console.log({s, v})
     word.split('')
     .forEach((letter, i) => {
       const {x, y} = s.add(v.mulScalar(i));
