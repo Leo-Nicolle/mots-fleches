@@ -8,7 +8,9 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@types/uuid": "^9.0.0",
     "@types/vector2js": "^2.0.0",
+    "@vicons/ionicons5": "^0.12.0",
     "axios": "^0.26.1",
     "core-js": "^3.8.3",
     "crypto": "^1.0.1",
@@ -17,6 +19,7 @@
     "primeicons": "^5.0.0",
     "primevue": "^3.12.5",
     "random-normal": "^1.0.0",
+    "uuid": "^9.0.0",
     "vector2js": "^2.0.1",
     "vue": "^3.2.13"
   },
@@ -32,6 +35,7 @@
     "@vue/eslint-config-typescript": "^9.1.0",
     "eslint": "^7.32.0",
     "eslint-plugin-vue": "^8.0.3",
+    "naive-ui": "^2.34.2",
     "typescript": "~4.5.5"
   },
   "eslintConfig": {
