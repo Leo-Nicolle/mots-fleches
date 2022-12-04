@@ -2,16 +2,21 @@
   <div ref="editor" class="editor" :version="version">
     <Suggestion
       :point="focus"
+      :dir="dir"
       :query="''"
       :grid-id="grid.id"
       @hover="onHover"
       @click="onClick"
-    ></Suggestion>
-    <EditGrid
+      @dir="onDir"
+      ></Suggestion>
+      <EditGrid
       @type="onType"
       @focus="(point) => (focus = point)"
+      @out="() => grid.suggest([], [], [])"
+      @mouseenter="onMouseEnter"
       :grid="props.grid"
       :suggestion="suggestion"
+      :dir="dir"
     />
   </div>
 </template>
@@ -28,10 +33,10 @@ const emit = defineEmits<{
   (event: "update", value: number): string;
 }>();
 const editor = ref(null);
-let dir: Direction = "horizontal";
-let focus = ref({ x: -1, y: -1 });
-let suggestion = ref("");
-let version = ref(0);
+const dir = ref<Direction>("horizontal");
+const focus = ref<Vec>({ x: -1, y: -1 });
+const suggestion = ref("");
+const version = ref(0);
 
 setTimeout(() => {
   emit("update", 1);
@@ -44,13 +49,19 @@ function onType() {
   emit("update", 1);
 }
 function onHover(value: string) {
-  props.grid.suggest([value], [focus.value], ["horizontal"]);
+  props.grid.suggest([value], [focus.value], [dir.value]);
   refresh();
 }
+function onMouseEnter(){
+  setTimeout(() => {
+    props.grid.suggest([], [], []);
+  }, 100);
+}
+function onDir(d) {
+  
+}
 function onClick(value: string) {
-  console.log('onclick', Grid.getDirVec(dir));
-
-  props.grid.setWord(value, focus.value, dir);
+  props.grid.setWord(value, focus.value, dir.value);
   refresh();
 }
 </script>

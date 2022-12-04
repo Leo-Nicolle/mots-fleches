@@ -100,7 +100,6 @@ export default {
   },
   methods: {
     getError() {
-      console.log('status', this.statusSearch === 'ok');
       return this.statusSearch === 'ok'
         ? null
         : 'error';

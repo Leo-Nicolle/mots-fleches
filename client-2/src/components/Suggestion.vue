@@ -19,6 +19,17 @@
         </n-icon>
       </template>
     </n-button>
+    <n-button
+      icon-placement="right"
+      @click="emit('dir', dir === 'horizontal' ? 'vertical' : 'horizontal')"
+    >
+      <template #icon>
+        <n-icon>
+          <ArrowForward v-if="dir === 'horizontal'" />
+          <ArrowDown v-else />
+        </n-icon>
+      </template>
+    </n-button>
     <n-data-table
       :bordered="false"
       :single-line="false"
@@ -44,6 +55,7 @@ import { defineProps, defineEmits, ref, watch } from "vue";
 import {
   ArrowDown,
   ArrowUp,
+  ArrowForward,
   Hammer,
   Flash,
   ReturnUpBackOutline,
@@ -58,13 +70,14 @@ let ordering = ref(1);
 let results = ref([]);
 let totalResults = ref(0);
 let hovered = "";
-let dir: Direction = "horizontal";
 let queryPromise: Promise<void> = Promise.resolve();
 let loading = false;
-const props = defineProps<{ query: string; gridId: string; point: Vec }>();
+const props = defineProps<{ query: string; gridId: string; point: Vec,
+dir: Direction }>();
 const emit = defineEmits<{
-  (event: "hover", value: string): string;
-  (event: "click", value: string): string;
+  (event: "hover", value: string): void;
+  (event: "click", value: string): void;
+  (event: "dir", value: Direction): void;
 
 }>();
 
@@ -83,7 +96,6 @@ setTimeout(() => {
 
 function getSuggestions() {
   if (!props.point) return Promise.resolve();
-  console.log("ordering", ordering.value, props.point);
   queryPromise = queryPromise
     .then(() => {
       loading = true;
@@ -92,7 +104,7 @@ function getSuggestions() {
           axios.post(getUrl("search"), {
             gridId: props.gridId,
             coord: props.point,
-            dir,
+            dir: props.dir,
             ordering: ordering.value,
             query: "",
             method: method.value,

@@ -6,7 +6,7 @@
           type="text"
           :class="getClass(cell)"
           :value="cell.suggestion.length ? cell.suggestion : cell.text"
-          @click="focus(i, j)"
+          @click="focused = {y:i, x:j}"
           @keyup="onKeyPress"
           @input="onChange($event, i, j)"
         />
@@ -17,33 +17,37 @@
 </template>
 
 <script setup lang="ts">
-import { defineEmits, ref, defineProps } from "vue";
+import { defineEmits, ref, defineProps, watchEffect } from "vue";
 import Grid, { nullCell } from "../grid/Grid";
 import Vector from "vector2js";
 import { Cell, Direction, Vec } from "../grid/types";
 
 const container = ref(null);
-let focused = ref(nullCell);
+const focused = ref<Vec>({x: -1, y: -1});
 const cellWidth = ref(`${52}px`);
 const buttonWidth = ref(`${15}px`);
-const props = defineProps<{ grid: Grid; suggestion: string }>();
+const props = defineProps<{ grid: Grid; suggestion: string, dir: Direction }>();
 const emit = defineEmits<{
   (event: "type", value: number): void;
   (event: "focus", value: Vec): void;
 }>();
-let dir: Direction = "horizontal";
 let version = ref(0);
-// const grid: Grid = new Grid(10,10);
-function focus(i: number, j: number) {
-  focused.value = props.grid.cells[i][j];
-  const cells = props.grid.getBounds(focused.value, dir).cells;
+// function focus(i: number, j: number) {
+  // focused.value = props.grid.cells[i][j];
+// }
+
+watchEffect(() => {
+  const cells = props.grid.getBounds(focused.value, props.dir).cells;
   props.grid.highlight(cells);
+  if (!container.value) return;
   const row = [...container.value.querySelectorAll(".row")][focused.value.y];
+  if (!row) return;
   const col = [...row.querySelectorAll(".cell")][focused.value.x];
   col.firstChild.focus();
   props.grid.suggest([], [], []);
   emit("focus", cells[0]);
-}
+});
+
 function getClass(cell: Cell) {
   const f = focused.value;
   return [
@@ -56,7 +60,7 @@ function getClass(cell: Cell) {
 }
 function onClick(y: number, x: number) {
   props.grid.setDefinition({ x, y }, !props.grid.getCell({ x, y }).definition);
-  props.grid.highlight(props.grid.getBounds(focused.value, dir).cells);
+  props.grid.highlight(props.grid.getBounds(focused.value, props.dir).cells);
   emit("type");
   refresh();
 }
@@ -65,11 +69,11 @@ function onChange(evt: InputEvent, y: number, x: number) {
   props.grid.setText({ x, y }, (evt.target as HTMLInputElement).value || "");
   emit("type");
   if (focused.value.definition) return;
-  const next = props.grid.increment(focused.value, dir);
+  const next = props.grid.increment(focused.value, props.dir);
   if (next.definition || !props.grid.isValid(next)) {
     return refresh();
   }
-  focus(next.y, next.x);
+  focused.value= {...next};
 }
 function onKeyPress(event) {
   const vec = new Vector(0, 0);
@@ -85,7 +89,7 @@ function onKeyPress(event) {
   if (!vec.x && !vec.y) return;
   const f = vec.addSelf(focused.value);
   if (!props.grid.isValid(f)) return;
-  focus(f.y, f.x);
+  focused.value= {...f};
 }
 function refresh() {
   version.value++;
