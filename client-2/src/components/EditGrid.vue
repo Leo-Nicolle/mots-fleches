@@ -32,9 +32,6 @@ const emit = defineEmits<{
   (event: "focus", value: Vec): void;
 }>();
 let version = ref(0);
-// function focus(i: number, j: number) {
-  // focused.value = props.grid.cells[i][j];
-// }
 
 watchEffect(() => {
   const cells = props.grid.getBounds(focused.value, props.dir).cells;
@@ -67,12 +64,12 @@ function onClick(y: number, x: number) {
 
 function onChange(evt: InputEvent, y: number, x: number) {
   props.grid.setText({ x, y }, (evt.target as HTMLInputElement).value || "");
+  console.log()
+  if (props.grid.isDefinition(focused.value)) return;
   emit("type");
-  if (focused.value.definition) return;
-  const next = props.grid.increment(focused.value, props.dir);
-  if (next.definition || !props.grid.isValid(next)) {
-    return refresh();
-  }
+  const next = evt.target.value.length
+  ? props.grid.increment(focused.value, props.dir)
+  : props.grid.decrement(focused.value, props.dir);
   focused.value= {...next};
 }
 function onKeyPress(event) {
@@ -85,7 +82,7 @@ function onKeyPress(event) {
     vec.x -= 1;
   } else if (event.code == "ArrowRight") {
     vec.x += 1;
-  }
+  } 
   if (!vec.x && !vec.y) return;
   const f = vec.addSelf(focused.value);
   if (!props.grid.isValid(f)) return;
@@ -149,7 +146,7 @@ function refresh() {
 .suggest {
   color: #777;
 }
-.definition {
+.cell > input.definition {
   background: #aaa;
   font-size: calc(v-bind(cellWidth) * 0.25);
 }

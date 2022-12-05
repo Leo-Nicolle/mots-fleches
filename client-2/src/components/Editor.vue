@@ -7,9 +7,10 @@
       :grid-id="grid.id"
       @hover="onHover"
       @click="onClick"
-      @dir="onDir"
-      ></Suggestion>
-      <EditGrid
+      @dir="(d) => (dir = d)"
+    >
+    </Suggestion>
+    <EditGrid
       @type="onType"
       @focus="(point) => (focus = point)"
       @out="() => grid.suggest([], [], [])"
@@ -18,6 +19,11 @@
       :suggestion="suggestion"
       :dir="dir"
     />
+    <Definition
+      :cell="
+        Grid.equal(nullCell, focus) ? nullCell : grid.cells[focus.y][focus.x]
+      "
+    ></Definition>
   </div>
 </template>
 
@@ -27,6 +33,7 @@ import Grid, { nullCell } from "../grid/Grid";
 import { Cell, Direction, Vec } from "../grid/types";
 import EditGrid from "./EditGrid.vue";
 import Suggestion from "./Suggestion.vue";
+import Definition from "./Definition.vue";
 
 const props = defineProps<{ grid: Grid }>();
 const emit = defineEmits<{
@@ -52,13 +59,10 @@ function onHover(value: string) {
   props.grid.suggest([value], [focus.value], [dir.value]);
   refresh();
 }
-function onMouseEnter(){
+function onMouseEnter() {
   setTimeout(() => {
     props.grid.suggest([], [], []);
   }, 100);
-}
-function onDir(d) {
-  
 }
 function onClick(value: string) {
   props.grid.setWord(value, focus.value, dir.value);

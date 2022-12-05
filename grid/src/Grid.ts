@@ -8,6 +8,7 @@ export const nullCell:Cell = {
   definition: false,
   highlighted: false,
   suggestion: '',
+  arrows: [],
   text: ''
 };
 
@@ -33,6 +34,7 @@ export default class Grid {
           y,
           definition: false,
           highlighted: false,
+          arrows: [],
           suggestion: '',
           text: "",
         }))
@@ -77,6 +79,11 @@ export default class Grid {
     if (this.isValid({x,y})) return this.cells[y][x];
     return nullCell;
   }
+  decrement(v: Vec, direction: Direction): Cell {
+    const {x,y} = new Vector(v.x,v.y).sub(Grid.getDirVec(direction));
+    if (this.isValid({x,y})) return this.cells[y][x];
+    return nullCell;
+  }
   getCell({x, y}: Vec): Cell{
     return this.cells[y][x];
   }
@@ -108,7 +115,7 @@ export default class Grid {
     });
   }
 
-  static equal(a: Cell, b: Cell): boolean {
+  static equal(a: Vec, b: Vec): boolean {
     return a.x === b.x && a.y === b.y;
   }
 
