@@ -35,10 +35,12 @@ import EditGrid from "./EditGrid.vue";
 import Suggestion from "./Suggestion.vue";
 import Definition from "./Definition.vue";
 
+
 const props = defineProps<{ grid: Grid }>();
 const emit = defineEmits<{
   (event: "update", value: number): string;
 }>();
+const b = ref('A')
 const editor = ref(null);
 const dir = ref<Direction>("horizontal");
 const focus = ref<Vec>({ x: -1, y: -1 });
@@ -47,6 +49,7 @@ const version = ref(0);
 
 setTimeout(() => {
   emit("update", 1);
+  b.value = 'C'
 }, 3000);
 
 function refresh() {
