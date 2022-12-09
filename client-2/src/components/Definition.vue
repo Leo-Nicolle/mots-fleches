@@ -4,44 +4,30 @@
     <n-button icon-placement="right" @click="onSplit">
       {{ cell.splited ? "unsplit" : "split" }}
     </n-button>
-    <div class="def">
-      <div
-        type="text"
-        :style="{
-          background: 'red',
-          gridArea: '2 / 2 / 5 / 5'
-        }"
-      ></div>
-      <input
-        v-if="cell.splited"
-        type="text"
-        :style="{
-          gridColumnStart: 4,
-          gridColumnEnd: 5,
-          gridRowStart: 2,
-          gridRowEnd: 2,
-        }"
-      />
-      <button
-        v-for="(point, i) in points[+cell.splited]"
-        :key="i"
-        class="handle"
-        :style="{
-          gridColumnStart: 4,
-          gridColumnEnd: 5,
-          gridRowStart: 2,
-          gridRowEnd: 2,
-        }"
-      ></button>
-      <button
-        v-for="(point, i) in points[+cell.splited]"
-        :key="i"
-        class="handle"
-        :style="{
-          gridRowStart: 5,
-          gridColumnStart: 3,
-        }"
-      ></button>
+    <div
+      :style="{
+        width: '64px',
+        height: '64px',
+      }"
+    >
+      <div class="def">
+        <div class="definputs" @click="onFocus">
+          <span />
+          <span v-if="cell.splited" />
+        </div>
+        <div v-if="cell.splited" class="separator"></div>
+
+        <button
+          v-for="(point, i) in points[+cell.splited]"
+          :key="i"
+          class="handle"
+          :style="{
+            gridColumnStart: point.col,
+            // gridColumnEnd: point,
+            gridRowStart: point.row,
+          }"
+        ></button>
+      </div>
     </div>
   </div>
 </template>
@@ -91,24 +77,31 @@ const definition = ref(null);
 const version = ref(1);
 const points = [
   [
-    { x: 1, y: 0.5 },
-    { x: 0.5, y: 1 },
+    { x: 1, y: 0.5, row: 3, col: 3 },
+    { x: 0.5, y: 1, row: 6, col: 2 },
   ],
   [
-    { x: 1, y: 0.25 },
-    { x: 1, y: 0.75 },
-    { x: 0.5, y: 1 },
+    { x: 1, y: 0.25, row: 2, col: 3 },
+    { x: 1, y: 0.75, row: 4, col: 3 },
+    { x: 0.5, y: 1, row: 6, col: 2 },
   ],
 ];
 const w = ref(52);
+const b = ref(8);
+
 const props = defineProps<{ cell: Cell }>();
 const data = reactive({
   cell: props.cell,
 });
 
-const cellWidth = ref(`${52}px`);
-const buttonWidth = ref(`${4}px`);
+const cWidth = ref(`${w.value}px`);
+const bWidth = ref(`${b.value}px`);
+const row = ref(`${(w.value - 2 * b.value) / 4}px`);
+const col = ref(`${(w.value - b.value) / 2}px`);
 
+function onFocus() {
+  console.log(`onFocus`);
+}
 function getTransform(p) {
   if (!definition.value) return `translate(0, 0)`;
   const { x, y, width, height } = definition.value
@@ -172,23 +165,39 @@ const emit = defineEmits<{
   width: 200px;
   height: 200px;
 }
+.separator {
+  grid-area: 3 / 1 / 3 / 3;
+  background: black;
+  height: 1px;
+}
+.definputs {
+  display: flex;
+  flex-direction: column;
+  grid-area: 1 / 1 / 5 / 3;
+}
 .def {
-  width: v-bind(cellWidth);
-  min-height: v-bind(cellWidth);
   border: 1px solid black;
   display: grid;
-  grid-template-rows: 4px 26px 4px 26px 4px;
-  grid-template-columns: 4px 26px 4px 26px 4px;
+  width: v-bind(cWidth);
+  height: v-bind(cWidth);
+  grid-template-rows: 25% 25% 25% 25%;
+  grid-template-columns: 50% 50%;
+  /* grid-template-columns: v-bind(col) v-bind(bWidth) v-bind(col) v-bind(bWidth); */
   gap: 0px 0px;
   grid-auto-flow: row;
 }
-input {
-  width: v-bind(cellWidth);
-  height: 100%;
+textarea {
   border: 0;
   padding: 0;
   margin: 0;
   text-align: center;
+  text-anchor: start;
+  max-width: 100%;
+  height: 100%;
+  resize: none;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+  overflow: hidden;
 }
 input:focus {
   border: 0;
@@ -203,8 +212,9 @@ input:focus {
 .handle {
   position: relative;
   cursor: pointer;
-  padding: v-bind(buttonWidth);
+  padding: v-bind(`${b/2}px`);
   height: 0;
+  width: 0;
   border: 0;
   border-radius: 50%;
   z-index: 100;
