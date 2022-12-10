@@ -17,16 +17,44 @@
         </div>
         <div v-if="cell.splited" class="separator"></div>
 
-        <button
-          v-for="(point, i) in points[+cell.splited]"
+        <n-popover
+          v-for="(p, i) in points[+cell.splited]"
           :key="i"
-          class="handle"
+          trigger="hover"
+        >
+          <template #trigger>
+            <n-button
+              class="handle"
+              :style="{
+                gridColumnStart: getCol(p),
+                gridRowStart: getRow(p),
+              }"
+            ></n-button>
+          </template>
+          <n-button
+            icon-placement="right"
+            v-for="(dir, j) in getDir(i)"
+            @click="setArrow(p, dir)"
+            :key="j"
+          >
+            <template #icon>
+              <n-icon>
+                <Arrow :dir="dir" />
+              </n-icon>
+            </template>
+          </n-button>
+        </n-popover>
+        <n-icon
+          class="arrow"
+          v-for="(a, i) in cell.arrows"
+          :key="i"
           :style="{
-            gridColumnStart: point.col,
-            // gridColumnEnd: point,
-            gridRowStart: point.row,
+            gridColumnStart: getCol(a.position),
+            gridRowStart: getRow(a.position),
           }"
-        ></button>
+        >
+          <Arrow :dir="a.direction" />
+        </n-icon>
       </div>
     </div>
   </div>
@@ -38,41 +66,7 @@ import Arrow from "./Arrow";
 import { ArrowDir, Cell, Vec } from "../grid/types";
 import Vector from "vector2js";
 import Grid from "../grid/Grid";
-/*
- <n-icon
-          class="arrow"
-          v-for="(a, i) in cell.arrows"
-          :style="{
-            // left: `${getHanldePosition(a.position, 8).x}px`,
-            // top: `${getHanldePosition(a.position, 8).y}px`,
-          }"
-          :key="i"
-        >
-          <Arrow :dir="a.direction" />
-        </n-icon>
- <n-popover
-        v-for="(p, i) in points[+cell.splited]"
-        :key="i"
-        trigger="hover"
-      >
-        <template #trigger> </template>
-        <span>
-          <n-button
-            v-for="(dir, j) in getDir(i)"
-            :key="j"
-            icon-placement="right"
-            @click="setArrow(p, dir)"
-          >
-            <template #icon>
-              <n-icon>
-                <Arrow :dir="dir" />
-              </n-icon>
-            </template>
-          </n-button>
-        </span>
-      </n-popover>
 
-*/
 const definition = ref(null);
 const version = ref(1);
 const points = [
@@ -117,29 +111,23 @@ function getHanldePosition(p: Vec, o = 0) {
     .querySelector(".def")
     .getBoundingClientRect();
   console.log(p, width, height);
-  // const v = new Vector(x, y);
-  // let offset = Vector.zero;
-  // if (o) {
-  //   offset = p.x > p.y ? { x: 0, y: o } : { x: o, y: 0 };
-  // }
   return new Vector(p.x, p.y).mul({ x: width, y: height });
-  // .add(v);
-  // .sub(offset)
-  // .sub(4);
 }
 
+function getRow(point: Vec) {
+  return point.y == 0.25 ? 2 : point.y === 0.5 ? 3 : point.y === 0.75 ? 4 : 6;
+}
+function getCol(point: Vec) {
+  return point.x == 0.5 ? 2 : 3;
+}
 function getDir(i: number): ArrowDir[] {
-  console.log("getDir", i, props.cell.splited);
   if (props.cell.splited) {
     return i < 2 ? ["right", "rightdown"] : ["down", "downright"];
   }
   return i < 1 ? ["right", "rightdown"] : ["down", "downright"];
 }
 function setArrow(p: Vec, direction: ArrowDir) {
-  const c = props.cell;
-  c.arrows = c.arrows
-    .filter(({ position }) => !Grid.equal(position, p))
-    .concat({ position: p, direction });
+  Grid.setArrow(props.cell, p, direction);
   refresh();
 }
 function onSplit() {
@@ -202,12 +190,9 @@ textarea {
 input:focus {
   border: 0;
 }
-.arrows {
-  width: v-bind(cellWidth);
-}
-.arrows > .arrow {
-  font-size: 20px;
-  position: absolute;
+.arrow {
+  height: 2em;
+  width: 2em;
 }
 .handle {
   position: relative;
@@ -220,6 +205,13 @@ input:focus {
   z-index: 100;
   background: #333;
   transform: translate(-50%, -50%);
+}
+.n-icon svg {
+  width: 100%;
+  height: 100%;
+}
+.n-icon-slot i {
+  transform: translate(50%, 45%);
 }
 img {
   width: 100%;
