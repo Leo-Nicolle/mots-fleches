@@ -3,13 +3,15 @@
     <div class="row" v-for="(row, i) in grid.cells" :key="i">
       <div class="cell" v-for="(cell, j) in row" :key="j">
         <input
+          v-if="!cell.definition"
           type="text"
           :class="getClass(cell)"
           :value="cell.text.length ? cell.text : cell.suggestion"
-          @click="focused = {y:i, x:j}"
+          @click="focused = { y: i, x: j }"
           @keyup="onKeyPress"
           @input="onChange($event, i, j)"
         />
+        <Definition v-else :width="cellWidth" :cell="cell"></Definition>
         <button @click="onClick(i, j)"></button>
       </div>
     </div>
@@ -18,15 +20,19 @@
 
 <script setup lang="ts">
 import { defineEmits, ref, defineProps, watchEffect } from "vue";
+import Definition from "./Definition.vue";
 import Grid, { nullCell } from "../grid/Grid";
 import Vector from "vector2js";
 import { Cell, Direction, Vec } from "../grid/types";
 
+const w = ref(52);
+const b = ref(8);
+
 const container = ref(null);
-const focused = ref<Vec>({x: -1, y: -1});
-const cellWidth = ref(`${52}px`);
-const buttonWidth = ref(`${15}px`);
-const props = defineProps<{ grid: Grid; suggestion: string, dir: Direction }>();
+const focused = ref<Vec>({ x: -1, y: -1 });
+const cellWidth = ref(`${w.value}px`);
+const buttonWidth = ref(`${b.value}px`);
+const props = defineProps<{ grid: Grid; suggestion: string; dir: Direction }>();
 const emit = defineEmits<{
   (event: "type", value: number): void;
   (event: "focus", value: Vec): void;
@@ -64,13 +70,13 @@ function onClick(y: number, x: number) {
 
 function onChange(evt: InputEvent, y: number, x: number) {
   props.grid.setText({ x, y }, (evt.target as HTMLInputElement).value || "");
-  console.log()
+  console.log();
   if (props.grid.isDefinition(focused.value)) return;
   emit("type");
   const next = evt.target.value.length
-  ? props.grid.increment(focused.value, props.dir)
-  : props.grid.decrement(focused.value, props.dir);
-  focused.value= {...next};
+    ? props.grid.increment(focused.value, props.dir)
+    : props.grid.decrement(focused.value, props.dir);
+  focused.value = { ...next };
 }
 function onKeyPress(event) {
   const vec = new Vector(0, 0);
@@ -82,11 +88,11 @@ function onKeyPress(event) {
     vec.x -= 1;
   } else if (event.code == "ArrowRight") {
     vec.x += 1;
-  } 
+  }
   if (!vec.x && !vec.y) return;
   const f = vec.addSelf(focused.value);
   if (!props.grid.isValid(f)) return;
-  focused.value= {...f};
+  focused.value = { ...f };
 }
 function refresh() {
   version.value++;
@@ -114,6 +120,7 @@ function refresh() {
   width: v-bind(cellWidth);
   height: v-bind(cellWidth);
   padding: 0;
+  outline: 0;
   text-align: center;
   font-size: v-bind(cellWidth);
   text-transform: capitalize;

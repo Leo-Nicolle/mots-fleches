@@ -1,61 +1,52 @@
 <template>
   <div ref="definition" class="definition" :version="version">
-    Definition
     <n-button icon-placement="right" @click="onSplit">
       {{ cell.splited ? "unsplit" : "split" }}
     </n-button>
-    <div
-      :style="{
-        width: '64px',
-        height: '64px',
-      }"
-    >
-      <div class="def">
-        <div class="definputs" @click="onFocus">
-          <span />
-          <span v-if="cell.splited" />
-        </div>
+    <div class="def">
+      <div class="definputs" @click="onFocus">
         <div v-if="cell.splited" class="separator"></div>
-
-        <n-popover
-          v-for="(p, i) in points[+cell.splited]"
-          :key="i"
-          trigger="hover"
-        >
-          <template #trigger>
-            <n-button
-              class="handle"
-              :style="{
-                gridColumnStart: getCol(p),
-                gridRowStart: getRow(p),
-              }"
-            ></n-button>
-          </template>
-          <n-button
-            icon-placement="right"
-            v-for="(dir, j) in getDir(i)"
-            @click="setArrow(p, dir)"
-            :key="j"
-          >
-            <template #icon>
-              <n-icon>
-                <Arrow :dir="dir" />
-              </n-icon>
-            </template>
-          </n-button>
-        </n-popover>
-        <n-icon
-          class="arrow"
-          v-for="(a, i) in cell.arrows"
-          :key="i"
-          :style="{
-            gridColumnStart: getCol(a.position),
-            gridRowStart: getRow(a.position),
-          }"
-        >
-          <Arrow :dir="a.direction" />
-        </n-icon>
+        <textarea></textarea>
       </div>
+
+      <n-popover
+        v-for="(p, i) in points[+cell.splited]"
+        :key="i"
+        trigger="hover"
+      >
+        <template #trigger>
+          <n-button
+            class="handle"
+            :style="{
+              gridColumnStart: getCol(p),
+              gridRowStart: getRow(p),
+            }"
+          ></n-button>
+        </template>
+        <n-button
+          icon-placement="right"
+          v-for="(dir, j) in getDir(i)"
+          @click="setArrow(p, dir)"
+          :key="j"
+        >
+          <template #icon>
+            <n-icon>
+              <Arrow :dir="dir" />
+            </n-icon>
+          </template>
+        </n-button>
+      </n-popover>
+      <n-icon
+        class="arrow"
+        v-for="(a, i) in cell.arrows"
+        :key="i"
+        :style="{
+          gridColumnStart: getCol(a.position),
+          gridRowStart: getRow(a.position),
+        }"
+      >
+        <Arrow :dir="a.direction" />
+      </n-icon>
     </div>
   </div>
 </template>
@@ -80,18 +71,11 @@ const points = [
     { x: 0.5, y: 1, row: 6, col: 2 },
   ],
 ];
-const w = ref(52);
-const b = ref(8);
 
-const props = defineProps<{ cell: Cell }>();
+const props = defineProps<{ cell: Cell; width: string }>();
 const data = reactive({
   cell: props.cell,
 });
-
-const cWidth = ref(`${w.value}px`);
-const bWidth = ref(`${b.value}px`);
-const row = ref(`${(w.value - 2 * b.value) / 4}px`);
-const col = ref(`${(w.value - b.value) / 2}px`);
 
 function onFocus() {
   console.log(`onFocus`);
@@ -154,7 +138,10 @@ const emit = defineEmits<{
   height: 200px;
 }
 .separator {
-  grid-area: 3 / 1 / 3 / 3;
+  /* grid-area: 3 / 1 / 3 / 3; */
+  position: relative;
+  top: 50%;
+  widows: 100%;
   background: black;
   height: 1px;
 }
@@ -166,16 +153,16 @@ const emit = defineEmits<{
 .def {
   border: 1px solid black;
   display: grid;
-  width: v-bind(cWidth);
-  height: v-bind(cWidth);
+  width: v-bind(width);
+  height: v-bind(width);
   grid-template-rows: 25% 25% 25% 25%;
   grid-template-columns: 50% 50%;
-  /* grid-template-columns: v-bind(col) v-bind(bWidth) v-bind(col) v-bind(bWidth); */
   gap: 0px 0px;
   grid-auto-flow: row;
 }
 textarea {
   border: 0;
+  outline: 0;
   padding: 0;
   margin: 0;
   text-align: center;
@@ -187,7 +174,8 @@ textarea {
   overflow-wrap: anywhere;
   overflow: hidden;
 }
-input:focus {
+textarea:focus {
+  outline: 0;
   border: 0;
 }
 .arrow {
@@ -197,7 +185,7 @@ input:focus {
 .handle {
   position: relative;
   cursor: pointer;
-  padding: v-bind(`${b/2}px`);
+  padding: 4px;
   height: 0;
   width: 0;
   border: 0;

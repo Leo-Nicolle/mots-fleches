@@ -23,6 +23,7 @@
       :cell="
         Grid.equal(nullCell, focus) ? nullCell : grid.cells[focus.y][focus.x]
       "
+      :width="'54px'"
     ></Definition>
   </div>
 </template>
