@@ -1,54 +1,50 @@
 <template>
-  <div ref="definition" class="definition" :version="version">
+  <!-- <div ref="definition" class="definition" :version="version">
     <n-button icon-placement="right" @click="onSplit">
       {{ cell.splited ? "unsplit" : "split" }}
-    </n-button>
-    <div class="def">
-      <div class="definputs" @click="onFocus">
-        <div v-if="cell.splited" class="separator"></div>
-        <textarea></textarea>
-      </div>
-
-      <n-popover
-        v-for="(p, i) in points[+cell.splited]"
-        :key="i"
-        trigger="hover"
-      >
-        <template #trigger>
-          <n-button
-            class="handle"
-            :style="{
-              gridColumnStart: getCol(p),
-              gridRowStart: getRow(p),
-            }"
-          ></n-button>
-        </template>
-        <n-button
-          icon-placement="right"
-          v-for="(dir, j) in getDir(i)"
-          @click="setArrow(p, dir)"
-          :key="j"
-        >
-          <template #icon>
-            <n-icon>
-              <Arrow :dir="dir" />
-            </n-icon>
-          </template>
-        </n-button>
-      </n-popover>
-      <n-icon
-        class="arrow"
-        v-for="(a, i) in cell.arrows"
-        :key="i"
-        :style="{
-          gridColumnStart: getCol(a.position),
-          gridRowStart: getRow(a.position),
-        }"
-      >
-        <Arrow :dir="a.direction" />
-      </n-icon>
+    </n-button> -->
+  <div class="def" >
+    <div class="definputs" @click="onFocus">
+      <div v-if="cell.splited" class="separator"></div>
+      <textarea></textarea>
     </div>
+
+    <n-popover v-for="(p, i) in points[+cell.splited]" :key="i" trigger="hover">
+      <template #trigger>
+        <n-button
+          class="handle"
+          :style="{
+            gridColumnStart: getCol(p),
+            gridRowStart: getRow(p),
+          }"
+        ></n-button>
+      </template>
+      <n-button
+        icon-placement="right"
+        v-for="(dir, j) in getDir(i)"
+        @click="setArrow(p, dir)"
+        :key="j"
+      >
+        <template #icon>
+          <n-icon>
+            <Arrow :dir="dir" />
+          </n-icon>
+        </template>
+      </n-button>
+    </n-popover>
+    <n-icon
+      class="arrow"
+      v-for="(a, i) in cell.arrows"
+      :key="i"
+      :style="{
+        gridColumnStart: getCol(a.position),
+        gridRowStart: getRow(a.position),
+      }"
+    >
+      <Arrow :dir="a.direction" />
+    </n-icon>
   </div>
+  <!-- </div> -->
 </template>
 
 <script setup lang="ts">
@@ -73,11 +69,15 @@ const points = [
 ];
 
 const props = defineProps<{ cell: Cell; width: string }>();
+const emit = defineEmits<{
+  (event: "click2", value: void): void;
+}>();
 const data = reactive({
   cell: props.cell,
 });
 
 function onFocus() {
+  emit('click2')
   console.log(`onFocus`);
 }
 function getTransform(p) {
@@ -106,9 +106,9 @@ function getCol(point: Vec) {
 }
 function getDir(i: number): ArrowDir[] {
   if (props.cell.splited) {
-    return i < 2 ? ["right", "rightdown"] : ["down", "downright"];
+    return i < 2 ? ['none', "right", "rightdown"] : ['none', "down", "downright"];
   }
-  return i < 1 ? ["right", "rightdown"] : ["down", "downright"];
+  return i < 1 ? ['none', "right", "rightdown"] : ['none', "down", "downright"];
 }
 function setArrow(p: Vec, direction: ArrowDir) {
   Grid.setArrow(props.cell, p, direction);
@@ -123,9 +123,6 @@ function refresh() {
   version.value += 1;
 }
 
-const emit = defineEmits<{
-  (event: "hover", value: string): void;
-}>();
 </script>
 
 <style scoped>
@@ -151,7 +148,7 @@ const emit = defineEmits<{
   grid-area: 1 / 1 / 5 / 3;
 }
 .def {
-  border: 1px solid black;
+  border: 0;
   display: grid;
   width: v-bind(width);
   height: v-bind(width);
@@ -170,6 +167,8 @@ textarea {
   max-width: 100%;
   height: 100%;
   resize: none;
+  background: #aaa;
+  line-height: calc(v-bind(width) / 4 - 1px);
   text-overflow: clip;
   overflow-wrap: anywhere;
   overflow: hidden;

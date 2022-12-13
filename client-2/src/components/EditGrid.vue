@@ -11,7 +11,13 @@
           @keyup="onKeyPress"
           @input="onChange($event, i, j)"
         />
-        <Definition v-else :width="cellWidth" :cell="cell"></Definition>
+        <Definition
+          v-else
+          class="cell"
+          :width="cellWidth"
+          :cell="cell"
+          @click2="focused = { y: i, x: j }"
+        ></Definition>
         <button @click="onClick(i, j)"></button>
       </div>
     </div>
@@ -25,7 +31,7 @@ import Grid, { nullCell } from "../grid/Grid";
 import Vector from "vector2js";
 import { Cell, Direction, Vec } from "../grid/types";
 
-const w = ref(52);
+const w = ref(56);
 const b = ref(8);
 
 const container = ref(null);
@@ -43,12 +49,15 @@ watchEffect(() => {
   const cells = props.grid.getBounds(focused.value, props.dir).cells;
   props.grid.highlight(cells);
   if (!container.value) return;
+  if (!cells.length) return;
+  console.log('focus', cells[0]);
+  emit("focus", cells[0]);
+  if (props.grid.isDefinition(focused.value)) return;
   const row = [...container.value.querySelectorAll(".row")][focused.value.y];
   if (!row) return;
   const col = [...row.querySelectorAll(".cell")][focused.value.x];
   col.firstChild.focus();
   props.grid.suggest([], [], []);
-  emit("focus", cells[0]);
 });
 
 function getClass(cell: Cell) {
@@ -138,7 +147,7 @@ function refresh() {
   padding: 0;
   transform: translate(
     calc(v-bind(cellWidth) - v-bind(buttonWidth) * 0.75),
-    calc(v-bind(buttonWidth) * -0.75)
+    calc(v-bind(buttonWidth) * -2)
   );
 }
 .cell:hover {
