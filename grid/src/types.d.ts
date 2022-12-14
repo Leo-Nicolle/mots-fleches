@@ -3,7 +3,7 @@ export type Lookup<T> = { [key: number | string]: T };
 export type DefGrid = boolean[][];
 // export type LetterGrid = Letter[][];
 
-export type ArrowDir = 'right' | 'down' | 'rightdown' | 'downright';
+export type ArrowDir = 'right' | 'down' | 'rightdown' | 'downright' | 'none';
 export type Arrow = {
   position: Vec;
   direction: ArrowDir;
@@ -16,6 +16,7 @@ export type Cell = {
   highlighted: boolean;
   suggestion: string;
   arrows: Arrow[];
+  splited: boolean;
   text: string;
 }
 

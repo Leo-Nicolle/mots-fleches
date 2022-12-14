@@ -3,47 +3,7 @@
     <n-button icon-placement="right" @click="onSplit">
       {{ cell.splited ? "unsplit" : "split" }}
     </n-button> -->
-  <div class="def" >
-    <div class="definputs" @click="onFocus">
-      <div v-if="cell.splited" class="separator"></div>
-      <textarea></textarea>
-    </div>
-
-    <n-popover v-for="(p, i) in points[+cell.splited]" :key="i" trigger="hover">
-      <template #trigger>
-        <n-button
-          class="handle"
-          :style="{
-            gridColumnStart: getCol(p),
-            gridRowStart: getRow(p),
-          }"
-        ></n-button>
-      </template>
-      <n-button
-        icon-placement="right"
-        v-for="(dir, j) in getDir(i)"
-        @click="setArrow(p, dir)"
-        :key="j"
-      >
-        <template #icon>
-          <n-icon>
-            <Arrow :dir="dir" />
-          </n-icon>
-        </template>
-      </n-button>
-    </n-popover>
-    <n-icon
-      class="arrow"
-      v-for="(a, i) in cell.arrows"
-      :key="i"
-      :style="{
-        gridColumnStart: getCol(a.position),
-        gridRowStart: getRow(a.position),
-      }"
-    >
-      <Arrow :dir="a.direction" />
-    </n-icon>
-  </div>
+ 
   <!-- </div> -->
 </template>
 

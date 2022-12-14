@@ -1,4 +1,4 @@
-import { Bounds, Cell, Direction, Vec } from "./types";
+import { ArrowDir, Bounds, Cell, Direction, Vec } from "./types";
 import Vector from "vector2js";
 import {v4 as uuid} from "uuid";
 
@@ -7,6 +7,7 @@ export const nullCell:Cell = {
   y: -1,
   definition: false,
   highlighted: false,
+  splited: false,
   suggestion: '',
   arrows: [],
   text: ''
@@ -19,6 +20,7 @@ export default class Grid {
   public title: string;
   public cells: Cell[][];
   public id: string;
+
   constructor(rows: number, cols: number, id?: string) {
     this.cols = cols;
     this.rows = rows;
@@ -34,6 +36,7 @@ export default class Grid {
           y,
           definition: false,
           highlighted: false,
+          splited: false,
           arrows: [],
           suggestion: '',
           text: "",
@@ -46,7 +49,7 @@ export default class Grid {
   }
 
   isDefinition({x, y}: Vec): boolean {
-    return this.cells[y][x].definition;
+    return this.isValid({x, y}) && this.cells[y][x].definition;
   }
 
   setDefinition({x, y}: Vec, value: boolean): void {
@@ -74,16 +77,34 @@ export default class Grid {
     });
   } 
 
+  static setArrow(cell: Cell, point: Vec, direction: ArrowDir): void {
+    cell.arrows = cell.arrows
+    .filter(({position}) => !Grid.equal(point,position));
+    if (direction !== 'none'){
+      cell.arrows.push({
+        direction,
+        position: point
+      });
+    }
+  }
+
+  setArrow(v: Vec, point: Vec, direction: ArrowDir): void {
+    if (!this.isValid(v)) return;
+    Grid.setArrow(this.cells[v.y][v.x], point, direction);
+  }
+
   increment(v: Vec, direction: Direction): Cell {
     const {x,y} = new Vector(v.x,v.y).add(Grid.getDirVec(direction));
     if (this.isValid({x,y})) return this.cells[y][x];
     return nullCell;
   }
+
   decrement(v: Vec, direction: Direction): Cell {
     const {x,y} = new Vector(v.x,v.y).sub(Grid.getDirVec(direction));
     if (this.isValid({x,y})) return this.cells[y][x];
     return nullCell;
   }
+
   getCell({x, y}: Vec): Cell{
     return this.cells[y][x];
   }
@@ -172,6 +193,27 @@ export default class Grid {
       comment: this.comment,
       title: this.title
     });
+  }
+
+  isSplited(v: Vec){
+    if (!this.isValid(v)) return false;
+    return this.cells[v.y][v.x].splited;
+  }
+  static setSplit(cell: Cell, split: boolean){
+
+    if (cell.splited === split) return;
+    const rightArrows = cell.arrows.filter(a => a.position.x === 1);
+    if (rightArrows.length){
+      const first =rightArrows[0]; 
+      if (split){
+        first.position.y = 0.25;
+      } 
+      else {
+        first.position.y = 0.5;
+        cell.arrows = cell.arrows.filter(a => a.position.x < 1).concat(first);
+      } 
+    }
+    cell.splited = split;
   }
 
   static unserialize(s: string){
