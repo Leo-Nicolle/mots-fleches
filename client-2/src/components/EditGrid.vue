@@ -1,7 +1,20 @@
 <template>
-  <div ref="container" class="grid" :version="version">
+  <div
+    ref="container"
+    class="grid"
+    :version="version"
+    @mousemove="onDragging($event)"
+    @mouseup="onDragEnd()"
+  >
     <div class="row" v-for="(row, i) in grid.cells" :key="i">
-      <div class="cell" v-for="(cell, j) in row" :key="j">
+      <div
+        class="cell"
+        v-for="(cell, j) in row"
+        :key="j"
+        :style="{
+          cursor: !!draggingCell ? 'pointer!important' : 'unset',
+        }"
+      >
         <input
           v-if="!cell.definition"
           type="text"
@@ -20,8 +33,19 @@
           @click="focused = { y: i, x: j }"
         >
           <textarea></textarea>
+          <div
+            class="separator"
+            @mousedown="onDragStart(i, j)"
+            :style="{
+              gridRowStart: +cell.splited * 2 - 1,
+              gridColumnStart: 1,
+              gridColumnEnd: 3,
+            }"
+          ></div>
           <n-popover
-            v-for="(p, k) in points[+cell.splited]"
+            v-for="(p, k) in points[
+              Math.min(1, Math.max(+cell.splited - 1, 0))
+            ]"
             :key="k"
             trigger="hover"
           >
@@ -30,7 +54,7 @@
                 class="handle"
                 :style="{
                   gridColumnStart: getCol(p),
-                  gridRowStart: getRow(p),
+                  gridRowStart: getRow(p, cell.splited),
                 }"
               ></n-button>
             </template>
@@ -53,7 +77,7 @@
             :key="k"
             :style="{
               gridColumnStart: getCol(a.position),
-              gridRowStart: getRow(a.position),
+              gridRowStart: getRow(a.position, cell.splited),
             }"
           >
             <Arrow :dir="a.direction" />
@@ -78,13 +102,13 @@ const definition = ref(null);
 const version = ref(1);
 const points = [
   [
-    { x: 1, y: 0.5, row: 3, col: 3 },
-    { x: 0.5, y: 1, row: 6, col: 2 },
+    { x: 1, y: 0.5 },
+    { x: 0.5, y: 1 },
   ],
   [
-    { x: 1, y: 0.25, row: 2, col: 3 },
-    { x: 1, y: 0.75, row: 4, col: 3 },
-    { x: 0.5, y: 1, row: 6, col: 2 },
+    { x: 1, y: 0.25 },
+    { x: 1, y: 0.75 },
+    { x: 0.5, y: 1 },
   ],
 ];
 
@@ -97,6 +121,8 @@ const emit = defineEmits<{
   (event: "type", value: number): void;
   (event: "focus", value: Vec): void;
 }>();
+let cellDiv: HTMLDivElement | null = null;
+const draggingCell = ref<Cell | null>(null);
 
 watchEffect(() => {
   const cells = props.grid.getBounds(focused.value, props.dir).cells;
@@ -141,31 +167,56 @@ function getHanldePosition(p: Vec, o = 0) {
   return new Vector(p.x, p.y).mul({ x: width, y: height });
 }
 
-function getRow(point: Vec) {
-  return point.y == 0.25 ? 2 : point.y === 0.5 ? 3 : point.y === 0.75 ? 4 : 6;
+function getRow(point: Vec, splited: number) {
+  if (point.y === 1) return 9;
+  if (splited <= 1){
+    return 5;
+  }
+  if (splited === 2) {
+    return point.y == 0.25 ? 2 : 6;
+  }
+  if (splited === 3) {
+    return point.y == 0.25 ? 3 : 7;
+  }
+  if (splited === 4){
+    return point.y == 0.25 ? 4 : 8;
+  }
+  return 0;
 }
 function getCol(point: Vec) {
   return point.x == 0.5 ? 2 : 3;
 }
 function getDir(x: number): ArrowDir[] {
-  // if (props.grid.isSplited(focused)) {
-    return x > 0.75
-      ? ["none", "right", "rightdown"]
-      : ["none", "down", "downright"];
-  // }
-  // return i < 1 ? ["none", "right", "rightdown"] : ["none", "down", "downright"];
+  return x > 0.75
+    ? ["none", "right", "rightdown"]
+    : ["none", "down", "downright"];
 }
 function setArrow(v: Vec, p: Vec, direction: ArrowDir) {
   props.grid.setArrow(v, p, direction);
   refresh();
 }
-function onSplit() {
-  Grid.setSplit(
-    props.grid.isSplited(focused),
-    !props.grid.isSplited(focused).splited
+
+function onDragStart(y: number, x: number) {
+  const row = [...container.value.querySelectorAll(".row")][y];
+  if (!row) return;
+  cellDiv = [...row.querySelectorAll(".cell")][x];
+  draggingCell.value = props.grid.cells[y][x];
+}
+function onDragEnd() {
+  cellDiv = null;
+  draggingCell.value = null;
+}
+function onDragging(evt: MouseEvent) {
+  if (!draggingCell.value || !cellDiv) return;
+  const bb = cellDiv.getBoundingClientRect();
+  const row = Math.min(
+    4,
+    Math.max(1, Math.min(5, Math.round((4 * (evt.clientY - bb.y)) / bb.height)))
   );
+  Grid.setSplit(draggingCell.value, row);
   refresh();
 }
+
 function onClick(y: number, x: number) {
   props.grid.setDefinition({ x, y }, !props.grid.getCell({ x, y }).definition);
   props.grid.highlight(props.grid.getBounds(focused.value, props.dir).cells);
@@ -263,18 +314,23 @@ function refresh() {
   font-size: calc(v-bind(cellWidth) * 0.25);
 }
 .separator {
-  position: relative;
-  top: 50%;
-  widows: 100%;
-  background: black;
-  height: 1px;
+  cursor: pointer;
+  grid-column: 1 / 3;
+  grid-row-start: false;
+  padding-top: 10px;
+  border-bottom: 1px solid black;
+  transform: translate(0, -100%);
+}
+.separator:hover {
+  border-bottom: 3px solid #333;
 }
 .def {
+  position: absolute;
   border: 0;
   display: grid;
   width: v-bind(cellWidth);
   height: v-bind(cellWidth);
-  grid-template-rows: 25% 25% 25% 25%;
+  grid-template-rows: 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5%;
   grid-template-columns: 50% 50%;
   gap: 0px 0px;
   grid-auto-flow: row;
@@ -294,7 +350,7 @@ textarea {
   text-overflow: clip;
   overflow-wrap: anywhere;
   overflow: hidden;
-  grid-area: 1 / 1 / 5 / 3;
+  grid-area: 1 / 1 / 9 / 3;
 }
 textarea:focus {
   outline: 0;
