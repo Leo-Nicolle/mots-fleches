@@ -32,12 +32,15 @@
           :class="getClass(cell)"
           @click="focused = { y: i, x: j }"
         >
-          <textarea></textarea>
+          <textarea
+          @input="onChange($event, i, j)"
+          :value="cell.text.length ? cell.text: '' "
+          ></textarea>
           <div
             class="separator"
             @mousedown="onDragStart(i, j)"
             :style="{
-              gridRowStart: +cell.splited * 2 - 1,
+              gridRowStart: +Math.max(1, cell.splited * 2 - 1),
               gridColumnStart: 1,
               gridColumnEnd: 3,
             }"
@@ -205,6 +208,7 @@ function onDragStart(y: number, x: number) {
 function onDragEnd() {
   cellDiv = null;
   draggingCell.value = null;
+  emit('type');
 }
 function onDragging(evt: MouseEvent) {
   if (!draggingCell.value || !cellDiv) return;
@@ -226,9 +230,8 @@ function onClick(y: number, x: number) {
 
 function onChange(evt: InputEvent, y: number, x: number) {
   props.grid.setText({ x, y }, (evt.target as HTMLInputElement).value || "");
-  console.log();
-  if (props.grid.isDefinition(focused.value)) return;
   emit("type");
+  if (props.grid.isDefinition(focused.value)) return;
   const next = evt.target.value.length
     ? props.grid.increment(focused.value, props.dir)
     : props.grid.decrement(focused.value, props.dir);
@@ -269,6 +272,9 @@ function refresh() {
   height: v-bind(cellWidth);
   border: 1px solid black;
   cursor: text;
+  display: grid;
+  grid-template-rows: 0 50%;
+  grid-template-columns: 25% 25% 50%;
 }
 .cell > input {
   display: flex;
@@ -292,10 +298,9 @@ function refresh() {
   max-height: v-bind(buttonWidth);
   border-radius: 50%;
   padding: 0;
-  transform: translate(
-    calc(v-bind(cellWidth) - v-bind(buttonWidth) * 0.75),
-    calc(v-bind(buttonWidth) * -2)
-  );
+  grid-row-start: 2;
+  grid-column-start: 1;
+  transform: translate(-50%, -50%);
 }
 .cell:hover {
   background: #eee;
@@ -315,8 +320,6 @@ function refresh() {
 }
 .separator {
   cursor: pointer;
-  grid-column: 1 / 3;
-  grid-row-start: false;
   padding-top: 10px;
   border-bottom: 1px solid black;
   transform: translate(0, -100%);
@@ -346,7 +349,8 @@ textarea {
   height: 100%;
   resize: none;
   background: #aaa;
-  line-height: calc(v-bind(cellWidth) / 4 - 1px);
+  font-size: 10px;
+  line-height: calc(v-bind(cellWidth) / 4);
   text-overflow: clip;
   overflow-wrap: anywhere;
   overflow: hidden;
