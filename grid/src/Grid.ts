@@ -7,7 +7,7 @@ export const nullCell:Cell = {
   y: -1,
   definition: false,
   highlighted: false,
-  splited: false,
+  splited: 0,
   suggestion: '',
   arrows: [],
   text: ''
@@ -36,7 +36,7 @@ export default class Grid {
           y,
           definition: false,
           highlighted: false,
-          splited: false,
+          splited: 0,
           arrows: [],
           suggestion: '',
           text: "",
@@ -199,7 +199,7 @@ export default class Grid {
     if (!this.isValid(v)) return false;
     return this.cells[v.y][v.x].splited;
   }
-  static setSplit(cell: Cell, split: boolean){
+  static setSplit(cell: Cell, split: number){
 
     if (cell.splited === split) return;
     const rightArrows = cell.arrows.filter(a => a.position.x === 1);

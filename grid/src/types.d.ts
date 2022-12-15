@@ -16,7 +16,7 @@ export type Cell = {
   highlighted: boolean;
   suggestion: string;
   arrows: Arrow[];
-  splited: boolean;
+  splited: number;
   text: string;
 }
 
