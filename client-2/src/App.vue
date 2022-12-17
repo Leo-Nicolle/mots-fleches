@@ -13,7 +13,7 @@ import axios from "axios";
 import apiMixin from "./js/apiMixin";
 // import Crosswords from "./components/Crosswords.vue";
 import Editor from "./components/Editor.vue";
-import Grid from "../../grid/src/Grid";
+import { Grid } from "../../grid/src/Grid";
 
 export default {
   name: "App",
@@ -64,7 +64,7 @@ export default {
   },
 
   mounted() {
-    this.fetch()
+    this.fetch();
   },
 };
 </script>

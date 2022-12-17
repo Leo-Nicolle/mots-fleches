@@ -3,16 +3,15 @@
     <n-button icon-placement="right" @click="onSplit">
       {{ cell.splited ? "unsplit" : "split" }}
     </n-button> -->
- 
+
   <!-- </div> -->
 </template>
 
 <script setup lang="ts">
 import { defineProps, defineEmits, ref, watchEffect, reactive } from "vue";
 import Arrow from "./Arrow";
-import { ArrowDir, Cell, Vec } from "../grid/types";
 import Vector from "vector2js";
-import Grid from "../grid/Grid";
+import { Grid, ArrowDir, Cell, Vec } from "../grid";
 
 const definition = ref(null);
 const version = ref(1);
@@ -37,7 +36,7 @@ const data = reactive({
 });
 
 function onFocus() {
-  emit('click2')
+  emit("click2");
   console.log(`onFocus`);
 }
 function getTransform(p) {
@@ -66,9 +65,11 @@ function getCol(point: Vec) {
 }
 function getDir(i: number): ArrowDir[] {
   if (props.cell.splited) {
-    return i < 2 ? ['none', "right", "rightdown"] : ['none', "down", "downright"];
+    return i < 2
+      ? ["none", "right", "rightdown"]
+      : ["none", "down", "downright"];
   }
-  return i < 1 ? ['none', "right", "rightdown"] : ['none', "down", "downright"];
+  return i < 1 ? ["none", "right", "rightdown"] : ["none", "down", "downright"];
 }
 function setArrow(p: Vec, direction: ArrowDir) {
   Grid.setArrow(props.cell, p, direction);
@@ -82,7 +83,6 @@ function onSplit() {
 function refresh() {
   version.value += 1;
 }
-
 </script>
 
 <style scoped>

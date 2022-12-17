@@ -21,6 +21,23 @@ export type Cell = {
 }
 
 
+export type GridOptions = {
+  grid: {
+    cellSize: string;
+    borderSize: string;
+    borderColor: string;
+  };
+  definition: {
+    font: string;
+    size: string;
+    color: string;
+  };
+  arrow: {
+    size: string;
+    color: string;
+  };
+};
+
 // export type Grid = {
 //   rows: number;
 //   cols: number;

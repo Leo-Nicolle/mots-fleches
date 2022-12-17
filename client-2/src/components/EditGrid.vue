@@ -33,8 +33,8 @@
           @click="focused = { y: i, x: j }"
         >
           <textarea
-          @input="onChange($event, i, j)"
-          :value="cell.text.length ? cell.text: '' "
+            @input="onChange($event, i, j)"
+            :value="cell.text.length ? cell.text : ''"
           ></textarea>
           <div
             class="separator"
@@ -83,7 +83,7 @@
               gridRowStart: getRow(a.position, cell.splited),
             }"
           >
-            <Arrow :dir="a.direction" />
+            <Arrow :dir="a.direction" :strokeColor="options.arrow.color" />
           </n-icon>
         </div>
         <button @click="onClick(i, j)"></button>
@@ -95,9 +95,16 @@
 <script setup lang="ts">
 import { defineEmits, ref, defineProps, watchEffect } from "vue";
 import Arrow from "./Arrow";
-import Grid, { nullCell } from "../grid/Grid";
+import {
+  Grid,
+  GridOptions,
+  nullCell,
+  ArrowDir,
+  Cell,
+  Direction,
+  Vec,
+} from "../grid";
 import Vector from "vector2js";
-import { ArrowDir, Cell, Direction, Vec } from "../grid/types";
 
 const w = ref(56);
 const b = ref(8);
@@ -119,7 +126,14 @@ const container = ref(null);
 const focused = ref<Vec>({ x: -1, y: -1 });
 const cellWidth = ref(`${w.value}px`);
 const buttonWidth = ref(`${b.value}px`);
-const props = defineProps<{ grid: Grid; suggestion: string; dir: Direction }>();
+const props = defineProps<{
+  grid: Grid;
+  options: GridOptions;
+  suggestion: string;
+  dir: Direction;
+  width: number;
+}>();
+
 const emit = defineEmits<{
   (event: "type", value: number): void;
   (event: "focus", value: Vec): void;
@@ -130,10 +144,12 @@ const draggingCell = ref<Cell | null>(null);
 watchEffect(() => {
   const cells = props.grid.getBounds(focused.value, props.dir).cells;
   props.grid.highlight(cells);
+  console.log("FOCUS", !!container.value, cells.length);
   if (!container.value) return;
+  if (props.grid.isValid(focused.value)) {
+    emit("focus", props.grid.cells[focused.value.y][focused.value.x]);
+  }
   if (!cells.length) return;
-  console.log("focus", cells[0]);
-  emit("focus", cells[0]);
   if (props.grid.isDefinition(focused.value)) return;
   const row = [...container.value.querySelectorAll(".row")][focused.value.y];
   if (!row) return;
@@ -172,7 +188,7 @@ function getHanldePosition(p: Vec, o = 0) {
 
 function getRow(point: Vec, splited: number) {
   if (point.y === 1) return 9;
-  if (splited <= 1){
+  if (splited <= 1) {
     return 5;
   }
   if (splited === 2) {
@@ -181,7 +197,7 @@ function getRow(point: Vec, splited: number) {
   if (splited === 3) {
     return point.y == 0.25 ? 3 : 7;
   }
-  if (splited === 4){
+  if (splited === 4) {
     return point.y == 0.25 ? 4 : 8;
   }
   return 0;
@@ -208,7 +224,7 @@ function onDragStart(y: number, x: number) {
 function onDragEnd() {
   cellDiv = null;
   draggingCell.value = null;
-  emit('type');
+  emit("type");
 }
 function onDragging(evt: MouseEvent) {
   if (!draggingCell.value || !cellDiv) return;
@@ -268,9 +284,9 @@ function refresh() {
   flex-direction: column;
 }
 .cell {
-  width: v-bind(cellWidth);
-  height: v-bind(cellWidth);
-  border: 1px solid black;
+  width: v-bind(options.grid.cellSize); 
+  height: v-bind(options.grid.cellSize);
+  border: v-bind(options.grid.borderSize) solid v-bind(options.grid.borderColor);
   cursor: text;
   display: grid;
   grid-template-rows: 0 50%;
@@ -279,12 +295,12 @@ function refresh() {
 .cell > input {
   display: flex;
   align-items: center;
-  width: v-bind(cellWidth);
-  height: v-bind(cellWidth);
+  width: v-bind(options.grid.cellSize);
+  height: v-bind(options.grid.cellSize);
   padding: 0;
   outline: 0;
   text-align: center;
-  font-size: v-bind(cellWidth);
+  font-size: v-bind(options.grid.cellSize);
   text-transform: capitalize;
   justify-content: space-around;
   border: 0;
@@ -316,7 +332,7 @@ function refresh() {
 }
 .cell > input.definition {
   background: #aaa;
-  font-size: calc(v-bind(cellWidth) * 0.25);
+  font-size: calc(v-bind(options.grid.cellSize) * 0.25);
 }
 .separator {
   cursor: pointer;
@@ -331,8 +347,8 @@ function refresh() {
   position: absolute;
   border: 0;
   display: grid;
-  width: v-bind(cellWidth);
-  height: v-bind(cellWidth);
+  width: v-bind(options.grid.cellSize);
+  height: v-bind(options.grid.cellSize);
   grid-template-rows: 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5%;
   grid-template-columns: 50% 50%;
   gap: 0px 0px;
@@ -349,8 +365,10 @@ textarea {
   height: 100%;
   resize: none;
   background: #aaa;
-  font-size: 10px;
-  line-height: calc(v-bind(cellWidth) / 4);
+  color: v-bind(options.definition.color);
+  font-family: v-bind(options.definition.font);
+  font-size: v-bind(options.definition.size);
+  line-height: calc(v-bind(options.grid.cellSize) / 4);
   text-overflow: clip;
   overflow-wrap: anywhere;
   overflow: hidden;
@@ -361,8 +379,8 @@ textarea:focus {
   border: 0;
 }
 .arrow {
-  height: 2em;
-  width: 2em;
+  height: v-bind(options.arrow.size);
+  width: v-bind(options.arrow.size);
 }
 .handle {
   position: relative;

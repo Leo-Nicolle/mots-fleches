@@ -3,7 +3,7 @@
     viewBox="-1 -1 2 2"
     fill="none"
     class="icon"
-    stroke="black"
+    :stroke="strokeColor"
     stroke-width="0.1"
     stroke-linecap="round"
     :style="{
@@ -24,7 +24,7 @@ import { defineProps } from "vue";
 import { ArrowDir } from "../grid/types";
 // :style="{transform: `${dir.startsWith('right') ? 'rotate(-90deg)scale(-1, 1)': ''}`}"
 
-const props = defineProps<{ width?: number; dir: ArrowDir }>();
+const props = defineProps<{dir: ArrowDir, strokeColor: string }>();
 
 function getD(dir: ArrowDir) {
   if (dir === "none") return "M 0 0.5 L 1 -0.5 M 0 -0.5 L 1 0.5 ";

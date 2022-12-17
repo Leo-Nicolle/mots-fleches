@@ -1,17 +1,22 @@
 <template>
   <div ref="editor" class="editor" :version="version">
-    <Suggestion
-      v-if="!focusedCell.definition"
-      :point="focus"
-      :dir="dir"
-      :query="''"
-      :grid-id="grid.id"
-      @hover="onHover"
-      @click="onClick"
-      @dir="(d) => (dir = d)"
-    >
-    </Suggestion>
-    <DefinitionOptions v-else :cell="focusedCell"></DefinitionOptions>
+    <div class="leftpanel">
+      <Suggestion
+        v-if="false && !focusedCell.definition"
+        :point="focus"
+        :dir="dir"
+        :query="''"
+        :grid-id="grid.id"
+        @hover="onHover"
+        @click="onClick"
+        @dir="(d) => (dir = d)"
+      >
+      </Suggestion>
+
+      <n-scrollbar v-else>
+        <Options  v-model="options"></Options>
+      </n-scrollbar>
+    </div>
     <EditGrid
       @type="onType"
       @focus="(point) => (focus = point)"
@@ -19,6 +24,8 @@
       @mouseenter="onMouseEnter"
       :grid="grid"
       :focused-cell="focusedCell"
+      :width="width"
+      :options="options"
       :suggestion="suggestion"
       :dir="dir"
     />
@@ -27,11 +34,27 @@
 
 <script setup lang="ts">
 import { defineProps, defineEmits, ref, computed, watchEffect } from "vue";
-import Grid, { nullCell } from "../grid/Grid";
-import { Cell, Direction, Vec } from "../grid/types";
+import { Grid, Cell, Direction, Vec, nullCell, GridOptions } from "../grid";
 import EditGrid from "./EditGrid.vue";
+import Options from "./Options.vue";
 import Suggestion from "./Suggestion.vue";
-import DefinitionOptions from "./DefinitionOptions.vue";
+
+const options: GridOptions = ref({
+  grid: {
+    cellSize: "56px",
+    borderColor: "black",
+    borderSize: "1px",
+  },
+  definition: {
+    font: "sans-serif",
+    size: "12px",
+    color: "black",
+  },
+  arrow: {
+    size: "2em",
+    color: "black",
+  },
+});
 
 const props = defineProps<{ grid: Grid }>();
 const emit = defineEmits<{
@@ -42,10 +65,12 @@ const dir = ref<Direction>("horizontal");
 const focus = ref<Vec>({ x: -1, y: -1 });
 let focusedCell = computed<Cell>(() => {
   const { x, y } = focus.value;
+  console.log("compute");
   return Grid.equal(nullCell, { x, y }) ? nullCell : props.grid.cells[y][x];
 });
 const suggestion = ref("");
 const version = ref(0);
+const width = ref(56);
 
 setTimeout(() => {
   emit("update", 1);
@@ -58,7 +83,9 @@ function onType() {
   emit("update", 1);
 }
 function onHover(value: string) {
-  props.grid.suggest([value], [focus.value], [dir.value]);
+  const cells = props.grid.getBounds(focus.value, dir.value).cells;
+  if (!cells || !cells.length) return;
+  props.grid.suggest([value], [cells[0]], [dir.value]);
   refresh();
 }
 function onMouseEnter() {
@@ -67,7 +94,9 @@ function onMouseEnter() {
   }, 100);
 }
 function onClick(value: string) {
-  props.grid.setWord(value, focus.value, dir.value);
+  const cells = props.grid.getBounds(focus.value, dir.value).cells;
+  if (!cells || !cells.length) return;
+  props.grid.setWord(value, cells[0], dir.value);
   refresh();
 }
 </script>
@@ -80,5 +109,13 @@ function onClick(value: string) {
 .editor > .suggestion {
   margin-right: 2px;
   max-width: 180px;
+}
+.leftpanel {
+  width: 210px;
+  min-width: 210px;
+  overflow: hidden;
+}
+.n-scrollbar {
+  max-height: calc(100vh - 10px);
 }
 </style>

@@ -13,7 +13,7 @@ export const nullCell:Cell = {
   text: ''
 };
 
-export default class Grid {
+export class Grid {
   public rows: number;
   public cols: number;
   public comment: string;
