@@ -29,6 +29,10 @@
       :suggestion="suggestion"
       :dir="dir"
     />
+    <Exporter
+      :grid="grid"
+      :options="options"
+    />
   </div>
 </template>
 
@@ -36,6 +40,8 @@
 import { defineProps, defineEmits, ref, computed, watchEffect } from "vue";
 import { Grid, Cell, Direction, Vec, nullCell, GridOptions } from "../grid";
 import EditGrid from "./EditGrid.vue";
+import Exporter from "./Exporter.vue";
+
 import Options from "./Options.vue";
 import Suggestion from "./Suggestion.vue";
 
@@ -115,7 +121,7 @@ function onClick(value: string) {
   min-width: 210px;
   overflow: hidden;
 }
-.n-scrollbar {
-  max-height: calc(100vh - 10px);
+.leftpanel > .n-scrollbar {
+  max-height: 100vh;
 }
 </style>

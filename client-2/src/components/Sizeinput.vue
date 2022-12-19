@@ -38,7 +38,7 @@ const options = ref([
 ]);
 
 const value = computed({
-  get: () => props.modelValue.slice(0, -2),
+  get: () => +props.modelValue.slice(0, -2),
   set: (value) => emit("update:modelValue", value + props.modelValue.slice(-2)),
 });
 

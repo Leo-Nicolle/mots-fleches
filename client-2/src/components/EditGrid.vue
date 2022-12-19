@@ -69,7 +69,11 @@
             >
               <template #icon>
                 <n-icon>
-                  <Arrow :dir="dir" />
+                  <Arrow
+                    :dir="dir"
+                    :center="true"
+                    :strokeColor="options.arrow.color"
+                  />
                 </n-icon>
               </template>
             </n-button>
@@ -83,7 +87,11 @@
               gridRowStart: getRow(a.position, cell.splited),
             }"
           >
-            <Arrow :dir="a.direction" :strokeColor="options.arrow.color" />
+            <Arrow
+              :dir="a.direction"
+              :center="true"
+              :strokeColor="options.arrow.color"
+            />
           </n-icon>
         </div>
         <button @click="onClick(i, j)"></button>
@@ -167,23 +175,6 @@ function getClass(cell: Cell) {
     Grid.equal(f, cell) ? "focus" : null,
     props.grid.isDefinition(cell) ? "definition" : null,
   ].filter((e) => e);
-}
-function getTransform(p) {
-  if (!definition.value) return `translate(0, 0)`;
-  const { x, y, width, height } = definition.value
-    .querySelector(".def")
-    .getBoundingClientRect();
-  console.log(p, width, height);
-  const res = new Vector(p.x, p.y).mul({ x: width, y: height });
-  return `translate(${res.x}px, ${res.y}px)`;
-}
-function getHanldePosition(p: Vec, o = 0) {
-  if (!definition.value) return { x: 0, y: 0 };
-  const { x, y, width, height } = definition.value
-    .querySelector(".def")
-    .getBoundingClientRect();
-  console.log(p, width, height);
-  return new Vector(p.x, p.y).mul({ x: width, y: height });
 }
 
 function getRow(point: Vec, splited: number) {
@@ -284,7 +275,7 @@ function refresh() {
   flex-direction: column;
 }
 .cell {
-  width: v-bind(options.grid.cellSize); 
+  width: v-bind(options.grid.cellSize);
   height: v-bind(options.grid.cellSize);
   border: v-bind(options.grid.borderSize) solid v-bind(options.grid.borderColor);
   cursor: text;

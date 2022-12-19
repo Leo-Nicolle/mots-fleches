@@ -1,17 +1,13 @@
 <template>
   <svg
-    viewBox="-1 -1 2 2"
+    viewBox="-100 -100 200 200"
     fill="none"
     class="icon"
     :stroke="strokeColor"
-    stroke-width="0.1"
+    stroke-width="10"
     stroke-linecap="round"
     :style="{
-      transform: `${
-        !dir.startsWith('right')
-          ? 'rotate(-90deg)scale(-1, 1)translate(-50%,-50%)'
-          : 'translate(-50%,-50%)'
-      }`,
+      transform: transform,
     }"
     xmlns="http://www.w3.org/2000/svg"
   >
@@ -20,17 +16,27 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from "vue";
+import { defineProps, computed } from "vue";
 import { ArrowDir } from "../grid/types";
 // :style="{transform: `${dir.startsWith('right') ? 'rotate(-90deg)scale(-1, 1)': ''}`}"
 
-const props = defineProps<{dir: ArrowDir, strokeColor: string }>();
-
+const props =
+  defineProps<{ dir: ArrowDir; strokeColor: string; center: boolean }>();
+function getTranform() {
+ 
+}
+let transform = computed<string>(() => {
+  const translate = props.center ? `translate(-50%,-50%)` : `translate(0,0)`;
+  if (props.dir.startsWith("right")) {
+    return `rotate(180deg)scale(-1, -1)${translate}`;
+  }
+  return `scale(-1,1)rotate(90deg)${translate}`;
+});
 function getD(dir: ArrowDir) {
-  if (dir === "none") return "M 0 0.5 L 1 -0.5 M 0 -0.5 L 1 0.5 ";
+  if (dir === "none") return "M 0 50 L 100 -50 M 0 -50 L 100 50";
   if (dir === "rightdown" || dir === "downright")
-    return "M 0 0 L 0.75 0 0.75 1 1 0.75 M 0.5 0.75 L 0.75 1";
-  return "M 0 0 L 0.9 0 0.75 0.25 M 0.75 -0.25 L 0.9 0";
+    return "M 0 0 L 75 0 75 100 100 75 M 50 75 L 75 100";
+  return "M 0 0 L 90 0 75 25 M 75 -25 L 90 0";
 }
 </script>
 
