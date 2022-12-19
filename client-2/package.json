@@ -16,6 +16,7 @@
     "crypto": "^1.0.1",
     "dom-to-image": "^2.6.0",
     "grid": "file:../grid",
+    "html2canvas": "^1.4.1",
     "primeicons": "^5.0.0",
     "primevue": "^3.12.5",
     "random-normal": "^1.0.0",

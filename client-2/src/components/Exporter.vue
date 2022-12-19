@@ -201,8 +201,10 @@ function refresh() {
   flex-direction: row;
 }
 .grid {
-  display: flex;
+  display: inline-flex;
+  flex-wrap: nowrap;
   flex-direction: column;
+  width: calc(v-bind(options.grid.cellSize) * v-bind(grid.rows));
 }
 .cell {
   width: v-bind(options.grid.cellSize);

@@ -5,13 +5,13 @@
       :grid="grids[activeGrid]"
       @update="onUpdate"
     ></Editor>
+    <div class="exp" :innerHtml="exp"></div>
   </div>
 </template>
 
 <script>
 import axios from "axios";
 import apiMixin from "./js/apiMixin";
-// import Crosswords from "./components/Crosswords.vue";
 import Editor from "./components/Editor.vue";
 import { Grid } from "../../grid/src/Grid";
 
@@ -22,10 +22,10 @@ export default {
     return {
       activeGrid: 0,
       grids: [],
+      exp: "",
     };
   },
   components: {
-    // Crosswords,
     Editor,
   },
   methods: {
@@ -70,4 +70,18 @@ export default {
 </script>
 
 <style>
+#Crosswords {
+  max-height: 100vh;
+  overflow: hidden;
+}
+body{
+ width: min-content;
+ max-width: 100vw;
+ overflow: hidden;
+}
+.exp {
+  position: absolute;
+  top: 22px;
+  left: 400px;
+}
 </style>

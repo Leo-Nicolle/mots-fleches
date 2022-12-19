@@ -2,7 +2,7 @@
   <div ref="editor" class="editor" :version="version">
     <div class="leftpanel">
       <Suggestion
-        v-if="false && !focusedCell.definition"
+        v-if="!focusedCell.definition"
         :point="focus"
         :dir="dir"
         :query="''"
@@ -13,26 +13,28 @@
       >
       </Suggestion>
 
-      <n-scrollbar v-else>
-        <Options  v-model="options"></Options>
+      <n-scrollbar style="max-height: 80vh" v-else>
+        <Options v-model="options"></Options>
       </n-scrollbar>
     </div>
-    <EditGrid
-      @type="onType"
-      @focus="(point) => (focus = point)"
-      @out="() => grid.suggest([], [], [])"
-      @mouseenter="onMouseEnter"
-      :grid="grid"
-      :focused-cell="focusedCell"
-      :width="width"
-      :options="options"
-      :suggestion="suggestion"
-      :dir="dir"
-    />
-    <Exporter
-      :grid="grid"
-      :options="options"
-    />
+    <n-scrollbar style="max-height: calc(100vh - 100px)">
+      <n-scrollbar style="max-width: calc(100vw - 100px)">
+        <EditGrid
+          @type="onType"
+          @focus="(point) => (focus = point)"
+          @out="() => grid.suggest([], [], [])"
+          @mouseenter="onMouseEnter"
+          :grid="grid"
+          :focused-cell="focusedCell"
+          :width="width"
+          :options="options"
+          :suggestion="suggestion"
+          :dir="dir"
+        />
+      </n-scrollbar>
+    </n-scrollbar>
+
+    <Exporter :grid="grid" :options="options" />
   </div>
 </template>
 
@@ -111,6 +113,15 @@ function onClick(value: string) {
 .editor {
   display: flex;
   flex-direction: row;
+  max-width: 100vw;
+  overflow: hidden;
+}
+.grid-wrap {
+  max-width: 200px;
+  /* calc(100vw - 210px); */
+  max-height: 200px;
+  /* calc(100vh - 210px); */
+  /* overflow-x: scroll; */
 }
 .editor > .suggestion {
   margin-right: 2px;

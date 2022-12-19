@@ -335,7 +335,6 @@ function refresh() {
   border-bottom: 3px solid #333;
 }
 .def {
-  position: absolute;
   border: 0;
   display: grid;
   width: v-bind(options.grid.cellSize);
