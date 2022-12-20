@@ -1,6 +1,10 @@
 <template>
   <div class="grids">
-    <n-scroll>
+    <div class="leftpanel">
+LSSADOSA
+
+    </div>
+    <div class="wrapper scroll">
       <div>
         <n-card
           v-for="(grid, i) in grids"
@@ -9,10 +13,15 @@
           :title="grid.title ? grid.title : `Nouvelle Grille`"
         >
           <template #cover>
+            <button v-if="!grid.thumbnail" class="thumbnail add" grid.thumbnail>
+              <n-icon>
+                <HeartOutline />
+              </n-icon>
+            </button>
             <img
-              v-if="active !== grid || !shouldExport"
+              v-else-if="active !== grid || !shouldExport"
               class="thumbnail"
-              :src="grid.thumbnail || '/assets/logo.png'"
+              :src="grid.thumbnail"
             />
             <n-button
               v-else
@@ -23,6 +32,15 @@
             </n-button>
           </template>
           {{ grid.comment ? grid.comment : "Nouvelle Grille" }}
+        </n-card>
+        <n-card @click="createGrid" title="Créer">
+          <template #cover>
+            <n-button class="thumbnail add">
+              <n-icon>
+                <AddIcon />
+              </n-icon>
+            </n-button>
+          </template>
         </n-card>
       </div>
       <Exporter
@@ -36,7 +54,7 @@
         :options="options"
         @exported="onExported"
       />
-    </n-scroll>
+    </div>
   </div>
 </template>
 
@@ -44,6 +62,8 @@
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import axios from "axios";
+import { AddCircleOutline as AddIcon, HeartOutline } from "@vicons/ionicons5";
+
 import { getUrl } from "../js/utils";
 import Exporter from "../components/Exporter.vue";
 import { Grid, GridOptions } from "../grid";
@@ -106,6 +126,13 @@ function onExported(canvas: HTMLCanvasElement) {
   shouldExport.value = false;
 }
 
+function createGrid() {
+  const newGrid = new Grid(10, 10);
+  newGrid.name = "Nouvelle Grille";
+  return axios.post(getUrl("grid"), { grid: newGrid.serialize() })
+  .then(() => fetch())
+}
+
 onMounted(() => {
   fetch().then(() => {
     const lastRoute = router.options.history.state.back as string;
@@ -119,21 +146,32 @@ onMounted(() => {
 </script>
 
 <style>
+.leftpanel {
+  width: 210px;
+  min-width: 210px;
+  overflow: hidden;
+}
 .n-grid {
   margin: 0 10px;
 }
 .grids {
   width: 100vw;
   height: calc(100vh - 55px);
-}
-.grids > n-scroll > div {
-  grid-template-columns: repeat(12, minmax(200px, 200px));
-  width: 100%;
   display: grid;
-  gap: 8px 12px;
+  grid-template-columns: 200px auto;
 }
-.n-scroll {
+.wrapper > div {
+  justify-content: center;
+  gap: 8px 12px; 
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 200px));
+  width: calc(100vw - 210px);
+}
+
+.wrapper {
   max-height: calc(100vh - 55px);
+  padding-bottom: 10px;
+  overflow-x: hidden;
 }
 .n-card {
   box-shadow: 4px 4px 7px #ddd;
@@ -153,6 +191,9 @@ onMounted(() => {
   width: 170px;
   height: 170px;
   margin: 4px auto;
+}
+.add svg {
+  transform: scale(5);
 }
 </style>
 

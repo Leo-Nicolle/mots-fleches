@@ -47,6 +47,9 @@ const menuOptions = ref<MenuOption[]>([
 </script>
 
 <style>
+body{
+  overflow: hidden;
+}
 #app{
   width: 100vw;
   max-height: 100vh;
@@ -63,5 +66,20 @@ nav {
 .burger {
   margin-left: auto;
   margin-right: 25px;
+}
+
+
+.scroll::-webkit-scrollbar {
+  width: 5px;
+}
+ 
+.scroll::-webkit-scrollbar-thumb {
+  background: #666;
+  border-radius: 20px;
+}
+
+.scroll::-webkit-scrollbar-track {
+  background: #ddd;
+  border-radius: 20px;
 }
 </style>
