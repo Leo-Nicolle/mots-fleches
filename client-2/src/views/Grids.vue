@@ -1,23 +1,34 @@
 <template>
   <div class="grids">
     <n-scroll>
-      <n-grid :x-gap="12" :y-gap="8" :cols="4">
-        <n-grid-item
+      <div>
+        <n-card
           v-for="(grid, i) in grids"
           :key="i"
           @click="$router.push(`/grid/${grid.id}`)"
+          :title="grid.title ? grid.title : `Nouvelle Grille`"
         >
-          <n-card :title="grid.title ? grid.title : `Nouvelle Grille`">
-            <template #cover>
-              <img v-if="imgs[i]" class="thumbnail" :src="imgs[i]" />
-            </template>
-            {{ grid.comment ? grid.comment : "Nouvelle Grille" }}
-          </n-card>
-        </n-grid-item>
-      </n-grid>
+          <template #cover>
+            <img
+              v-if="active !== grid || !shouldExport"
+              class="thumbnail"
+              :src="grid.thumbnail || '/assets/logo.png'"
+            />
+            <n-button
+              v-else
+              class="thumbnail"
+              :loading="true"
+              icon-placement="center"
+            >
+            </n-button>
+          </template>
+          {{ grid.comment ? grid.comment : "Nouvelle Grille" }}
+        </n-card>
+      </div>
       <Exporter
-        v-if="grid"
-        :grid="grid"
+        v-if="active"
+        :grid="active"
+        :shouldExport="shouldExport"
         :arrows="false"
         :separators="false"
         :texts="true"
@@ -31,11 +42,12 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import axios from "axios";
 import { getUrl } from "../js/utils";
 import Exporter from "../components/Exporter.vue";
 import { Grid, GridOptions } from "../grid";
-
+const router = useRouter();
 const options: GridOptions = ref({
   grid: {
     cellSize: "56px",
@@ -54,39 +66,56 @@ const options: GridOptions = ref({
 });
 
 const grids = ref<Grid[]>([]);
-const grid = ref<Grid>();
-const imgs = ref<string[]>([]);
+const active = ref<Grid>();
+const shouldExport = ref(false);
 
 function fetch() {
   return axios
     .get(getUrl("grid"))
     .then(({ data }) => {
       grids.value = data.map((g) => Grid.unserialize(JSON.stringify(g)));
-      grid.value = grids.value[0];
-      console.log(grids.value.length);
     })
     .catch((e) => {
       console.error("E", e);
     });
 }
+
 function onExported(canvas: HTMLCanvasElement) {
-  grids.value.forEach((g, i) => {
-    if (!grid.value || grid.value.id !== g.id) return;
-    imgs.value[i] = canvas.toDataURL();
-  });
-  const noThumbnail = grids.value.filter((g, i) => !imgs.value[i]);
-  if (!noThumbnail.length) return;
-  grid.value = noThumbnail[0];
+  if (!active.value) return;
+  const thumb = document.createElement("canvas");
+  const thumbWidth = 128;
+  thumb.width = 128;
+  thumb.height = Math.floor((canvas.height / canvas.width) * thumbWidth);
+  thumb
+    .getContext("2d")
+    ?.drawImage(
+      canvas,
+      0,
+      0,
+      thumb.width * 2,
+      thumb.height * 2,
+      0,
+      0,
+      canvas.width / 4,
+      canvas.height / 4
+    );
+  document.body.appendChild(canvas);
+  document.body.appendChild(thumb);
+
+  // active.value.setThumbnail(thumb.toDataURL());
+  shouldExport.value = false;
 }
 
 onMounted(() => {
-  fetch().then(() => {});
+  fetch().then(() => {
+    const lastRoute = router.options.history.state.back as string;
+    if (!lastRoute) return;
+    const match = lastRoute.match(/\/grid\/(.*)/);
+    if (!match || !match.length) return;
+    active.value = grids.value.find((grid) => grid.id === match[1]);
+    shouldExport.value = true;
+  });
 });
-
-//   mounted() {
-//     this.fetch();
-//   },
-// };
 </script>
 
 <style>
@@ -96,6 +125,12 @@ onMounted(() => {
 .grids {
   width: 100vw;
   height: calc(100vh - 55px);
+}
+.grids > n-scroll > div {
+  grid-template-columns: repeat(12, minmax(200px, 200px));
+  width: 100%;
+  display: grid;
+  gap: 8px 12px;
 }
 .n-scroll {
   max-height: calc(100vh - 55px);
@@ -108,9 +143,15 @@ onMounted(() => {
 .n-card:hover {
   background: #ddd;
 }
+.n-card-cover {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+}
 .thumbnail {
-  max-width: 200px;
-  height: auto;
+  width: 170px;
+  height: 170px;
   margin: 4px auto;
 }
 </style>

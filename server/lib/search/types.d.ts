@@ -1,4 +1,4 @@
-import { Cell } from "../../../grid/src/types";
+import { Cell } from "../../../grid/src";
 
 declare global {
   const APP_CROSSWORDS_PORT: string;

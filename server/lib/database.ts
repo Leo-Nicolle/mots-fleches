@@ -1,6 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
-import Grid from "../../grid/src/Grid";
+import { Grid } from "../../grid/src";
 
 export class Database {
   public words: string[];
@@ -88,6 +88,7 @@ export class Database {
   }
   updateGrid(gridstring: string) {
     const newgrid = Grid.unserialize(gridstring);
+    console.log(gridstring, newgrid.thumbnail);
     return this.getGrids().then((grids) => {
       this.grids = this.grids.filter(({ id }) => id !== newgrid.id);
       this.grids.push(newgrid);

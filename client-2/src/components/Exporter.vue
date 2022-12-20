@@ -57,13 +57,13 @@ const props = defineProps<{
   grid: Grid;
   texts: boolean;
   definitions: boolean;
+  shouldExport: boolean;
   separators: boolean;
   arrows: boolean;
   options: GridOptions;
 }>();
 
 const emit = defineEmits<{
-  // (event: "type", value: number): void;
   (event: "exported", value: HTMLCanvasElement): void;
 }>();
 
@@ -112,8 +112,6 @@ function exportPdf() {
       const ctx = (canvas as HTMLCanvasElement).getContext(
         "2d"
       ) as CanvasRenderingContext2D;
-      // container.value.appendChild(canvas as HTMLCanvasElement);
-      // window.ctx = ctx;
       ctx.resetTransform();
       const cellWidth = canvas.width / props.grid.cols;
       const aw = arrowSize.width * dpx;
@@ -154,7 +152,8 @@ function exportPdf() {
     });
 }
 watchEffect(() => {
-  if (!props.grid) return;
+  console.log("watch", props.grid, props.shouldExport)
+  if (!props.grid || !props.shouldExport) return;
   setTimeout(() => {
     exportPdf();
   }, 500);

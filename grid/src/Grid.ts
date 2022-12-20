@@ -1,6 +1,7 @@
 import { ArrowDir, Bounds, Cell, Direction, Vec } from "./types";
 import Vector from "vector2js";
 import {v4 as uuid} from "uuid";
+import { Cellular } from "@vicons/ionicons5";
 
 export const nullCell:Cell = {
   x: -1,
@@ -20,27 +21,20 @@ export class Grid {
   public title: string;
   public cells: Cell[][];
   public id: string;
+  public thumbnail: string;
 
   constructor(rows: number, cols: number, id?: string) {
     this.cols = cols;
     this.rows = rows;
     this.comment = '';
     this.title = '';
+    this.thumbnail = '';
     this.id = id || uuid();
     this.cells =  new Array(rows)
       .fill(0)
       .map((_, y) => new Array(cols)
         .fill(0)
-        .map((_, x) => ({
-          x,
-          y,
-          definition: false,
-          highlighted: false,
-          splited: 0,
-          arrows: [],
-          suggestion: '',
-          text: "",
-        }))
+        .map((_, x) => Grid.newCell(x,y))
       );
   }
 
@@ -50,6 +44,21 @@ export class Grid {
 
   isDefinition({x, y}: Vec): boolean {
     return this.isValid({x, y}) && this.cells[y][x].definition;
+  }
+
+  resize(rows: number, cols: number){
+    const newCells = new Array(rows)
+    .fill(0)
+    .map((_, i) => new Array(cols).fill(0)
+    .map((_ ,j) => {
+      if (this.cells[i] && this.cells[i][j]){
+        return this.cells[i][j];
+      }
+      return Grid.newCell(j,i);
+    }));
+    this.rows = rows;
+    this.cols = cols;
+    this.cells = newCells;
   }
 
   setDefinition({x, y}: Vec, value: boolean): void {
@@ -91,6 +100,10 @@ export class Grid {
   setArrow(v: Vec, point: Vec, direction: ArrowDir): void {
     if (!this.isValid(v)) return;
     Grid.setArrow(this.cells[v.y][v.x], point, direction);
+  }
+
+  setThumbnail(t :string){
+    this.thumbnail = t;
   }
 
   increment(v: Vec, direction: Direction): Cell {
@@ -190,6 +203,7 @@ export class Grid {
       rows: this.rows,
       cols: this.cols,
       cells: this.cells,
+      thumbnail: this.thumbnail,
       comment: this.comment,
       title: this.title
     });
@@ -217,11 +231,12 @@ export class Grid {
   }
 
   static unserialize(s: string){
-    const {rows, cols,comment, title, id, cells} = JSON.parse(s) as {
+    const {rows, cols,comment, title, id, cells, thumbnail} = JSON.parse(s) as {
       rows: number,
       cols: number,
       id: string,
       comment: string,
+      thumbnail: string,
       title: string
       cells: Cell[][]
     };
@@ -235,7 +250,20 @@ export class Grid {
     });
     res.title = title;
     res.comment = comment;
+    res.thumbnail = thumbnail;
     return res;
   }
 
+  static newCell(x: number, y: number){
+    return {
+      x,
+      y,
+      definition: false,
+      highlighted: false,
+      splited: 0,
+      arrows: [],
+      suggestion: '',
+      text: "",
+    };
+  }
 }

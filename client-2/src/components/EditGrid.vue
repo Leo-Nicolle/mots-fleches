@@ -28,7 +28,7 @@
         <div
           v-else
           class="def"
-          :width="cellWidth"
+          :width="options.grid.cellSize"
           :class="getClass(cell)"
           @click="focused = { y: i, x: j }"
         >
@@ -114,7 +114,6 @@ import {
 } from "../grid";
 import Vector from "vector2js";
 
-const w = ref(56);
 const b = ref(8);
 const definition = ref(null);
 const version = ref(1);
@@ -132,14 +131,12 @@ const points = [
 
 const container = ref(null);
 const focused = ref<Vec>({ x: -1, y: -1 });
-const cellWidth = ref(`${w.value}px`);
 const buttonWidth = ref(`${b.value}px`);
 const props = defineProps<{
   grid: Grid;
   options: GridOptions;
   suggestion: string;
   dir: Direction;
-  width: number;
 }>();
 
 const emit = defineEmits<{
@@ -152,7 +149,6 @@ const draggingCell = ref<Cell | null>(null);
 watchEffect(() => {
   const cells = props.grid.getBounds(focused.value, props.dir).cells;
   props.grid.highlight(cells);
-  console.log("FOCUS", !!container.value, cells.length);
   if (!container.value) return;
   if (props.grid.isValid(focused.value)) {
     emit("focus", props.grid.cells[focused.value.y][focused.value.x]);
@@ -213,9 +209,12 @@ function onDragStart(y: number, x: number) {
   draggingCell.value = props.grid.cells[y][x];
 }
 function onDragEnd() {
+  let shouldEmit = !!cellDiv;
   cellDiv = null;
   draggingCell.value = null;
-  emit("type");
+  if(shouldEmit){
+    emit("type");
+  }
 }
 function onDragging(evt: MouseEvent) {
   if (!draggingCell.value || !cellDiv) return;

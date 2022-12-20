@@ -1,7 +1,17 @@
 <template>
   <div ref="editor" class="editor" :version="version">
+    <ModalOptions v-model="modalProps" />
     <div class="leftpanel">
-      <h2>{{ grid.title ? grid.title : `Nouvelle Grille` }}</h2>
+      <span class="title">
+        <h2>
+          {{ grid.title ? grid.title : `Nouvelle Grille` }}
+        </h2>
+        <n-button @click="visible.visible = true">
+          <n-icon>
+            <CogIcon />
+          </n-icon>
+        </n-button>
+      </span>
 
       <Suggestion
         v-if="!focusedCell.definition"
@@ -28,31 +38,23 @@
           @mouseenter="onMouseEnter"
           :grid="grid"
           :focused-cell="focusedCell"
-          :width="width"
           :options="options"
           :suggestion="suggestion"
           :dir="dir"
         />
       </n-scrollbar>
     </n-scrollbar>
-
-    <Exporter
-      :grid="grid"
-      :options="options"
-      :arrows="true"
-      :definitions="true"
-      :texts="false"
-      :separators="true"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { defineProps, defineEmits, ref, computed, watchEffect } from "vue";
 import { Grid, Cell, Direction, Vec, nullCell, GridOptions } from "../grid";
+import { CogOutline as CogIcon } from "@vicons/ionicons5";
+
 import EditGrid from "./EditGrid.vue";
-import Exporter from "./Exporter.vue";
 import Options from "./Options.vue";
+import ModalOptions from "./ModalOptions.vue";
 import Suggestion from "./Suggestion.vue";
 
 const options: GridOptions = ref({
@@ -80,16 +82,18 @@ const dir = ref<Direction>("horizontal");
 const focus = ref<Vec>({ x: -1, y: -1 });
 let focusedCell = computed<Cell>(() => {
   const { x, y } = focus.value;
-  console.log("compute");
   return Grid.equal(nullCell, { x, y }) ? nullCell : props.grid.cells[y][x];
 });
 const suggestion = ref("");
 const version = ref(0);
-const width = ref(56);
+const visible = ref({visible: false});
 
-setTimeout(() => {
-  emit("update", 1);
-}, 3000);
+const modalProps = computed(() => {
+  return {
+    grid: props.grid,
+    visible: visible.value,
+  };
+});
 
 function refresh() {
   version.value++;
@@ -97,6 +101,7 @@ function refresh() {
 function onType() {
   emit("update", 1);
 }
+
 function onHover(value: string) {
   const cells = props.grid.getBounds(focus.value, dir.value).cells;
   if (!cells || !cells.length) return;
@@ -114,9 +119,17 @@ function onClick(value: string) {
   props.grid.setWord(value, cells[0], dir.value);
   refresh();
 }
+function openOptions() {}
 </script>
 
 <style scoped>
+.title {
+  display: flex;
+  justify-content: space-between;
+}
+.title .n-button {
+  margin-right: 4px;
+}
 h2 {
   margin-top: 0;
 }

@@ -1,5 +1,4 @@
-import Grid from "../../../grid/src/Grid";
-import { Cell, Direction, Vec } from "../../../grid/src/types";
+import { Grid, Cell, Direction, Vec } from "../../../grid/src";
 import dico from "./dico";
 import {
   Lemme,

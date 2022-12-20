@@ -20,11 +20,10 @@ import { NIcon } from "naive-ui";
 
 import { h, ref, Component } from "vue";
 import { RouterLink } from "vue-router";
+import {renderIcon} from "./js/utils";
 
 const collapsed = ref(true);
-function renderIcon(icon: Component) {
-  return () => h(NIcon, null, { default: () => h(icon) });
-}
+
 const menuOptions = ref<MenuOption[]>([
   {
     label: "",
