@@ -11,11 +11,11 @@
             : '',
         }"
       >
-        <span v-if="!cell.definition"></span>
+        <span v-if="!cell.definition">{{ texts ? cell.text: '' }}</span>
         <div v-else class="definition">
-          <span>{{ cell.text.length ? cell.text : "" }}</span>
+          <span>{{ definitions && cell.text.length ? cell.text : "" }}</span>
           <div
-            v-if="cell.splited > 1"
+            v-if="separators && cell.splited > 1"
             class="separator"
             :style="{
               gridRowStart: +Math.max(1, cell.splited * 2 - 1),
@@ -58,6 +58,10 @@ const borders = ref(true);
 
 const props = defineProps<{
   grid: Grid;
+  texts: boolean;
+  definitions: boolean;
+  separators: boolean;
+  arrows: boolean;
   options: GridOptions;
 }>();
 
@@ -136,19 +140,20 @@ function exportPdf() {
       //   cellWidth * props.grid.rows - lineWidth
       // );
       // ctx.stroke();
-
-      props.grid.cells.forEach((row, i) => {
-        row.forEach((cell, j) => {
-          if (!cell.definition) return;
-          cell.arrows.forEach(({ direction, position }, k) => {
-            const x = (j + position.x) * cellWidth - aw / 2;
-            const y = (i + position.y) * cellWidth - aw / 2;
-            const img = images[dirToId[direction]];
-            ctx.drawImage(img as any as HTMLImageElement, x, y, aw, aw);
+      if (props.arrows){
+        props.grid.cells.forEach((row, i) => {
+          row.forEach((cell, j) => {
+            if (!cell.definition) return;
+            cell.arrows.forEach(({ direction, position }, k) => {
+              const x = (j + position.x) * cellWidth - aw / 2;
+              const y = (i + position.y) * cellWidth - aw / 2;
+              const img = images[dirToId[direction]];
+              ctx.drawImage(img as any as HTMLImageElement, x, y, aw, aw);
+            });
           });
         });
-      });
-      emit("exported", canvas as HTMLCanvasElement);
+      }
+        emit("exported", canvas as HTMLCanvasElement);
     });
 }
 watchEffect(() => {
