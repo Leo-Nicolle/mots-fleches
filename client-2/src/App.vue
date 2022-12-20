@@ -1,87 +1,68 @@
 <template>
-  <div id="Crosswords">
-    <Editor
-      v-if="grids[activeGrid]"
-      :grid="grids[activeGrid]"
-      @update="onUpdate"
-    ></Editor>
-    <div class="exp" :innerHtml="exp"></div>
-  </div>
+  <nav>
+    <n-menu
+      class="burger"
+      :accordion="true"
+      :mode="'horizontal'"
+      :collapsed="collapsed"
+      :collapsed-width="64"
+      :collapsed-icon-size="22"
+      :options="menuOptions"
+    />
+  </nav>
+  <router-view collapsed="true" />
 </template>
 
-<script>
-import axios from "axios";
-import apiMixin from "./js/apiMixin";
-import Editor from "./components/Editor.vue";
-import { Grid } from "../../grid/src/Grid";
+<script setup lang="ts">
+import { MenuOutline } from "@vicons/ionicons5";
+import type { MenuOption } from "naive-ui";
+import { NIcon } from "naive-ui";
 
-export default {
-  name: "App",
-  mixins: [apiMixin],
-  data() {
-    return {
-      activeGrid: 0,
-      grids: [],
-      exp: "",
-    };
-  },
-  components: {
-    Editor,
-  },
-  methods: {
-    fetch() {
-      return axios
-        .get(this.getUrl("grid"))
-        .then(({ data }) => {
-          this.grids = data.map((g) => Grid.unserialize(JSON.stringify(g)));
-          if (this.grids.length === 0) {
-            return this.createGrid().then(() => this.fetch());
-            // .then(() => this.activeGrid= 0)
-          }
-        })
-        .catch((e) => {
-          console.error("E", e);
-        });
-    },
-    createGrid() {
-      const newGrid = new Grid(10, 10);
-      newGrid.name = "nouvelle grille";
-      return axios.post(this.getUrl("grid"), { grid: newGrid.serialize() });
-    },
-    onRefreshGrids() {
-      this.fetch();
-    },
-    onDelete() {
-      this.fetch().then(() => {
-        this.activeGrid = (this.grids[0] && this.grids[0].id) || "";
-      });
-    },
-    onUpdate() {
-      axios.post(this.getUrl("grid"), {
-        grid: this.grids[this.activeGrid].serialize(),
-      });
-    },
-  },
+import { h, ref, Component } from "vue";
+import { RouterLink } from "vue-router";
 
-  mounted() {
-    this.fetch();
+const collapsed = ref(true);
+function renderIcon(icon: Component) {
+  return () => h(NIcon, null, { default: () => h(icon) });
+}
+const menuOptions = ref<MenuOption[]>([
+  {
+    label: "",
+    key: "",
+    icon: renderIcon(MenuOutline),
+    children: [
+      {
+        label: () =>
+          h(
+            RouterLink,
+            {
+              to: "/grids"
+            },
+            { default: () => "Grilles" }
+          ),
+        key: "go-back-home",
+      },
+    ],
   },
-};
+]);
 </script>
 
 <style>
-#Crosswords {
+#app{
+  width: 100vw;
   max-height: 100vh;
+  min-height: 100vh;
   overflow: hidden;
 }
-body{
- width: min-content;
- max-width: 100vw;
- overflow: hidden;
+nav {
+  width: 100%;
+  display: flex;
+  padding: 5px;
+  right: 10px;
 }
-.exp {
-  position: absolute;
-  top: 22px;
-  left: 400px;
+
+.burger {
+  margin-left: auto;
+  margin-right: 25px;
 }
 </style>

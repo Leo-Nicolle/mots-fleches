@@ -1,6 +1,8 @@
 <template>
   <div ref="editor" class="editor" :version="version">
     <div class="leftpanel">
+      <h2>{{ grid.title ? grid.title : `Nouvelle Grille` }}</h2>
+
       <Suggestion
         v-if="!focusedCell.definition"
         :point="focus"
@@ -34,7 +36,14 @@
       </n-scrollbar>
     </n-scrollbar>
 
-    <Exporter :grid="grid" :options="options" />
+    <Exporter
+      :grid="grid"
+      :options="options"
+      :arrows="true"
+      :definitions="true"
+      :texts="false"
+      :separators="true"
+    />
   </div>
 </template>
 
@@ -43,7 +52,6 @@ import { defineProps, defineEmits, ref, computed, watchEffect } from "vue";
 import { Grid, Cell, Direction, Vec, nullCell, GridOptions } from "../grid";
 import EditGrid from "./EditGrid.vue";
 import Exporter from "./Exporter.vue";
-
 import Options from "./Options.vue";
 import Suggestion from "./Suggestion.vue";
 
@@ -63,7 +71,6 @@ const options: GridOptions = ref({
     color: "black",
   },
 });
-
 const props = defineProps<{ grid: Grid }>();
 const emit = defineEmits<{
   (event: "update", value: number): string;
@@ -110,6 +117,15 @@ function onClick(value: string) {
 </script>
 
 <style scoped>
+h2 {
+  margin-top: 0;
+}
+.editor-wrapper {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  width: 100vw;
+}
 .editor {
   display: flex;
   flex-direction: row;

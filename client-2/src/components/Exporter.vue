@@ -11,7 +11,9 @@
             : '',
         }"
       >
-        <span v-if="!cell.definition">{{ texts ? cell.text: '' }}</span>
+        <span class="text" v-if="!cell.definition">{{
+          texts ? cell.text : ""
+        }}</span>
         <div v-else class="definition">
           <span>{{ definitions && cell.text.length ? cell.text : "" }}</span>
           <div
@@ -43,12 +45,7 @@
 import html2canvas from "html2canvas";
 import { defineEmits, ref, defineProps, watchEffect, nextTick } from "vue";
 import Arrow from "./Arrow";
-import {
-  Grid,
-  GridOptions,
-  ArrowDir,
-  Vec,
-} from "../grid";
+import { Grid, GridOptions, ArrowDir, Vec } from "../grid";
 import Vector from "vector2js";
 
 const container = ref<HTMLDivElement>(null as any as HTMLDivElement);
@@ -140,7 +137,7 @@ function exportPdf() {
       //   cellWidth * props.grid.rows - lineWidth
       // );
       // ctx.stroke();
-      if (props.arrows){
+      if (props.arrows) {
         props.grid.cells.forEach((row, i) => {
           row.forEach((cell, j) => {
             if (!cell.definition) return;
@@ -153,12 +150,11 @@ function exportPdf() {
           });
         });
       }
-        emit("exported", canvas as HTMLCanvasElement);
+      emit("exported", canvas as HTMLCanvasElement);
     });
 }
 watchEffect(() => {
   if (!props.grid) return;
-  console.log("ICI");
   setTimeout(() => {
     exportPdf();
   }, 500);
@@ -223,6 +219,15 @@ function refresh() {
   border: 0;
   grid-area: 1 / 1 / 4 / 4;
   background: #fff;
+}
+.text {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  font-size: v-bind(options.grid.cellSize);
+  text-transform: capitalize;
+  justify-content: space-around;
+  border: 0;
 }
 .separator {
   cursor: pointer;

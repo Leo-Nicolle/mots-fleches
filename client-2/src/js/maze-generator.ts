@@ -1,4 +1,17 @@
 
+type Place = {
+  y: number;
+  x: number;
+  idH: any;
+  idV: any;
+  lengthLeft: number;
+  lengthRight: number;
+  lengthBottom: number;
+  lengthTop: number;
+  lengthH: number;
+  lengthV: number;
+};
+
 export function getLength({ vec, grid, pos }) {
   let length = -1;
   let { x, y } = pos;
@@ -9,6 +22,7 @@ export function getLength({ vec, grid, pos }) {
   }
   return length;
 }
+
 
 function placeDefinition({minWord, rows, cols, scaledDistib, grid}){
   const cellToWordIdH ={}; 
@@ -64,7 +78,7 @@ function placeDefinition({minWord, rows, cols, scaledDistib, grid}){
         };
     }))
     .reduce((flat, row) => flat.concat(row), [])
-    .filter(e => e && (e.idV || e.idH));
+    .filter(e => e && (e.idV || e.idH)) as Place[];
 
 
     // compute the actual distribution
@@ -105,7 +119,7 @@ function placeDefinition({minWord, rows, cols, scaledDistib, grid}){
       return {
         x: e.x,
         y: e.y,
-        proba: proba * (1 - impossible)
+        proba: proba * (1 - +impossible)
       };
     }).sort((a, b) => a.proba - b.proba);
 
@@ -116,15 +130,21 @@ function placeDefinition({minWord, rows, cols, scaledDistib, grid}){
     const cut = probas.reduce((acc, e) => {
       if (acc.chosen) return acc;
       acc.total+=e.proba;
+      // @ts-ignore
       if (acc.total > chosenCut)acc.chosen = e;
       return acc;
     }, {total: 0, chosen: null}).chosen;
 
     // console.log(actDistrib.reduce((acc, e, i) => Math.abs(e - scaledDistib[i]), 0))
+    //@ts-ignore
     grid[cut.y][cut.x] = true;
 }
 
-export default function generate({ rows, cols , distribution}) {
+export default function generate({ rows, cols , distribution}: {
+  rows: number;
+  cols: number;
+  distribution: Record<string, number>
+}) {
   const minWord = 2;
   const maxWord = 10;
 
@@ -140,10 +160,10 @@ export default function generate({ rows, cols , distribution}) {
   // Sum of all the % of each length
   const total = Object.values(distribution).slice(minWord, Math.max(rows, cols) + 1).reduce((acc, e) => acc + e, 0);
   // scale it to [0;1]  
-  const scaledDistib = Object.values(distribution.slice(minWord,Math.max(rows, cols) + 1)).reduce((acc, e) => acc.concat(e /total), []);
+  // const scaledDistib = Object.values(distribution).slice(minWord,Math.max(rows, cols) + 1).reduce((acc, e) => acc.concat(e / total), []);
  
   for (let i = 0; i< rows; i++ ){
-    placeDefinition({minWord, rows, cols, scaledDistib, grid});
+    // placeDefinition({minWord, rows, cols, scaledDistib, grid});
   }
   return grid;
 }
