@@ -1,36 +1,40 @@
 <template>
   <div ref="suggestion" class="suggestion" :version="version">
-    <n-button icon-placement="right" @click="ordering *= -1">
-      <template #icon>
-        <n-icon>
-          <ArrowDown v-if="ordering === 1" />
-          <ArrowUp v-else />
-        </n-icon>
-      </template>
-    </n-button>
-    <n-button
-      icon-placement="right"
-      @click="method = method === 'fastest' ? 'simple' : 'fastest'"
-    >
-      <template #icon>
-        <n-icon>
-          <Hammer v-if="method === 'fastest'" />
-          <Flash v-else />
-        </n-icon>
-      </template>
-    </n-button>
-    <n-button
-      icon-placement="right"
-      @click="emit('dir', dir === 'horizontal' ? 'vertical' : 'horizontal')"
-    >
-      <template #icon>
-        <n-icon>
-          <ArrowForward v-if="dir === 'horizontal'" />
-          <ArrowDown v-else />
-        </n-icon>
-      </template>
-    </n-button>
+    <span>
+      <n-button icon-placement="right" @click="ordering *= -1">
+        <template #icon>
+          <n-icon>
+            <ArrowDown v-if="ordering === 1" />
+            <ArrowUp v-else />
+          </n-icon>
+        </template>
+      </n-button>
+      <n-button
+        icon-placement="right"
+        @click="method = method === 'fastest' ? 'simple' : 'fastest'"
+      >
+        <template #icon>
+          <n-icon>
+            <Hammer v-if="method === 'fastest'" />
+            <Flash v-else />
+          </n-icon>
+        </template>
+      </n-button>
+      <n-button
+        icon-placement="right"
+        @click="emit('dir', dir === 'horizontal' ? 'vertical' : 'horizontal')"
+      >
+        <template #icon>
+          <n-icon>
+            <ArrowForward v-if="dir === 'horizontal'" />
+            <ArrowDown v-else />
+          </n-icon>
+        </template>
+      </n-button>
+    </span>
+
     <n-data-table
+      v-if="!loading"
       :bordered="false"
       :single-line="false"
       :columns="[
@@ -47,11 +51,12 @@
       @mousemove="onMouseEvt($event, false)"
       @click="onMouseEvt($event, true)"
     />
+    <n-button class="loading" v-else :loading="true"></n-button>
   </div>
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, ref, watch } from "vue";
+import { defineProps, defineEmits, ref, watchEffect } from "vue";
 import {
   ArrowDown,
   ArrowUp,
@@ -62,52 +67,51 @@ import {
 } from "@vicons/ionicons5";
 
 import axios from "axios";
-import { Cell, Direction, Vec } from "../grid/types";
+import { Grid, Direction, Vec } from "../grid";
 import { getUrl } from "../js/utils";
 
-let method = ref("fastest");
-let ordering = ref(1);
-let results = ref([]);
-let totalResults = ref(0);
-let hovered = "";
-let queryPromise: Promise<void> = Promise.resolve();
-let loading = false;
-const props = defineProps<{ query: string; gridId: string; point: Vec,
-dir: Direction }>();
+const method = ref("fastest");
+const ordering = ref(1);
+const results = ref([]);
+const totalResults = ref(0);
+const suggestion = ref(null);
+const loading = ref(false);
+const version = ref(0);
+const props =
+  defineProps<{ query: string; gridId: string; point: Vec; dir: Direction }>();
 const emit = defineEmits<{
   (event: "hover", value: string): void;
   (event: "click", value: string): void;
   (event: "dir", value: Direction): void;
-
 }>();
 
-const suggestion = ref(null);
-let version = ref(0);
+let hovered = "";
+let queryPromise: Promise<void> = Promise.resolve();
 
-watch(props, () => {
-  getSuggestions();
-});
-watch([method, ordering], () => {
-  getSuggestions();
-});
-setTimeout(() => {
-  getSuggestions();
-}, 200);
 
-function getSuggestions() {
-  if (!props.point) return Promise.resolve();
+function getSuggestions(
+  point: Vec,
+  dir: Direction,
+  ordering: number,
+  method: string,
+  gridId: string
+) {
+  if (!props.point) {
+    loading.value = true;
+    return Promise.resolve();
+  }
+  loading.value = true;
   queryPromise = queryPromise
     .then(() => {
-      loading = true;
       return new Promise((resolve) => setTimeout(() => resolve(), 200)).then(
         () =>
           axios.post(getUrl("search"), {
-            gridId: props.gridId,
-            coord: props.point,
-            dir: props.dir,
-            ordering: ordering.value,
+            gridId: gridId,
+            coord: point,
+            dir: dir,
+            ordering: ordering,
             query: "",
-            method: method.value,
+            method: method,
             max: 100,
           })
       );
@@ -115,7 +119,7 @@ function getSuggestions() {
     .then((response) => response.data)
     .then(({ words, cells, impossible, nbResults }) => {
       if (!words) return;
-      loading = false;
+      loading.value = false;
       totalResults.value = nbResults;
       results.value = words.map((word) => ({
         word,
@@ -132,11 +136,22 @@ function getSuggestions() {
       // this.selectedCells = [];
       // this.suggestions = [];
       // this.impossibleLetters = [];
-      loading = false;
+      loading.value = false;
     });
 
   return queryPromise;
 }
+
+watchEffect(() => {
+  getSuggestions(
+    props.point,
+    props.dir,
+    ordering.value,
+    method.value,
+    props.gridId
+  );
+});
+
 function onMouseEvt(evt: MouseEvent, click = false) {
   const t = evt.target as HTMLDivElement;
   if (!t.classList.contains("n-data-table-td")) return;
@@ -155,4 +170,13 @@ function refresh() {
 .n-data-table-tr > td {
   cursor: pointer;
 }
+.suggestion {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.suggestion > .loading {
+  flex: 1;
+}
+
 </style>

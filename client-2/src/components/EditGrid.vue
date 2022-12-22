@@ -22,6 +22,7 @@
           :value="cell.text.length ? cell.text : cell.suggestion"
           @click="focused = { y: i, x: j }"
           @keyup="onKeyPress"
+          @keydown="onKeyDown"
           @input="onChange($event, i, j)"
         />
 
@@ -151,7 +152,7 @@ watchEffect(() => {
   props.grid.highlight(cells);
   if (!container.value) return;
   if (props.grid.isValid(focused.value)) {
-    emit("focus", props.grid.cells[focused.value.y][focused.value.x]);
+    emit("focus", focused.value);
   }
   if (!cells.length) return;
   if (props.grid.isDefinition(focused.value)) return;
@@ -212,7 +213,7 @@ function onDragEnd() {
   let shouldEmit = !!cellDiv;
   cellDiv = null;
   draggingCell.value = null;
-  if(shouldEmit){
+  if (shouldEmit) {
     emit("type");
   }
 }
@@ -241,10 +242,12 @@ function onChange(evt: InputEvent, y: number, x: number) {
   const next = evt.target.value.length
     ? props.grid.increment(focused.value, props.dir)
     : props.grid.decrement(focused.value, props.dir);
+  if (!props.grid.isValid(next)) return;
   focused.value = { ...next };
 }
 function onKeyPress(event) {
   const vec = new Vector(0, 0);
+
   if (event.code == "ArrowUp") {
     vec.y -= 1;
   } else if (event.code == "ArrowDown") {
@@ -258,6 +261,18 @@ function onKeyPress(event) {
   const f = vec.addSelf(focused.value);
   if (!props.grid.isValid(f)) return;
   focused.value = { ...f };
+}
+function onKeyDown(event) {
+  if (
+    event.code !== "Backspace" ||
+    props.grid.isDefinition(focused.value) ||
+    props.grid.getCell(focused.value).text.length
+  )
+    return;
+
+  const next = Grid.getDirVec(props.dir).mulScalar(-1).addSelf(focused.value);
+  if (!props.grid.isValid(next)) return;
+  focused.value = { ...next };
 }
 function refresh() {
   version.value++;

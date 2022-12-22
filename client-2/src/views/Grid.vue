@@ -18,6 +18,7 @@ export default {
     return {
       activeGrid: 0,
       grids: [],
+      saveTimeout: 0,
       exp: "",
     };
   },
@@ -29,7 +30,7 @@ export default {
       return axios
         .get(this.getUrl(`grid/${this.$route.params.id}`))
         .then(({ data }) => {
-          console.log('fetch');
+          console.log("fetch");
           this.activeGrid = Grid.unserialize(JSON.stringify(data));
         })
         .catch((e) => {
@@ -50,10 +51,12 @@ export default {
       });
     },
     onUpdate() {
-      console.log('UPDATE');
-      // axios.post(this.getUrl("grid"), {
-      //   grid: this.activeGrid.serialize(),
-      // });
+      clearTimeout(this.saveTimeout);
+      this.saveTimeout = setTimeout(() => {
+        axios.post(this.getUrl("grid"), {
+          grid: this.activeGrid.serialize(),
+        });
+      }, 500);
     },
   },
 

@@ -34,10 +34,8 @@
         <EditGrid
           @type="onType"
           @focus="(point) => (focus = point)"
-          @out="() => grid.suggest([], [], [])"
           @mouseenter="onMouseEnter"
           :grid="grid"
-          :focused-cell="focusedCell"
           :options="options"
           :suggestion="suggestion"
           :dir="dir"
@@ -48,7 +46,14 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, ref, computed, watchEffect } from "vue";
+import {
+  defineProps,
+  defineEmits,
+  ref,
+  computed,
+  watchEffect,
+  watch,
+} from "vue";
 import { Grid, Cell, Direction, Vec, nullCell, GridOptions } from "../grid";
 import { CogOutline as CogIcon } from "@vicons/ionicons5";
 
@@ -56,6 +61,8 @@ import EditGrid from "./EditGrid.vue";
 import Options from "./Options.vue";
 import ModalOptions from "./ModalOptions.vue";
 import Suggestion from "./Suggestion.vue";
+import axios from "axios";
+import { getUrl } from "../js/utils";
 
 const options: GridOptions = ref({
   grid: {
@@ -86,7 +93,7 @@ let focusedCell = computed<Cell>(() => {
 });
 const suggestion = ref("");
 const version = ref(0);
-const visible = ref({visible: false});
+const visible = ref({ visible: false });
 
 const modalProps = computed(() => {
   return {
@@ -100,6 +107,11 @@ function refresh() {
 }
 function onType() {
   emit("update", 1);
+}
+function save() {
+  return axios.post(getUrl("grid"), {
+    grid: props.grid.serialize(),
+  });
 }
 
 function onHover(value: string) {
@@ -117,7 +129,9 @@ function onClick(value: string) {
   const cells = props.grid.getBounds(focus.value, dir.value).cells;
   if (!cells || !cells.length) return;
   props.grid.setWord(value, cells[0], dir.value);
-  refresh();
+  save().then(() => {
+    refresh();
+  });
 }
 function openOptions() {}
 </script>
