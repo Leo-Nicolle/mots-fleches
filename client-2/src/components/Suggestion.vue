@@ -56,6 +56,7 @@
 </template>
 
 <script setup lang="ts">
+import { CancelablePromise as CPromise } from 'cancelable-promise';
 import { defineProps, defineEmits, ref, watchEffect } from "vue";
 import {
   ArrowDown,
@@ -86,7 +87,7 @@ const emit = defineEmits<{
 }>();
 
 let hovered = "";
-let queryPromise: Promise<void> = Promise.resolve();
+let queryPromise: CPromise<void> = CPromise.resolve();
 
 
 function getSuggestions(
@@ -96,14 +97,14 @@ function getSuggestions(
   method: string,
   gridId: string
 ) {
+  loading.value = false;
+  queryPromise.cancel();
   if (!props.point) {
-    loading.value = true;
-    return Promise.resolve();
+    return CPromise.resolve();
   }
   loading.value = true;
-  queryPromise = queryPromise
-    .then(() => {
-      return new Promise((resolve) => setTimeout(() => resolve(), 200)).then(
+  queryPromise =  new CPromise((resolve) => setTimeout(() => resolve(null), 200))
+      .then(
         () =>
           axios.post(getUrl("search"), {
             gridId: gridId,
@@ -114,10 +115,10 @@ function getSuggestions(
             method: method,
             max: 100,
           })
-      );
-    })
+      )
     .then((response) => response.data)
     .then(({ words, cells, impossible, nbResults }) => {
+
       if (!words) return;
       loading.value = false;
       totalResults.value = nbResults;

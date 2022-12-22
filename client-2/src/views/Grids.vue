@@ -13,7 +13,7 @@ LSSADOSA
           :title="grid.title ? grid.title : `Nouvelle Grille`"
         >
           <template #cover>
-            <button v-if="!grid.thumbnail" class="thumbnail add" grid.thumbnail>
+            <button v-if="!grid.thumbnail && (active !== grid || !shouldExport)" class="thumbnail add" grid.thumbnail>
               <n-icon>
                 <HeartOutline />
               </n-icon>
@@ -64,7 +64,7 @@ import { useRouter, useRoute } from "vue-router";
 import axios from "axios";
 import { AddCircleOutline as AddIcon, HeartOutline } from "@vicons/ionicons5";
 
-import { getUrl } from "../js/utils";
+import { getUrl, save } from "../js/utils";
 import Exporter from "../components/Exporter.vue";
 import { Grid, GridOptions } from "../grid";
 const router = useRouter();
@@ -119,10 +119,8 @@ function onExported(canvas: HTMLCanvasElement) {
       canvas.width / 4,
       canvas.height / 4
     );
-  document.body.appendChild(canvas);
-  document.body.appendChild(thumb);
-
-  // active.value.setThumbnail(thumb.toDataURL());
+  active.value.setThumbnail(thumb.toDataURL());
+  save(active.value);
   shouldExport.value = false;
 }
 
@@ -130,7 +128,7 @@ function createGrid() {
   const newGrid = new Grid(10, 10);
   newGrid.name = "Nouvelle Grille";
   return axios.post(getUrl("grid"), { grid: newGrid.serialize() })
-  .then(() => fetch())
+  .then(() => fetch());
 }
 
 onMounted(() => {

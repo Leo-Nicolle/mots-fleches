@@ -82,7 +82,7 @@ const options: GridOptions = ref({
 });
 const props = defineProps<{ grid: Grid }>();
 const emit = defineEmits<{
-  (event: "update", value: number): string;
+  (event: "update"): string;
 }>();
 const editor = ref(null);
 const dir = ref<Direction>("horizontal");
@@ -106,12 +106,8 @@ function refresh() {
   version.value++;
 }
 function onType() {
-  emit("update", 1);
-}
-function save() {
-  return axios.post(getUrl("grid"), {
-    grid: props.grid.serialize(),
-  });
+  console.log('UPDATE')
+  emit("update");
 }
 
 function onHover(value: string) {
@@ -129,9 +125,7 @@ function onClick(value: string) {
   const cells = props.grid.getBounds(focus.value, dir.value).cells;
   if (!cells || !cells.length) return;
   props.grid.setWord(value, cells[0], dir.value);
-  save().then(() => {
-    refresh();
-  });
+  emit('update');
 }
 function openOptions() {}
 </script>

@@ -10,6 +10,7 @@ import axios from "axios";
 import apiMixin from "../js/apiMixin";
 import Editor from "../components/Editor.vue";
 import { Grid } from "../grid";
+import {save} from '../js/utils';
 
 export default {
   name: "Grid",
@@ -53,9 +54,7 @@ export default {
     onUpdate() {
       clearTimeout(this.saveTimeout);
       this.saveTimeout = setTimeout(() => {
-        axios.post(this.getUrl("grid"), {
-          grid: this.activeGrid.serialize(),
-        });
+        save(this.activeGrid);
       }, 500);
     },
   },
