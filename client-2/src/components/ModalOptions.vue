@@ -14,6 +14,7 @@
           <n-input
             placeholder="Nouvelle Grille"
             v-model:value="value.grid.title"
+            @change="emit('update')"
           />
         </n-form-item>
 
@@ -22,6 +23,7 @@
             type="textarea"
             placeholder="Commentaire..."
             v-model:value="value.grid.comment"
+            @change="emit('update')"
             :autosize="{
               minRows: 3,
             }"
@@ -47,38 +49,42 @@
 </template>
 
 <script setup lang="ts">
-import { defineEmits, defineProps, ref } from "vue";
+import { defineEmits, defineProps, ref, watch, watchEffect } from "vue";
 import { Grid } from "../grid";
 import { useModel } from "../js/useModel";
 const props = defineProps<{
-  modelValue: { grid: Grid; visible: {visible: boolean} };
+  modelValue: { grid: Grid; visible: { visible: boolean } };
 }>();
 
 const show = ref(true);
 const emit = defineEmits<{
   (event: "update:modelValue", value: Grid): void;
+  (event: "update"): void;
 }>();
 const value = useModel(props, emit);
-console.log(value.value);
 
+watchEffect(value.value.visible.visible, () => {
+  console.log(value.value.visible.visible);
+});
 function onRowChange(evt) {
   props.modelValue.grid.resize(evt, props.modelValue.grid.cols);
+  emit("update");
 }
 function onColChange(evt) {
   props.modelValue.grid.resize(props.modelValue.grid.rows, evt);
+  emit("update");
 }
-
 </script>
 
 <style scoped>
 .n-form {
   width: 100%;
 }
-.rowcols{
+.rowcols {
   display: flex;
   justify-content: space-between;
 }
-.rowcols > .n-form-item{
+.rowcols > .n-form-item {
   max-width: 100px;
 }
 </style>

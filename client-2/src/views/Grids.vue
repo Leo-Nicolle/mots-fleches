@@ -1,37 +1,59 @@
 <template>
   <div class="grids">
     <div class="leftpanel">
-LSSADOSA
-
+      <h3>Grilles</h3>
+      <n-button @click="onExportClick">Exporter</n-button>
+      <n-button @click="deleteVisible = true" type="warning"
+        >Supprimer</n-button
+      >
     </div>
     <div class="wrapper scroll">
       <div>
-        <n-card
-          v-for="(grid, i) in grids"
-          :key="i"
-          @click="$router.push(`/grid/${grid.id}`)"
-          :title="grid.title ? grid.title : `Nouvelle Grille`"
-        >
-          <template #cover>
-            <button v-if="!grid.thumbnail && (active !== grid || !shouldExport)" class="thumbnail add" grid.thumbnail>
-              <n-icon>
-                <HeartOutline />
-              </n-icon>
-            </button>
-            <img
-              v-else-if="active !== grid || !shouldExport"
-              class="thumbnail"
-              :src="grid.thumbnail"
-            />
-            <n-button
-              v-else
-              class="thumbnail"
-              :loading="true"
-              icon-placement="center"
-            >
-            </n-button>
+        <n-card v-for="(grid, i) in grids" :key="i" :hoverable="true">
+          <template #header>
+            <span class="card-title">
+              <span>
+                {{ grid.title ? grid.title : `Nouvelle Grille` }}
+              </span>
+              <n-checkbox
+                @click="
+                  (evt) => {
+                    evt.preventDefault();
+                    evt.stopPropagation();
+                  }
+                "
+                v-model:checked="selected[i]"
+              >
+              </n-checkbox>
+            </span>
           </template>
-          {{ grid.comment ? grid.comment : "Nouvelle Grille" }}
+
+          <template #default>
+            <div @click="$router.push(`/grid/${grid.id}`)">
+              <button
+                v-if="!grid.thumbnail && (active !== grid || !shouldExport)"
+                class="thumbnail add"
+                grid.thumbnail
+              >
+                <n-icon>
+                  <HeartOutline />
+                </n-icon>
+              </button>
+              <img
+                v-else-if="active !== grid || !shouldExport"
+                class="thumbnail"
+                :src="grid.thumbnail"
+              />
+              <n-button
+                v-else
+                class="thumbnail"
+                :loading="true"
+                icon-placement="center"
+              >
+              </n-button>
+              {{ grid.comment ? grid.comment : "Nouvelle Grille" }}
+            </div>
+          </template>
         </n-card>
         <n-card @click="createGrid" title="Créer">
           <template #cover>
@@ -54,6 +76,18 @@ LSSADOSA
         :options="options"
         @exported="onExported"
       />
+
+      <n-modal
+        preset="dialog"
+        title="Supprimer ?"
+        :showIcon="false"
+        v-model:show="deleteVisible"
+      >
+        <template #action>
+          <n-button @click="deleteVisible = false">Non</n-button>
+          <n-button @click="onDelete" type="warning">Oui</n-button>
+        </template>
+      </n-modal>
     </div>
   </div>
 </template>
@@ -86,6 +120,8 @@ const options: GridOptions = ref({
 });
 
 const grids = ref<Grid[]>([]);
+const selected = ref<boolean[]>([]);
+const deleteVisible = ref<boolean>(false);
 const active = ref<Grid>();
 const shouldExport = ref(false);
 
@@ -94,6 +130,7 @@ function fetch() {
     .get(getUrl("grid"))
     .then(({ data }) => {
       grids.value = data.map((g) => Grid.unserialize(JSON.stringify(g)));
+      selected.value = new Array(grids.value.length).fill(false);
     })
     .catch((e) => {
       console.error("E", e);
@@ -124,11 +161,27 @@ function onExported(canvas: HTMLCanvasElement) {
   shouldExport.value = false;
 }
 
+function onExportClick() {
+  console.log("export");
+}
+function onDelete() {
+  Promise.all(
+    selected.value.map((shouldDelete, i) =>
+      shouldDelete
+        ? axios.delete(getUrl(`grid/${grids.value[i].id}`))
+        : Promise.resolve(null)
+    )
+  )
+    .then(() => fetch())
+    .then(() => (deleteVisible.value = false));
+}
+
 function createGrid() {
   const newGrid = new Grid(10, 10);
   newGrid.name = "Nouvelle Grille";
-  return axios.post(getUrl("grid"), { grid: newGrid.serialize() })
-  .then(() => fetch());
+  return axios
+    .post(getUrl("grid"), { grid: newGrid.serialize() })
+    .then(() => fetch());
 }
 
 onMounted(() => {
@@ -148,9 +201,22 @@ onMounted(() => {
   width: 210px;
   min-width: 210px;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.leftpanel > button {
+  margin-bottom: 5px;
+  width: 95px;
 }
 .n-grid {
   margin: 0 10px;
+}
+.card-title {
+  display: flex;
+}
+.card-title > div {
+  margin-left: auto;
 }
 .grids {
   width: 100vw;
@@ -160,7 +226,7 @@ onMounted(() => {
 }
 .wrapper > div {
   justify-content: center;
-  gap: 8px 12px; 
+  gap: 8px 12px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 200px));
   width: calc(100vw - 210px);
@@ -173,22 +239,32 @@ onMounted(() => {
 }
 .n-card {
   box-shadow: 4px 4px 7px #ddd;
-  cursor: pointer;
   height: 350px;
 }
-.n-card:hover {
-  background: #ddd;
+.n-card__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
 }
+
 .n-card-cover {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-around;
 }
+.n-dialog .n-dialog__action {
+  display: flex;
+  flex-direction: row;
+  padding-top: 50px;
+  justify-content: space-between;
+  width: 100%;
+}
 .thumbnail {
   width: 170px;
   height: 170px;
-  margin: 4px auto;
+  margin: 4px 0;
 }
 .add svg {
   transform: scale(5);

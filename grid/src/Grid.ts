@@ -21,6 +21,7 @@ export class Grid {
   public title: string;
   public cells: Cell[][];
   public id: string;
+  public created: number;
   public thumbnail: string;
 
   constructor(rows: number, cols: number, id?: string) {
@@ -30,6 +31,7 @@ export class Grid {
     this.title = '';
     this.thumbnail = '';
     this.id = id || uuid();
+    this.created = Date.now();
     this.cells =  new Array(rows)
       .fill(0)
       .map((_, y) => new Array(cols)
@@ -205,6 +207,7 @@ export class Grid {
       cells: this.cells,
       thumbnail: this.thumbnail,
       comment: this.comment,
+      created: this.created,
       title: this.title
     });
   }
@@ -231,10 +234,11 @@ export class Grid {
   }
 
   static unserialize(s: string){
-    const {rows, cols,comment, title, id, cells, thumbnail} = JSON.parse(s) as {
+    const {rows, cols,comment, title, id, cells, thumbnail, created} = JSON.parse(s) as {
       rows: number,
       cols: number,
       id: string,
+      created: number,
       comment: string,
       thumbnail: string,
       title: string
@@ -251,6 +255,7 @@ export class Grid {
     res.title = title;
     res.comment = comment;
     res.thumbnail = thumbnail;
+    res.created = created;
     return res;
   }
 

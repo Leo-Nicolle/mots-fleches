@@ -1,6 +1,6 @@
 <template>
   <div ref="editor" class="editor" :version="version">
-    <ModalOptions v-model="modalProps" />
+    <ModalOptions v-model="modalProps" @update="emit('update')" />
     <div class="leftpanel">
       <span class="title">
         <h2>
@@ -106,8 +106,12 @@ function refresh() {
   version.value++;
 }
 function onType() {
-  console.log('UPDATE')
+  console.log("UPDATE");
   emit("update");
+}
+
+function onToggleOption(visible) {
+  console.log("watch", visible);
 }
 
 function onHover(value: string) {
@@ -125,7 +129,7 @@ function onClick(value: string) {
   const cells = props.grid.getBounds(focus.value, dir.value).cells;
   if (!cells || !cells.length) return;
   props.grid.setWord(value, cells[0], dir.value);
-  emit('update');
+  emit("update");
 }
 function openOptions() {}
 </script>

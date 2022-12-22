@@ -63,7 +63,9 @@ export class Database {
   }
 
   getGrids() {
-    return this.loadingPromise.then(() => this.grids);
+    return this.loadingPromise.then(() =>
+      this.grids.sort((a, b) => a.created - b.created)
+    );
   }
 
   getGrid(id) {
