@@ -26,11 +26,25 @@
       </Suggestion>
 
       <n-scrollbar style="max-height: 80vh" v-else>
-        <Options v-model="options"></Options>
+        <Options
+          v-model="options"
+          :arrows="true"
+          :grid="true"
+          :definition="true"
+          :format="true"
+        ></Options>
       </n-scrollbar>
     </div>
     <n-scrollbar style="max-height: calc(100vh - 100px)">
       <n-scrollbar style="max-width: calc(100vw - 100px)">
+        <Exporterfabric :grid="grid" :options="options" 
+          :texts="true"
+          :arrow="true"
+          :definitions="true"
+          :shouldExport="true"
+          :separators="true"
+          :arrows="true"
+        />
         <EditGrid
           @type="onType"
           @focus="(point) => (focus = point)"
@@ -61,6 +75,8 @@ import EditGrid from "./EditGrid.vue";
 import Options from "./Options.vue";
 import ModalOptions from "./ModalOptions.vue";
 import Suggestion from "./Suggestion.vue";
+import Exporterfabric from "./Exporter-fabric.vue";
+
 import axios from "axios";
 import { getUrl } from "../js/utils";
 
@@ -78,6 +94,17 @@ const options: GridOptions = ref({
   arrow: {
     size: "2em",
     color: "black",
+  },
+  paper: {
+    width: 21,
+    height: 29.7,
+    orientation: 'portrait',
+    margin: {
+      top: 0,
+      bottom: 0,
+      left: 0,
+      right: 0,
+    },
   },
 });
 const props = defineProps<{ grid: Grid }>();

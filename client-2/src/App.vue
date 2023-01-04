@@ -82,4 +82,14 @@ nav {
   background: #ddd;
   border-radius: 20px;
 }
+
+
+.hidden-input {
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  pointer-events: none;
+  visibility: hidden;
+  display: block;
+}
 </style>

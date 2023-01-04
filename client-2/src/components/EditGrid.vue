@@ -287,6 +287,7 @@ function refresh() {
 .grid {
   display: flex;
   flex-direction: column;
+  padding: calc(v-bind(options.grid.borderSize) * 2);
 }
 .cell {
   width: v-bind(options.grid.cellSize);
@@ -369,6 +370,7 @@ textarea {
   height: 100%;
   resize: none;
   background: #aaa;
+  white-space: nowrap;
   color: v-bind(options.definition.color);
   font-family: v-bind(options.definition.font);
   font-size: v-bind(options.definition.size);

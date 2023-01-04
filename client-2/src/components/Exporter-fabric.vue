@@ -1,22 +1,6 @@
 <template>
   <div ref="container" class="grid exporter" :version="version">
-    <canvas ref="canvas"></canvas>
-    <div class="row" v-for="(row, i) in grid.cells" :key="i">
-      <div
-        class="cell"
-        v-for="(cell, j) in row"
-        :key="j"
-        :style="{
-          border: borders
-            ? `${options.grid.borderSize} solid ${options.grid.borderColor}`
-            : '',
-        }"
-      >
-        <span :class="cell.definition ? 'definition' : 'text'">
-          >{{ cell.text }}</span
-        >
-      </div>
-    </div>
+    <canvas ref="exportcanvas"></canvas>
     <div class="arrows">
       <Arrow
         v-for="(dir, i) in directions"
@@ -32,20 +16,27 @@
 
 <script setup lang="ts">
 import { fabric } from "fabric";
-import { defineEmits, ref, defineProps, watchEffect, nextTick } from "vue";
+import {
+  defineEmits,
+  onMounted,
+  ref,
+  defineProps,
+  watchEffect,
+  nextTick,
+} from "vue";
+import { Grid, GridOptions, ArrowDir } from "../grid";
 import Arrow from "./Arrow";
-import { Grid, GridOptions, ArrowDir, Vec, DPI_TO_PIXEL } from "../grid";
-import Vector from "vector2js";
-import { measureText } from "../js/utils";
+
 
 const ruler = document.createElement("div");
 ruler.classList.add("hidden-input");
 document.body.appendChild(ruler);
-
+const exportcanvas = ref(null);
 const container = ref<HTMLDivElement>(null as any as HTMLDivElement);
 const version = ref(1);
 const directions = ref(["right", "rightdown", "down", "downright"]);
 const borders = ref(true);
+let f: fabric.Canvas;
 let timeout = 0;
 const props = defineProps<{
   grid: Grid;
@@ -63,6 +54,7 @@ const emit = defineEmits<{
 
 function exportCanvas() {
   if (!container.value) return;
+  console.log('export')
   const dirToId: Record<ArrowDir, number> = {
     right: 0,
     rightdown: 1,
@@ -71,47 +63,30 @@ function exportCanvas() {
     none: 4,
   };
   const dpx = window.devicePixelRatio;
-  const cellBB = container.value
-    .querySelector(".cell")!
+  const cellBB = document
+    .querySelector(".cell>input")!
     .getBoundingClientRect();
-  const spanBB = container.value
-    .querySelector(".cell> span")!
-    .getBoundingClientRect();
-  const lineWidth = (cellBB.width - spanBB.width) / 2;
+  const lineWidth = +props.options.grid.borderSize.slice(0, -2);
 
   const arrowSize = container.value
     .querySelector(".arrow")!
     .getBoundingClientRect();
 
   borders.value = false;
-  // const canvas = document.createElement('canvas');
-  // const paper = props.options.paper;
-  // const [width, height, top, left, bottom, right] = [
-  //   paper.width,
-  //   paper.height,
-  //   paper.margin.top,
-  //   paper.margin.left,
-  //   paper.margin.bottom,
-  //   paper.margin.right,
-  // ].map((e) => (e * paper.dpi * 10) / DPI_TO_PIXEL);
-
   const width = (props.grid.cols + 1) * cellBB.width;
   const height = (props.grid.rows + 1) * cellBB.height;
-  const canvas = container.value.querySelector("canvas") as HTMLCanvasElement;
-  canvas.width = width;
-  canvas.height = height;
+  f.setDimensions({
+    width,
+    height,
+  });
+  f.clear();
 
-  const defSize = measureText(
-    "Measure",
-    props.options.definition.size,
-    props.options.definition.font
-  );
   const defHeihgt = +props.options.definition.size.slice(0, -2);
   // create a wrapper around native canvas element (with id="c")
-  const f = new fabric.Canvas(canvas);
   return nextTick()
     .then(() => {
-      const promises = [...container.value.querySelectorAll(".arrows>svg")].map(
+
+      const imgs = [...container.value.querySelectorAll(".arrows>svg")].map(
         (svg) => {
           return new Promise((resolve) => {
             const blob = new Blob([svg.outerHTML], {
@@ -124,12 +99,14 @@ function exportCanvas() {
           });
         }
       );
-      return Promise.all([...promises]);
+      return Promise.all([
+        Promise.all([]),
+        Promise.all(imgs),
+      ]);
     })
-    .then((imgs) => {
+    .then(([definitions, imgs]) => {
       const cellWidth = cellBB.width; //canvas.width / props.grid.cols;
       const aw = arrowSize.width * dpx;
-
       const arrowBB = document
         .querySelector(".arrow")
         ?.getBoundingClientRect() as DOMRect;
@@ -140,6 +117,62 @@ function exportCanvas() {
         canvas.getContext("2d")?.drawImage(img, 0, 0);
         return canvas;
       });
+      for (let i = 0; i < props.grid.cells.length; i++) {
+        const row = props.grid.cells[i];
+        for (let j = 0; j < row.length; j++) {
+          const cell = row[j];
+          if (cell.definition) {
+            const tb = new fabric.Text(cell.text, {
+              left: cell.x * cellWidth,
+              top: cell.y * cellWidth,
+              width: cellWidth,
+              height: cellWidth,
+              lineHeight: Math.floor(cellWidth / defHeihgt / 4),
+              fontSize: defHeihgt,
+              textAlign: "center",
+              hasBorders: true,
+              hasControls: false,
+              hasRotatingPoint: false,
+              lockSkewingX: true,
+              lockSkewingY: true,
+              fontFamily: props.options.definition.font,
+            });
+            f.add(tb);
+            tb.setOptions({
+              width: cellWidth,
+              height: cellWidth,
+            });
+            if (cell.splited) {
+              console.log("splited", cell.splited);
+              const y =
+                (cell.y + (cell.splited - 1) / 4) * cellWidth - lineWidth;
+              f.add(
+                new fabric.Line([i * cellWidth, y, (i + 1) * cellWidth, y], {
+                  stroke: props.options.grid.borderColor,
+                  strokeWidth: lineWidth,
+                })
+              );
+            }
+
+            cell.arrows.forEach((arrow) => {
+              const x =
+                (cell.x + arrow.position.x) * cellWidth - arrowBB.width / 2;
+              const y =
+                (cell.y + arrow.position.y) * cellWidth - arrowBB.height / 2;
+              const a =
+                canvasArrows[
+                  directions.value.findIndex((d) => arrow.direction == d)
+                ];
+              f.add(
+                new fabric.Image(a, {
+                  left: x,
+                  top: y,
+                })
+              );
+            });
+          }
+        }
+      }
 
       for (let i = 0; i < props.grid.rows + 1; i++) {
         f.add(
@@ -173,56 +206,9 @@ function exportCanvas() {
           )
         );
       }
-      for (let i = 0; i < props.grid.cells.length; i++) {
-        const row = props.grid.cells[i];
-        for (let j = 0; j < row.length; j++) {
-          const cell = row[j];
-          if (cell.definition) {
-            f.add(
-              new fabric.Textbox(cell.text, {
-                left: cell.x * cellWidth,
-                top: cell.y * cellWidth,
-                width: cellWidth,
-                height: cellWidth,
-                lineHeight: Math.floor(cellWidth / defHeihgt / 4),
-                fontSize: defHeihgt,
-                textAlign: "center",
-                hasBorders: true,
-                fontFamily: props.options.definition.font,
-              })
-            );
-            if (cell.splited) {
-              console.log("splited", cell.splited);
-              const y =
-                (cell.y + (cell.splited - 1) / 4) * cellWidth - lineWidth;
-              f.add(
-                new fabric.Line([i * cellWidth, y, (i + 1) * cellWidth, y], {
-                  stroke: props.options.grid.borderColor,
-                  strokeWidth: lineWidth,
-                })
-              );
-            }
+      // container.value.appendChild(f.toCanvasElement());
 
-            cell.arrows.forEach((arrow) => {
-              const x =
-                (cell.x + arrow.position.x) * cellWidth - arrowBB.width / 2;
-              const y =
-                (cell.y + arrow.position.y) * cellWidth - arrowBB.height / 2;
-              const a =
-                canvasArrows[
-                  directions.value.findIndex((d) => arrow.direction == d)
-                ];
-              f.add(
-                new fabric.Image(a, {
-                  left: x,
-                  top: y,
-                })
-              );
-            });
-          }
-        }
-      }
-      emit("exported", canvas as HTMLCanvasElement);
+      // emit("exported", f.);
     });
 }
 
@@ -234,9 +220,15 @@ watchEffect(() => {
   }, 100);
 });
 
+setInterval(() => {
+  exportCanvas();
+}, 2000);
 function refresh() {
   version.value++;
 }
+onMounted(() => {
+  f = new fabric.Canvas(exportcanvas.value);
+});
 </script>
 
 <style scoped>
@@ -247,12 +239,15 @@ function refresh() {
   z-index: -1000;
   background: #fff;
   z-index: 1000;
-  top: 200px;
+  top: 300px;
   left: 0;
 }
 .row {
   display: flex;
   flex-direction: row;
+  position: absolute;
+  top: -200%;
+  left: 200%;
 }
 .grid {
   display: inline-flex;

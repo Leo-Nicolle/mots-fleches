@@ -60,6 +60,7 @@ const props = defineProps<{
   shouldExport: boolean;
   separators: boolean;
   arrows: boolean;
+  scale?: number;
   options: GridOptions;
 }>();
 
@@ -106,7 +107,10 @@ function exportPdf() {
           });
         }
       );
-      return Promise.all([html2canvas(container.value), ...promises]);
+      return Promise.all([
+        html2canvas(container.value, { scale: props.scale || 1 }),
+        ...promises,
+      ]);
     })
     .then(([canvas, ...images]) => {
       const ctx = (canvas as HTMLCanvasElement).getContext(
@@ -152,7 +156,7 @@ function exportPdf() {
     });
 }
 watchEffect(() => {
-  console.log("watch", props.grid, props.shouldExport)
+  console.log("watch", props.grid, props.shouldExport);
   if (!props.grid || !props.shouldExport) return;
   setTimeout(() => {
     exportPdf();
@@ -205,6 +209,7 @@ function refresh() {
   flex-wrap: nowrap;
   flex-direction: column;
   width: calc(v-bind(options.grid.cellSize) * v-bind(grid.rows));
+  padding: calc(v-bind(options.grid.borderSize) * 2);
 }
 .cell {
   width: v-bind(options.grid.cellSize);
