@@ -48,6 +48,10 @@
         <SVGGrid
           :grid="grid"
           :options="options"
+          :export-options="{
+            ...defaultExportOptions,
+            texts: true,
+          }"
         ></SVGGrid>
         <EditGrid
           @type="onType"
@@ -74,9 +78,10 @@ import {
 } from "vue";
 import { Grid, Cell, Direction, Vec, nullCell, GridOptions } from "grid";
 import { CogOutline as CogIcon } from "@vicons/ionicons5";
-
 import EditGrid from "./EditGrid.vue";
 import SVGGrid from "./svg-renderer/Grid.vue";
+import {defaultExportOptions} from "./svg-renderer/types";
+
 
 import Options from "./Options.vue";
 import ModalOptions from "./ModalOptions.vue";
@@ -90,9 +95,9 @@ const options: GridOptions = ref({
   grid: {
     cellSize: "56px",
     borderColor: "black",
-    borderSize: "10px",
-    outerBorderSize: '20px',
-    outerBorderColor: 'red',
+    borderSize: "1px",
+    outerBorderSize: "20px",
+    outerBorderColor: "red",
   },
   definition: {
     font: "sans-serif",
@@ -100,13 +105,13 @@ const options: GridOptions = ref({
     color: "black",
   },
   arrow: {
-    size: "2em",
+    size: "28px",
     color: "black",
   },
   paper: {
     width: 21,
     height: 29.7,
-    orientation: 'portrait',
+    orientation: "portrait",
     margin: {
       top: 0,
       bottom: 0,

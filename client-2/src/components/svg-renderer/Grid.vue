@@ -8,18 +8,17 @@
     )} ${gridTotalHeight(grid, options)}`"
     :width="`${gridTotalWidth(grid, options)}px`"
     :height="`${gridTotalHeight(grid, options)}px`"
+    xmlns="http://www.w3.org/2000/svg"
   >
     <rect
+      v-if="exportOptions.outerBorders"
       :x="-outerLineStroke / 2"
       :y="-outerLineStroke / 2"
       :width="gridTotalWidth(grid, options) - outerLineStroke"
       :height="gridTotalHeight(grid, options) - outerLineStroke"
       class="outer-rect"
     />
-    <g class="row" v-for="(row, i) in rows" :key="i">
-      <g class="cell" v-for="(cell, j) in row" :key="j"></g>
-    </g>
-    <g class="lines">
+    <g class="lines" v-if="exportOptions.borders">
       <line
         v-for="i in rows.length - 1"
         :key="i"
@@ -42,19 +41,12 @@
     <g class="cells">
       <g class="row" v-for="(row, i) in grid.cells" :key="i">
         <g class="cell" v-for="(cell, j) in row" :key="j">
-          <rect
-            :x="xText(cell) - cellWidth(options) / 2"
-            :y="yText(cell)"
-            :width="cellWidth(options)"
-            :height="cellWidth(options)"
-            fill="rgba(0,127,0,0.8)"
-          />
           <text
             :x="xText(cell)"
             :y="yText(cell)"
             text-anchor="middle"
             alignment-baseline="middle"
-            v-if="cell.definition"
+            v-if="cell.definition && exportOptions.definitions"
           >
             <tspan v-for="(sp, k) in lines(cell)" :key="k" v-bind="sp">
               {{ sp.text }}
@@ -62,13 +54,38 @@
           </text>
           <text
             :x="xText(cell)"
-            :y="yText(cell) + 6 * cellWidth(options)/7"
+            :y="yText(cell) + (6 * cellWidth(options)) / 7"
             text-anchor="middle"
             class="text"
-            v-else
+            v-else-if="!cell.definition && exportOptions.texts"
           >
             {{ cell.text }}
           </text>
+        </g>
+      </g>
+    </g>
+
+    <g
+      class="arrows"
+      stroke-linecap="round"
+      stroke-width="10"
+      fill="none"
+      stroke="black"
+      v-if="exportOptions.arrows"
+    >
+      <g v-for="(cell, i) in cellsWithArrows" :key="i">
+        <g
+          v-for="(arrow, j) in cell.arrows"
+          :key="j"
+          :transform="`translate(${
+            cellAndBorderWidth(options) * cell.x +
+            cellWidth(options) * arrow.position.x
+          },${
+            cellAndBorderWidth(options) * cell.y +
+            cellWidth(options) * arrow.position.y
+          })scale(0.14,0.14)`"
+        >
+          <path :class="arrow.direction" :d="getD(arrow.direction, true)" />
         </g>
       </g>
     </g>
@@ -76,8 +93,16 @@
 </template>
 
 <script setup lang="ts">
-import { defineEmits, ref, defineProps, watchEffect, computed } from "vue";
-import Arrow from "./Arrow";
+import {
+  defineEmits,
+  ref,
+  defineProps,
+  watchEffect,
+  withDefaults,
+  computed,
+  watch,
+} from "vue";
+import { getD } from "../../js/paths";
 import {
   Grid,
   GridOptions,
@@ -91,32 +116,25 @@ import {
   parse,
   Cell,
 } from "grid";
-import Vector from "vector2js";
-
-const points = [
-  [
-    { x: 1, y: 0.5 },
-    { x: 0.5, y: 1 },
-  ],
-  [
-    { x: 1, y: 0.25 },
-    { x: 1, y: 0.75 },
-    { x: 0.5, y: 1 },
-  ],
-];
+import { defaultExportOptions, ExportOptions } from "./types";
 
 const container = ref(null);
-const props = defineProps<{
-  grid: Grid;
-  options: GridOptions;
-}>();
+const props = withDefaults(
+  defineProps<{
+    grid: Grid;
+    options: GridOptions;
+    exportOptions: Partial<ExportOptions>;
+  }>(),
+  {
+    exportOptions: () => defaultExportOptions,
+  }
+);
 const rows = computed(() =>
   new Array(props.grid.rows).fill(0).map((e, i) => i)
 );
 const cols = computed(() =>
   new Array(props.grid.cols).fill(0).map((e, i) => i)
 );
-console.log({ rows, cols });
 const lineStroke = computed(() => parse(props.options.grid.borderSize)[0]);
 const lineColor = computed(() => props.options.grid.borderColor);
 const outerLineStroke = computed(
@@ -126,6 +144,10 @@ const outerLineColor = computed(() => props.options.grid.outerBorderColor);
 const defSize = computed(() => parse(props.options.definition.size)[0]);
 const textSize = computed(() => parse(props.options.grid.cellSize)[0]);
 const textFont = computed(() => `${textSize.value}px roboto`);
+const cellsWithArrows = computed(() =>
+  props.grid.cells.flat().filter((c) => c.definition && c.arrows.length > 0)
+);
+console.log(cellsWithArrows.value[0].arrows);
 
 function xText(cell: Cell) {
   return (
@@ -170,7 +192,10 @@ function lines(cell: Cell) {
   return lines;
 }
 
-console.log(gridTotalWidth(props.grid, props.options));
+function trueOrUndefined(k: boolean | undefined) {
+  return k === undefined || !!k;
+}
+
 </script>
 
 <style scoped>
@@ -193,5 +218,13 @@ console.log(gridTotalWidth(props.grid, props.options));
 .text {
   line-height: v-bind(textSize);
   font: v-bind(textFont);
+}
+
+.right .rightdown {
+  transform: rotate(180deg) scale(-1, -1);
+}
+.downright,
+.down {
+  transform: scale(-1, 1) rotate(90deg);
 }
 </style>
