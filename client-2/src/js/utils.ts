@@ -1,5 +1,5 @@
 import axios from "axios";
-import {Grid} from "../grid";
+import {Grid} from "grid";
 import { NIcon } from "naive-ui";
 import { h,  Component } from "vue";
 

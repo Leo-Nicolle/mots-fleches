@@ -17,7 +17,7 @@
 
 <script setup lang="ts">
 import { defineProps, computed } from "vue";
-import { ArrowDir } from "../grid/types";
+import { ArrowDir } from "grid";
 // :style="{transform: `${dir.startsWith('right') ? 'rotate(-90deg)scale(-1, 1)': ''}`}"
 
 const props =

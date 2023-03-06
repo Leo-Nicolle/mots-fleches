@@ -9,7 +9,7 @@
 import axios from "axios";
 import apiMixin from "../js/apiMixin";
 import Editor from "../components/Editor.vue";
-import { Grid } from "../grid";
+import { Grid } from "grid";
 import {save} from '../js/utils';
 
 export default {

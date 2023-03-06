@@ -1,7 +1,6 @@
 import { ArrowDir, Bounds, Cell, Direction, Vec } from "./types";
 import Vector from "vector2js";
 import {v4 as uuid} from "uuid";
-import { Cellular } from "@vicons/ionicons5";
 
 export const nullCell:Cell = {
   x: -1,

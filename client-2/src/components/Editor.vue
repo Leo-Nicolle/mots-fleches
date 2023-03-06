@@ -37,14 +37,18 @@
     </div>
     <n-scrollbar style="max-height: calc(100vh - 100px)">
       <n-scrollbar style="max-width: calc(100vw - 100px)">
-        <Exporterfabric :grid="grid" :options="options" 
+        <!-- <Exporterfabric :grid="grid" :options="options" 
           :texts="true"
           :arrow="true"
           :definitions="true"
           :shouldExport="true"
           :separators="true"
           :arrows="true"
-        />
+        /> -->
+        <SVGGrid
+          :grid="grid"
+          :options="options"
+        ></SVGGrid>
         <EditGrid
           @type="onType"
           @focus="(point) => (focus = point)"
@@ -68,10 +72,12 @@ import {
   watchEffect,
   watch,
 } from "vue";
-import { Grid, Cell, Direction, Vec, nullCell, GridOptions } from "../grid";
+import { Grid, Cell, Direction, Vec, nullCell, GridOptions } from "grid";
 import { CogOutline as CogIcon } from "@vicons/ionicons5";
 
 import EditGrid from "./EditGrid.vue";
+import SVGGrid from "./svg-renderer/Grid.vue";
+
 import Options from "./Options.vue";
 import ModalOptions from "./ModalOptions.vue";
 import Suggestion from "./Suggestion.vue";
@@ -84,7 +90,9 @@ const options: GridOptions = ref({
   grid: {
     cellSize: "56px",
     borderColor: "black",
-    borderSize: "1px",
+    borderSize: "10px",
+    outerBorderSize: '20px',
+    outerBorderColor: 'red',
   },
   definition: {
     font: "sans-serif",

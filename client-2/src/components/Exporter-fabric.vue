@@ -1,6 +1,5 @@
 <template>
   <div ref="container" class="grid exporter" :version="version">
-    <canvas ref="exportcanvas"></canvas>
     <div class="arrows">
       <Arrow
         v-for="(dir, i) in directions"
@@ -24,14 +23,11 @@ import {
   watchEffect,
   nextTick,
 } from "vue";
-import { Grid, GridOptions, ArrowDir } from "../grid";
+import { Grid, GridOptions, ArrowDir } from "grid";
 import Arrow from "./Arrow";
 
 
-const ruler = document.createElement("div");
-ruler.classList.add("hidden-input");
-document.body.appendChild(ruler);
-const exportcanvas = ref(null);
+const exportcanvas = document.createElement('canvas');
 const container = ref<HTMLDivElement>(null as any as HTMLDivElement);
 const version = ref(1);
 const directions = ref(["right", "rightdown", "down", "downright"]);
@@ -49,12 +45,11 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (event: "exported", value: HTMLCanvasElement): void;
+  (event: "exported", value: fabric.Canvas): void;
 }>();
 
 function exportCanvas() {
   if (!container.value) return;
-  console.log('export')
   const dirToId: Record<ArrowDir, number> = {
     right: 0,
     rightdown: 1,
@@ -105,8 +100,7 @@ function exportCanvas() {
       ]);
     })
     .then(([definitions, imgs]) => {
-      const cellWidth = cellBB.width; //canvas.width / props.grid.cols;
-      const aw = arrowSize.width * dpx;
+      const cellWidth = cellBB.width;
       const arrowBB = document
         .querySelector(".arrow")
         ?.getBoundingClientRect() as DOMRect;
@@ -122,7 +116,7 @@ function exportCanvas() {
         for (let j = 0; j < row.length; j++) {
           const cell = row[j];
           if (cell.definition) {
-            const tb = new fabric.Text(cell.text, {
+            const tb = f.add(new fabric.Text(cell.text, {
               left: cell.x * cellWidth,
               top: cell.y * cellWidth,
               width: cellWidth,
@@ -131,17 +125,8 @@ function exportCanvas() {
               fontSize: defHeihgt,
               textAlign: "center",
               hasBorders: true,
-              hasControls: false,
-              hasRotatingPoint: false,
-              lockSkewingX: true,
-              lockSkewingY: true,
               fontFamily: props.options.definition.font,
-            });
-            f.add(tb);
-            tb.setOptions({
-              width: cellWidth,
-              height: cellWidth,
-            });
+            }));
             if (cell.splited) {
               console.log("splited", cell.splited);
               const y =
@@ -206,9 +191,7 @@ function exportCanvas() {
           )
         );
       }
-      // container.value.appendChild(f.toCanvasElement());
-
-      // emit("exported", f.);
+      emit("exported", f);
     });
 }
 
@@ -220,14 +203,14 @@ watchEffect(() => {
   }, 100);
 });
 
-setInterval(() => {
-  exportCanvas();
-}, 2000);
+// setInterval(() => {
+//   exportCanvas();
+// }, 2000);
 function refresh() {
   version.value++;
 }
 onMounted(() => {
-  f = new fabric.Canvas(exportcanvas.value);
+  f = new fabric.Canvas(exportcanvas);
 });
 </script>
 
@@ -239,68 +222,6 @@ onMounted(() => {
   z-index: -1000;
   background: #fff;
   z-index: 1000;
-  top: 300px;
-  left: 0;
-}
-.row {
-  display: flex;
-  flex-direction: row;
-  position: absolute;
-  top: -200%;
-  left: 200%;
-}
-.grid {
-  display: inline-flex;
-  flex-wrap: nowrap;
-  flex-direction: column;
-  width: calc(v-bind(options.grid.cellSize) * v-bind(grid.rows));
-  padding: calc(v-bind(options.grid.borderSize) * 2);
-}
-.cell {
-  width: v-bind(options.grid.cellSize);
-  height: v-bind(options.grid.cellSize);
-  cursor: text;
-  display: grid;
-  grid-template-rows: 0 50% 50%;
-  grid-template-columns: 25% 25% 50%;
-}
-.cell > span {
-  border: 0;
-  grid-area: 1 / 1 / 4 / 4;
-  background: #fff;
-}
-.text {
-  display: flex;
-  align-items: center;
-  text-align: center;
-  font-size: v-bind(options.grid.cellSize);
-  text-transform: capitalize;
-  justify-content: space-around;
-  border: 0;
-}
-.separator {
-  cursor: pointer;
-  padding-top: 10px;
-  border-bottom: 1px solid black;
-  transform: translate(0, -100%);
-}
-.definition {
-  border: 0;
-  outline: 0;
-  padding: 0;
-  margin: 0;
-  text-align: center;
-  text-anchor: start;
-  max-width: 100%;
-  height: 100%;
-  resize: none;
-  background: #aaa;
-  color: v-bind(options.definition.color);
-  font-family: v-bind(options.definition.font);
-  font-size: v-bind(options.definition.size);
-  line-height: calc(v-bind(options.grid.cellSize) / 4);
-  text-overflow: clip;
-  overflow-wrap: anywhere;
 }
 .arrow {
   height: v-bind(options.arrow.size);

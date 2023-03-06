@@ -1,7 +1,6 @@
 export type Vec = {x: number, y: number};
 export type Lookup<T> = { [key: number | string]: T };
 export type DefGrid = boolean[][];
-// export type LetterGrid = Letter[][];
 
 export type ArrowDir = 'right' | 'down' | 'rightdown' | 'downright' | 'none';
 export type Arrow = {
@@ -20,12 +19,26 @@ export type Cell = {
   text: string;
 }
 
+export type Format = {
+  width: number;
+  height: number;
+  orientation: string;
+  dpi: number;
+  margin: {
+    top: number;
+    bottom: number;
+    left: number;
+    right: number;
+  }
+}
 
 export type GridOptions = {
   grid: {
     cellSize: string;
     borderSize: string;
     borderColor: string;
+    outerBorderSize: string;
+    outerBorderColor: string;
   };
   definition: {
     font: string;
@@ -36,13 +49,9 @@ export type GridOptions = {
     size: string;
     color: string;
   };
+  paper: Format;
 };
 
-// export type Grid = {
-//   rows: number;
-//   cols: number;
-//   cells: Cell[][];
-// }
 export type Bounds = {
   start: Vec;
   end: Vec;
@@ -50,3 +59,5 @@ export type Bounds = {
   length: number;
 }
 export type Direction = 'horizontal' | 'vertical';
+
+export const DPI_TO_PIXEL = 25.4;

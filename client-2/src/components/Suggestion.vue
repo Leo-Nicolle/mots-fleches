@@ -68,7 +68,7 @@ import {
 } from "@vicons/ionicons5";
 
 import axios from "axios";
-import { Grid, Direction, Vec } from "../grid";
+import { Grid, Direction, Vec } from "grid";
 import { getUrl } from "../js/utils";
 
 const method = ref("fastest");

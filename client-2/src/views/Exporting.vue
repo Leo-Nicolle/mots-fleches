@@ -1,34 +1,6 @@
 <template>
-  <div class="exporting">
-    <div class="leftpanel">
-      <n-scrollbar>
-        <h3>Export</h3>
-        <Options
-          v-model="optionsV"
-          :format="true"
-          :grid="false"
-          :arrows="false"
-          :definition="false"
-        />
-      </n-scrollbar>
+  <div>
     </div>
-    <div class="wrapper scroll">
-      <n-image width="100" :src="previewUrl" />
-    </div>
-    <Exporter
-      v-if="active"
-      :ref="preview"
-      :grid="active"
-      :shouldExport="shouldExport"
-      :arrows="false"
-      :separators="false"
-      :texts="true"
-      :scale="2"
-      :definitions="false"
-      :options="options"
-      @exported="onExported"
-    />
-  </div>
 </template>
 
 <script setup lang="ts">
@@ -40,77 +12,105 @@ import {
   defineEmits,
   watchEffect,
 } from "vue";
-import { useRouter, useRoute } from "vue-router";
-import axios from "axios";
-import { AddCircleOutline as AddIcon, HeartOutline } from "@vicons/ionicons5";
+// <div class="exporting">
+//     <div class="leftpanel">
+//       <n-scrollbar>
+//         <h3>Export</h3>
+//         <Options
+//           v-model="optionsV"
+//           :format="true"
+//           :grid="false"
+//           :arrows="false"
+//           :definition="false"
+//         />
+//       </n-scrollbar>
+//     </div>
+//     <div class="wrapper scroll">
+//       <n-image width="100" :src="previewUrl" />
+//     </div>
+//     <Exporter
+//       v-if="active"
+//       :grid="active"
+//       :shouldExport="shouldExport"
+//       :arrows="false"
+//       :separators="false"
+//       :texts="true"
+//       :scale="2"
+//       :definitions="false"
+//       :options="options"
+//       @exported="onExported"
+//     />
+//   </div>
+// import { useRouter, useRoute } from "vue-router";
+// import axios from "axios";
+// import { AddCircleOutline as AddIcon, HeartOutline } from "@vicons/ionicons5";
 
-import { getUrl, save } from "../js/utils";
-import Exporter from "../components/Exporter.vue";
-import Options from "../components/Options.vue";
-import { Grid, GridOptions, DPI_TO_PIXEL } from "../grid";
-import { fromUnixTime } from "date-fns";
+// import { getUrl, save } from "../js/utils";
+// import Exporter from "../components/Exporter-fabric.vue";
+// import Options from "../components/Options.vue";
+// import { Grid, GridOptions, DPI_TO_PIXEL } from "grid";
+// import { fromUnixTime } from "date-fns";
 
-const props = defineProps<{ grids: Grid[]; options: GridOptions }>();
-const emit = defineEmits<{
-  (event: "update:modelValue", value: GridOptions): void;
-}>();
+// const props = defineProps<{ grids: Grid[]; options: GridOptions }>();
+// const emit = defineEmits<{
+//   (event: "update:modelValue", value: GridOptions): void;
+// }>();
 
-const active = ref<Grid>();
-const shouldExport = ref(false);
-const previewUrl = ref("");
+// const active = ref<Grid>();
+// const shouldExport = ref(false);
+// const previewUrl = ref("");
 
-const optionsV = computed({
-  get: () => props.options,
-  set: (unit) => emit("update:modelValue", props.options),
-});
-onMounted(() => {
-  console.log(props.options);
-  active.value = props.grids[0] as Grid;
-  shouldExport.value = true;
-});
+// const optionsV = computed({
+//   get: () => props.options,
+//   set: (unit) => emit("update:modelValue", props.options),
+// });
+// onMounted(() => {
+//   console.log(props.options);
+//   active.value = props.grids[0] as Grid;
+//   shouldExport.value = true;
+// });
 
-watchEffect(() => {
-  console.log("watch effect");
-  props.options.paper.margin.left +
-  props.options.paper.margin.top +
-  props.options.paper.margin.right +
-  props.options.paper.margin.bottom
-    ? (shouldExport.value = true)
-    : "";
-});
+// watchEffect(() => {
+//   console.log("watch effect");
+//   props.options.paper.margin.left +
+//   props.options.paper.margin.top +
+//   props.options.paper.margin.right +
+//   props.options.paper.margin.bottom
+//     ? (shouldExport.value = true)
+//     : "";
+// });
 
-function onExported(canvas) {
-  console.log(canvas.width)
-  const preview = document.createElement("canvas");
-  const paper = props.options.paper;
-  const [width, height, top, left, bottom, right] = [
-    paper.width,
-    paper.height,
-    paper.margin.top,
-    paper.margin.left,
-    paper.margin.bottom,
-    paper.margin.right,
-  ].map((e) => (e * paper.dpi * 10) / DPI_TO_PIXEL);
-  preview.width = width;
-  preview.height = height;
-  const ctx = preview.getContext("2d") as CanvasRenderingContext2D;
-  ctx.fillStyle = "#ccddff";
-  ctx.fillRect(0, 0, width, height);
+// function onExported(canvas: fabric.Canvas) {
+//   const preview = document.createElement("canvas");
+//   const paper = props.options.paper;
+//   const [width, height, top, left, bottom, right] = [
+//     paper.width,
+//     paper.height,
+//     paper.margin.top,
+//     paper.margin.left,
+//     paper.margin.bottom,
+//     paper.margin.right,
+//   ].map((e) => (e * paper.dpi * 10) / DPI_TO_PIXEL);
+//   preview.width = width;
+//   preview.height = height;
+//   const ctx = preview.getContext("2d") as CanvasRenderingContext2D;
+//   ctx.fillStyle = "#ccddff";
+//   ctx.fillRect(0, 0, width, height);
 
-  ctx.drawImage(
-    canvas,
-    0,
-    0,
-    canvas.width,
-    canvas.height,
-    left,
-    top,
-    width - left - right,
-    height - top - bottom
-  );
-  previewUrl.value = preview.toDataURL();
-  shouldExport.value = false;
-}
+//   ctx.drawImage(
+//     canvas,
+//     0,
+//     0,
+//     canvas.width,
+//     canvas.height,
+//     left,
+//     top,
+//     width - left - right,
+//     height - top - bottom
+//   );
+//   previewUrl.value = preview.toDataURL();
+//   shouldExport.value = false;
+// }
 </script>
 
 <style>

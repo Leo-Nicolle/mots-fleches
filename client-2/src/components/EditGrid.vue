@@ -112,7 +112,7 @@ import {
   Cell,
   Direction,
   Vec,
-} from "../grid";
+} from "grid";
 import Vector from "vector2js";
 
 const b = ref(8);

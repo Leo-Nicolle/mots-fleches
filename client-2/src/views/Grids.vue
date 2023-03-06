@@ -66,7 +66,7 @@
             </template>
           </n-card>
         </div>
-        <Exporter
+        <!-- <Exporter
           v-if="active"
           :grid="active"
           :shouldExport="shouldExport"
@@ -76,7 +76,7 @@
           :definitions="false"
           :options="options"
           @exported="onExported"
-        />
+        /> -->
 
         <n-modal
           preset="dialog"
@@ -91,7 +91,7 @@
         </n-modal>
       </div>
     </div>
-    <Exporting v-else :grids="selectedGrids" :options="options" />
+    <!-- <Exporting v-else :grids="selectedGrids" :options="options" /> -->
   </div>
 </template>
 
@@ -102,10 +102,9 @@ import axios from "axios";
 import { AddCircleOutline as AddIcon, HeartOutline } from "@vicons/ionicons5";
 
 import { getUrl, save } from "../js/utils";
-import Exporter from "../components/Exporter.vue";
-import Exporting from "./Exporting.vue";
+// import Exporter from "../components/Exporter.vue";
 
-import { Grid, GridOptions } from "../grid";
+import { Grid, GridOptions } from "grid";
 const router = useRouter();
 const options = ref<GridOptions>({
   grid: {

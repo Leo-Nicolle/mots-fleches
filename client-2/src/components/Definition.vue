@@ -14,7 +14,7 @@
 import { defineProps, defineEmits, ref, watchEffect, reactive } from "vue";
 import Arrow from "./Arrow";
 import Vector from "vector2js";
-import { Grid, ArrowDir, Cell, Vec } from "../grid";
+import { Grid, ArrowDir, Cell, Vec } from "grid";
 
 const definition = ref(null);
 const version = ref(1);
