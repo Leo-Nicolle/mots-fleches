@@ -6,6 +6,8 @@ export type ExportOptions = {
   outerBorders: boolean;
   borders: boolean;
   texts: boolean;
+  highlight:boolean;
+
 }
 
 export const defaultExportOptions: ExportOptions = {
@@ -14,4 +16,12 @@ export const defaultExportOptions: ExportOptions = {
   definitions: true,
   texts: true,
   arrows: true,
+  highlight: false,
 };
+
+export type Rect = {
+  x: number;
+  y: number;
+  width: number; 
+  height: number;
+}

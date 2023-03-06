@@ -8,6 +8,7 @@
     )} ${gridTotalHeight(grid, options)}`"
     :width="`${gridTotalWidth(grid, options)}px`"
     :height="`${gridTotalHeight(grid, options)}px`"
+    @click="onClick"
     xmlns="http://www.w3.org/2000/svg"
   >
     <rect
@@ -41,14 +42,27 @@
     <g class="cells">
       <g class="row" v-for="(row, i) in grid.cells" :key="i">
         <g class="cell" v-for="(cell, j) in row" :key="j">
+          <rect
+            :x="cellAndBorderWidth(options) * cell.x"
+            :y="cellAndBorderWidth(options) * cell.y"
+            :width="cellWidth(options)"
+            :height="cellWidth(options)"
+            :fill="getCellFill(cell)"
+          />
           <text
             :x="xText(cell)"
             :y="yText(cell)"
             text-anchor="middle"
             alignment-baseline="middle"
+            :class="getCellClass(cell)"
             v-if="cell.definition && exportOptions.definitions"
           >
-            <tspan v-for="(sp, k) in lines(cell)" :key="k" v-bind="sp">
+            <tspan
+              v-for="(sp, k) in lines(cell)"
+              :key="k"
+              v-bind="sp"
+              class="definition"
+            >
               {{ sp.text }}
             </tspan>
           </text>
@@ -56,10 +70,10 @@
             :x="xText(cell)"
             :y="yText(cell) + (6 * cellWidth(options)) / 7"
             text-anchor="middle"
-            class="text"
+            :class="getCellClass(cell)"
             v-else-if="!cell.definition && exportOptions.texts"
           >
-            {{ cell.text }}
+            {{ cell.text || cell.suggestion }}
           </text>
         </g>
       </g>
@@ -115,20 +129,32 @@ import {
   cellWidth,
   parse,
   Cell,
+  nullCell,
+  Vec,
 } from "grid";
-import { defaultExportOptions, ExportOptions } from "./types";
+import { defaultExportOptions, ExportOptions, Rect } from "./types";
 
-const container = ref(null);
+const container = ref<SVGSVGElement>(null as unknown as SVGSVGElement);
+const focused = ref(nullCell);
+
 const props = withDefaults(
   defineProps<{
     grid: Grid;
+    dir: "row" | "col";
     options: GridOptions;
     exportOptions: Partial<ExportOptions>;
   }>(),
   {
+    dir: "row",
+    highlight: false,
     exportOptions: () => defaultExportOptions,
   }
 );
+const emit = defineEmits<{
+  (event: "type", value: number): void;
+  (event: "focus", value: Vec): void;
+}>();
+
 const rows = computed(() =>
   new Array(props.grid.rows).fill(0).map((e, i) => i)
 );
@@ -144,11 +170,57 @@ const outerLineColor = computed(() => props.options.grid.outerBorderColor);
 const defSize = computed(() => parse(props.options.definition.size)[0]);
 const textSize = computed(() => parse(props.options.grid.cellSize)[0]);
 const textFont = computed(() => `${textSize.value}px roboto`);
+const defFont = computed(
+  () => `${defSize.value}px ${props.options.definition.font}`
+);
+
 const cellsWithArrows = computed(() =>
   props.grid.cells.flat().filter((c) => c.definition && c.arrows.length > 0)
 );
-console.log(cellsWithArrows.value[0].arrows);
+watchEffect(() => {
+  const cells = props.grid.getBounds(focused.value, props.dir).cells;
+  const width = cellWidth(props.options);
+  const height = cellWidth(props.options);
+  props.grid.highlight(cells);
+  if (!container.value) return;
+  if (props.grid.isValid(focused.value)) {
+    emit("focus", focused.value);
+  }
+  // if (!cells.length) return;
+  // if (props.grid.isDefinition(focused.value)) return;
+  // const row = [...container.value.querySelectorAll(".row")][focused.value.y];
+  // if (!row) return;
+  // const col = [...row.querySelectorAll(".cell")][focused.value.x];
+  // col.firstChild.focus();
+  // props.grid.suggest([], [], []);
+});
 
+function getCellClass(cell: Cell) {
+  const classes = [cell.definition ? "definition" : "text"];
+
+  if (cell.x === focused.value.x && cell.y === focused.value.y) {
+    classes.push(`focused`);
+  }
+  if (cell.highlighted) {
+    classes.push(`highlighted`);
+  }
+  if (cell.suggestion && !cell.text.length) {
+    classes.push(`suggested`);
+  }
+  return classes.join(" ");
+}
+
+function getCellFill(cell: Cell) {
+  if (cell.definition) {
+    return props.options.definition.backgroundColor;
+  }
+  if (!props.exportOptions.highlight) return "transparent";
+  return Grid.equal(cell, focused.value)
+    ? "#acf"
+    : cell.highlighted
+    ? "#def"
+    : "transparent";
+}
 function xText(cell: Cell) {
   return (
     cell.x * cellAndBorderWidth(props.options) + cellWidth(props.options) / 2
@@ -192,10 +264,32 @@ function lines(cell: Cell) {
   return lines;
 }
 
-function trueOrUndefined(k: boolean | undefined) {
-  return k === undefined || !!k;
+function onClick(evt: MouseEvent) {
+  console.log(evt.x, evt.y);
+  const x = evt.offsetX - outerLineStroke.value;
+  const y = evt.offsetY - outerLineStroke.value;
+  const maxX = gridTotalWidth(props.grid, props.options);
+  const maxY = gridTotalHeight(props.grid, props.options);
+  const cWidth =
+    container.value && container.value.getBoundingClientRect()
+      ? container.value.getBoundingClientRect().width
+      : gridTotalWidth(props.grid, props.options);
+  const ratio = cWidth / gridTotalWidth(props.grid, props.options);
+  if (x < 0 || y < 0 || x > maxX || y > maxY) return (focused.value = nullCell);
+  const cY = Math.floor(y / cellAndBorderWidth(props.options) / ratio);
+  const cX = Math.floor(x / cellAndBorderWidth(props.options) / ratio);
+  const cell = props.grid.cells[cY][cX];
+  console.log(
+    "ICI",
+    { cX, cY },
+    ratio,
+    // cellWidth(props.options),
+    // borderWidth(props.options),
+    // cellAndBorderWidth(props.options),
+    { x, y }
+  );
+  focused.value = cell;
 }
-
 </script>
 
 <style scoped>
@@ -214,10 +308,17 @@ function trueOrUndefined(k: boolean | undefined) {
 .definition {
   line-height: v-bind(defSize);
   font-size: v-bind(defSize);
+  font: v-bind(defFont);
 }
 .text {
   line-height: v-bind(textSize);
   font: v-bind(textFont);
+}
+.text.highlighted {
+  fill: #000;
+}
+.text.suggested  {
+  fill: #777;
 }
 
 .right .rightdown {

@@ -48,9 +48,7 @@ export function gridHeight(grid: Grid, options: GridOptions){
 }
 
 export function gridTotalWidth(grid: Grid, options: GridOptions){
-
   const a = gridWidth(grid, options) + 2 * outerBorderWidth(options);
-  console.log(a);
   return a;
 }
 

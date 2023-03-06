@@ -46,12 +46,15 @@
           :arrows="true"
         /> -->
         <SVGGrid
+          @focus="(point) => (focus = point)"
           :grid="grid"
           :options="options"
           :export-options="{
             ...defaultExportOptions,
             texts: true,
+            highlight: true,
           }"
+          :dir="dir"
         ></SVGGrid>
         <EditGrid
           @type="onType"
@@ -80,8 +83,7 @@ import { Grid, Cell, Direction, Vec, nullCell, GridOptions } from "grid";
 import { CogOutline as CogIcon } from "@vicons/ionicons5";
 import EditGrid from "./EditGrid.vue";
 import SVGGrid from "./svg-renderer/Grid.vue";
-import {defaultExportOptions} from "./svg-renderer/types";
-
+import { defaultExportOptions } from "./svg-renderer/types";
 
 import Options from "./Options.vue";
 import ModalOptions from "./ModalOptions.vue";
@@ -93,16 +95,17 @@ import { getUrl } from "../js/utils";
 
 const options: GridOptions = ref({
   grid: {
-    cellSize: "56px",
+    cellSize: "49px",
     borderColor: "black",
     borderSize: "1px",
-    outerBorderSize: "20px",
+    outerBorderSize: "1px",
     outerBorderColor: "red",
   },
   definition: {
     font: "sans-serif",
     size: "12px",
     color: "black",
+    backgroundColor: "#ccc",
   },
   arrow: {
     size: "28px",
@@ -142,6 +145,11 @@ const modalProps = computed(() => {
   };
 });
 
+// watchEffect(() => {
+//   const cells = props.grid.getBounds(focus.value, dir.value).cells;
+//   if (!cells || !cells.length) return;
+//   props.grid.suggest([value], [cells[0]], [dir.value]);
+// });
 function refresh() {
   version.value++;
 }

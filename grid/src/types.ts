@@ -44,6 +44,7 @@ export type GridOptions = {
     font: string;
     size: string;
     color: string;
+    backgroundColor: string;
   };
   arrow: {
     size: string;
