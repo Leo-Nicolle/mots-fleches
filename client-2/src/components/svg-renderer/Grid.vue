@@ -103,6 +103,18 @@
         </g>
       </g>
     </g>
+
+    <g class="splits" v-if="exportOptions.splits">
+      <line
+        v-for="(line, i) in splits"
+        :key="i"
+        :x1="line.x1"
+        :y1="line.y1"
+        :x2="line.x2"
+        :y2="line.y2"
+        class="line"
+      />
+    </g>
   </svg>
 </template>
 
@@ -131,28 +143,30 @@ import {
   Cell,
   nullCell,
   Vec,
+  Direction,
 } from "grid";
 import { defaultExportOptions, ExportOptions, Rect } from "./types";
 
 const container = ref<SVGSVGElement>(null as unknown as SVGSVGElement);
-const focused = ref(nullCell);
 
 const props = withDefaults(
   defineProps<{
     grid: Grid;
-    dir: "row" | "col";
+    dir: Direction;
     options: GridOptions;
+    focus: Cell;
     exportOptions: Partial<ExportOptions>;
   }>(),
   {
-    dir: "row",
+    dir: "horizontal",
+    focus: nullCell,
     highlight: false,
     exportOptions: () => defaultExportOptions,
   }
 );
 const emit = defineEmits<{
   (event: "type", value: number): void;
-  (event: "focus", value: Vec): void;
+  (event: "focus", value: Cell): void;
 }>();
 
 const rows = computed(() =>
@@ -177,28 +191,46 @@ const defFont = computed(
 const cellsWithArrows = computed(() =>
   props.grid.cells.flat().filter((c) => c.definition && c.arrows.length > 0)
 );
-watchEffect(() => {
-  const cells = props.grid.getBounds(focused.value, props.dir).cells;
-  const width = cellWidth(props.options);
-  const height = cellWidth(props.options);
-  props.grid.highlight(cells);
-  if (!container.value) return;
-  if (props.grid.isValid(focused.value)) {
-    emit("focus", focused.value);
-  }
-  // if (!cells.length) return;
-  // if (props.grid.isDefinition(focused.value)) return;
-  // const row = [...container.value.querySelectorAll(".row")][focused.value.y];
-  // if (!row) return;
-  // const col = [...row.querySelectorAll(".cell")][focused.value.x];
-  // col.firstChild.focus();
-  // props.grid.suggest([], [], []);
-});
+const splits = computed(() =>
+  props.grid.cells
+    .flat()
+    .filter((c) => c.definition && c.text.split("\n\n").length > 1)
+    .map((cell) => {
+      let isSplited = false;
+      let splitIndex = 0;
+      const lines = cell.text.split("\n\n").reduce((lines, s, i, blocks) => {
+        isSplited = blocks.length > 1;
+        const linesInBlock = s.split("\n");
+        if (i === 0) {
+          splitIndex = linesInBlock.length - 1;
+        }
+        lines.push(...linesInBlock);
+        return lines;
+      }, [] as string[]);
+
+      const ratio =
+        lines.length == 2 || lines.length === 4
+          ? 0.5
+          : splitIndex === 0
+          ? 1 / 3
+          : 0.66;
+      const y =
+        cell.y * cellAndBorderWidth(props.options) +
+        ratio * cellWidth(props.options);
+      return {
+        x1: cell.x * cellAndBorderWidth(props.options),
+        x2:
+          cell.x * cellAndBorderWidth(props.options) + cellWidth(props.options),
+        y1: y,
+        y2: y,
+      };
+    })
+);
 
 function getCellClass(cell: Cell) {
   const classes = [cell.definition ? "definition" : "text"];
 
-  if (cell.x === focused.value.x && cell.y === focused.value.y) {
+  if (cell.x === props.focus.x && cell.y === props.focus.y) {
     classes.push(`focused`);
   }
   if (cell.highlighted) {
@@ -215,7 +247,7 @@ function getCellFill(cell: Cell) {
     return props.options.definition.backgroundColor;
   }
   if (!props.exportOptions.highlight) return "transparent";
-  return Grid.equal(cell, focused.value)
+  return Grid.equal(cell, props.focus)
     ? "#acf"
     : cell.highlighted
     ? "#def"
@@ -231,7 +263,6 @@ function yText(cell: Cell) {
 }
 function lines(cell: Cell) {
   if (!cell.definition) {
-    const spacing = (cellWidth(props.options) - textSize.value) / 2;
     return [
       {
         text: cell.text,
@@ -241,31 +272,49 @@ function lines(cell: Cell) {
       },
     ];
   }
-  const gaps = cell.text.split("\n\n");
-  const height = cellWidth(props.options) / gaps.length;
+  const cellHeight = cellWidth(props.options);
 
-  let lastSpacing = 0;
-  const lines = gaps.reduce((acc, gap, i) => {
-    const lines = gap.split("\n");
-    const spacing =
-      (height - defSize.value * lines.length) / (lines.length + 1);
+  let isSplited = false;
+  let splitIndex = 0;
+  const lines = cell.text.split("\n\n").reduce((lines, s, i, blocks) => {
+    isSplited = blocks.length > 1;
+    const linesInBlock = s.split("\n");
+    if (i === 0) {
+      splitIndex = linesInBlock.length - 1;
+    }
+    lines.push(...linesInBlock);
+    return lines;
+  }, [] as string[]);
+  const borderSize = parse(props.options.grid.borderSize)[0];
+  const dSize = defSize.value;
+  const freeHeight =
+    cellHeight - +isSplited * borderSize - lines.length * defSize.value;
 
-    lines.forEach((line, j) => {
-      acc.push({
-        text: line,
-        dy: spacing + defSize.value + +(j === 0) * lastSpacing,
-        x: xText(cell),
-        class: "definition",
-      });
-    });
-    lastSpacing = spacing;
-    return acc;
-  }, [] as { text: string; dy: number; x: number; class: string }[]);
-  return lines;
+  console.log({ isSplited, borderSize, dSize, freeHeight, lines: lines.length });
+  const topGaps = !isSplited
+    ? new Array(lines.length).fill(1 / (lines.length + 1))
+    : lines.length === 3
+    ? splitIndex === 0
+      ? [2 / 9, 7 / 18, 2 / 9]
+      : [2 / 9, 2 / 9, 7 / 18]
+    : lines.length === 2
+    ? [1 / 4, 1 / 2]
+    : new Array(lines.length).fill(1 / (lines.length + 2));
+  const res = lines.map((line, i) => {
+    return {
+      text: line,
+      "dominant-baseline": "middle",
+      dy:
+        (i === 0 ? defSize.value / 2 : defSize.value) + topGaps[i] * freeHeight,
+      x: xText(cell),
+      class: "definition",
+    };
+  });
+  console.log(res);
+  return res;
 }
 
 function onClick(evt: MouseEvent) {
-  console.log(evt.x, evt.y);
   const x = evt.offsetX - outerLineStroke.value;
   const y = evt.offsetY - outerLineStroke.value;
   const maxX = gridTotalWidth(props.grid, props.options);
@@ -275,20 +324,12 @@ function onClick(evt: MouseEvent) {
       ? container.value.getBoundingClientRect().width
       : gridTotalWidth(props.grid, props.options);
   const ratio = cWidth / gridTotalWidth(props.grid, props.options);
-  if (x < 0 || y < 0 || x > maxX || y > maxY) return (focused.value = nullCell);
+  if (x < 0 || y < 0 || x > maxX || y > maxY) return emit("focus", nullCell);
   const cY = Math.floor(y / cellAndBorderWidth(props.options) / ratio);
   const cX = Math.floor(x / cellAndBorderWidth(props.options) / ratio);
   const cell = props.grid.cells[cY][cX];
-  console.log(
-    "ICI",
-    { cX, cY },
-    ratio,
-    // cellWidth(props.options),
-    // borderWidth(props.options),
-    // cellAndBorderWidth(props.options),
-    { x, y }
-  );
-  focused.value = cell;
+  console.log("click", cell);
+  emit("focus", cell);
 }
 </script>
 
@@ -317,7 +358,7 @@ function onClick(evt: MouseEvent) {
 .text.highlighted {
   fill: #000;
 }
-.text.suggested  {
+.text.suggested {
   fill: #777;
 }
 
