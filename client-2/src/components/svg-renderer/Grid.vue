@@ -123,10 +123,8 @@ import {
   defineEmits,
   ref,
   defineProps,
-  watchEffect,
   withDefaults,
   computed,
-  watch,
 } from "vue";
 import { getD } from "../../js/paths";
 import {
@@ -286,11 +284,9 @@ function lines(cell: Cell) {
     return lines;
   }, [] as string[]);
   const borderSize = parse(props.options.grid.borderSize)[0];
-  const dSize = defSize.value;
   const freeHeight =
     cellHeight - +isSplited * borderSize - lines.length * defSize.value;
 
-  console.log({ isSplited, borderSize, dSize, freeHeight, lines: lines.length });
   const topGaps = !isSplited
     ? new Array(lines.length).fill(1 / (lines.length + 1))
     : lines.length === 3
@@ -299,7 +295,7 @@ function lines(cell: Cell) {
       : [2 / 9, 2 / 9, 7 / 18]
     : lines.length === 2
     ? [1 / 4, 1 / 2]
-    : new Array(lines.length).fill(1 / (lines.length + 2));
+    : [1 / 6, 1 / 6, 1 / 3, 1 / 6];
   const res = lines.map((line, i) => {
     return {
       text: line,
@@ -310,7 +306,6 @@ function lines(cell: Cell) {
       class: "definition",
     };
   });
-  console.log(res);
   return res;
 }
 
@@ -328,7 +323,6 @@ function onClick(evt: MouseEvent) {
   const cY = Math.floor(y / cellAndBorderWidth(props.options) / ratio);
   const cX = Math.floor(x / cellAndBorderWidth(props.options) / ratio);
   const cell = props.grid.cells[cY][cX];
-  console.log("click", cell);
   emit("focus", cell);
 }
 </script>

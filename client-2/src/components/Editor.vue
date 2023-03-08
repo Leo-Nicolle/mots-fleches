@@ -14,7 +14,7 @@
       </span>
 
       <Suggestion
-        v-if="!focusedCell.definition"
+        v-if="!focus.definition"
         :point="focus"
         :dir="dir"
         :query="''"
@@ -46,17 +46,26 @@
           :arrows="true"
         /> -->
         <SVGGrid
-          @focus="(point) => (focus = point)"
+          @focus="(cell) => (focus = cell)"
           :grid="grid"
+          :focus="focus"
+          :dir="dir"
           :options="options"
           :export-options="{
             ...defaultExportOptions,
             texts: true,
             highlight: true,
           }"
-          :dir="dir"
         ></SVGGrid>
-        <EditGrid
+        <GridInput
+          :grid="grid"
+          :dir="dir"
+          :options="options"
+          :cell="focus"
+          @focus="(point) => (focus = point)"
+        >
+        </GridInput>
+        <!-- <EditGrid
           @type="onType"
           @focus="(point) => (focus = point)"
           @mouseenter="onMouseEnter"
@@ -64,7 +73,7 @@
           :options="options"
           :suggestion="suggestion"
           :dir="dir"
-        />
+        /> -->
       </n-scrollbar>
     </n-scrollbar>
   </div>
@@ -83,6 +92,8 @@ import { Grid, Cell, Direction, Vec, nullCell, GridOptions } from "grid";
 import { CogOutline as CogIcon } from "@vicons/ionicons5";
 import EditGrid from "./EditGrid.vue";
 import SVGGrid from "./svg-renderer/Grid.vue";
+import GridInput from "./svg-renderer/GridInput.vue";
+
 import { defaultExportOptions } from "./svg-renderer/types";
 
 import Options from "./Options.vue";
@@ -95,7 +106,7 @@ import { getUrl } from "../js/utils";
 
 const options: GridOptions = ref({
   grid: {
-    cellSize: "49px",
+    cellSize: "121px",
     borderColor: "black",
     borderSize: "1px",
     outerBorderSize: "1px",
@@ -103,7 +114,7 @@ const options: GridOptions = ref({
   },
   definition: {
     font: "sans-serif",
-    size: "12px",
+    size: "20px",
     color: "black",
     backgroundColor: "#ccc",
   },
@@ -129,11 +140,7 @@ const emit = defineEmits<{
 }>();
 const editor = ref(null);
 const dir = ref<Direction>("horizontal");
-const focus = ref<Vec>({ x: -1, y: -1 });
-let focusedCell = computed<Cell>(() => {
-  const { x, y } = focus.value;
-  return Grid.equal(nullCell, { x, y }) ? nullCell : props.grid.cells[y][x];
-});
+const focus = ref<Cell>(nullCell);
 const suggestion = ref("");
 const version = ref(0);
 const visible = ref({ visible: false });
@@ -145,11 +152,6 @@ const modalProps = computed(() => {
   };
 });
 
-// watchEffect(() => {
-//   const cells = props.grid.getBounds(focus.value, dir.value).cells;
-//   if (!cells || !cells.length) return;
-//   props.grid.suggest([value], [cells[0]], [dir.value]);
-// });
 function refresh() {
   version.value++;
 }
@@ -161,6 +163,11 @@ function onType() {
 function onToggleOption(visible) {
   console.log("watch", visible);
 }
+
+watchEffect(() => {
+  props.grid.highlight(props.grid.getBounds(focus.value, dir.value).cells);
+  
+});
 
 function onHover(value: string) {
   const cells = props.grid.getBounds(focus.value, dir.value).cells;
