@@ -47,13 +47,10 @@
           <rect
             :x="cellAndBorderWidth(options) * cell.x"
             :y="cellAndBorderWidth(options) * cell.y"
-            :width="cellWidth(options)"
-            :height="cellWidth(options)"
           />
           <text
             :x="xText(cell)"
             :y="yText(cell)"
-            text-anchor="middle"
             alignment-baseline="middle"
             v-if="cell.definition && exportOptions.definitions"
           >
@@ -61,7 +58,8 @@
               v-for="(sp, k) in lines(cell)"
               :key="k"
               v-bind="sp"
-              class="definition"
+              :line-height="defSize"
+              :font-size="defSize"
             >
               {{ sp.text }}
             </tspan>
@@ -69,7 +67,6 @@
           <text
             :x="xText(cell)"
             :y="yText(cell) + (6 * cellWidth(options)) / 7"
-            text-anchor="middle"
             :class="getCellClass(cell)"
             v-else-if="!cell.definition && exportOptions.texts"
           >
@@ -248,7 +245,7 @@ function getCellClass(cell: Cell) {
   if (cell.suggestion && !cell.text.length) {
     classes.push(`suggested`);
   }
-  return classes.join(" ");
+  return classes.concat('cell').join(" ");
 }
 
 function getCellFill(cell: Cell) {
@@ -342,13 +339,8 @@ function onClick(evt: MouseEvent) {
   stroke-miterlimit: 10;
   stroke: v-bind(outerLineColor);
 }
-.definition {
-  line-height: v-bind(defSize);
-  font-size: v-bind(defSize);
-  font: v-bind(defFont);
-}
+
 .text {
-  line-height: v-bind(textSize);
   font: v-bind(textFont);
 }
 .text.highlighted {
@@ -360,6 +352,13 @@ function onClick(evt: MouseEvent) {
 .text>rect{
   fill: none;
 }
+.cell> rect{
+  width: v-bind(cellWidth(options));
+  height: v-bind(cellWidth(options));
+}
+.cell>text{
+  text-anchor:middle;
+}
 .text.highlighted>rect{
   fill: #def;
 }
@@ -368,6 +367,9 @@ function onClick(evt: MouseEvent) {
 }
 .definition>text{
   fill: v-bind(defColor);
+}
+.definition>text>tspan {
+  font: v-bind(defFont);
 }
 .right .rightdown {
   transform: rotate(180deg) scale(-1, -1);
