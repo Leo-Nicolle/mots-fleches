@@ -65,6 +65,12 @@ export class Grid {
   setDefinition({x, y}: Vec, value: boolean): void {
     this.cells[y][x].definition = value;
     this.cells[y][x].text = '';
+    if (value){
+      this.cells[y][x].arrows = ['none', 'none', 'none'];
+    } else {
+      this.cells[y][x].arrows = [];
+
+    }
   }
 
   setText({x, y}: Vec, value:string){
@@ -87,20 +93,16 @@ export class Grid {
     });
   } 
 
-  static setArrow(cell: Cell, point: Vec, direction: ArrowDir): void {
-    cell.arrows = cell.arrows
-    .filter(({position}) => !Grid.equal(point,position));
-    if (direction !== 'none'){
-      cell.arrows.push({
-        direction,
-        position: point
-      });
+  static setArrow(cell: Cell, index: number, direction: ArrowDir): void {
+    if (!cell.arrows){
+      cell.arrows = ['none', 'none', 'none'];
     }
+    cell.arrows[index] = direction;
   }
 
-  setArrow(v: Vec, point: Vec, direction: ArrowDir): void {
+  setArrow(v: Vec, index: number, direction: ArrowDir): void {
     if (!this.isValid(v)) return;
-    Grid.setArrow(this.cells[v.y][v.x], point, direction);
+    Grid.setArrow(this.cells[v.y][v.x], index, direction);
   }
 
   setThumbnail(t :string){
@@ -215,22 +217,6 @@ export class Grid {
     if (!this.isValid(v)) return false;
     return this.cells[v.y][v.x].splited;
   }
-  static setSplit(cell: Cell, split: number){
-
-    if (cell.splited === split) return;
-    const rightArrows = cell.arrows.filter(a => a.position.x === 1);
-    if (rightArrows.length){
-      const first =rightArrows[0]; 
-      if (split){
-        first.position.y = 0.25;
-      } 
-      else {
-        first.position.y = 0.5;
-        cell.arrows = cell.arrows.filter(a => a.position.x < 1).concat(first);
-      } 
-    }
-    cell.splited = split;
-  }
 
   static unserialize(s: string){
     const {rows, cols,comment, title, id, cells, thumbnail, created} = JSON.parse(s) as {
@@ -249,6 +235,16 @@ export class Grid {
         cell.highlighted = false;
         cell.suggestion = '';
         res.cells[i][j] = cell;
+        if (cell.arrows){
+          cell.arrows = cell.arrows.map(a => {
+            if (typeof a === 'string') a;
+            //@ts-ignore
+            return a.direction;
+          });
+          if (cell.arrows.length !== 0 && cell.arrows.length !== 3 ){
+            cell.arrows.push(...new Array(3 - cell.arrows.length).fill('none'));
+          }
+        }
       });
     });
     res.title = title;

@@ -1,5 +1,5 @@
 import { Grid } from "./Grid";
-import { GridOptions } from "./types";
+import { Cell, GridOptions } from "./types";
 
 
 export function parse(str: string): [number, string] {
@@ -55,3 +55,36 @@ export function gridTotalWidth(grid: Grid, options: GridOptions){
 export function gridTotalHeight(grid: Grid, options: GridOptions){
   return gridHeight(grid, options) + 2 * outerBorderWidth(options);
 }
+
+export function isSplited(cell:Cell){
+  return cell.text.includes("\n\n");
+}
+export function getLines(cell: Cell){
+  return cell.text.split("\n\n").map(line => line.split("\n")).flat();
+}
+export function splitIndex(cell: Cell){
+  const split  = cell.text.split("\n\n");
+  return split.length === 2 
+  ? split[0].split("\n").length 
+  : 0;
+}
+
+export function arrowPositions(cell: Cell){
+  const lines = getLines(cell);
+  const splited = isSplited(cell);
+  const index = splitIndex(cell);
+
+  const rightArrows =  splited && lines.length === 2 ||lines.length === 4
+   ? [{x: 1, y: 0.25}, {x: 1, y: 0.75}]
+   : splited && lines.length === 3
+    ? index === 1
+      ? [{x: 1, y: 1/6}, {x: 1, y: 2/3}]
+      : [{x: 1, y: 1/3}, {x: 1, y:5/6}]
+    : [{x: 1, y: 0.5}, {x: 1, y: 0.5}];
+
+   return rightArrows.concat({
+    x: 0.5,y: 1
+   });
+}
+
+export const arrowDirs =[['right', 'rightdown'], ['right', 'rightdown'], ['down' , 'downright']];

@@ -20,7 +20,7 @@
         <n-button
           icon-placement="right"
           v-for="(dir, l) in handle.dirs"
-          @click="setArrow(dir, l)"
+          @click="setArrow(dir, handle.index)"
           :key="l"
         >
           <template #icon>
@@ -45,15 +45,19 @@
 import { computed, defineEmits, defineProps, ref, watchEffect } from "vue";
 import {
   Cell,
+  Grid,
   cellAndBorderWidth,
   cellWidth,
   Direction,
-  Grid,
   GridOptions,
   nullCell,
+  isSplited,
+  arrowPositions,
   parse,
+  ArrowDir,
 } from "grid";
 import { getD } from "../../js/paths";
+import { Handle } from "./types";
 const container = ref(null as unknown as HTMLDivElement);
 const emit = defineEmits<{
   (event: "update", value: string): string;
@@ -86,7 +90,12 @@ function onChange(evt: Event) {
     text = text.trim().slice(-1).toUpperCase();
   }
   props.grid.setText({ x, y }, text);
-  if (props.grid.isDefinition(props.cell)) return;
+  if (props.grid.isDefinition(props.cell)) {
+    if (!isSplited(props.cell)){
+      Grid.setArrow(props.cell, 1, "none");
+    }
+    return;
+  }
   const next = text.length
     ? props.grid.increment(props.cell, props.dir)
     : props.grid.decrement(props.cell, props.dir);
@@ -94,6 +103,12 @@ function onChange(evt: Event) {
   emit("focus", next);
 }
 function onKeyup(evt: KeyboardEvent) {
+  console.log(evt.key);
+  if (evt.key === "Escape") {
+      props.grid.setDefinition(props.cell, !props.cell.definition);
+      props.grid.setText(props.cell, '');
+      return;
+  }
   if (props.cell.definition && evt.key === "Enter" && evt.ctrlKey) {
     let next = props.grid.increment(props.cell, props.dir);
     if (!props.grid.isValid(next)) {
@@ -134,42 +149,50 @@ function onKeyup(evt: KeyboardEvent) {
     }
   }
 }
-function setArrow(dir: Direction) {
-  console.log(dir);
-}
-const handles = computed(() => {
-  const isSplited = props.cell.text.split("\n\n").length > 1;
-  const w = cellWidth(props.options);
-  const handleW = 4;
-  const half = handleW / 2;
+function setArrow(dir: ArrowDir, index: number) {
+  Grid.setArrow(props.cell, index, dir);
+  container.value.querySelector("textarea")?.focus();
 
-  return isSplited
+}
+const handles = computed<Handle[]>(() => {
+  const splited = isSplited(props.cell);
+  const w = cellWidth(props.options);
+  const handleW = 6;
+  const double = handleW * 2;
+
+
+  return splited
     ? [
         {
           top: `${0.25 * w - handleW}px`,
-          left: `${w - 2 * handleW}px`,
+          left: `${w - double}px`,
+          index: 0,
           dirs: ["right", "rightdown", "none"],
         },
         {
           top: `${0.75 * w - handleW}px`,
-          left: `${w - 2 * handleW}px`,
+          left: `${w - double}px`,
+          index: 1,
           dirs: ["right", "rightdown", "none"],
         },
         {
-          top: `${w - 2 * handleW}px`,
+          top: `${w - double}px`,
           left: `${0.5 * w - handleW}px`,
+          index: 2,
           dirs: ["down", "downright", "none"],
         },
       ]
     : [
         {
           top: `${0.5 * w - handleW}px`,
-          left: `${w - 2 * handleW}px`,
+          left: `${w - double}px`,
+          index: 0,
           dirs: ["right", "rightdown", "none"],
         },
         {
-          top: `${w - 2 * handleW}px`,
+          top: `${w - double}px`,
           left: `${0.5 * w - handleW}px`,
+          index: 2,
           dirs: ["down", "downright", "none"],
         },
       ];
@@ -237,7 +260,7 @@ textarea:focus-visible {
 .handle {
   position: absolute;
   cursor: pointer;
-  padding: 4px;
+  padding: 6px;
   height: 0;
   width: 0;
   border: 0;

@@ -87,21 +87,16 @@
       stroke="black"
       v-if="exportOptions.arrows"
     >
-      <g v-for="(cell, i) in cellsWithArrows" :key="i">
-        <g
-          v-for="(arrow, j) in cell.arrows"
-          :key="j"
-          :transform="`translate(${
-            cellAndBorderWidth(options) * cell.x +
-            cellWidth(options) * arrow.position.x
-          },${
-            cellAndBorderWidth(options) * cell.y +
-            cellWidth(options) * arrow.position.y
-          })scale(0.14,0.14)`"
+
+      <g v-for="(arrow, i) in arrows" 
+      :key="i"
+      :transform="`translate(${arrow.x},${
+        arrow.y
+      })scale(0.14,0.14)`"
         >
-          <path :class="arrow.direction" :d="getD(arrow.direction)" />
+          <path 
+          :class="arrow.dir" :d="getD(arrow.dir)" />
         </g>
-      </g>
     </g>
 
     <g class="splits" v-if="exportOptions.splits">
@@ -141,7 +136,12 @@ import {
   Cell,
   nullCell,
   Vec,
+  isSplited,
+  splitIndex,
   Direction,
+  getLines,
+  arrowPositions,
+  ArrowDir
 } from "grid";
 import { defaultExportOptions, ExportOptions, Rect } from "./types";
 
@@ -186,30 +186,37 @@ const defFont = computed(
   () => `${defSize.value}px ${props.options.definition.font}`
 );
 
-const cellsWithArrows = computed(() =>
-  props.grid.cells.flat().filter((c) => c.definition && c.arrows.length > 0)
+const arrows = computed(() =>
+  props.grid.cells.flat()
+  .filter((c) => c.definition && c.arrows.length > 0)
+  .map(cell => {
+    return arrowPositions(cell).map(({x, y}, i) => {
+    return cell.arrows[i] === 'none' ? null :{
+      dir: cell.arrows[i],
+      x: cellAndBorderWidth(props.options) * cell.x +
+            cellWidth(props.options) * x,
+      y:cellAndBorderWidth(props.options) * cell.y +
+            cellWidth(props.options) * y
+    };
+  });
+  })
+  .flat()
+  .filter(e => e) as unknown as {dir: ArrowDir, x: string, y: string}[]
 );
+function arrowPos(cell: Cell) {
+  return;
+}
 const splits = computed(() =>
   props.grid.cells
     .flat()
     .filter((c) => c.definition && c.text.split("\n\n").length > 1)
     .map((cell) => {
-      let isSplited = false;
-      let splitIndex = 0;
-      const lines = cell.text.split("\n\n").reduce((lines, s, i, blocks) => {
-        isSplited = blocks.length > 1;
-        const linesInBlock = s.split("\n");
-        if (i === 0) {
-          splitIndex = linesInBlock.length - 1;
-        }
-        lines.push(...linesInBlock);
-        return lines;
-      }, [] as string[]);
-
+      const lines = getLines(cell);
+      const split = splitIndex(cell);
       const ratio =
         lines.length == 2 || lines.length === 4
           ? 0.5
-          : splitIndex === 0
+          : split === 0
           ? 1 / 3
           : 0.66;
       const y =
@@ -271,26 +278,17 @@ function lines(cell: Cell) {
     ];
   }
   const cellHeight = cellWidth(props.options);
-
-  let isSplited = false;
-  let splitIndex = 0;
-  const lines = cell.text.split("\n\n").reduce((lines, s, i, blocks) => {
-    isSplited = blocks.length > 1;
-    const linesInBlock = s.split("\n");
-    if (i === 0) {
-      splitIndex = linesInBlock.length - 1;
-    }
-    lines.push(...linesInBlock);
-    return lines;
-  }, [] as string[]);
+  const splited = isSplited(cell);
+  const split = splitIndex(cell);
+  const lines = getLines(cell);
   const borderSize = parse(props.options.grid.borderSize)[0];
   const freeHeight =
-    cellHeight - +isSplited * borderSize - lines.length * defSize.value;
+    cellHeight - +splited * borderSize - lines.length * defSize.value;
 
-  const topGaps = !isSplited
+  const topGaps = !splited
     ? new Array(lines.length).fill(1 / (lines.length + 1))
     : lines.length === 3
-    ? splitIndex === 0
+    ? split === 0
       ? [2 / 9, 7 / 18, 2 / 9]
       : [2 / 9, 2 / 9, 7 / 18]
     : lines.length === 2

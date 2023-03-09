@@ -1,3 +1,4 @@
+import { ArrowDir } from "grid";
 
 
 export type ExportOptions = {
@@ -25,4 +26,10 @@ export type Rect = {
   y: number;
   width: number; 
   height: number;
+}
+export type Handle ={
+  top:string;
+  left:string;
+  index: number;
+  dirs: ArrowDir[];
 }

@@ -14,7 +14,7 @@ export type Cell = {
   definition: boolean;
   highlighted: boolean;
   suggestion: string;
-  arrows: Arrow[];
+  arrows: ArrowDir[];
   splited: number;
   text: string;
 }
