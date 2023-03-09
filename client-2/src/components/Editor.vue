@@ -166,7 +166,6 @@ function onToggleOption(visible) {
 
 watchEffect(() => {
   props.grid.highlight(props.grid.getBounds(focus.value, dir.value).cells);
-  
 });
 
 function onHover(value: string) {

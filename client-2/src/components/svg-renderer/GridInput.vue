@@ -6,6 +6,38 @@
       :value="cell.text.length ? cell.text : ''"
       :class="cell.definition ? 'def-input' : 'text-input'"
     />
+    <div class="handles" v-if="cell.definition">
+      <n-popover v-for="(handle, k) in handles" :key="k" trigger="hover">
+        <template #trigger>
+          <n-button
+            class="handle"
+            :style="{
+              top: handle.top,
+              left: handle.left,
+            }"
+          ></n-button>
+        </template>
+        <n-button
+          icon-placement="right"
+          v-for="(dir, l) in handle.dirs"
+          @click="setArrow(dir, l)"
+          :key="l"
+        >
+          <template #icon>
+            <svg
+              viewBox="0 -35 110 150"
+              fill="none"
+              stroke="black"
+              stroke-width="10"
+              stroke-linecap="round"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path :class="dir" :d="getD(dir)"></path>
+            </svg>
+          </template>
+        </n-button>
+      </n-popover>
+    </div>
   </div>
 </template>
 
@@ -21,6 +53,7 @@ import {
   nullCell,
   parse,
 } from "grid";
+import { getD } from "../../js/paths";
 const container = ref(null as unknown as HTMLDivElement);
 const emit = defineEmits<{
   (event: "update", value: string): string;
@@ -81,7 +114,7 @@ function onKeyup(evt: KeyboardEvent) {
         return emit("focus", next);
       }
     }
-    if(evt.key === "ArrowDown") {
+    if (evt.key === "ArrowDown") {
       const next = props.grid.increment(props.cell, "vertical");
       if (props.grid.isValid(next)) {
         return emit("focus", next);
@@ -101,6 +134,47 @@ function onKeyup(evt: KeyboardEvent) {
     }
   }
 }
+function setArrow(dir: Direction) {
+  console.log(dir);
+}
+const handles = computed(() => {
+  const isSplited = props.cell.text.split("\n\n").length > 1;
+  const w = cellWidth(props.options);
+  const handleW = 4;
+  const half = handleW / 2;
+
+  return isSplited
+    ? [
+        {
+          top: `${0.25 * w - handleW}px`,
+          left: `${w - 2 * handleW}px`,
+          dirs: ["right", "rightdown", "none"],
+        },
+        {
+          top: `${0.75 * w - handleW}px`,
+          left: `${w - 2 * handleW}px`,
+          dirs: ["right", "rightdown", "none"],
+        },
+        {
+          top: `${w - 2 * handleW}px`,
+          left: `${0.5 * w - handleW}px`,
+          dirs: ["down", "downright", "none"],
+        },
+      ]
+    : [
+        {
+          top: `${0.5 * w - handleW}px`,
+          left: `${w - 2 * handleW}px`,
+          dirs: ["right", "rightdown", "none"],
+        },
+        {
+          top: `${w - 2 * handleW}px`,
+          left: `${0.5 * w - handleW}px`,
+          dirs: ["down", "downright", "none"],
+        },
+      ];
+});
+
 function onDefChange(e: Event) {
   const target = e.target as HTMLInputElement;
   emit("update", target.value);
@@ -152,6 +226,39 @@ textarea:focus-visible {
   font-size: v-bind(defSize);
   font: v-bind(defFont);
   background: #aaa;
+}
+.handles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: v-bind(cellSize);
+  height: v-bind(cellSize);
+}
+.handle {
+  position: absolute;
+  cursor: pointer;
+  padding: 4px;
+  height: 0;
+  width: 0;
+  border: 0;
+  border-radius: 50%;
+  z-index: 100;
+  background: #333;
+}
 
+.rightdown {
+  transform: rotate(180deg) scale(-1, -1);
+}
+.right {
+  transform: translate(0, 30px) rotate(180deg) scale(-1, -1);
+}
+.downright {
+  transform: translate(8px, 0) scale(-1, 1) rotate(90deg);
+}
+.down {
+  transform: translate(50px, 0) scale(-1, 1) rotate(90deg);
+}
+.none {
+  transform: translate(10px, 0);
 }
 </style>

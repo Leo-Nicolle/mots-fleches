@@ -99,7 +99,7 @@
             cellWidth(options) * arrow.position.y
           })scale(0.14,0.14)`"
         >
-          <path :class="arrow.direction" :d="getD(arrow.direction, true)" />
+          <path :class="arrow.direction" :d="getD(arrow.direction)" />
         </g>
       </g>
     </g>
