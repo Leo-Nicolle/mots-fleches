@@ -66,17 +66,13 @@
             </template>
           </n-card>
         </div>
-        <!-- <Exporter
+        <Exporter
           v-if="active"
           :grid="active"
           :shouldExport="shouldExport"
-          :arrows="false"
-          :separators="false"
-          :texts="true"
-          :definitions="false"
           :options="options"
-          @exported="onExported"
-        /> -->
+          @export-png="onExported"
+        />
 
         <n-modal
           preset="dialog"
@@ -102,30 +98,32 @@ import axios from "axios";
 import { AddCircleOutline as AddIcon, HeartOutline } from "@vicons/ionicons5";
 
 import { getUrl, save } from "../js/utils";
-// import Exporter from "../components/Exporter.vue";
+import Exporter from "../components/svg-renderer/Exporter.vue";
 
 import { Grid, GridOptions } from "grid";
 const router = useRouter();
 const options = ref<GridOptions>({
   grid: {
-    cellSize: "56px",
+    cellSize: "50px",
     borderColor: "black",
     borderSize: "1px",
+    outerBorderSize: "1px",
+    outerBorderColor: "red",
   },
   definition: {
     font: "sans-serif",
     size: "12px",
     color: "black",
+    backgroundColor: "#ccc",
   },
   arrow: {
-    size: "2em",
+    size: "10px",
     color: "black",
   },
   paper: {
     width: 21,
     height: 29.7,
     orientation: "portrait",
-    dpi: 300,
     margin: {
       top: 0,
       bottom: 0,
@@ -161,26 +159,10 @@ function fetch() {
     });
 }
 
-function onExported(canvas: HTMLCanvasElement) {
+function onExported(str: string) {
+  console.log(str, active.value)
   if (!active.value) return;
-  const thumb = document.createElement("canvas");
-  const thumbWidth = 128;
-  thumb.width = 128;
-  thumb.height = Math.floor((canvas.height / canvas.width) * thumbWidth);
-  thumb
-    .getContext("2d")
-    ?.drawImage(
-      canvas,
-      0,
-      0,
-      thumb.width * 2,
-      thumb.height * 2,
-      0,
-      0,
-      canvas.width / 4,
-      canvas.height / 4
-    );
-  active.value.setThumbnail(thumb.toDataURL());
+  active.value.setThumbnail(str);
   save(active.value);
   shouldExport.value = false;
 }
@@ -239,8 +221,6 @@ onMounted(() => {
 }
 .card-title > div {
   margin-left: auto;
-}
-.grids {
 }
 .grids > div {
   width: 100vw;
