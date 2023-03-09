@@ -37,14 +37,6 @@
     </div>
     <n-scrollbar style="max-height: calc(100vh - 100px)">
       <n-scrollbar style="max-width: calc(100vw - 100px)">
-        <!-- <Exporterfabric :grid="grid" :options="options" 
-          :texts="true"
-          :arrow="true"
-          :definitions="true"
-          :shouldExport="true"
-          :separators="true"
-          :arrows="true"
-        /> -->
         <SVGGrid
           @focus="(cell) => (focus = cell)"
           :grid="grid"
@@ -65,15 +57,6 @@
           @focus="(point) => (focus = point)"
         >
         </GridInput>
-        <!-- <EditGrid
-          @type="onType"
-          @focus="(point) => (focus = point)"
-          @mouseenter="onMouseEnter"
-          :grid="grid"
-          :options="options"
-          :suggestion="suggestion"
-          :dir="dir"
-        /> -->
       </n-scrollbar>
     </n-scrollbar>
   </div>
@@ -90,23 +73,20 @@ import {
 } from "vue";
 import { Grid, Cell, Direction, Vec, nullCell, GridOptions } from "grid";
 import { CogOutline as CogIcon } from "@vicons/ionicons5";
-import EditGrid from "./EditGrid.vue";
 import SVGGrid from "./svg-renderer/Grid.vue";
 import GridInput from "./svg-renderer/GridInput.vue";
-
 import { defaultExportOptions } from "./svg-renderer/types";
 
 import Options from "./Options.vue";
 import ModalOptions from "./ModalOptions.vue";
 import Suggestion from "./Suggestion.vue";
-import Exporterfabric from "./Exporter-fabric.vue";
 
 import axios from "axios";
 import { getUrl } from "../js/utils";
 
 const options: GridOptions = ref({
   grid: {
-    cellSize: "121px",
+    cellSize: "50px",
     borderColor: "black",
     borderSize: "1px",
     outerBorderSize: "1px",
@@ -114,12 +94,12 @@ const options: GridOptions = ref({
   },
   definition: {
     font: "sans-serif",
-    size: "20px",
+    size: "12px",
     color: "black",
     backgroundColor: "#ccc",
   },
   arrow: {
-    size: "28px",
+    size: "10px",
     color: "black",
   },
   paper: {

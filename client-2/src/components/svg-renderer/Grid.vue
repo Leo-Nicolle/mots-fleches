@@ -41,20 +41,20 @@
     </g>
     <g class="cells">
       <g class="row" v-for="(row, i) in grid.cells" :key="i">
-        <g class="cell" v-for="(cell, j) in row" :key="j">
+        <g class="cell" v-for="(cell, j) in row" :key="j"
+        :class="getCellClass(cell)"
+        >
           <rect
             :x="cellAndBorderWidth(options) * cell.x"
             :y="cellAndBorderWidth(options) * cell.y"
             :width="cellWidth(options)"
             :height="cellWidth(options)"
-            :fill="getCellFill(cell)"
           />
           <text
             :x="xText(cell)"
             :y="yText(cell)"
             text-anchor="middle"
             alignment-baseline="middle"
-            :class="getCellClass(cell)"
             v-if="cell.definition && exportOptions.definitions"
           >
             <tspan
@@ -83,8 +83,7 @@
       class="arrows"
       stroke-linecap="round"
       stroke-width="10"
-      fill="none"
-      stroke="black"
+      :stroke="options.arrow.color"
       v-if="exportOptions.arrows"
     >
 
@@ -92,7 +91,7 @@
       :key="i"
       :transform="`translate(${arrow.x},${
         arrow.y
-      })scale(0.14,0.14)`"
+      })scale(${arrowScale},${arrowScale})`"
         >
           <path 
           :class="arrow.dir" :d="getD(arrow.dir)" />
@@ -173,6 +172,7 @@ const rows = computed(() =>
 const cols = computed(() =>
   new Array(props.grid.cols).fill(0).map((e, i) => i)
 );
+const arrowScale = computed(() => 0.01 * parse(props.options.arrow.size)[0]);
 const lineStroke = computed(() => parse(props.options.grid.borderSize)[0]);
 const lineColor = computed(() => props.options.grid.borderColor);
 const outerLineStroke = computed(
@@ -185,6 +185,10 @@ const textFont = computed(() => `${textSize.value}px roboto`);
 const defFont = computed(
   () => `${defSize.value}px ${props.options.definition.font}`
 );
+const defBackgroundColor = computed(
+  () => props.options.definition.backgroundColor
+);
+const defColor = computed(() => props.options.definition.color);
 
 const arrows = computed(() =>
   props.grid.cells.flat()
@@ -353,7 +357,18 @@ function onClick(evt: MouseEvent) {
 .text.suggested {
   fill: #777;
 }
-
+.text>rect{
+  fill: none;
+}
+.text.highlighted>rect{
+  fill: #def;
+}
+.definition>rect{
+  fill: v-bind(defBackgroundColor);
+}
+.definition>text{
+  fill: v-bind(defColor);
+}
 .right .rightdown {
   transform: rotate(180deg) scale(-1, -1);
 }
