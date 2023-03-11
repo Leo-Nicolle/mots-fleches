@@ -59,7 +59,7 @@
 <script setup lang="ts">
 import { defineProps, defineEmits } from "vue";
 import { useModel } from "../../js/useModel";
-import { Grid, GridOptions } from "grid";
+import { GridOptions } from "grid";
 import Sizeinput from "./Sizeinput";
 import FormatPicker from "./FormatPicker";
 

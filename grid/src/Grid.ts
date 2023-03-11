@@ -220,13 +220,12 @@ export class Grid {
   }
 
   static unserialize(s: string) {
-    const { rows, cols, comment, title, id, cells, thumbnail, created } = JSON.parse(s) as {
+    const { rows, cols, comment, title, id, cells, created } = JSON.parse(s) as {
       rows: number,
       cols: number,
       id: string,
       created: number,
       comment: string,
-      thumbnail: string,
       title: string
       cells: Cell[][]
     };
@@ -236,21 +235,10 @@ export class Grid {
         cell.highlighted = false;
         cell.suggestion = '';
         res.cells[i][j] = cell;
-        // if (cell.arrows){
-        //   cell.arrows = cell.arrows.map(a => {
-        //     if (typeof a === 'string') a;
-        //     //@ts-ignore
-        //     return a.direction;
-        //   });
-        //   if (cell.arrows.length !== 0 && cell.arrows.length !== 3 ){
-        //     cell.arrows.push(...new Array(3 - cell.arrows.length).fill('none'));
-        //   }
-        // }
       });
     });
     res.title = title;
     res.comment = comment;
-    res.thumbnail = thumbnail;
     res.created = created;
     return res;
   }

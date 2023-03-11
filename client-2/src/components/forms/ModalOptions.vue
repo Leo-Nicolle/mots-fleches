@@ -63,9 +63,6 @@ const emit = defineEmits<{
 }>();
 const value = useModel(props, emit);
 
-watchEffect(value.value.visible.visible, () => {
-  console.log(value.value.visible.visible);
-});
 function onRowChange(evt) {
   props.modelValue.grid.resize(evt, props.modelValue.grid.cols);
   emit("update");

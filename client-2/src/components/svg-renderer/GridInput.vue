@@ -3,8 +3,15 @@
     <textarea
       @input="onChange($event)"
       @keyup="onKeyup($event)"
-      :value="cell.text.length ? cell.text : cell.suggestion.length ? cell.suggestion : ''"
-      :class = "getCellClass(cell, cell)"
+      :value="
+        cell.text.length
+          ? cell.text
+          : cell.suggestion.length
+          ? cell.suggestion
+          : ''
+      "
+      :rows="cell.definition ? 5 : 1"
+      :class="getCellClass(cell, cell)"
     />
     <div class="handles" v-if="cell.definition">
       <n-popover v-for="(handle, k) in handles" :key="k" trigger="hover">
@@ -54,13 +61,14 @@ import {
   isSplited,
   parse,
   ArrowDir,
+  outerBorderWidth,
 } from "grid";
 import { getCellClass } from "../../js/utils";
 import { getD } from "../../js/paths";
 import { Handle } from "./types";
 const container = ref(null as unknown as HTMLDivElement);
 const emit = defineEmits<{
-  (event: "update", value: string): string;
+  (event: "update"): string;
   (event: "focus", value: Cell);
 }>();
 const props = defineProps<{
@@ -68,6 +76,7 @@ const props = defineProps<{
   grid: Grid;
   options: GridOptions;
   dir: Direction;
+  offset: [number, number];
 }>();
 const cellSize = computed(() => `${cellWidth(props.options)}px`);
 const textSize = computed(() => parse(props.options.grid.cellSize)[0]);
@@ -77,18 +86,22 @@ const defFont = computed(
   () => `${defSize.value}px ${props.options.definition.font}`
 );
 const transform = computed(() => {
-  return `translate(${props.cell.x * cellAndBorderWidth(props.options)}px, ${
-    props.cell.y * cellAndBorderWidth(props.options)
+  return `translate(${
+    props.cell.x * cellAndBorderWidth(props.options) +
+    outerBorderWidth(props.options)- props.offset[0]
+  }px, ${
+    props.cell.y * cellAndBorderWidth(props.options) +
+    outerBorderWidth(props.options) - props.offset[1]
   }px)`;
 });
 function onChange(evt: Event) {
   const { x, y } = props.cell;
   let text = (evt.target as HTMLInputElement).value || "";
-  console.log(`'${text}'`);
   if (!props.cell.definition) {
     text = text.trim().slice(-1).toUpperCase();
   }
   props.grid.setText({ x, y }, text);
+  emit("update");
   if (props.grid.isDefinition(props.cell)) {
     if (!isSplited(props.cell)) {
       Grid.setArrow(props.cell, 1, "none");
@@ -106,6 +119,7 @@ function onKeyup(evt: KeyboardEvent) {
   if (evt.key === "Escape") {
     props.grid.setDefinition(props.cell, !props.cell.definition);
     props.grid.setText(props.cell, "");
+    emit("update");
     return;
   }
   if (props.cell.definition && evt.key === "Enter" && evt.ctrlKey) {
@@ -151,14 +165,13 @@ function onKeyup(evt: KeyboardEvent) {
 function setArrow(dir: ArrowDir, index: number) {
   Grid.setArrow(props.cell, index, dir);
   container.value.querySelector("textarea")?.focus();
+  emit("update");
+
 }
-const handleW = 6;
-const handlesW = computed(() => `${cellWidth(props.options) + handleW}px`);
+const handleW = 4;
 const handles = computed<Handle[]>(() => {
   const splited = isSplited(props.cell);
   const w = cellAndBorderWidth(props.options);
-  const double = 0 * handleW * 2;
-
   return splited
     ? [
         {
@@ -195,11 +208,6 @@ const handles = computed<Handle[]>(() => {
         },
       ];
 });
-
-function onDefChange(e: Event) {
-  const target = e.target as HTMLInputElement;
-  emit("update", target.value);
-}
 
 watchEffect(() => {
   if (props.cell === nullCell || !container.value) return;
@@ -244,7 +252,7 @@ textarea:focus-visible {
 .text.suggested {
   color: #777;
 }
-.definition{
+.definition {
   line-height: v-bind(defSize);
   font-size: v-bind(defSize);
   font: v-bind(defFont);
@@ -254,7 +262,7 @@ textarea:focus-visible {
 .handle {
   position: absolute;
   cursor: pointer;
-  padding: 6px;
+  padding: 4px;
   height: 0;
   width: 0;
   border: 0;

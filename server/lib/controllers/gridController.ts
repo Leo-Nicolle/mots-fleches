@@ -22,7 +22,6 @@ export default function gridController({
 
   app.post("/grid", [body("grid").isString()], async (req, res) => {
     const errors = validationResult(req);
-    console.log(errors)
     if (!errors.isEmpty()) {
       return res.status(500).json({ errors: errors.array() });
     }

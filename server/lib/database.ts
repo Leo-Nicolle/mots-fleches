@@ -90,7 +90,6 @@ export class Database {
   }
   updateGrid(gridstring: string) {
     const newgrid = Grid.unserialize(gridstring);
-    console.log(gridstring, newgrid.thumbnail);
     return this.getGrids().then((grids) => {
       this.grids = this.grids.filter(({ id }) => id !== newgrid.id);
       this.grids.push(newgrid);

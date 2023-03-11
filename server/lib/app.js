@@ -13,8 +13,6 @@ export function createApp() {
   app.use(cors());
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json());
-  console.log(`ICI`);
-
   if (existsSync("public")) {
     console.log("server static");
     app.use(express.static("public"));

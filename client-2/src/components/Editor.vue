@@ -21,42 +21,39 @@
         @hover="onHover"
         @click="onClick"
         @dir="(d) => (dir = d)"
+        @mouseout="onMouseOut"
       >
       </Suggestion>
 
-      <n-scrollbar style="max-height: 80vh" v-else>
-        <Options
-          v-model="options"
-          :arrows="true"
-          :grid="true"
-          :definition="true"
-          :format="true"
-        ></Options>
-      </n-scrollbar>
+    
     </div>
-    <n-scrollbar style="max-height: calc(100vh - 100px)">
-      <n-scrollbar style="max-width: calc(100vw - 100px)">
-        <SVGGrid
-          @focus="(cell) => (focus = cell)"
-          :grid="grid"
-          :focus="focus"
-          :dir="dir"
-          :options="options"
-          :export-options="{
-            ...defaultExportOptions,
-            texts: true,
-            highlight: true,
-          }"
-        ></SVGGrid>
-        <GridInput
-          :grid="grid"
-          :dir="dir"
-          :options="options"
-          :cell="focus"
-          @focus="(point) => (focus = point)"
-        >
-        </GridInput>
-      </n-scrollbar>
+    <n-scrollbar
+      x-scrollable
+      :on-scroll="onScroll"
+      style="max-height: calc(100vh - 100px); max-width: calc(100vw - 100px)"
+    >
+      <SVGGrid
+        @focus="(cell) => (focus = cell)"
+        :grid="grid"
+        :focus="focus"
+        :dir="dir"
+        :options="options"
+        :export-options="{
+          ...defaultExportOptions,
+          texts: true,
+          highlight: true,
+        }"
+      ></SVGGrid>
+      <GridInput
+        :grid="grid"
+        :dir="dir"
+        :options="options"
+        :cell="focus"
+        :offset="offset"
+        @focus="(point) => (focus = point)"
+        @update="emit('update')"
+      >
+      </GridInput>
     </n-scrollbar>
   </div>
 </template>
@@ -68,27 +65,21 @@ import {
   ref,
   computed,
   watchEffect,
-  watch,
 } from "vue";
-import { Grid, Cell, Direction, Vec, nullCell, GridOptions } from "grid";
+import { Grid, Cell, Direction, nullCell, GridOptions } from "grid";
 import { CogOutline as CogIcon } from "@vicons/ionicons5";
 import SVGGrid from "./svg-renderer/Grid.vue";
 import GridInput from "./svg-renderer/GridInput.vue";
 import { defaultExportOptions } from "./svg-renderer/types";
-
-import Options from "./forms/Options.vue";
 import ModalOptions from "./forms/ModalOptions.vue";
 import Suggestion from "./Suggestion.vue";
 
-import axios from "axios";
-import { getUrl } from "../js/utils";
-
 const options: GridOptions = ref({
   grid: {
-    cellSize: "50px",
+    cellSize: "150px",
     borderColor: "black",
     borderSize: "1px",
-    outerBorderSize: "1px",
+    outerBorderSize: "10px",
     outerBorderColor: "red",
   },
   definition: {
@@ -123,6 +114,7 @@ const dir = ref<Direction>("horizontal");
 const focus = ref<Cell>(nullCell);
 const version = ref(0);
 const visible = ref({ visible: false });
+const offset = ref<[number, number]>([0, 0]);
 
 const modalProps = computed(() => {
   return {
@@ -134,15 +126,9 @@ const modalProps = computed(() => {
 function refresh() {
   version.value++;
 }
-function onType() {
-  console.log("UPDATE");
-  emit("update");
+function onScroll(e) {
+  offset.value = [e.target.scrollLeft, e.target.scrollTop];
 }
-
-function onToggleOption(visible) {
-  console.log("watch", visible);
-}
-
 watchEffect(() => {
   props.grid.highlight(props.grid.getBounds(focus.value, dir.value).cells);
 });
@@ -153,10 +139,9 @@ function onHover(value: string) {
   props.grid.suggest([value], [cells[0]], [dir.value]);
   refresh();
 }
-function onMouseEnter() {
-  setTimeout(() => {
-    props.grid.suggest([], [], []);
-  }, 100);
+function onMouseOut(value: string) {
+  props.grid.suggest([], [], []);
+  refresh();
 }
 function onClick(value: string) {
   const cells = props.grid.getBounds(focus.value, dir.value).cells;

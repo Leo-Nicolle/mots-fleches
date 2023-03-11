@@ -147,7 +147,6 @@ function fetch() {
 function onExported(str: string) {
   console.log(str, active.value);
   if (!active.value) return;
-  active.value.setThumbnail(str);
   save(active.value);
   shouldExport.value = false;
 }

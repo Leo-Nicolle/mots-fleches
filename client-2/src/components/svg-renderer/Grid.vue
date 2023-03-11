@@ -55,7 +55,6 @@
             :y="cellAndBorderWidth(options) * cell.y"
             :width="cellWidth(options)"
             :height="cellWidth(options)"
-
           />
           <text
             :x="xText(cell)"
@@ -76,7 +75,6 @@
           <text
             :x="xText(cell)"
             :y="yText(cell) + (6 * cellWidth(options)) / 7"
-            :class="getCellClass(cell, focus)"
             v-else-if="!cell.definition && exportOptions.texts"
           >
             {{ cell.text || cell.suggestion }}
@@ -317,7 +315,7 @@ function onClick(evt: MouseEvent) {
 }
 </script>
 
-<style>
+<style scoped>
 .line {
   fill: none;
   stroke-width: v-bind(lineStroke);
@@ -342,10 +340,6 @@ function onClick(evt: MouseEvent) {
 }
 .text > rect {
   fill: none;
-}
-.cell > rect {
-  width: v-bind(cellWidth(options));
-  height: v-bind(cellWidth(options));
 }
 .cell > text {
   text-anchor: middle;
