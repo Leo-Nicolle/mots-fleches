@@ -86,9 +86,9 @@ import { getUrl } from "../js/utils";
 
 const options: GridOptions = ref({
   grid: {
-    cellSize: "50px",
+    cellSize: "150px",
     borderColor: "black",
-    borderSize: "1px",
+    borderSize: "10px",
     outerBorderSize: "1px",
     outerBorderColor: "red",
   },

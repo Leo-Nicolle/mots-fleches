@@ -17,7 +17,10 @@
       :y="-outerLineStroke / 2"
       :width="gridTotalWidth(grid, options) - outerLineStroke"
       :height="gridTotalHeight(grid, options) - outerLineStroke"
-      class="outer-rect"
+      fill="none" 
+      stroke-miterlimit="10"
+      :stroke-width="outerLineStroke"
+      :stroke="outerLineColor"
     />
     <g class="lines" v-if="exportOptions.borders">
       <line
@@ -86,6 +89,7 @@
 
       <g v-for="(arrow, i) in arrows" 
       :key="i"
+      fill="none"
       :transform="`translate(${arrow.x},${
         arrow.y
       })scale(${arrowScale},${arrowScale})`"
@@ -195,9 +199,9 @@ const arrows = computed(() =>
     return cell.arrows[i] === 'none' ? null :{
       dir: cell.arrows[i],
       x: cellAndBorderWidth(props.options) * cell.x +
-            cellWidth(props.options) * x,
+      cellAndBorderWidth(props.options) * x,
       y:cellAndBorderWidth(props.options) * cell.y +
-            cellWidth(props.options) * y
+      cellAndBorderWidth(props.options) * y
     };
   });
   })
@@ -326,7 +330,7 @@ function onClick(evt: MouseEvent) {
 }
 </script>
 
-<style scoped>
+<style>
 .line {
   fill: none;
   stroke-width: v-bind(lineStroke);

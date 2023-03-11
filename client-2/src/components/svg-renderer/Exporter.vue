@@ -1,19 +1,18 @@
 <template>
-  <div class="exporter">
-    <GridSvg
-      :ref="svg"
-      :grid="grid"
-      :options="options"
-      :export-options="{
-        ...defaultExportOptions,
-        texts: true,
-        arrows: false,
-        highlight: false,
-      }"
-      dir="horizontal"
-      :focused="nullCell"
-    />
-  </div>
+  <GridSvg
+    class="exporter"
+    :ref="svg"
+    :grid="grid"
+    :options="options"
+    :export-options="{
+      ...defaultExportOptions,
+      texts: true,
+      arrows: false,
+      highlight: false,
+    }"
+    dir="horizontal"
+    :focused="nullCell"
+  />
 </template>
 
 <script setup lang="ts">
@@ -40,20 +39,24 @@ watchEffect(() => {
     const img = document.createElement("img");
     document.body.appendChild(img);
     const canvas = document.createElement("canvas");
+    const svg = document.querySelector(".exporter")as SVGSVGElement;
     canvas.width = 128;
     canvas.height = 128;
-    var xml = new XMLSerializer().serializeToString(
-      document.querySelector(".exporter")
-    );
-    var svg64 = btoa(xml);
-    var b64Start = "data:image/svg+xml;base64,";
-    var image64 = b64Start + svg64;
-    debugger;
-    img.addEventListener('load', () => {
+    document.body.appendChild(canvas);
+
+    return new Promise((resolve) => {
+      const blob = new Blob([svg.outerHTML], {
+        type: "image/svg+xml;charset=utf-8",
+      });
+      const blobURL = URL.createObjectURL(blob);
+      img.onload = () => resolve(img);
+      img.src = blobURL;
+    }).then(() => {
+
+      //@ts-ignore
       canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
       emit("export-png", canvas.toDataURL());
-    })
-    img.src = image64;
+    });
   });
 });
 </script>

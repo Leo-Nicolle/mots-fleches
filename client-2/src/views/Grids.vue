@@ -30,35 +30,25 @@
             </template>
 
             <template #default>
-              <div @click="$router.push(`/grid/${grid.id}`)">
-                <button
-                  v-if="!grid.thumbnail && (active !== grid || !shouldExport)"
-                  class="thumbnail add"
-                  grid.thumbnail
-                >
-                  <n-icon>
-                    <HeartOutline />
-                  </n-icon>
-                </button>
-                <img
-                  v-else-if="active !== grid || !shouldExport"
-                  class="thumbnail"
-                  :src="grid.thumbnail"
-                />
-                <n-button
-                  v-else
-                  class="thumbnail"
-                  :loading="true"
-                  icon-placement="center"
-                >
-                </n-button>
+              <div class="card-body" @click="$router.push(`/grid/${grid.id}`)">
+                <div class="preview">
+                  <SVGGrid
+                    :grid="grid"
+                    :options="options"
+                    :export-options="{
+                      ...defaultExportOptions,
+                      texts: true,
+                      highlight: true,
+                    }"
+                  ></SVGGrid>
+                </div>
                 {{ grid.comment ? grid.comment : "Nouvelle Grille" }}
               </div>
             </template>
           </n-card>
           <n-card @click="createGrid" title="Créer">
-            <template #cover>
-              <n-button class="thumbnail add">
+            <template #default>
+              <n-button class="preview add">
                 <n-icon>
                   <AddIcon />
                 </n-icon>
@@ -66,13 +56,6 @@
             </template>
           </n-card>
         </div>
-        <Exporter
-          v-if="active"
-          :grid="active"
-          :shouldExport="shouldExport"
-          :options="options"
-          @export-png="onExported"
-        />
 
         <n-modal
           preset="dialog"
@@ -96,9 +79,11 @@ import { ref, onMounted, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import axios from "axios";
 import { AddCircleOutline as AddIcon, HeartOutline } from "@vicons/ionicons5";
+import SVGGrid from "../components/svg-renderer/Grid";
+import { defaultExportOptions } from "../components/svg-renderer/types";
 
 import { getUrl, save } from "../js/utils";
-import Exporter from "../components/svg-renderer/Exporter.vue";
+// import Exporter from "../components/svg-renderer/Exporter.vue";
 
 import { Grid, GridOptions } from "grid";
 const router = useRouter();
@@ -160,7 +145,7 @@ function fetch() {
 }
 
 function onExported(str: string) {
-  console.log(str, active.value)
+  console.log(str, active.value);
   if (!active.value) return;
   active.value.setThumbnail(str);
   save(active.value);
@@ -265,13 +250,26 @@ onMounted(() => {
   justify-content: space-between;
   width: 100%;
 }
-.thumbnail {
+.preview {
   width: 170px;
   height: 170px;
-  margin: 4px 0;
+  max-width: 170px;
+  max-height: 170px;
+
+  overflow: hidden;
 }
 .add svg {
   transform: scale(5);
+}
+
+.card-body {
+  /* max-width: 170px;
+  max-height: 170px;
+  overflow: hidden; */
+}
+.card-body > svg {
+  max-width: 340px;
+  max-height: 340px;
 }
 </style>
 

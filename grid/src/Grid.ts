@@ -1,17 +1,20 @@
 import { ArrowDir, Bounds, Cell, Direction, Vec } from "./types";
 import Vector from "vector2js";
-import {v4 as uuid} from "uuid";
+import { v4 as uuid } from "uuid";
 
-export const nullCell:Cell = {
+export const nullCell: Cell = {
   x: -1,
   y: -1,
   definition: false,
   highlighted: false,
-  splited: 0,
   suggestion: '',
   arrows: [],
   text: ''
 };
+export function isSplited(cell:Cell){
+  return cell.text.includes("\n\n");
+}
+
 
 export class Grid {
   public rows: number;
@@ -31,41 +34,41 @@ export class Grid {
     this.thumbnail = '';
     this.id = id || uuid();
     this.created = Date.now();
-    this.cells =  new Array(rows)
+    this.cells = new Array(rows)
       .fill(0)
       .map((_, y) => new Array(cols)
         .fill(0)
-        .map((_, x) => Grid.newCell(x,y))
+        .map((_, x) => Grid.newCell(x, y))
       );
   }
 
-  isValid({x, y}: Vec): boolean {
+  isValid({ x, y }: Vec): boolean {
     return x >= 0 && x < this.cols && y >= 0 && y < this.rows;
   }
 
-  isDefinition({x, y}: Vec): boolean {
-    return this.isValid({x, y}) && this.cells[y][x].definition;
+  isDefinition({ x, y }: Vec): boolean {
+    return this.isValid({ x, y }) && this.cells[y][x].definition;
   }
 
-  resize(rows: number, cols: number){
+  resize(rows: number, cols: number) {
     const newCells = new Array(rows)
-    .fill(0)
-    .map((_, i) => new Array(cols).fill(0)
-    .map((_ ,j) => {
-      if (this.cells[i] && this.cells[i][j]){
-        return this.cells[i][j];
-      }
-      return Grid.newCell(j,i);
-    }));
+      .fill(0)
+      .map((_, i) => new Array(cols).fill(0)
+        .map((_, j) => {
+          if (this.cells[i] && this.cells[i][j]) {
+            return this.cells[i][j];
+          }
+          return Grid.newCell(j, i);
+        }));
     this.rows = rows;
     this.cols = cols;
     this.cells = newCells;
   }
 
-  setDefinition({x, y}: Vec, value: boolean): void {
+  setDefinition({ x, y }: Vec, value: boolean): void {
     this.cells[y][x].definition = value;
     this.cells[y][x].text = '';
-    if (value){
+    if (value) {
       this.cells[y][x].arrows = ['none', 'none', 'none'];
     } else {
       this.cells[y][x].arrows = [];
@@ -73,29 +76,32 @@ export class Grid {
     }
   }
 
-  setText({x, y}: Vec, value:string){
+  setText({ x, y }: Vec, value: string) {
     const cell = this.cells[y][x];
-    if (cell.definition){
+    if (cell.definition) {
       cell.text = value;
     } else {
       cell.text = value.slice(-1);
     }
   }
 
-  setWord(word: string, point : Vec, direction: Direction){
+  setWord(word: string, point: Vec, direction: Direction) {
     const v = Grid.getDirVec(direction);
     const s = new Vector(point.x, point.y);
     word.split('')
-    .forEach((letter, i) => {
-      const {x, y} = s.add(v.mulScalar(i));
-      this.cells[y][x].text = letter; 
-      this.cells[y][x].suggestion = ''; 
-    });
-  } 
+      .forEach((letter, i) => {
+        const { x, y } = s.add(v.mulScalar(i));
+        this.cells[y][x].text = letter;
+        this.cells[y][x].suggestion = '';
+      });
+  }
 
   static setArrow(cell: Cell, index: number, direction: ArrowDir): void {
-    if (!cell.arrows){
+    if (!cell.arrows) {
       cell.arrows = ['none', 'none', 'none'];
+    }
+    if (!isSplited(cell)) {
+      cell.arrows[1] = 'none';
     }
     cell.arrows[index] = direction;
   }
@@ -105,23 +111,23 @@ export class Grid {
     Grid.setArrow(this.cells[v.y][v.x], index, direction);
   }
 
-  setThumbnail(t :string){
+  setThumbnail(t: string) {
     this.thumbnail = t;
   }
 
   increment(v: Vec, direction: Direction): Cell {
-    const {x,y} = new Vector(v.x,v.y).add(Grid.getDirVec(direction));
-    if (this.isValid({x,y})) return this.cells[y][x];
+    const { x, y } = new Vector(v.x, v.y).add(Grid.getDirVec(direction));
+    if (this.isValid({ x, y })) return this.cells[y][x];
     return nullCell;
   }
 
   decrement(v: Vec, direction: Direction): Cell {
-    const {x,y} = new Vector(v.x,v.y).sub(Grid.getDirVec(direction));
-    if (this.isValid({x,y})) return this.cells[y][x];
+    const { x, y } = new Vector(v.x, v.y).sub(Grid.getDirVec(direction));
+    if (this.isValid({ x, y })) return this.cells[y][x];
     return nullCell;
   }
 
-  getCell({x, y}: Vec): Cell{
+  getCell({ x, y }: Vec): Cell {
     return this.cells[y][x];
   }
 
@@ -135,7 +141,7 @@ export class Grid {
       c.highlighted = true;
     });
   }
-  
+
   suggest(words: string[], start: Vec[], directions: Direction[]) {
     this.cells.forEach((row) => {
       row.forEach((cell) => {
@@ -146,7 +152,7 @@ export class Grid {
       const s = new Vector(start[i].x, start[i].y);
       const v = Grid.getDirVec(directions[i]);
       word.split('').forEach((letter, j) => {
-        const {x,y} = s.add(v.mulScalar(j));
+        const { x, y } = s.add(v.mulScalar(j));
         this.cells[y][x].suggestion = letter;
       });
     });
@@ -157,7 +163,7 @@ export class Grid {
   }
 
   static getDirVec(direction: Direction): Vector {
-    return direction === 'horizontal' 
+    return direction === 'horizontal'
       ? new Vector(1, 0)
       : new Vector(0, 1);
   }
@@ -166,10 +172,10 @@ export class Grid {
     return direction === 'vertical' ? 'horizontal' : 'vertical';
   }
 
-  getBounds({x, y}: Vec, direction: Direction): Bounds {
-    if (!this.isValid({x,y}) || this.isDefinition({x,y})) return {
-      start: {x, y},
-      end: {x, y},
+  getBounds({ x, y }: Vec, direction: Direction): Bounds {
+    if (!this.isValid({ x, y }) || this.isDefinition({ x, y })) return {
+      start: { x, y },
+      end: { x, y },
       cells: [],
       length: 0
     };
@@ -178,14 +184,14 @@ export class Grid {
     const start = new Vector(x, y);
     const end = new Vector(x, y);
     let length = 0;
-    while (this.isValid(start) && !this.isDefinition(start)){
+    while (this.isValid(start) && !this.isDefinition(start)) {
       length++;
       start.addSelf(vm);
     }
-    start.addSelf( v);
+    start.addSelf(v);
 
     length--;
-    while (this.isValid(end) && !this.isDefinition(end)){
+    while (this.isValid(end) && !this.isDefinition(end)) {
       end.addSelf(v);
       length++;
     }
@@ -193,14 +199,14 @@ export class Grid {
     const cells = new Array(length)
       .fill(0)
       .map((_, i) => this.cells[start.y + v.y * i][start.x + v.x * i]);
-    
+
     return {
-      start,end, length,
+      start, end, length,
       cells
     };
   }
-  
-  serialize(){
+
+  serialize() {
     return JSON.stringify({
       id: this.id,
       rows: this.rows,
@@ -213,13 +219,8 @@ export class Grid {
     });
   }
 
-  isSplited(v: Vec){
-    if (!this.isValid(v)) return false;
-    return this.cells[v.y][v.x].splited;
-  }
-
-  static unserialize(s: string){
-    const {rows, cols,comment, title, id, cells, thumbnail, created} = JSON.parse(s) as {
+  static unserialize(s: string) {
+    const { rows, cols, comment, title, id, cells, thumbnail, created } = JSON.parse(s) as {
       rows: number,
       cols: number,
       id: string,
@@ -230,21 +231,21 @@ export class Grid {
       cells: Cell[][]
     };
     const res = new Grid(rows, cols, id);
-    cells.forEach((row,i ) =>{
+    cells.forEach((row, i) => {
       row.forEach((cell, j) => {
         cell.highlighted = false;
         cell.suggestion = '';
         res.cells[i][j] = cell;
-        if (cell.arrows){
-          cell.arrows = cell.arrows.map(a => {
-            if (typeof a === 'string') a;
-            //@ts-ignore
-            return a.direction;
-          });
-          if (cell.arrows.length !== 0 && cell.arrows.length !== 3 ){
-            cell.arrows.push(...new Array(3 - cell.arrows.length).fill('none'));
-          }
-        }
+        // if (cell.arrows){
+        //   cell.arrows = cell.arrows.map(a => {
+        //     if (typeof a === 'string') a;
+        //     //@ts-ignore
+        //     return a.direction;
+        //   });
+        //   if (cell.arrows.length !== 0 && cell.arrows.length !== 3 ){
+        //     cell.arrows.push(...new Array(3 - cell.arrows.length).fill('none'));
+        //   }
+        // }
       });
     });
     res.title = title;
@@ -254,13 +255,12 @@ export class Grid {
     return res;
   }
 
-  static newCell(x: number, y: number){
+  static newCell(x: number, y: number) {
     return {
       x,
       y,
       definition: false,
       highlighted: false,
-      splited: 0,
       arrows: [],
       suggestion: '',
       text: "",

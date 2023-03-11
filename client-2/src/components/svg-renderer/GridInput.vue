@@ -32,7 +32,7 @@
               stroke-linecap="round"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <path :class="dir" :d="getD(dir)"></path>
+              <path :class="dir" :d="getD(dir)" ></path>
             </svg>
           </template>
         </n-button>
@@ -55,6 +55,7 @@ import {
   arrowPositions,
   parse,
   ArrowDir,
+  borderWidth,
 } from "grid";
 import { getD } from "../../js/paths";
 import { Handle } from "./types";
@@ -154,24 +155,25 @@ function setArrow(dir: ArrowDir, index: number) {
   container.value.querySelector("textarea")?.focus();
 
 }
+const handleW = 6;
+const handlesW = computed(() => `${cellWidth(props.options) + handleW}px`);
 const handles = computed<Handle[]>(() => {
   const splited = isSplited(props.cell);
-  const w = cellWidth(props.options);
-  const handleW = 6;
-  const double = handleW * 2;
+  const w = cellAndBorderWidth(props.options);
+  const double = 0*handleW * 2;
 
 
   return splited
     ? [
         {
           top: `${0.25 * w - handleW}px`,
-          left: `${w - double}px`,
+          left: `${w + double}px`,
           index: 0,
           dirs: ["right", "rightdown", "none"],
         },
         {
           top: `${0.75 * w - handleW}px`,
-          left: `${w - double}px`,
+          left: `${w + double}px`,
           index: 1,
           dirs: ["right", "rightdown", "none"],
         },
@@ -214,20 +216,19 @@ watchEffect(() => {
   position: absolute;
   top: 0;
   left: 0;
-  width: v-bind(cellSize);
-  height: v-bind(cellSize);
   padding: 0;
   margin: 0;
   transform: v-bind(transform);
-  overflow: hidden;
 }
 textarea {
   overflow: hidden;
   resize: none;
-  border: none;
-  height: 100%;
-  width: 100%;
+  padding: 0;
+  width: v-bind(cellSize);
+  height: v-bind(cellSize);
   text-align: center;
+  outline: none;
+  border: 0;
 }
 
 textarea:focus {
@@ -250,13 +251,7 @@ textarea:focus-visible {
   font: v-bind(defFont);
   background: #aaa;
 }
-.handles {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: v-bind(cellSize);
-  height: v-bind(cellSize);
-}
+
 .handle {
   position: absolute;
   cursor: pointer;
