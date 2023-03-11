@@ -7,7 +7,7 @@
 
 <script setup lang="ts">
 import { ref, defineProps, defineEmits, computed } from "vue";
-import { useModel } from "../js/useModel";
+import { useModel } from "../../js/useModel";
 
 const props = defineProps<{ modelValue: string }>();
 const emit = defineEmits<{

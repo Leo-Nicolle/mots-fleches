@@ -17,7 +17,7 @@
       :y="-outerLineStroke / 2"
       :width="gridTotalWidth(grid, options) - outerLineStroke"
       :height="gridTotalHeight(grid, options) - outerLineStroke"
-      fill="none" 
+      fill="none"
       stroke-miterlimit="10"
       :stroke-width="outerLineStroke"
       :stroke="outerLineColor"
@@ -44,12 +44,18 @@
     </g>
     <g class="cells">
       <g class="row" v-for="(row, i) in grid.cells" :key="i">
-        <g class="cell" v-for="(cell, j) in row" :key="j"
-        :class="getCellClass(cell)"
+        <g
+          class="cell"
+          v-for="(cell, j) in row"
+          :key="j"
+          :class="getCellClass(cell, focus)"
         >
           <rect
             :x="cellAndBorderWidth(options) * cell.x"
             :y="cellAndBorderWidth(options) * cell.y"
+            :width="cellWidth(options)"
+            :height="cellWidth(options)"
+
           />
           <text
             :x="xText(cell)"
@@ -70,7 +76,7 @@
           <text
             :x="xText(cell)"
             :y="yText(cell) + (6 * cellWidth(options)) / 7"
-            :class="getCellClass(cell)"
+            :class="getCellClass(cell, focus)"
             v-else-if="!cell.definition && exportOptions.texts"
           >
             {{ cell.text || cell.suggestion }}
@@ -86,17 +92,14 @@
       :stroke="options.arrow.color"
       v-if="exportOptions.arrows"
     >
-
-      <g v-for="(arrow, i) in arrows" 
-      :key="i"
-      fill="none"
-      :transform="`translate(${arrow.x},${
-        arrow.y
-      })scale(${arrowScale},${arrowScale})`"
-        >
-          <path 
-          :class="arrow.dir" :d="getD(arrow.dir)" />
-        </g>
+      <g
+        v-for="(arrow, i) in arrows"
+        :key="i"
+        fill="none"
+        :transform="`translate(${arrow.x},${arrow.y})scale(${arrowScale},${arrowScale})`"
+      >
+        <path :class="arrow.dir" :d="getD(arrow.dir)" />
+      </g>
     </g>
 
     <g class="splits" v-if="exportOptions.splits">
@@ -114,13 +117,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  defineEmits,
-  ref,
-  defineProps,
-  withDefaults,
-  computed,
-} from "vue";
+import { defineEmits, ref, defineProps, withDefaults, computed } from "vue";
 import { getD } from "../../js/paths";
 import {
   Grid,
@@ -135,16 +132,15 @@ import {
   parse,
   Cell,
   nullCell,
-  Vec,
   isSplited,
   splitIndex,
   Direction,
   getLines,
   arrowPositions,
-  ArrowDir
+  ArrowDir,
 } from "grid";
 import { defaultExportOptions, ExportOptions, Rect } from "./types";
-
+import { getCellClass } from "../../js/utils";
 const container = ref<SVGSVGElement>(null as unknown as SVGSVGElement);
 
 const props = withDefaults(
@@ -191,22 +187,28 @@ const defBackgroundColor = computed(
 );
 const defColor = computed(() => props.options.definition.color);
 
-const arrows = computed(() =>
-  props.grid.cells.flat()
-  .filter((c) => c.definition && c.arrows.length > 0)
-  .map(cell => {
-    return arrowPositions(cell).map(({x, y}, i) => {
-    return cell.arrows[i] === 'none' ? null :{
-      dir: cell.arrows[i],
-      x: cellAndBorderWidth(props.options) * cell.x +
-      cellAndBorderWidth(props.options) * x,
-      y:cellAndBorderWidth(props.options) * cell.y +
-      cellAndBorderWidth(props.options) * y
-    };
-  });
-  })
-  .flat()
-  .filter(e => e) as unknown as {dir: ArrowDir, x: string, y: string}[]
+const arrows = computed(
+  () =>
+    props.grid.cells
+      .flat()
+      .filter((c) => c.definition && c.arrows.length > 0)
+      .map((cell) => {
+        return arrowPositions(cell).map(({ x, y }, i) => {
+          return cell.arrows[i] === "none"
+            ? null
+            : {
+                dir: cell.arrows[i],
+                x:
+                  cellAndBorderWidth(props.options) * cell.x +
+                  cellAndBorderWidth(props.options) * x,
+                y:
+                  cellAndBorderWidth(props.options) * cell.y +
+                  cellAndBorderWidth(props.options) * y,
+              };
+        });
+      })
+      .flat()
+      .filter((e) => e) as unknown as { dir: ArrowDir; x: string; y: string }[]
 );
 function arrowPos(cell: Cell) {
   return;
@@ -236,21 +238,6 @@ const splits = computed(() =>
       };
     })
 );
-
-function getCellClass(cell: Cell) {
-  const classes = [cell.definition ? "definition" : "text"];
-
-  if (cell.x === props.focus.x && cell.y === props.focus.y) {
-    classes.push(`focused`);
-  }
-  if (cell.highlighted) {
-    classes.push(`highlighted`);
-  }
-  if (cell.suggestion && !cell.text.length) {
-    classes.push(`suggested`);
-  }
-  return classes.concat('cell').join(" ");
-}
 
 function getCellFill(cell: Cell) {
   if (cell.definition) {
@@ -353,26 +340,26 @@ function onClick(evt: MouseEvent) {
 .text.suggested {
   fill: #777;
 }
-.text>rect{
+.text > rect {
   fill: none;
 }
-.cell> rect{
+.cell > rect {
   width: v-bind(cellWidth(options));
   height: v-bind(cellWidth(options));
 }
-.cell>text{
-  text-anchor:middle;
+.cell > text {
+  text-anchor: middle;
 }
-.text.highlighted>rect{
+.text.highlighted > rect {
   fill: #def;
 }
-.definition>rect{
+.definition > rect {
   fill: v-bind(defBackgroundColor);
 }
-.definition>text{
+.definition > text {
   fill: v-bind(defColor);
 }
-.definition>text>tspan {
+.definition > text > tspan {
   font: v-bind(defFont);
 }
 .right .rightdown {

@@ -31,7 +31,7 @@
 
 <script setup lang="ts">
 import { ref, defineProps, defineEmits, computed } from "vue";
-import { useModel } from "../js/useModel";
+import { useModel } from "../../js/useModel";
 import { Format } from "grid";
 
 const props = defineProps<{ modelValue: Format }>();

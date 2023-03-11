@@ -3,8 +3,8 @@
     <textarea
       @input="onChange($event)"
       @keyup="onKeyup($event)"
-      :value="cell.text.length ? cell.text : ''"
-      :class="cell.definition ? 'def-input' : 'text-input'"
+      :value="cell.text.length ? cell.text : cell.suggestion.length ? cell.suggestion : ''"
+      :class = "getCellClass(cell, cell)"
     />
     <div class="handles" v-if="cell.definition">
       <n-popover v-for="(handle, k) in handles" :key="k" trigger="hover">
@@ -32,7 +32,7 @@
               stroke-linecap="round"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <path :class="dir" :d="getD(dir)" ></path>
+              <path :class="dir" :d="getD(dir)"></path>
             </svg>
           </template>
         </n-button>
@@ -52,11 +52,10 @@ import {
   GridOptions,
   nullCell,
   isSplited,
-  arrowPositions,
   parse,
   ArrowDir,
-  borderWidth,
 } from "grid";
+import { getCellClass } from "../../js/utils";
 import { getD } from "../../js/paths";
 import { Handle } from "./types";
 const container = ref(null as unknown as HTMLDivElement);
@@ -83,7 +82,6 @@ const transform = computed(() => {
   }px)`;
 });
 function onChange(evt: Event) {
-  // emit("update", target.value);
   const { x, y } = props.cell;
   let text = (evt.target as HTMLInputElement).value || "";
   console.log(`'${text}'`);
@@ -92,7 +90,7 @@ function onChange(evt: Event) {
   }
   props.grid.setText({ x, y }, text);
   if (props.grid.isDefinition(props.cell)) {
-    if (!isSplited(props.cell)){
+    if (!isSplited(props.cell)) {
       Grid.setArrow(props.cell, 1, "none");
     }
     return;
@@ -106,9 +104,9 @@ function onChange(evt: Event) {
 function onKeyup(evt: KeyboardEvent) {
   console.log(evt.key);
   if (evt.key === "Escape") {
-      props.grid.setDefinition(props.cell, !props.cell.definition);
-      props.grid.setText(props.cell, '');
-      return;
+    props.grid.setDefinition(props.cell, !props.cell.definition);
+    props.grid.setText(props.cell, "");
+    return;
   }
   if (props.cell.definition && evt.key === "Enter" && evt.ctrlKey) {
     let next = props.grid.increment(props.cell, props.dir);
@@ -153,32 +151,30 @@ function onKeyup(evt: KeyboardEvent) {
 function setArrow(dir: ArrowDir, index: number) {
   Grid.setArrow(props.cell, index, dir);
   container.value.querySelector("textarea")?.focus();
-
 }
 const handleW = 6;
 const handlesW = computed(() => `${cellWidth(props.options) + handleW}px`);
 const handles = computed<Handle[]>(() => {
   const splited = isSplited(props.cell);
   const w = cellAndBorderWidth(props.options);
-  const double = 0*handleW * 2;
-
+  const double = 0 * handleW * 2;
 
   return splited
     ? [
         {
           top: `${0.25 * w - handleW}px`,
-          left: `${w + double}px`,
+          left: `${w}px`,
           index: 0,
           dirs: ["right", "rightdown", "none"],
         },
         {
           top: `${0.75 * w - handleW}px`,
-          left: `${w + double}px`,
+          left: `${w}px`,
           index: 1,
           dirs: ["right", "rightdown", "none"],
         },
         {
-          top: `${w - double}px`,
+          top: `${w}px`,
           left: `${0.5 * w - handleW}px`,
           index: 2,
           dirs: ["down", "downright", "none"],
@@ -187,12 +183,12 @@ const handles = computed<Handle[]>(() => {
     : [
         {
           top: `${0.5 * w - handleW}px`,
-          left: `${w - double}px`,
+          left: `${w}px`,
           index: 0,
           dirs: ["right", "rightdown", "none"],
         },
         {
-          top: `${w - double}px`,
+          top: `${w}px`,
           left: `${0.5 * w - handleW}px`,
           index: 2,
           dirs: ["down", "downright", "none"],
@@ -241,11 +237,14 @@ textarea:focus-visible {
   resize: none;
   border: none;
 }
-.text-input {
+.text {
   font: v-bind(textFont);
   background: #acf;
 }
-.def-input {
+.text.suggested {
+  color: #777;
+}
+.definition{
   line-height: v-bind(defSize);
   font-size: v-bind(defSize);
   font: v-bind(defFont);

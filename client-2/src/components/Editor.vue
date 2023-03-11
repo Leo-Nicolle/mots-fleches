@@ -12,7 +12,6 @@
           </n-icon>
         </n-button>
       </span>
-
       <Suggestion
         v-if="!focus.definition"
         :point="focus"
@@ -77,8 +76,8 @@ import SVGGrid from "./svg-renderer/Grid.vue";
 import GridInput from "./svg-renderer/GridInput.vue";
 import { defaultExportOptions } from "./svg-renderer/types";
 
-import Options from "./Options.vue";
-import ModalOptions from "./ModalOptions.vue";
+import Options from "./forms/Options.vue";
+import ModalOptions from "./forms/ModalOptions.vue";
 import Suggestion from "./Suggestion.vue";
 
 import axios from "axios";
@@ -86,9 +85,9 @@ import { getUrl } from "../js/utils";
 
 const options: GridOptions = ref({
   grid: {
-    cellSize: "150px",
+    cellSize: "50px",
     borderColor: "black",
-    borderSize: "10px",
+    borderSize: "1px",
     outerBorderSize: "1px",
     outerBorderColor: "red",
   },
@@ -98,6 +97,7 @@ const options: GridOptions = ref({
     color: "black",
     backgroundColor: "#ccc",
   },
+
   arrow: {
     size: "10px",
     color: "black",
@@ -121,7 +121,6 @@ const emit = defineEmits<{
 const editor = ref(null);
 const dir = ref<Direction>("horizontal");
 const focus = ref<Cell>(nullCell);
-const suggestion = ref("");
 const version = ref(0);
 const visible = ref({ visible: false });
 
@@ -190,13 +189,6 @@ h2 {
   flex-direction: row;
   max-width: 100vw;
   overflow: hidden;
-}
-.grid-wrap {
-  max-width: 200px;
-  /* calc(100vw - 210px); */
-  max-height: 200px;
-  /* calc(100vh - 210px); */
-  /* overflow-x: scroll; */
 }
 .editor > .suggestion {
   margin-right: 2px;

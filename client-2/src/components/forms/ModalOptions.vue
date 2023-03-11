@@ -51,7 +51,7 @@
 <script setup lang="ts">
 import { defineEmits, defineProps, ref, watch, watchEffect } from "vue";
 import { Grid } from "grid";
-import { useModel } from "../js/useModel";
+import { useModel } from "../../js/useModel";
 const props = defineProps<{
   modelValue: { grid: Grid; visible: { visible: boolean } };
 }>();

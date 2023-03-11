@@ -1,5 +1,5 @@
 import axios from "axios";
-import {Grid} from "grid";
+import {Cell, Grid} from "grid";
 import { NIcon } from "naive-ui";
 import { h,  Component } from "vue";
 
@@ -25,4 +25,20 @@ export function measureText(text, size:string, font: string) {
   context.font = font;
   const metrics = context.measureText(text);
   return metrics;
+}
+
+
+export function getCellClass(cell: Cell, focus: Cell) {
+  const classes = [cell.definition ? "definition" : "text"];
+
+  if (cell.x === focus.x && cell.y === focus.y) {
+    classes.push(`focused`);
+  }
+  if (cell.highlighted) {
+    classes.push(`highlighted`);
+  }
+  if (cell.suggestion && !cell.text.length) {
+    classes.push(`suggested`);
+  }
+  return classes.concat('cell').join(" ");
 }
