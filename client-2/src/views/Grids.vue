@@ -127,13 +127,6 @@ function fetch() {
     });
 }
 
-function onExported(str: string) {
-  console.log(str, active.value);
-  if (!active.value) return;
-  save(active.value);
-  shouldExport.value = false;
-}
-
 function onExportClick() {
   exporting.value = true;
 }
@@ -167,7 +160,7 @@ onMounted(() => {
 });
 </script>
 
-<style>
+<style scoped>
 .leftpanel {
   width: 210px;
   min-width: 210px;

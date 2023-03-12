@@ -133,7 +133,7 @@ onMounted(() => {
 });
 </script>
 
-<style>
+<style scoped>
 .leftpanel {
   width: 210px;
   min-width: 210px;

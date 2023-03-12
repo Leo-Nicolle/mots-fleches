@@ -14,6 +14,11 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/grid/:id',
     name: 'grid',
+    component: () => import('../views/Grid-Editor.vue')
+  },
+  {
+    path: '/grid-export/:id',
+    name: 'grid-export',
     component: () => import('../views/Grid.vue')
   },
   {

@@ -1,5 +1,5 @@
 <template>
-  <nav>
+  <nav v-if="displayMenu">
     <n-menu
       class="burger"
       :accordion="true"
@@ -16,10 +16,14 @@
 <script setup lang="ts">
 import { MenuOutline } from "@vicons/ionicons5";
 import type { MenuOption } from "naive-ui";
-import { h, ref } from "vue";
-import { RouterLink } from "vue-router";
+import { computed, h, ref } from "vue";
+import { RouterLink, useRoute } from "vue-router";
 import { renderIcon } from "./js/utils";
+const route = useRoute();
 
+const displayMenu = computed(() => {
+  return route.name !== "grid-export";
+});
 const collapsed = ref(true);
 
 const menuOptions = ref<MenuOption[]>([

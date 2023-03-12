@@ -1,6 +1,6 @@
 <template>
-  <div id="Options">
-    <Editor v-if="grid && options" :grid="grid" :options="options">
+  <div class="options" v-if="options && grid">
+    <div class="leftpanel">
       <n-scrollbar y-scrollable style="max-height: calc(100vh - 100px)">
         <OptionsForm
           v-model="options"
@@ -11,13 +11,31 @@
           format
         />
       </n-scrollbar>
-    </Editor>
+    </div>
+    <div class="viewer">
+      <n-scrollbar
+        x-scrollable
+        :on-scroll="onScroll"
+        style="max-height: calc(100vh - 100px); max-width: calc(100vw - 100px)"
+      >
+        <GridPaper
+          v-if="grid && options"
+          class="paper"
+          :grid="grid"
+          :options="options"
+        />
+      </n-scrollbar>
+    </div>
+    <ExportButton :grid="grid" />
   </div>
 </template>
 
 <script setup lang="ts">
 import axios from "axios";
 import Editor from "../components/Editor.vue";
+import GridPaper from "../components/GridPaper.vue";
+import ExportButton from "../components/ExportButton.vue";
+
 import OptionsForm from "../components/forms/Options";
 import { Grid, GridOptions } from "grid";
 import { getUrl, save } from "../js/utils";
@@ -49,7 +67,7 @@ function onUpdate() {
     if (!options.value) return;
     axios.post(getUrl(`options`), {
       options: options.value,
-    })
+    });
   }, 150);
 }
 
@@ -58,14 +76,25 @@ onMounted(() => {
 });
 </script>
 
-<style>
-#Grid {
-  max-height: 100vh;
+<style scoped>
+.options {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+}
+.leftpanel {
+  width: 210px;
+  min-width: 210px;
   overflow: hidden;
 }
-body {
-  width: min-content;
-  max-width: 100vw;
-  overflow: hidden;
+.leftpanel > .n-scrollbar {
+  max-height: 100vh;
+}
+.paper {
+  margin: 20px;
+}
+.viewer {
+  position: relative;
+  top: 20px;
 }
 </style>

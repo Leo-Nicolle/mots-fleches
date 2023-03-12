@@ -4,9 +4,9 @@
     <n-form-item label="Format" path="fomat.name">
       <n-select v-model:value="format" :options="options" />
     </n-form-item>
-    <n-form-item label="Orientation" path="fomat.orientation">
-      <n-select v-model:value="value.orientation" :options="orientations" />
-    </n-form-item>
+      <!-- <n-form-item label="Orientation" path="fomat.orientation">
+        <n-select v-model:value="value.orientation" :options="orientations" />
+      </n-form-item> -->
     <n-form-item label="Largeur" path="format.width">
       <n-input-number v-model:value="value.width" />
     </n-form-item>
@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps, defineEmits, computed } from "vue";
+import { ref, defineProps, defineEmits, computed, watchEffect } from "vue";
 import { useModel } from "../../js/useModel";
 import { Format } from "grid";
 
@@ -88,10 +88,16 @@ const format = computed({
     return option.value;
   },
   set: (format) => {
-    const [height, width] =
+    const lengths =
       format === "custom"
         ? [props.modelValue.height, props.modelValue.width]
         : decompose(format);
+    if (format === "portrait") {
+      lengths.sort((a, b) => a - b);
+    } else if (format === "paysage") {
+      lengths.sort((a, b) => b - a);
+    }
+    const [height, width] = lengths;
     emit("update:modelValue", {
       ...props.modelValue,
       width,
@@ -101,6 +107,20 @@ const format = computed({
 });
 
 const value = useModel(props, emit);
+function onUpdate() {
+  emit("update:modelValue", value.value);
+}
+watchEffect(() => {
+  props.modelValue.margin.right +
+  props.modelValue.margin.left +
+  props.modelValue.margin.top +
+  props.modelValue.margin.bottom +
+  props.modelValue.height +
+  props.modelValue.orientation +
+  props.modelValue.width
+    ? value && emit("update:modelValue", value.value)
+    : null;
+});
 </script>
 
 <style>

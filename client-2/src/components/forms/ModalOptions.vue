@@ -18,11 +18,11 @@
           />
         </n-form-item>
         <n-form-item label="Options" path="grid.optionsId" v-if="opts.length">
-          <n-select 
-          :options="opts" 
-          :default-value="defaultSelectOpt"
-          v-model:value="value.optionsId"
-          def
+          <n-select
+            :options="opts"
+            :default-value="defaultSelectOpt"
+            v-model:value="value.grid.optionsId"
+            def
           />
         </n-form-item>
         <n-form-item label="Commentaire" path="grid.description">
@@ -89,7 +89,8 @@ function onColChange(evt) {
   emit("update");
 }
 const defaultSelectOpt = computed(() => {
-  return opts.value.find((opt) => opt.value === props.modelValue.grid.optionsId)?.label;
+  return opts.value.find((opt) => opt.value === props.modelValue.grid.optionsId)
+    ?.label;
 });
 onMounted(() => {
   axios
@@ -102,6 +103,11 @@ onMounted(() => {
     .then((res) => {
       opts.value = res;
     });
+});
+const previous = ref(0);
+watchEffect(() => {
+  previous.value = value.value.grid.optionsId
+   emit("update");
 });
 </script>
 
