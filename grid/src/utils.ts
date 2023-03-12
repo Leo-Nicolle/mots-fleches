@@ -1,6 +1,6 @@
 import { Grid, isSplited } from "./Grid";
-import { Cell, GridOptions, } from "./types";
-
+import { Cell, defaultOptions, GridOptions, } from "./types";
+import { v4 as uuid } from "uuid";
 
 export function parse(str: string): [number, string] {
   return [
@@ -85,3 +85,14 @@ export function arrowPositions(cell: Cell) {
 }
 
 export const arrowDirs = [['right', 'rightdown'], ['right', 'rightdown'], ['down', 'downright']];
+
+export function duplicate(options: GridOptions) {
+  return {
+    ...options,
+    id: uuid(),
+  }
+}
+
+export function newOptions() {
+  return duplicate(defaultOptions);
+}

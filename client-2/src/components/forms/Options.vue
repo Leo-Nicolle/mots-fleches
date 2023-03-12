@@ -2,7 +2,11 @@
   <div class="options">
     <n-form ref="formRef" inline :label-width="80" :model="value">
       <div v-if="grid">
-        <h3>Grille</h3>
+        <h3>Options</h3>
+        <n-form-item label="Nom" path="name">
+          <n-input @update:modelValue="onUpdate" v-model:value="value.name" />
+        </n-form-item>
+
         <n-form-item label="Taille cellule" path="grid.cellSize">
           <Sizeinput
             @update:modelValue="onUpdate"
@@ -90,6 +94,7 @@ const value = useModel(props, emit);
 
 watchEffect(() => {
   props.modelValue.arrow.color +
+  props.modelValue.name +
   props.modelValue.definition.color +
   props.modelValue.grid.borderColor +
   props.modelValue.grid.outerBorderColor

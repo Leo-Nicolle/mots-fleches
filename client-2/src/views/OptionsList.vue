@@ -9,7 +9,11 @@
       </div>
       <div class="wrapper scroll">
         <div>
-          <n-card v-for="(options, i) in optionsList" :key="i" :hoverable="true">
+          <n-card
+            v-for="(options, i) in optionsList"
+            :key="i"
+            :hoverable="true"
+          >
             <template #header>
               <span class="card-title">
                 <span>
@@ -29,14 +33,17 @@
             </template>
 
             <template #default>
-              <div class="card-body" @click="$router.push(`/options/${options.id}`)">
-                  <pre v-highlightjs="sourcecode">
+              <div
+                class="card-body"
+                @click="$router.push(`/options/${options.id}`)"
+              >
+                <pre v-highlightjs="sourcecode">
                     <code class="JSON">{{JSON.stringify(options, 0, 2)}}</code>
                   </pre>
               </div>
             </template>
           </n-card>
-          <n-card @click="createGrid" title="Créer">
+          <n-card @click="createOptions" title="Créer">
             <template #default>
               <n-button class="preview add">
                 <n-icon>
@@ -69,9 +76,10 @@ import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import { AddCircleOutline as AddIcon } from "@vicons/ionicons5";
-import VueHighlightJS from 'vue3-highlightjs';
-import 'highlight.js/styles/monokai.css';
- 
+import { newOptions, duplicate } from "grid";
+import VueHighlightJS from "vue3-highlightjs";
+import "highlight.js/styles/monokai.css";
+
 import { getUrl } from "../js/utils";
 import { Grid, GridOptions } from "grid";
 const router = useRouter();
@@ -108,11 +116,9 @@ function onDelete() {
     .then(() => (deleteVisible.value = false));
 }
 
-function createGrid() {
-  const newGrid = new Grid(10, 10);
-  newGrid.title = "Nouvelle Grille";
+function createOptions() {
   return axios
-    .post(getUrl("options"), { options: newGrid.serialize() })
+    .post(getUrl("options"), { options: newOptions() })
     .then(() => fetch());
 }
 
@@ -172,7 +178,7 @@ onMounted(() => {
   box-shadow: 4px 4px 7px #ddd;
   height: 350px;
 }
-.card-body > pre{
+.card-body > pre {
   padding: 0;
   margin: 0;
   overflow: hidden;
@@ -209,6 +215,5 @@ onMounted(() => {
 .add svg {
   transform: scale(5);
 }
-
 </style>
 

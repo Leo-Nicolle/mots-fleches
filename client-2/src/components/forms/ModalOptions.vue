@@ -17,7 +17,14 @@
             @change="emit('update')"
           />
         </n-form-item>
-
+        <n-form-item label="Options" path="grid.optionsId" v-if="opts.length">
+          <n-select 
+          :options="opts" 
+          :default-value="defaultSelectOpt"
+          v-model:value="value.optionsId"
+          def
+          />
+        </n-form-item>
         <n-form-item label="Commentaire" path="grid.description">
           <n-input
             type="textarea"
@@ -49,13 +56,23 @@
 </template>
 
 <script setup lang="ts">
-import { defineEmits, defineProps, ref, watch, watchEffect } from "vue";
+import {
+  computed,
+  defineEmits,
+  defineProps,
+  onMounted,
+  ref,
+  watch,
+  watchEffect,
+} from "vue";
 import { Grid } from "grid";
 import { useModel } from "../../js/useModel";
+import { getUrl } from "../../js/utils";
+import axios from "axios";
 const props = defineProps<{
   modelValue: { grid: Grid; visible: { visible: boolean } };
 }>();
-
+const opts = ref<{ label: string; value: string }[]>([]);
 const show = ref(true);
 const emit = defineEmits<{
   (event: "update:modelValue", value: Grid): void;
@@ -71,6 +88,21 @@ function onColChange(evt) {
   props.modelValue.grid.resize(props.modelValue.grid.rows, evt);
   emit("update");
 }
+const defaultSelectOpt = computed(() => {
+  return opts.value.find((opt) => opt.value === props.modelValue.grid.optionsId)?.label;
+});
+onMounted(() => {
+  axios
+    .get(getUrl("options"))
+    .then((res) => {
+      return res.data.map((opt) => {
+        return { label: opt.name, value: opt.id };
+      });
+    })
+    .then((res) => {
+      opts.value = res;
+    });
+});
 </script>
 
 <style scoped>
