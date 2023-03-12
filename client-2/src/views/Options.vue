@@ -1,9 +1,8 @@
 <template>
-  <div id="Grid">
+  <div id="Options">
     <Editor
       v-if="grid && options"
       :grid="grid"
-      @update="onUpdate"
       :options="options"
     ></Editor>
   </div>
@@ -11,7 +10,6 @@
 
 <script setup lang="ts">
 import axios from "axios";
-import apiMixin from "../js/apiMixin";
 import Editor from "../components/Editor.vue";
 import { Grid, GridOptions } from "grid";
 import { getUrl, save } from "../js/utils";
@@ -20,18 +18,16 @@ import { useRoute } from "vue-router";
 
 const grid = ref<Grid>();
 const options = ref<GridOptions>();
-
 const saveTimeout = ref(0);
 const route = useRoute();
 function fetch() {
-  return axios
-    .get(getUrl(`grid/${route.params.id}`))
-    .then(({ data }) => {
-      grid.value = Grid.unserialize(JSON.stringify(data));
-      return axios.get(getUrl(`options/${grid.value.optionsId}`));
-    })
-    .then(({ data }) => {
-      options.value = data;
+  return Promise.all([
+    axios.get(getUrl(`grid`)),
+    axios.get(getUrl(`options/${route.params.id}`)),
+  ])
+    .then(([{ data: grids }, { data: opts }]) => {
+      grid.value = Grid.unserialize(JSON.stringify(grids[0]));
+      options.value = opts;
     })
     .catch((e) => {
       console.error("E", e);
@@ -40,8 +36,8 @@ function fetch() {
 function onUpdate() {
   clearTimeout(saveTimeout.value);
   saveTimeout.value = setTimeout(() => {
-    if (!grid.value) return;
-    save(grid.value);
+    if(!options.value) return;
+    save(options.value);
   }, 50);
 }
 

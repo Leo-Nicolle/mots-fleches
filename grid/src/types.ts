@@ -1,4 +1,4 @@
-export type Vec = {x: number, y: number};
+export type Vec = { x: number, y: number };
 export type Lookup<T> = { [key: number | string]: T };
 export type DefGrid = boolean[][];
 
@@ -32,6 +32,8 @@ export type Format = {
 }
 
 export type GridOptions = {
+  id: string;
+  name: string;
   grid: {
     cellSize: string;
     borderSize: string;
@@ -60,4 +62,49 @@ export type Bounds = {
 }
 export type Direction = 'horizontal' | 'vertical';
 
+
+export const defaultOptions: GridOptions = {
+  id: 'default',
+  name: 'Default',
+  grid: {
+    cellSize: '54px',
+    borderSize: '1px',
+    borderColor: '#000000',
+    outerBorderSize: '2px',
+    outerBorderColor: '#000000',
+  },
+  definition: {
+    font: "sans-serif",
+    size: "12px",
+    color: "black",
+    backgroundColor: "#ccc",
+  },
+  arrow: {
+    size: '10px',
+    color: '#000000',
+  },
+  paper: {
+    width: 210,
+    height: 297,
+    orientation: 'portrait',
+    dpi: 300,
+    margin: {
+      top: 10,
+      bottom: 10,
+      left: 10,
+      right: 10,
+    }
+  }
+};
+
+export type GridState = {
+  rows: number;
+  cols: number;
+  id: string;
+  created: number;
+  comment: string;
+  optionsId: string;
+  title: string;
+  cells: Cell[][];
+};
 export const DPI_TO_PIXEL = 25.4;

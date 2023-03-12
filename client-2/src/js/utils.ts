@@ -13,7 +13,6 @@ export function renderIcon(icon: Component) {
 }
 
 export function save(grid: Grid){
-  console.log('save');
   return axios.post(getUrl("grid"), {
     grid: grid.serialize(),
   });

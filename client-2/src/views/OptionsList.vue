@@ -1,20 +1,19 @@
 <template>
-  <div class="grids">
-    <div v-if="!exporting">
+  <div class="options">
+    <div>
       <div class="leftpanel">
-        <h3>Grilles</h3>
-        <n-button @click="onExportClick">Exporter</n-button>
+        <h3>Options</h3>
         <n-button @click="deleteVisible = true" type="warning"
           >Supprimer</n-button
         >
       </div>
       <div class="wrapper scroll">
         <div>
-          <n-card v-for="(grid, i) in grids" :key="i" :hoverable="true">
+          <n-card v-for="(options, i) in optionsList" :key="i" :hoverable="true">
             <template #header>
               <span class="card-title">
                 <span>
-                  {{ grid.title ? grid.title : `Nouvelle Grille` }}
+                  {{ options.name ? options.name : `Nouveau Style` }}
                 </span>
                 <n-checkbox
                   @click="
@@ -30,21 +29,10 @@
             </template>
 
             <template #default>
-              <div class="card-body" @click="$router.push(`/grid/${grid.id}`)">
-                <div class="preview">
-                  <SVGGrid
-                    :grid="grid"
-                    :focus="nullCell"
-                    :options="options"
-                    dir="horizontal"
-                    :export-options="{
-                      ...defaultExportOptions,
-                      texts: true,
-                      highlight: true,
-                    }"
-                  ></SVGGrid>
-                </div>
-                {{ grid.comment ? grid.comment : "Nouvelle Grille" }}
+              <div class="card-body" @click="$router.push(`/options/${options.id}`)">
+                  <pre v-highlightjs="sourcecode">
+                    <code class="JSON">{{JSON.stringify(options, 0, 2)}}</code>
+                  </pre>
               </div>
             </template>
           </n-card>
@@ -72,94 +60,48 @@
         </n-modal>
       </div>
     </div>
-    <!-- <Exporting v-else :grids="selectedGrids" :options="options" /> -->
+    <!-- <Exporting v-else :optionsList="selectedOptions" :options="options" /> -->
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
-import { useRouter, useRoute } from "vue-router";
+import { useRouter } from "vue-router";
 import axios from "axios";
 import { AddCircleOutline as AddIcon } from "@vicons/ionicons5";
-import SVGGrid from "../components/svg-renderer/Grid";
-import { defaultExportOptions } from "../components/svg-renderer/types";
-
-import { getUrl, save } from "../js/utils";
-// import Exporter from "../components/svg-renderer/Exporter.vue";
-
-import { Grid, GridOptions,nullCell } from "grid";
+import VueHighlightJS from 'vue3-highlightjs';
+import 'highlight.js/styles/monokai.css';
+ 
+import { getUrl } from "../js/utils";
+import { Grid, GridOptions } from "grid";
 const router = useRouter();
-const options = ref<GridOptions>({
-  grid: {
-    cellSize: "50px",
-    borderColor: "black",
-    borderSize: "1px",
-    outerBorderSize: "1px",
-    outerBorderColor: "red",
-  },
-  definition: {
-    font: "sans-serif",
-    size: "12px",
-    color: "black",
-    backgroundColor: "#ccc",
-  },
-  arrow: {
-    size: "10px",
-    color: "black",
-  },
-  paper: {
-    width: 21,
-    height: 29.7,
-    orientation: "portrait",
-    margin: {
-      top: 0,
-      bottom: 0,
-      left: 0,
-      right: 0,
-    },
-  },
-});
-
-const grids = ref<Grid[]>([]);
+const optionsList = ref<GridOptions[]>([]);
 const selected = ref<boolean[]>([]);
 const deleteVisible = ref<boolean>(false);
-const active = ref<Grid>();
-const exporting = ref(false);
-const shouldExport = ref(false);
+const active = ref<GridOptions>();
 
-const selectedGrids = computed(
+const selectedOptions = computed(
   () =>
     selected.value
-      .map((s, i) => (s ? grids.value[i] : null))
-      .filter((e) => e) as Grid[]
+      .map((s, i) => (s ? optionsList.value[i] : null))
+      .filter((e) => e) as GridOptions[]
 );
 
 function fetch() {
   return axios
-    .get(getUrl("grid"))
+    .get(getUrl("options"))
     .then(({ data }) => {
-      grids.value = data.map((g) => Grid.unserialize(JSON.stringify(g)));
-      selected.value = new Array(grids.value.length).fill(false);
+      optionsList.value = data;
+      selected.value = new Array(optionsList.value.length).fill(false);
     })
     .catch((e) => {
       console.error("E", e);
     });
 }
-
-function onExported(str: string) {
-  console.log(str, active.value);
-  if (!active.value) return;
-  save(active.value);
-  shouldExport.value = false;
-}
-
-function onExportClick() {
-  exporting.value = true;
-}
 function onDelete() {
   Promise.all(
-    selectedGrids.value.map((shouldDelete, i) =>
-      axios.delete(getUrl(`grid/${grids.value[i].id}`))
+    selectedOptions.value.map((shouldDelete, i) =>
+      axios.delete(getUrl(`options/${optionsList.value[i].id}`))
     )
   )
     .then(() => fetch())
@@ -170,7 +112,7 @@ function createGrid() {
   const newGrid = new Grid(10, 10);
   newGrid.title = "Nouvelle Grille";
   return axios
-    .post(getUrl("grid"), { grid: newGrid.serialize() })
+    .post(getUrl("options"), { options: newGrid.serialize() })
     .then(() => fetch());
 }
 
@@ -178,10 +120,9 @@ onMounted(() => {
   fetch().then(() => {
     const lastRoute = router.options.history.state.back as string;
     if (!lastRoute) return;
-    const match = lastRoute.match(/\/grid\/(.*)/);
+    const match = lastRoute.match(/\/options\/(.*)/);
     if (!match || !match.length) return;
-    active.value = grids.value.find((grid) => grid.id === match[1]);
-    shouldExport.value = true;
+    active.value = optionsList.value.find((options) => options.id === match[1]);
   });
 });
 </script>
@@ -208,17 +149,17 @@ onMounted(() => {
 .card-title > div {
   margin-left: auto;
 }
-.grids > div {
+.options > div {
   width: 100vw;
   height: calc(100vh - 55px);
   display: grid;
-  grid-template-columns: 200px auto;
+  grid-template-columns: 300px auto;
 }
 .wrapper > div {
   justify-content: center;
   gap: 8px 12px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 200px));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 300px));
   width: calc(100vw - 210px);
 }
 
@@ -230,6 +171,13 @@ onMounted(() => {
 .n-card {
   box-shadow: 4px 4px 7px #ddd;
   height: 350px;
+}
+.card-body > pre{
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  max-height: 275px;
+  max-width: 295px;
 }
 .n-card__content {
   display: flex;
@@ -256,21 +204,11 @@ onMounted(() => {
   height: 170px;
   max-width: 170px;
   max-height: 170px;
-
   overflow: hidden;
 }
 .add svg {
   transform: scale(5);
 }
 
-.card-body {
-  /* max-width: 170px;
-  max-height: 170px;
-  overflow: hidden; */
-}
-.card-body > svg {
-  max-width: 340px;
-  max-height: 340px;
-}
 </style>
 

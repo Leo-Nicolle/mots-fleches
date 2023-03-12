@@ -1,4 +1,4 @@
-import { ArrowDir, Bounds, Cell, Direction, Vec } from "./types";
+import { ArrowDir, Bounds, Cell, Direction, GridState, Vec } from "./types";
 import Vector from "vector2js";
 import { v4 as uuid } from "uuid";
 
@@ -11,7 +11,7 @@ export const nullCell: Cell = {
   arrows: [],
   text: ''
 };
-export function isSplited(cell:Cell){
+export function isSplited(cell: Cell) {
   return cell.text.includes("\n\n");
 }
 
@@ -25,6 +25,8 @@ export class Grid {
   public id: string;
   public created: number;
   public thumbnail: string;
+  public optionsId: string;
+
 
   constructor(rows: number, cols: number, id?: string) {
     this.cols = cols;
@@ -32,6 +34,7 @@ export class Grid {
     this.comment = '';
     this.title = '';
     this.thumbnail = '';
+    this.optionsId = 'default';
     this.id = id || uuid();
     this.created = Date.now();
     this.cells = new Array(rows)
@@ -207,28 +210,21 @@ export class Grid {
   }
 
   serialize() {
-    return JSON.stringify({
+    const gridState: GridState = {
       id: this.id,
       rows: this.rows,
       cols: this.cols,
       cells: this.cells,
-      thumbnail: this.thumbnail,
       comment: this.comment,
       created: this.created,
-      title: this.title
-    });
+      title: this.title,
+      optionsId: this.optionsId
+    };
+    return JSON.stringify(gridState);
   }
 
   static unserialize(s: string) {
-    const { rows, cols, comment, title, id, cells, created } = JSON.parse(s) as {
-      rows: number,
-      cols: number,
-      id: string,
-      created: number,
-      comment: string,
-      title: string
-      cells: Cell[][]
-    };
+    const { rows, cols, comment, title, id, cells, created, optionsId } = JSON.parse(s) as GridState
     const res = new Grid(rows, cols, id);
     cells.forEach((row, i) => {
       row.forEach((cell, j) => {
@@ -240,6 +236,7 @@ export class Grid {
     res.title = title;
     res.comment = comment;
     res.created = created;
+    res.optionsId = optionsId;
     return res;
   }
 

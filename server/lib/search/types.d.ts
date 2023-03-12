@@ -5,6 +5,8 @@ declare global {
   const APP_CROSSWORDS_WORDS_PATH: string;
   const APP_CROSSWORDS_GRIDS_PATH: string;
   const APP_CROSSWORDS_DICO_PATH: string;
+  const APP_CROSSWORDS_OPTIONS_PATH: string;
+
 }
 
 export interface Point {

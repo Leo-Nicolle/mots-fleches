@@ -16,9 +16,7 @@
 <script setup lang="ts">
 import { MenuOutline } from "@vicons/ionicons5";
 import type { MenuOption } from "naive-ui";
-import { NIcon } from "naive-ui";
-
-import { h, ref, Component } from "vue";
+import { h, ref } from "vue";
 import { RouterLink } from "vue-router";
 import {renderIcon} from "./js/utils";
 

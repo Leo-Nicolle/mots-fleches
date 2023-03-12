@@ -5,7 +5,9 @@ import { existsSync } from "fs";
 import db from "./database";
 import wordController from "./controllers/wordController";
 import gridController from "./controllers/gridController";
+import optionsController from "./controllers/optionsController";
 import searchController from "./controllers/search-controller";
+
 import dico from "./search/dico";
 
 export function createApp() {
@@ -23,6 +25,7 @@ export function createApp() {
   wordController({ app, db });
   gridController({ app, db });
   searchController({ app, db });
+  optionsController({ app, db });
   // if (require.main === module) {
   const server = app.listen(+APP_CROSSWORDS_PORT || 3011, () => {
     console.log(
