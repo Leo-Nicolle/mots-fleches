@@ -1,19 +1,27 @@
 <template>
   <div id="Options">
-    <Editor
-      v-if="grid && options"
-      :grid="grid"
-      :options="options"
-    ></Editor>
+    <Editor v-if="grid && options" :grid="grid" :options="options">
+      <n-scrollbar y-scrollable style="max-height: calc(100vh - 100px)">
+        <OptionsForm
+          v-model="options"
+          @update:modelValue="onUpdate"
+          grid
+          definition
+          arrows
+          format
+        />
+      </n-scrollbar>
+    </Editor>
   </div>
 </template>
 
 <script setup lang="ts">
 import axios from "axios";
 import Editor from "../components/Editor.vue";
+import OptionsForm from "../components/forms/Options";
 import { Grid, GridOptions } from "grid";
 import { getUrl, save } from "../js/utils";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watchEffect } from "vue";
 import { useRoute } from "vue-router";
 
 const grid = ref<Grid>();
@@ -33,12 +41,16 @@ function fetch() {
       console.error("E", e);
     });
 }
+
 function onUpdate() {
+  console.log("update");
   clearTimeout(saveTimeout.value);
   saveTimeout.value = setTimeout(() => {
-    if(!options.value) return;
-    save(options.value);
-  }, 50);
+    if (!options.value) return;
+    axios.post(getUrl(`options`), {
+      options: options.value,
+    })
+  }, 150);
 }
 
 onMounted(() => {

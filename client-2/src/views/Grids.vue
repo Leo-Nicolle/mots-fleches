@@ -8,7 +8,7 @@
           >Supprimer</n-button
         >
       </div>
-      <div class="wrapper scroll">
+      <div class="wrapper scroll" v-if="grids.length === options.length">
         <div>
           <n-card v-for="(grid, i) in grids" :key="i" :hoverable="true">
             <template #header>
@@ -35,7 +35,7 @@
                   <SVGGrid
                     :grid="grid"
                     :focus="nullCell"
-                    :options="options"
+                    :options="options[i]"
                     dir="horizontal"
                     :export-options="{
                       ...defaultExportOptions,
@@ -48,6 +48,7 @@
               </div>
             </template>
           </n-card>
+
           <n-card @click="createGrid" title="Créer">
             <template #default>
               <n-button class="preview add">
@@ -85,42 +86,11 @@ import SVGGrid from "../components/svg-renderer/Grid";
 import { defaultExportOptions } from "../components/svg-renderer/types";
 
 import { getUrl, save } from "../js/utils";
-// import Exporter from "../components/svg-renderer/Exporter.vue";
-
-import { Grid, GridOptions,nullCell } from "grid";
+import { Grid, GridOptions, nullCell } from "grid";
 const router = useRouter();
-const options = ref<GridOptions>({
-  grid: {
-    cellSize: "50px",
-    borderColor: "black",
-    borderSize: "1px",
-    outerBorderSize: "1px",
-    outerBorderColor: "red",
-  },
-  definition: {
-    font: "sans-serif",
-    size: "12px",
-    color: "black",
-    backgroundColor: "#ccc",
-  },
-  arrow: {
-    size: "10px",
-    color: "black",
-  },
-  paper: {
-    width: 21,
-    height: 29.7,
-    orientation: "portrait",
-    margin: {
-      top: 0,
-      bottom: 0,
-      left: 0,
-      right: 0,
-    },
-  },
-});
-
 const grids = ref<Grid[]>([]);
+const options = ref<GridOptions[]>([]);
+
 const selected = ref<boolean[]>([]);
 const deleteVisible = ref<boolean>(false);
 const active = ref<Grid>();
@@ -140,6 +110,17 @@ function fetch() {
     .then(({ data }) => {
       grids.value = data.map((g) => Grid.unserialize(JSON.stringify(g)));
       selected.value = new Array(grids.value.length).fill(false);
+    })
+    .then(() =>
+      Promise.all(
+        grids.value.map((grid) =>
+          axios.get(getUrl(`options/${grid.optionsId}`))
+        )
+      )
+    )
+    .then((responses) => {
+      options.value = responses.map((r) => r.data);
+      console.log(options.value);
     })
     .catch((e) => {
       console.error("E", e);

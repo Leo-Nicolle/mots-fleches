@@ -137,8 +137,7 @@ export class Database {
       return this.saveOptions();
     });
   }
-  updateOption(optionstring: string) {
-    const newoption = JSON.parse(optionstring);
+  updateOption(newoption: GridOptions) {
     return this.getOptions().then(() => {
       this.options = this.options.filter(({ id }) => id !== newoption.id);
       this.options.push(newoption);
@@ -146,10 +145,19 @@ export class Database {
     });
   }
   deleteOption(optionId) {
-    return this.getOptions().then((options) => {
-      this.options = options.filter(({ id }) => id !== optionId);
-      return this.saveOptions();
-    });
+    if (optionId === "default")
+      throw new Error("Cannot delete default options");
+    return this.getOptions()
+      .then((options) => {
+        this.options = options.filter(({ id }) => id !== optionId);
+        this.grids.forEach((grid) => {
+          if (grid.optionsId === optionId) {
+            grid.optionsId = "default";
+          }
+        });
+        return this.saveOptions();
+      })
+      .then(() => this.saveGrids());
   }
 }
 

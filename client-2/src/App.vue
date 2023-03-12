@@ -18,7 +18,7 @@ import { MenuOutline } from "@vicons/ionicons5";
 import type { MenuOption } from "naive-ui";
 import { h, ref } from "vue";
 import { RouterLink } from "vue-router";
-import {renderIcon} from "./js/utils";
+import { renderIcon } from "./js/utils";
 
 const collapsed = ref(true);
 
@@ -33,11 +33,22 @@ const menuOptions = ref<MenuOption[]>([
           h(
             RouterLink,
             {
-              to: "/grids"
+              to: "/grids",
             },
             { default: () => "Grilles" }
           ),
         key: "go-back-home",
+      },
+      {
+        label: () =>
+          h(
+            RouterLink,
+            {
+              to: "/options",
+            },
+            { default: () => "Options" }
+          ),
+        key: "go-to-options",
       },
     ],
   },
@@ -45,10 +56,10 @@ const menuOptions = ref<MenuOption[]>([
 </script>
 
 <style>
-body{
+body {
   overflow: hidden;
 }
-#app{
+#app {
   width: 100vw;
   max-height: 100vh;
   min-height: 100vh;
@@ -66,11 +77,10 @@ nav {
   margin-right: 25px;
 }
 
-
 .scroll::-webkit-scrollbar {
   width: 5px;
 }
- 
+
 .scroll::-webkit-scrollbar-thumb {
   background: #666;
   border-radius: 20px;
@@ -80,7 +90,6 @@ nav {
   background: #ddd;
   border-radius: 20px;
 }
-
 
 .hidden-input {
   position: absolute;

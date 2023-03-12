@@ -15,19 +15,19 @@ export default function gridController({
   });
 
   app.get("/options/:id", async (req, res) => {
-    const option = await db.getOption(req.params.id);
-    if (!option) return res.send(400);
-    res.send(option);
+    const options = await db.getOption(req.params.id);
+    if (!options) return res.send(400);
+    res.send(options);
   });
 
-  app.post("/options", [body("option").isString()], async (req, res) => {
+  app.post("/options", [body("options").isObject()], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(500).json({ errors: errors.array() });
     }
     let id;
     try {
-      id = await db.updateOption(req.body.option);
+      id = await db.updateOption(req.body.options);
     } catch (e) {
       console.log("error", e);
       return res.status(500).send(e.message);

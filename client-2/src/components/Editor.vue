@@ -2,28 +2,30 @@
   <div ref="editor" class="editor" :version="version">
     <ModalOptions v-model="modalProps" @update="emit('update')" />
     <div class="leftpanel">
-      <span class="title">
-        <h2>
-          {{ grid.title ? grid.title : `Nouvelle Grille` }}
-        </h2>
-        <n-button @click="visible.visible = true">
-          <n-icon>
-            <CogIcon />
-          </n-icon>
-        </n-button>
-      </span>
-      <Suggestion
-        v-if="!focus.definition"
-        :point="focus"
-        :dir="dir"
-        :query="''"
-        :grid-id="grid.id"
-        @hover="onHover"
-        @click="onClick"
-        @dir="(d) => (dir = d)"
-        @mouseout="onMouseOut"
-      >
-      </Suggestion>
+      <slot>
+        <span class="title">
+          <h2>
+            {{ grid.title ? grid.title : `Nouvelle Grille` }}
+          </h2>
+          <n-button @click="visible.visible = true">
+            <n-icon>
+              <CogIcon />
+            </n-icon>
+          </n-button>
+        </span>
+        <Suggestion
+          v-if="!focus.definition"
+          :point="focus"
+          :dir="dir"
+          :query="''"
+          :grid-id="grid.id"
+          @hover="onHover"
+          @click="onClick"
+          @dir="(d) => (dir = d)"
+          @mouseout="onMouseOut"
+        >
+        </Suggestion>
+      </slot>
     </div>
     <n-scrollbar
       x-scrollable
@@ -58,13 +60,7 @@
 
 <script setup lang="ts">
 import { defineProps, defineEmits, ref, computed, watchEffect } from "vue";
-import {
-  Grid,
-  Cell,
-  Direction,
-  nullCell,
-  GridOptions,
-} from "grid";
+import { Grid, Cell, Direction, nullCell, GridOptions } from "grid";
 import { CogOutline as CogIcon } from "@vicons/ionicons5";
 import SVGGrid from "./svg-renderer/Grid.vue";
 import GridInput from "./svg-renderer/GridInput.vue";
