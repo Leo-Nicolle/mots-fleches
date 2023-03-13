@@ -1,12 +1,14 @@
 #!/bin/sh
 
-cd client
+cd grid
+npm run build
+cd ../client-2
 npm run build
 cd ../server
 npm run build
 cd ../
 rm -rf dist
 mkdir dist
-cp server/dist/server.cjs.js dist/server.js
+cp server/dist/server.js dist/server.js
 cp -R server/public dist/
-cp -R client/dist/* dist/public/
+cp -R client-2/dist/* dist/public/
