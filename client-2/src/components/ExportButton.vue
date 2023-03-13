@@ -1,5 +1,5 @@
 <template>
-  <div ref="exporter" class="exporter" :version="version">
+  <div ref="exporter" class="exporter">
     <n-button @click="print">Imprimer</n-button>
     <iframe class="print" :src="iframeUrl"></iframe>
   </div>

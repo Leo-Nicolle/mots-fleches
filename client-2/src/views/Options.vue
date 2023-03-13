@@ -18,36 +18,40 @@
     <div class="viewer">
       <n-scrollbar
         x-scrollable
-        :on-scroll="onScroll"
         style="max-height: calc(100vh - 100px); max-width: calc(100vw - 100px)"
       >
         <GridPaper
           v-if="grid && options"
           class="paper"
           :grid="grid"
+          :export-options="{
+            ...defaultExportOptions,
+            texts: true,
+            highlight: true,
+          }"
           :options="options"
         />
       </n-scrollbar>
     </div>
     <ExportButton :grid="grid" />
+    <ExportSVGButton :grid="grid" />
+
   </div>
 </template>
 
 <script setup lang="ts">
 import axios from "axios";
-import Editor from "../components/Editor.vue";
 import GridPaper from "../components/GridPaper.vue";
 import ExportButton from "../components/ExportButton.vue";
-import ModalOptions from "../components/forms/ModalOptions.vue";
+import ExportSVGButton from "../components/ExportSVG.vue";
 import OptionsForm from "../components/forms/Options";
 import GridForm from "../components/forms/GridForm";
-
+import {defaultExportOptions} from "../components/svg-renderer/types";
 import { Grid, GridOptions } from "grid";
-import { getUrl, save } from "../js/utils";
-import { ref, onMounted, watchEffect } from "vue";
+import { getUrl } from "../js/utils";
+import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 
-const visible = ref(false);
 const grid = ref<Grid>();
 const options = ref<GridOptions>();
 const saveTimeout = ref(0);

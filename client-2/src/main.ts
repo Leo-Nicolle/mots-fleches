@@ -9,4 +9,8 @@ const app = createApp(App)
   .use(router)
   .use(VueHighlightJS)
   .use(naive);
+
+app.config.compilerOptions.isCustomElement = (tag) => {
+    return tag.startsWith('svg:style')
+};
 app.mount('#app');

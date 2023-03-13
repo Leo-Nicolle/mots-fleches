@@ -11,37 +11,10 @@
     @click="onClick"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <rect
-      v-if="exportOptions.outerBorders"
-      :x="-outerLineStroke / 2"
-      :y="-outerLineStroke / 2"
-      :width="gridTotalWidth(grid, options) - outerLineStroke"
-      :height="gridTotalHeight(grid, options) - outerLineStroke"
-      fill="none"
-      stroke-miterlimit="10"
-      :stroke-width="outerLineStroke"
-      :stroke="outerLineColor"
-    />
-    <g class="lines" v-if="exportOptions.borders">
-      <line
-        v-for="i in rows.length - 1"
-        :key="i"
-        :x1="0"
-        :y1="i * cellWidth(options) + (i - 0.5) * borderWidth(options)"
-        :x2="gridWidth(grid, options)"
-        :y2="i * cellWidth(options) + (i - 0.5) * borderWidth(options)"
-        class="line"
-      />
-      <line
-        v-for="i in cols.length - 1"
-        :key="i"
-        :x1="i * cellWidth(options) + (i - 0.5) * borderWidth(options)"
-        :y1="0"
-        :x2="i * cellWidth(options) + (i - 0.5) * borderWidth(options)"
-        :y2="gridHeight(grid, options)"
-        class="line"
-      />
-    </g>
+    <svg:style type="text/css">
+      {{ styles }}
+    </svg:style>
+   
     <g class="cells">
       <g class="row" v-for="(row, i) in grid.cells" :key="i">
         <g
@@ -82,7 +55,37 @@
         </g>
       </g>
     </g>
-
+    <rect
+      v-if="exportOptions.outerBorders"
+      :x="-outerLineStroke / 2"
+      :y="-outerLineStroke / 2"
+      :width="gridTotalWidth(grid, options) - outerLineStroke"
+      :height="gridTotalHeight(grid, options) - outerLineStroke"
+      :stroke-width="outerLineStroke"
+      :stroke="outerLineColor"
+      fill="none"
+      stroke-miterlimit="10"
+    />
+    <g class="lines" v-if="exportOptions.borders">
+      <line
+        v-for="i in rows.length - 1"
+        :key="i"
+        :x1="0"
+        :y1="i * cellWidth(options) + (i - 0.5) * borderWidth(options)"
+        :x2="gridWidth(grid, options)"
+        :y2="i * cellWidth(options) + (i - 0.5) * borderWidth(options)"
+        class="line"
+      />
+      <line
+        v-for="i in cols.length - 1"
+        :key="i"
+        :x1="i * cellWidth(options) + (i - 0.5) * borderWidth(options)"
+        :y1="0"
+        :x2="i * cellWidth(options) + (i - 0.5) * borderWidth(options)"
+        :y2="gridHeight(grid, options)"
+        class="line"
+      />
+    </g>
     <g
       class="arrows"
       stroke-linecap="round"
@@ -93,7 +96,6 @@
       <g
         v-for="(arrow, i) in arrows"
         :key="i"
-        fill="none"
         :transform="`translate(${arrow.x},${arrow.y})scale(${arrowScale},${arrowScale})`"
       >
         <path :class="arrow.dir" :d="getD(arrow.dir)" />
@@ -137,10 +139,9 @@ import {
   arrowPositions,
   ArrowDir,
 } from "grid";
-import { defaultExportOptions, ExportOptions, Rect } from "./types";
+import { defaultExportOptions, ExportOptions } from "./types";
 import { getCellClass } from "../../js/utils";
 const container = ref<SVGSVGElement>(null as unknown as SVGSVGElement);
-
 const props = withDefaults(
   defineProps<{
     grid: Grid;
@@ -237,17 +238,6 @@ const splits = computed(() =>
     })
 );
 
-function getCellFill(cell: Cell) {
-  if (cell.definition) {
-    return props.options.definition.backgroundColor;
-  }
-  if (!props.exportOptions.highlight) return "transparent";
-  return Grid.equal(cell, props.focus)
-    ? "#acf"
-    : cell.highlighted
-    ? "#def"
-    : "transparent";
-}
 function xText(cell: Cell) {
   return (
     cell.x * cellAndBorderWidth(props.options) + cellWidth(props.options) / 2
@@ -313,54 +303,62 @@ function onClick(evt: MouseEvent) {
   const cell = props.grid.cells[cY][cX];
   emit("focus", cell);
 }
+
+const styles = computed(() => {
+  return `
+    .outerRect{
+      fill: none;
+      stroke-width: ${outerLineStroke.value};
+      stroke-miterlimit: 10;
+      stroke: ${outerLineColor.value};
+    }
+    .line{
+      fill: none;
+      stroke-width: ${lineStroke.value};
+      stroke: ${lineColor.value};
+      stroke-miterlimit: 10;
+    }
+    .arrows>g {
+      fill: none;
+    }
+    .text {
+      font: ${textFont.value};
+    }
+    .text.highlighted {
+      fill: #000;
+    }
+    .text.suggested {
+      fill: #777;
+    }
+    .text > rect {
+      fill: none;
+    }
+    .cell > text {
+      text-anchor: middle;
+    }
+    .text.highlighted > rect {
+      fill: #def;
+    }
+    .definition > rect {
+      fill: ${defBackgroundColor.value};
+    }
+    .definition > text {
+      fill: ${defColor.value};
+    }
+    .definition > text > tspan {
+      font: ${defFont.value};
+    }
+    .right .rightdown {
+      transform: rotate(180deg) scale(-1, -1);
+    }
+    .downright,
+    .down {
+      transform: scale(-1, 1) rotate(90deg);
+    }
+
+  `;
+});
 </script>
 
 <style scoped>
-.line {
-  fill: none;
-  stroke-width: v-bind(lineStroke);
-  stroke-miterlimit: 10;
-  stroke: v-bind(lineColor);
-}
-.outer-rect {
-  fill: none;
-  stroke-width: v-bind(outerLineStroke);
-  stroke-miterlimit: 10;
-  stroke: v-bind(outerLineColor);
-}
-
-.text {
-  font: v-bind(textFont);
-}
-.text.highlighted {
-  fill: #000;
-}
-.text.suggested {
-  fill: #777;
-}
-.text > rect {
-  fill: none;
-}
-.cell > text {
-  text-anchor: middle;
-}
-.text.highlighted > rect {
-  fill: #def;
-}
-.definition > rect {
-  fill: v-bind(defBackgroundColor);
-}
-.definition > text {
-  fill: v-bind(defColor);
-}
-.definition > text > tspan {
-  font: v-bind(defFont);
-}
-.right .rightdown {
-  transform: rotate(180deg) scale(-1, -1);
-}
-.downright,
-.down {
-  transform: scale(-1, 1) rotate(90deg);
-}
 </style>
