@@ -1,22 +1,12 @@
 <template>
   <div ref="editor" class="editor" :version="version">
-    <ModalOptions
-      :grid="grid"
-      :visible="visible"
-      @close="visible = false"
-      @update="emit('update')"
-    />
     <div class="leftpanel">
       <slot>
         <span class="title">
           <h2>
             {{ grid.title ? grid.title : `Nouvelle Grille` }}
           </h2>
-          <n-button @click="visible = true">
-            <n-icon>
-              <CogIcon />
-            </n-icon>
-          </n-button>
+          <ModalOptions :grid="grid" @update="emit('update')" />
         </span>
         <Suggestion
           v-if="!focus.definition"
@@ -66,7 +56,6 @@
 <script setup lang="ts">
 import { defineProps, defineEmits, ref, computed, watchEffect } from "vue";
 import { Grid, Cell, Direction, nullCell, GridOptions } from "grid";
-import { CogOutline as CogIcon } from "@vicons/ionicons5";
 import SVGGrid from "./svg-renderer/Grid.vue";
 import GridInput from "./svg-renderer/GridInput.vue";
 import { defaultExportOptions } from "./svg-renderer/types";
@@ -82,7 +71,6 @@ const editor = ref(null);
 const dir = ref<Direction>("horizontal");
 const focus = ref<Cell>(nullCell);
 const version = ref(0);
-const visible = ref(false);
 const offset = ref<[number, number]>([0, 0]);
 
 function refresh() {

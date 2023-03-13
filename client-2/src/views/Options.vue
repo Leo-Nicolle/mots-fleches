@@ -2,6 +2,9 @@
   <div class="options" v-if="options && grid">
     <div class="leftpanel">
       <n-scrollbar y-scrollable style="max-height: calc(100vh - 100px)">
+        <GridForm v-if="grid"
+          :grid="grid"
+        />
         <OptionsForm
           v-model="options"
           @update:modelValue="onUpdate"
@@ -35,13 +38,16 @@ import axios from "axios";
 import Editor from "../components/Editor.vue";
 import GridPaper from "../components/GridPaper.vue";
 import ExportButton from "../components/ExportButton.vue";
-
+import ModalOptions from "../components/forms/ModalOptions.vue";
 import OptionsForm from "../components/forms/Options";
+import GridForm from "../components/forms/GridForm";
+
 import { Grid, GridOptions } from "grid";
 import { getUrl, save } from "../js/utils";
 import { ref, onMounted, watchEffect } from "vue";
 import { useRoute } from "vue-router";
 
+const visible = ref(false);
 const grid = ref<Grid>();
 const options = ref<GridOptions>();
 const saveTimeout = ref(0);
