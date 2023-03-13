@@ -82,7 +82,7 @@ import { ref, onMounted, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import axios from "axios";
 import { AddCircleOutline as AddIcon } from "@vicons/ionicons5";
-import SVGGrid from "../components/svg-renderer/Grid";
+import SVGGrid from "../components/svg-renderer/Grid.vue";
 import { defaultExportOptions } from "../components/svg-renderer/types";
 
 import { getUrl, save } from "../js/utils";

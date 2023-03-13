@@ -8,14 +8,14 @@
     )} ${gridTotalHeight(grid, options)}`"
     :width="`${gridTotalWidth(grid, options)}px`"
     :height="`${gridTotalHeight(grid, options)}px`"
+    :version="version"
     @click="onClick"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <svg:style type="text/css">
-      {{ styles }}
-    </svg:style>
-   
-    <g class="cells">
+    <g class="cells" text-anchor="middle" 
+    alignment-baseline="middle"
+    dominant-baseline="middle"
+    >
       <g class="row" v-for="(row, i) in grid.cells" :key="i">
         <g
           class="cell"
@@ -28,11 +28,11 @@
             :y="cellAndBorderWidth(options) * cell.y"
             :width="cellWidth(options)"
             :height="cellWidth(options)"
+            :fill="cell.definition ? defBackgroundColor : 'none'"
           />
           <text
             :x="xText(cell)"
             :y="yText(cell)"
-            alignment-baseline="middle"
             v-if="cell.definition && exportOptions.definitions"
           >
             <tspan
@@ -41,6 +41,8 @@
               v-bind="sp"
               :line-height="defSize"
               :font-size="defSize"
+              :font="defFont"
+              :fill="defColor"
             >
               {{ sp.text }}
             </tspan>
@@ -48,6 +50,9 @@
           <text
             :x="xText(cell)"
             :y="yText(cell) + (6 * cellWidth(options)) / 7"
+            :font="textFont"
+            :font-size="textSize"
+            dominant-baseline="alphabetic"
             v-else-if="!cell.definition && exportOptions.texts"
           >
             {{ cell.text || cell.suggestion }}
@@ -65,6 +70,7 @@
       :stroke="outerLineColor"
       fill="none"
       stroke-miterlimit="10"
+      class="outerRect"
     />
     <g class="lines" v-if="exportOptions.borders">
       <line
@@ -74,22 +80,27 @@
         :y1="i * cellWidth(options) + (i - 0.5) * borderWidth(options)"
         :x2="gridWidth(grid, options)"
         :y2="i * cellWidth(options) + (i - 0.5) * borderWidth(options)"
-        class="line"
+        fill="none"
+        :stroke-width="lineStroke"
+        stroke-miterlimit="10"
+        :stroke="lineColor"
       />
-      <line
-        v-for="i in cols.length - 1"
-        :key="i"
-        :x1="i * cellWidth(options) + (i - 0.5) * borderWidth(options)"
-        :y1="0"
-        :x2="i * cellWidth(options) + (i - 0.5) * borderWidth(options)"
-        :y2="gridHeight(grid, options)"
-        class="line"
-      />
+      <line 
+        v-for="i in cols.length - 1" 
+        :key="i" 
+        :x1="i * cellWidth(options) + (i - 0.5) * borderWidth(options)" 
+        :y1="0" 
+        :x2="i * cellWidth(options) + (i - 0.5) * borderWidth(options)" 
+        :y2="gridHeight(grid, options)" fill="none"
+        :stroke-width="lineStroke" 
+        stroke-miterlimit = 10 
+        :stroke="lineColor" />
     </g>
     <g
       class="arrows"
       stroke-linecap="round"
       stroke-width="10"
+      fill="none"
       :stroke="options.arrow.color"
       v-if="exportOptions.arrows"
     >
@@ -98,7 +109,7 @@
         :key="i"
         :transform="`translate(${arrow.x},${arrow.y})scale(${arrowScale},${arrowScale})`"
       >
-        <path :class="arrow.dir" :d="getD(arrow.dir)" />
+        <path :class="arrow.dir" :d="getD(arrow.dir)" :transform="arrow.transform"/>
       </g>
     </g>
 
@@ -111,13 +122,25 @@
         :x2="line.x2"
         :y2="line.y2"
         class="line"
+        :stroke-width="lineStroke" 
+        stroke-miterlimit = 10 
+        :stroke="lineColor"
       />
     </g>
   </svg>
 </template>
 
 <script setup lang="ts">
-import { defineEmits, ref, defineProps, withDefaults, computed } from "vue";
+import {
+  defineEmits,
+  ref,
+  defineProps,
+  withDefaults,
+  computed,
+  onUpdated,
+  watchEffect,
+  onMounted,
+} from "vue";
 import { getD } from "../../js/paths";
 import {
   Grid,
@@ -161,6 +184,7 @@ const emit = defineEmits<{
   (event: "type", value: number): void;
   (event: "focus", value: Cell): void;
 }>();
+const version = ref("0");
 
 const rows = computed(() =>
   new Array(props.grid.rows).fill(0).map((e, i) => i)
@@ -203,15 +227,15 @@ const arrows = computed(
                 y:
                   cellAndBorderWidth(props.options) * cell.y +
                   cellAndBorderWidth(props.options) * y,
+                transform: cell.arrows[i].startsWith('right') 
+                ? "rotate(180)scale(-1, -1)"
+                : "scale(-1, 1)rotate(90)"
               };
         });
       })
       .flat()
-      .filter((e) => e) as unknown as { dir: ArrowDir; x: string; y: string }[]
+      .filter((e) => e) as unknown as { dir: ArrowDir; x: string; y: string, transform: string }[]
 );
-function arrowPos(cell: Cell) {
-  return;
-}
 const splits = computed(() =>
   props.grid.cells
     .flat()
@@ -304,61 +328,27 @@ function onClick(evt: MouseEvent) {
   emit("focus", cell);
 }
 
-const styles = computed(() => {
-  return `
-    .outerRect{
-      fill: none;
-      stroke-width: ${outerLineStroke.value};
-      stroke-miterlimit: 10;
-      stroke: ${outerLineColor.value};
-    }
-    .line{
-      fill: none;
-      stroke-width: ${lineStroke.value};
-      stroke: ${lineColor.value};
-      stroke-miterlimit: 10;
-    }
-    .arrows>g {
-      fill: none;
-    }
-    .text {
-      font: ${textFont.value};
-    }
-    .text.highlighted {
-      fill: #000;
-    }
-    .text.suggested {
-      fill: #777;
-    }
-    .text > rect {
-      fill: none;
-    }
-    .cell > text {
-      text-anchor: middle;
-    }
-    .text.highlighted > rect {
-      fill: #def;
-    }
-    .definition > rect {
-      fill: ${defBackgroundColor.value};
-    }
-    .definition > text {
-      fill: ${defColor.value};
-    }
-    .definition > text > tspan {
-      font: ${defFont.value};
-    }
-    .right .rightdown {
-      transform: rotate(180deg) scale(-1, -1);
-    }
-    .downright,
-    .down {
-      transform: scale(-1, 1) rotate(90deg);
-    }
-
-  `;
+watchEffect(() => {
+  version.value = `${styles.value
+    .split("")
+    .reduce((a, b) => a + b.charCodeAt(0), 0)}`;
+});
+onUpdated(() => {
+  updateStyles();
+});
+onMounted(() => {
+  updateStyles();
 });
 </script>
 
 <style scoped>
+.text.highlighted {
+  fill: #000;
+}
+.text.suggested {
+  fill: #777;
+}
+.text.highlighted > rect {
+      fill: #def;
+    }
 </style>

@@ -18,7 +18,7 @@
 <script setup lang="ts">
 import { defineProps, computed } from "vue";
 import { ArrowDir } from "grid";
-import {getD, getTransform} from "../../../js/paths";
+import {getD, getTransform} from "../../js/paths";
 
 const props = defineProps<{ dir: ArrowDir; strokeColor: string; center: boolean }>();
 let transform = computed<string>(() => getTransform(props.dir));

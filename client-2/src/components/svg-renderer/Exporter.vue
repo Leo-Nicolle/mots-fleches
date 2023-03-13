@@ -18,9 +18,8 @@
 <script setup lang="ts">
 import { defaultExportOptions } from "./types";
 import { defineEmits, ref, defineProps, watchEffect, nextTick } from "vue";
-import GridSvg from "./Grid";
-import { Grid, GridOptions, nullCell, Vec } from "grid";
-import Vector from "vector2js";
+import GridSvg from "./Grid.vue";
+import { Grid, GridOptions, nullCell } from "grid";
 
 const svg = ref<SVGSVGElement>(null as unknown as SVGSVGElement);
 const props = defineProps<{

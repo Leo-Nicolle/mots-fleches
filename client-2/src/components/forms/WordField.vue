@@ -20,8 +20,7 @@
     <b-button @click="onClick" :loading="loading">{{ icon }}</b-button>
   </b-field>
 </template>
-
-<script>
+<script lang="ts">
 import axios from "axios";
 import apiMixin from "../js/apiMixin";
 

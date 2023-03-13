@@ -10,7 +10,4 @@ const app = createApp(App)
   .use(VueHighlightJS)
   .use(naive);
 
-app.config.compilerOptions.isCustomElement = (tag) => {
-    return tag.startsWith('svg:style')
-};
 app.mount('#app');

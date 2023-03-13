@@ -1,11 +1,11 @@
 import axios from "axios";
 import {Cell, Grid} from "grid";
 import { NIcon } from "naive-ui";
-import { h,  Component } from "vue";
+import { h,  Component, Ref,ref } from "vue";
 
 
 export function getUrl(param: string) {
-  return `http://localhost:${process.env.VUE_APP_APIPORT}/${param}`;
+  return `http://localhost:${import.meta.env.VITE_APIPORT}/${param}`;
 }
 
 export function renderIcon(icon: Component) {

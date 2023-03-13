@@ -26,11 +26,8 @@ watchEffect(() => {
 
 function print(){
   if (!exporter.value) return;
-  const svg = exporter.value.querySelector('svg').cloneNode(true) as SVGSVGElement;
-  svg.setAttribute("viewBox", `0 0 ${svg.width.baseVal.value} ${svg.height.baseVal.value}`);
-  const toExport = svg.outerHTML.replaceAll('svg:style', 'style');
-  console.log(toExport.slice(0, 150))
-  const blob = new Blob([toExport], {type: "image/svg+xml;charset=utf-8"});
+  const svg = (exporter.value.querySelector('svg').cloneNode(true) as SVGSVGElement).outerHTML;
+  const blob = new Blob([svg], {type: "image/svg+xml;charset=utf-8"});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
     a.style.display = 'none';
@@ -38,8 +35,6 @@ function print(){
     a.download = `grille-${props.grid.title}.svg`;
     document.body.appendChild(a);
     a.click();
-    console.log('ici');
-    // window.URL.revokeObjectURL(url);  
 }
 
 </script>

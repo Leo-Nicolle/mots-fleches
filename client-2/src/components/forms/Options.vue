@@ -64,8 +64,8 @@
 import { defineProps, defineEmits, watchEffect, watch } from "vue";
 import { useModel } from "../../js/useModel";
 import { GridOptions } from "grid";
-import Sizeinput from "./Sizeinput";
-import FormatPicker from "./FormatPicker";
+import Sizeinput from "./Sizeinput.vue";
+import FormatPicker from "./FormatPicker.vue";
 
 const props = defineProps<{
   modelValue: GridOptions;
