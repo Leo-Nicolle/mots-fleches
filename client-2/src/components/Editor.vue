@@ -1,13 +1,18 @@
 <template>
   <div ref="editor" class="editor" :version="version">
-    <ModalOptions v-model="modalProps" @update="emit('update')" />
+    <ModalOptions
+      :grid="grid"
+      :visible="visible"
+      @close="visible = false"
+      @update="emit('update')"
+    />
     <div class="leftpanel">
       <slot>
         <span class="title">
           <h2>
             {{ grid.title ? grid.title : `Nouvelle Grille` }}
           </h2>
-          <n-button @click="visible.visible = true">
+          <n-button @click="visible = true">
             <n-icon>
               <CogIcon />
             </n-icon>
@@ -71,20 +76,14 @@ import Suggestion from "./Suggestion.vue";
 const props = defineProps<{ grid: Grid; options: GridOptions }>();
 const emit = defineEmits<{
   (event: "update"): string;
+  (event: "update:modelValue", value: Grid): void;
 }>();
 const editor = ref(null);
 const dir = ref<Direction>("horizontal");
 const focus = ref<Cell>(nullCell);
 const version = ref(0);
-const visible = ref({ visible: false });
+const visible = ref(false);
 const offset = ref<[number, number]>([0, 0]);
-
-const modalProps = computed(() => {
-  return {
-    grid: props.grid,
-    visible: visible.value,
-  };
-});
 
 function refresh() {
   version.value++;

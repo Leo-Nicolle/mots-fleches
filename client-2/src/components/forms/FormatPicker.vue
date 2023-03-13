@@ -107,20 +107,6 @@ const format = computed({
 });
 
 const value = useModel(props, emit);
-function onUpdate() {
-  emit("update:modelValue", value.value);
-}
-watchEffect(() => {
-  props.modelValue.margin.right +
-  props.modelValue.margin.left +
-  props.modelValue.margin.top +
-  props.modelValue.margin.bottom +
-  props.modelValue.height +
-  props.modelValue.orientation +
-  props.modelValue.width
-    ? value && emit("update:modelValue", value.value)
-    : null;
-});
 </script>
 
 <style>

@@ -3,51 +3,40 @@
     preset="dialog"
     title="Options"
     :showIcon="false"
-    v-model:show="value.visible.visible"
+    v-model:show="_visible"
   >
     <template #header>
       {{ value.title }}
     </template>
     <template #action>
       <n-form :label-width="80" :model="value">
-        <n-form-item label="Titre" path="grid.title">
-          <n-input
-            placeholder="Nouvelle Grille"
-            v-model:value="value.grid.title"
-            @change="emit('update')"
-          />
+        <n-form-item label="Titre" path="title">
+          <n-input placeholder="Nouvelle Grille" v-model:value="value.title" />
         </n-form-item>
-        <n-form-item label="Options" path="grid.optionsId" v-if="opts.length">
+        <n-form-item label="Options" path="optionsId" v-if="opts.length">
           <n-select
             :options="opts"
             :default-value="defaultSelectOpt"
-            v-model:value="value.grid.optionsId"
+            v-model:value="value.optionsId"
             def
           />
         </n-form-item>
-        <n-form-item label="Commentaire" path="grid.description">
+        <n-form-item label="Commentaire" path="description">
           <n-input
             type="textarea"
             placeholder="Commentaire..."
-            v-model:value="value.grid.comment"
-            @change="emit('update')"
+            v-model:value="value.comment"
             :autosize="{
               minRows: 3,
             }"
           />
         </n-form-item>
         <span class="rowcols">
-          <n-form-item label="Lignes" path="grid.rows">
-            <n-input-number
-              v-model:value="value.grid.rows"
-              @update="onRowChange"
-            />
+          <n-form-item label="Lignes" path="rows">
+            <n-input-number v-model:value="value.rows" />
           </n-form-item>
           <n-form-item label="Colones" path="grid.cols">
-            <n-input-number
-              v-model:value="value.grid.cols"
-              @update="onColChange"
-            />
+            <n-input-number v-model:value="value.cols" />
           </n-form-item>
         </span>
       </n-form>
@@ -66,31 +55,28 @@ import {
   watchEffect,
 } from "vue";
 import { Grid } from "grid";
-import { useModel } from "../../js/useModel";
 import { getUrl } from "../../js/utils";
 import axios from "axios";
 const props = defineProps<{
-  modelValue: { grid: Grid; visible: { visible: boolean } };
+  grid: Grid;
+  visible: boolean;
 }>();
 const opts = ref<{ label: string; value: string }[]>([]);
-const show = ref(true);
 const emit = defineEmits<{
   (event: "update:modelValue", value: Grid): void;
+  (event: "close", value: boolean): void;
   (event: "update"): void;
 }>();
-const value = useModel(props, emit);
-
-function onRowChange(evt) {
-  props.modelValue.grid.resize(evt, props.modelValue.grid.cols);
-  emit("update");
-}
-function onColChange(evt) {
-  props.modelValue.grid.resize(props.modelValue.grid.rows, evt);
-  emit("update");
-}
+const value = computed({
+  get: () => props.grid,
+  set: (value) => {
+    return emit("update:modelValue", value);
+  },
+});
+const _visible = ref(props.visible);
 const defaultSelectOpt = computed(() => {
-  return opts.value.find((opt) => opt.value === props.modelValue.grid.optionsId)
-    ?.label;
+  if (!props.grid) return "default";
+  return opts.value.find((opt) => opt.value === props.grid.optionsId)?.label;
 });
 onMounted(() => {
   axios
@@ -104,10 +90,22 @@ onMounted(() => {
       opts.value = res;
     });
 });
-const previous = ref(0);
+watch(props.grid, () => {
+  if (
+    value.value.rows !== props.grid.rows ||
+    value.value.cols !== props.grid.cols
+  ) {
+    props.grid.resize(value.value.rows, value.value.cols);
+    emit("update");
+  }
+});
 watchEffect(() => {
-  previous.value = value.value.grid.optionsId
-   emit("update");
+  console.log("visible", props.visible, _visible.value);
+  if (_visible.value === props.visible) return;
+  if (!props.visible) return;
+  let before = _visible.value;
+  _visible.value = props.visible;
+  if (!before) return emit("close", false);
 });
 </script>
 

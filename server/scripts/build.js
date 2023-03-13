@@ -3,6 +3,9 @@ const dotenv = require("dotenv");
 const { parsed } = dotenv.config({
   path: process.env.MODE === "test" ? "test/.test.env" : ".env",
 });
+if(process.env.MODE === 'prod'){
+  parsed.APP_OPEN_BROWSER = 1;
+}
 
 const logPlugin = {
   name: "log",

@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import open from "open";
 import bodyParser from "body-parser";
 import { existsSync } from "fs";
 import db from "./database";
@@ -28,9 +29,11 @@ export function createApp() {
   optionsController({ app, db });
   // if (require.main === module) {
   const server = app.listen(+APP_CROSSWORDS_PORT || 3011, () => {
-    console.log(
-      `server running at port http://localhost:${server.address().port}`
-    );
+    const url = `http://localhost:${server.address().port}`;
+    console.log(`server running at port ${url}`);
+    if (+APP_OPEN_BROWSER) {
+      open(url);
+    }
   });
   return { app, server };
 }
