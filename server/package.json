@@ -6,6 +6,7 @@
   "module": "dist/server.esm.js",
   "scripts": {
     "watch": "MODE=dev node scripts/build.js --watch",
+    "prebuild": "rm -rf dist",
     "build": "MODE=prod node scripts/build.js",
     "build-package": "node scripts/build-exec.js mots-flex",
     "ts": "tsc --outDir=dist",

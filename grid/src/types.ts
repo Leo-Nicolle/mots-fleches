@@ -84,15 +84,15 @@ export const defaultOptions: GridOptions = {
     color: '#000000',
   },
   paper: {
-    width: 210,
-    height: 297,
+    width: 21,
+    height: 29.7,
     orientation: 'portrait',
     dpi: 300,
     margin: {
-      top: 10,
-      bottom: 10,
-      left: 10,
-      right: 10,
+      top: 1,
+      bottom: 1,
+      left: 1,
+      right: 1,
     }
   }
 };
