@@ -115,7 +115,6 @@ function onChange(evt: Event) {
   emit("focus", next);
 }
 function onKeyup(evt: KeyboardEvent) {
-  console.log(evt.key);
   if (evt.key === "Escape") {
     props.grid.setDefinition(props.cell, !props.cell.definition);
     props.grid.setText(props.cell, "");

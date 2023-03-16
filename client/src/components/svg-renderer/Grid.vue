@@ -250,14 +250,23 @@ const splits = computed(() =>
     .flat()
     .filter((c) => c.definition && c.text.split("\n\n").length > 1)
     .map((cell) => {
-      const lines = getLines(cell);
+      const lines = getLines(cell).length;
       const split = splitIndex(cell);
-      const ratio =
-        lines.length == 2 || lines.length === 4
+      const ratio = lines === 4
+       ? split === 2
+        ? 0.5
+        :split === 1
+        ? 1/4
+        : 3/4
+       : lines === 3
+        ? split === 1
+         ? 2/3
+         : 1/3
+        : lines === 2
+         ? split === 1
           ? 0.5
-          : split === 0
-          ? 1 / 3
-          : 0.66;
+          : 0
+        : 0;
       const y =
         cell.y * cellAndBorderWidth(props.options) +
         ratio * cellWidth(props.options);

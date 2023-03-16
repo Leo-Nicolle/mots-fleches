@@ -67,19 +67,24 @@ export function splitIndex(cell: Cell) {
 }
 
 export function arrowPositions(cell: Cell) {
-  const lines = getLines(cell);
+  const lines = getLines(cell).length;
   const splited = isSplited(cell);
   const index = splitIndex(cell);
 
-  const rightArrows = splited && lines.length === 2 || lines.length === 4
-    ? [{ x: 1, y: 0.25 }, { x: 1, y: 0.75 }]
-    : splited && lines.length === 3
+  const rightArrowYs = splited
+    ? lines === 4
       ? index === 1
-        ? [{ x: 1, y: 1 / 6 }, { x: 1, y: 2 / 3 }]
-        : [{ x: 1, y: 1 / 3 }, { x: 1, y: 5 / 6 }]
-      : [{ x: 1, y: 0.5 }, { x: 1, y: 0.5 }];
-
-  return rightArrows.concat({
+        ? [1 / 8, 5 / 8]
+        : index === 2
+          ? [0.25, 0.75]
+          : [3 / 8, 7 / 8]
+      : lines === 3
+        ? index === 1
+          ? [1 / 3, 5 / 6]
+          : [1 / 6, 2 / 3]
+        : [0.25, 0.75]
+    : [0.5, 0.5];
+  return rightArrowYs.map(y => ({ x: 1, y })).concat({
     x: 0.5, y: 1
   });
 }
