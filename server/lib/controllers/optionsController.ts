@@ -36,7 +36,11 @@ export default function gridController({
   });
 
   app.delete("/options/:option", async (req, res) => {
-    await db.deleteOption(req.params.option);
-    res.sendStatus(200);
+    try {
+      await db.deleteOption(req.params.option);
+      res.sendStatus(200);
+    } catch (e) {
+      res.sendStatus(504);
+    }
   });
 }
