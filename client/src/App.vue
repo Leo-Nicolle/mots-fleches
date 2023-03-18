@@ -1,148 +1,106 @@
 <template>
-  <div id="app">
-    <b-tabs
-      v-if="grids.length"
-      type="is-boxed"
-      v-model="activeGrid"
-      @input="onTabChanged"
-      :multiline="true"
-    >
-      <template v-for="grid in grids">
-        <b-tab-item
-          :key="grid.id"
-          :value="grid.id"
-          :label="grid.name"
-          is-active="true"
-          is-selected="true"
-        >
-        </b-tab-item>
-      </template>
-    </b-tabs>
-    <Crosswords v-if="activeGrid.length" :id="activeGrid" @refresh-grids="onRefreshGrids" @delete="onDelete"/>
-    <AddWord />
-  </div>
+  <nav v-if="displayMenu">
+    <n-menu
+      class="burger"
+      :accordion="true"
+      :mode="'horizontal'"
+      :collapsed="collapsed"
+      :collapsed-width="64"
+      :collapsed-icon-size="22"
+      :options="menuOptions"
+    />
+  </nav>
+  <router-view collapsed="true" />
 </template>
 
-<script>
-import axios from 'axios';
-import Crosswords from './components/Crosswords.vue';
-import AddWord from './components/AddWord.vue';
-import apiMixin from './js/apiMixin';
+<script setup lang="ts">
+import { MenuOutline } from "@vicons/ionicons5";
+import type { MenuOption } from "naive-ui";
+import { computed, h, ref } from "vue";
+import { RouterLink, useRoute } from "vue-router";
+import { renderIcon } from "./js/utils";
+const route = useRoute();
 
-export default {
-  name: 'App',
-  mixins: [apiMixin],
-  data() {
-    return {
-      rows: 13,
-      cols: 10,
-      activeGrid: '',
-      grids: [],
-    };
-  },
-  components: {
-    Crosswords,
-    AddWord,
-  },
-  methods: {
-    fetch() {
-      return axios.get(this.getUrl('grid')).then(({ data }) => {
-        this.grids = data
-          .map((g) => ({
-            name: g.name,
-            id: g.id,
-          }))
-          .concat({
-            name: '+',
-            id: '',
-          });
-        return Promise.resolve();
-      }).catch((e) => {
-        console.error('E', e);
-      });
-    },
-    createGrid() {
-      return axios.post(this.getUrl('grid'), {
-        name: 'nouvelle grille',
-        comment: '',
-        rows: 10,
-        cols: 10,
-        cells: {},
-      });
-    },
-    onTabChanged(activeTab) {
-      if (!activeTab.length) {
-        let newGridId;
-        this.createGrid()
-          .then(({ data }) => {
-            newGridId = data;
-          })
-          .then(() => this.fetch())
-          .then(() => {
-            this.activeGrid = newGridId;
-          });
-      }
-    },
-    onRefreshGrids() {
-      this.fetch();
-    },
-    onDelete() {
-      this.fetch().then(() => {
-        this.activeGrid = this.grids[0] && this.grids[0].id || '';
-      });
-    },
-  },
+const displayMenu = computed(() => {
+  return route.name !== "grid-export";
+});
+const collapsed = ref(true);
 
-  mounted() {
-    this.fetch().then(() => {
-      if (this.grids.length < 2) {
-        return this.createGrid()
-          .then(() => this.fetch());
-      }
-      return Promise.resolve();
-    }).then(() => {
-      this.activeGrid = this.grids[0] && this.grids[0].id || '';
-    });
+const menuOptions = ref<MenuOption[]>([
+  {
+    label: "",
+    key: "",
+    icon: renderIcon(MenuOutline),
+    children: [
+      {
+        label: () =>
+          h(
+            RouterLink,
+            {
+              to: "/grids",
+            },
+            { default: () => "Grilles" }
+          ),
+        key: "go-back-home",
+      },
+      {
+        label: () =>
+          h(
+            RouterLink,
+            {
+              to: "/options",
+            },
+            { default: () => "Options" }
+          ),
+        key: "go-to-options",
+      },
+    ],
   },
-};
+]);
 </script>
 
 <style>
-.bottom{
-  transform: rotate(90);
+body {
+  overflow: hidden;
 }
-.scrollbar {
-  float: left;
-  background: #f5f5f5;
-  overflow-x: scroll;
-  margin-bottom: 25px;
-  margin-left: 0;
+#app {
+  width: 100vw;
+  max-height: 100vh;
+  min-height: 100vh;
+  overflow: hidden;
 }
-
-.scrollbar::-webkit-scrollbar-track {
-  border-radius: 10px;
-  background-color: #f5f5f5;
-}
-
-.scrollbar::-webkit-scrollbar {
-  width: 12px;
-  background-color: #f5f5f5;
+nav {
+  width: 100%;
+  display: flex;
+  padding: 5px;
+  right: 10px;
 }
 
-.scrollbar::-webkit-scrollbar-thumb {
-  border-radius: 10px;
-  background-color: #555;
+.burger {
+  margin-left: auto;
+  margin-right: 25px;
 }
 
-.icon-arrow.left::before {
-  transform: translate(0%, 40%) rotate(180deg);
+.scroll::-webkit-scrollbar {
+  width: 5px;
 }
 
-.icon-arrow.up::before {
-  transform: translate(-33%, 20%) rotate(-90deg);
-}
-.icon-arrow.down::before {
-  transform: translate(33%, 20%) rotate(90deg);
+.scroll::-webkit-scrollbar-thumb {
+  background: #666;
+  border-radius: 20px;
 }
 
+.scroll::-webkit-scrollbar-track {
+  background: #ddd;
+  border-radius: 20px;
+}
+
+.hidden-input {
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  pointer-events: none;
+  visibility: hidden;
+  display: block;
+}
 </style>

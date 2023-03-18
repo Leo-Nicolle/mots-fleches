@@ -1,0 +1,21 @@
+{
+  "pkg": {
+      "outputPath": "dist",
+      "assets": [
+          "dist/public"
+      ],
+      "targets": [
+        "node16-linux-x64"
+      ]
+  },
+  "pkg_fetch_version": "3.2",
+  "node_version": "18.14.2",
+  "pkg_cache_path": ".pkg-cache",
+  "icon": "icon.ico",
+  "name": "mots-flex",
+  "description": "Generateur de mots fleches",
+  "company": "Leo Nicolle",
+  "version": "1.0.0",
+  "copyright": "MIT",
+  "file": "dist/index.js"
+}

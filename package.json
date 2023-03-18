@@ -1,0 +1,19 @@
+{
+  "name": "mots-flex",
+  "version": "1.0.0",
+  "description": "Generateur de mots fleches",
+  "scripts": {
+    "build:client": "cd client && npm run build",
+    "build:server": "cd server && npm run build",
+    "pprebuild": "npm run build:client && npm run build:server",
+    "build": "node scripts/build.mjs"
+  },
+  "author": "Leo Nicolle",
+  "license": "MIT",
+  "devDependencies": {
+    "decompress": "^4.2.1",
+    "execa": "^7.1.0",
+    "fs-extra": "^11.1.0",
+    "rimraf": "^4.4.0"
+  }
+}

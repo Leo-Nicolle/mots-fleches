@@ -1,38 +1,49 @@
 {
-  "name": "mots-croises",
+  "name": "client-2",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint",
-    "build-font": "fantasticon public/icon -o public/font/"
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "@creativebulma/bulma-divider": "^1.1.0",
-    "@fortawesome/fontawesome-svg-core": "^1.2.36",
-    "@fortawesome/free-solid-svg-icons": "^5.15.4",
-    "@fortawesome/vue-fontawesome": "^2.0.6",
-    "axios": "^0.21.4",
-    "buefy": "^0.9.10",
-    "core-js": "^3.6.5",
-    "dom-to-image": "^2.6.0",
-    "vue": "^2.6.11",
-    "vue-fontawesome": "0.0.2"
+    "@types/uuid": "^9.0.0",
+    "@types/vector2js": "^2.0.0",
+    "@vicons/ionicons5": "^0.12.0",
+    "@vueuse/core": "^9.13.0",
+    "axios": "^0.26.1",
+    "cancelable-promise": "^4.3.1",
+    "core-js": "^3.8.3",
+    "crypto": "^1.0.1",
+    "grid": "file:../grid",
+    "naive-ui": "^2.34.3",
+    "uuid": "^9.0.0",
+    "vector2js": "^2.0.1",
+    "vue": "^3.2.13",
+    "vue-router": "^4.0.3",
+    "vue3-highlightjs": "^1.0.5"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "~4.5.0",
-    "@vue/cli-plugin-eslint": "^4.5.12",
-    "@vue/cli-service": "~4.5.0",
-    "@vue/eslint-config-airbnb": "^5.0.2",
-    "babel-eslint": "^10.1.0",
-    "eslint": "^6.7.2",
-    "eslint-plugin-import": "^2.20.2",
-    "eslint-plugin-vue": "^6.2.2",
-    "fantasticon": "^1.2.2",
-    "node-sass": "^7.0.1",
-    "sass-loader": "^12.4.0",
-    "vue-template-compiler": "^2.6.11"
+    "@babel/core": "^7.12.16",
+    "@babel/eslint-parser": "^7.12.16",
+    "@types/fabric": "^4.5.14",
+    "@typescript-eslint/eslint-plugin": "^5.4.0",
+    "@typescript-eslint/parser": "^5.4.0",
+    "@vitejs/plugin-vue": "^4.0.0",
+    "@vue/cli-plugin-babel": "~5.0.0",
+    "@vue/cli-plugin-eslint": "~5.0.0",
+    "@vue/cli-plugin-router": "~5.0.0",
+    "@vue/cli-plugin-typescript": "^5.0.4",
+    "@vue/cli-service": "~5.0.0",
+    "@vue/eslint-config-typescript": "^9.1.0",
+    "eslint": "^7.32.0",
+    "eslint-plugin-vue": "^8.0.3",
+    "less": "^4.1.3",
+    "less-loader": "^11.1.0",
+    "typescript": "~4.5.5",
+    "vite": "^4.1.4",
+    "vue-tsc": "^1.2.0"
   },
   "eslintConfig": {
     "root": true,
@@ -40,28 +51,38 @@
       "node": true
     },
     "extends": [
-      "plugin:vue/essential",
+      "plugin:vue/vue3-essential",
       "eslint:recommended",
-      "@vue/airbnb"
+      "@vue/typescript"
     ],
     "parserOptions": {
-      "parser": "babel-eslint"
+      "parser": "@typescript-eslint/parser"
     },
     "rules": {
       "no-mixed-operators": 0,
       "no-param-reassign": 0,
       "no-plusplus": 0,
       "no-shadow": 0,
+      "no-continue": 0,
+      "keyword-spacing": 1,
+      "semi": 1,
+      "padded-blocks": 0,
       "no-useless-constructor": 0,
       "no-empty-function": 0,
       "no-unused-vars": 0,
       "max-len": 0,
-      "no-nested-ternary": 0
+      "no-nested-ternary": 0,
+      "prefer-const": 0,
+      "vue/no-v-for-template-key-on-child": 0,
+      "vue/multi-word-component-names": 0,
+      "vue/no-unused-components": 0,
+      "no-debugger": 0
     }
   },
   "browserslist": [
     "> 1%",
     "last 2 versions",
-    "not dead"
+    "not dead",
+    "not ie 11"
   ]
 }

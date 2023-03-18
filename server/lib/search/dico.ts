@@ -1,11 +1,10 @@
 import { DicoIndex, OccurenceMap } from "./types";
-import { getAlphabet } from "./utils";
 const { readFile } = require("fs").promises;
 // import fs from "fs/promises";
 const { resolve } = require("path");
 
-class Dico {
-  private words: string[] = [];
+export class Dico {
+  public words: string[] = [];
   private wordsMap: Map<string, number> = new Map();
   private loadingPromise: Promise<void> | null;
   public occurencies: OccurenceMap[];
@@ -70,7 +69,7 @@ class Dico {
 
   loadDictionary() {
     if (this.loadingPromise) return this.loadingPromise;
-    const paths = process.env.APP_CROSSWORDS_DICO_PATH?.split(",") || [];
+    const paths = APP_CROSSWORDS_DICO_PATH.split(",") || [];
     this.loadingPromise = Promise.all(
       paths.map((filePath) => readFile(resolve(filePath), "utf8"))
     ).then((responses) => {
@@ -81,7 +80,7 @@ class Dico {
     return this.loadingPromise;
   }
 
-  addWordsToDictionnary(data: string) {
+  addWordsToDictionnary(data: string | string[]) {
     const { wordsMap } = this;
     let rawWords: string[] = [];
     if (typeof data === "string") {
