@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Mots-Flex
+GenericName=Mots Flex
+Comment=Crosswords edition tool
+Keywords=Text;Game;
+Exec=mots-flex
+Terminal=false
+Type=Application
+StartupNotify=true
+Icon=mots-flex
+Categories=Game;Text;

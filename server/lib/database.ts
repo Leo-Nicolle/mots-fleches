@@ -40,12 +40,12 @@ export class Database {
 
   loadFile(file) {
     return fs
-      .mkdir(path.dirname(file), { recursive: true })
-      .then(() => fs.access(path.resolve(file), 0))
+      .mkdir(path.dirname(path.resolve(__dirname, file)), { recursive: true })
+      .then(() => fs.access(path.resolve(__dirname, file), 0))
       .catch((e) =>
-        fs.writeFile(path.resolve(file), file.match(/\.json/) ? "[]" : "")
+        fs.writeFile(path.resolve(__dirname, file), file.match(/\.json/) ? "[]" : "")
       )
-      .then(() => fs.readFile(path.resolve(file), "utf-8"));
+      .then(() => fs.readFile(path.resolve(__dirname, file), "utf-8"));
   }
 
   getWords() {
@@ -54,7 +54,7 @@ export class Database {
   saveWords() {
     return this.getWords().then((words) =>
       fs.writeFile(
-        path.resolve(APP_CROSSWORDS_WORDS_PATH as string),
+        path.resolve(__dirname, APP_CROSSWORDS_WORDS_PATH as string),
         words.join(",")
       )
     );
@@ -87,7 +87,7 @@ export class Database {
   saveGrids() {
     return this.getGrids().then((grids) =>
       fs.writeFile(
-        path.resolve(APP_CROSSWORDS_GRIDS_PATH as string),
+        path.resolve(__dirname, APP_CROSSWORDS_GRIDS_PATH as string),
         `[${grids.map((grid) => grid.serialize()).join(", ")}]`
       )
     );
@@ -126,7 +126,7 @@ export class Database {
   saveOptions() {
     return this.getOptions().then((options) =>
       fs.writeFile(
-        path.resolve(APP_CROSSWORDS_OPTIONS_PATH as string),
+        path.resolve(__dirname, APP_CROSSWORDS_OPTIONS_PATH as string),
         `[${options.map((option) => JSON.stringify(option)).join(", ")}]`
       )
     );

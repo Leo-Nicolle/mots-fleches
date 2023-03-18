@@ -71,7 +71,7 @@ export class Dico {
     if (this.loadingPromise) return this.loadingPromise;
     const paths = APP_CROSSWORDS_DICO_PATH.split(",") || [];
     this.loadingPromise = Promise.all(
-      paths.map((filePath) => readFile(resolve(filePath), "utf8"))
+      paths.map((filePath) => readFile(resolve(__dirname, filePath), "utf8"))
     ).then((responses) => {
       responses.forEach((response) => {
         this.addWordsToDictionnary(response as any as string);

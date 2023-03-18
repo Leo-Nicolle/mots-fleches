@@ -6,7 +6,6 @@ const { parsed } = dotenv.config({
 if(process.env.MODE === 'prod'){
   parsed.APP_OPEN_BROWSER = 1;
 }
-
 const logPlugin = {
   name: "log",
   setup(build) {

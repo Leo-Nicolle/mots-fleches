@@ -3,6 +3,7 @@ import cors from "cors";
 import open from "open";
 import bodyParser from "body-parser";
 import { existsSync } from "fs";
+import path from 'path';
 import db from "./database";
 import wordController from "./controllers/wordController";
 import gridController from "./controllers/gridController";
@@ -16,9 +17,9 @@ export function createApp() {
   app.use(cors());
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json());
-  if (existsSync("public")) {
-    console.log("server static");
-    app.use(express.static("public"));
+  if (existsSync(path.resolve(__dirname, "public"))) {
+    console.log('public folder', path.resolve(__dirname, "public"));
+    app.use(express.static(path.resolve(__dirname, "public")));
   }
   db.getWords().then((words) => {
     dico.addWordsToDictionnary(words);
