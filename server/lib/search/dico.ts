@@ -1,6 +1,5 @@
 import { DicoIndex, OccurenceMap } from "./types";
-const { readFile } = require("fs").promises;
-// import fs from "fs/promises";
+const { readFile,readdir } = require("fs").promises;
 const { resolve } = require("path");
 
 export class Dico {
@@ -69,10 +68,9 @@ export class Dico {
 
   loadDictionary() {
     if (this.loadingPromise) return this.loadingPromise;
-    const paths = APP_CROSSWORDS_DICO_PATH.split(",") || [];
-    this.loadingPromise = Promise.all(
-      paths.map((filePath) => readFile(resolve(__dirname, filePath), "utf8"))
-    ).then((responses) => {
+    this.loadingPromise = readdir(resolve(__dirname, APP_CROSSWORDS_DICO_PATH)).then((files) => 
+    Promise.all(files.map((filePath) => readFile(resolve(__dirname, APP_CROSSWORDS_DICO_PATH, filePath), "utf8"))))
+    .then((responses) => {
       responses.forEach((response) => {
         this.addWordsToDictionnary(response as any as string);
       });
