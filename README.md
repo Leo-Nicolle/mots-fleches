@@ -1,17 +1,62 @@
-# Mots Fleches - Crosswords <img src="scripts/assets/icon.png"  width="24" height="28">
+# Mots Fléchés - Crosswords <img src="scripts/assets/icon.png"  width="24" height="28">
 ![]()
 
 Generateur de mots fléchés.
 
+## Installation
+ 
+ TODO. I am currently working on packaging and publishing scripts.
 
-![](./docs/definitions.mp4)
+## Fonctionalités
+
+### Suggestions
+
+https://user-images.githubusercontent.com/7451806/226173711-224940ab-17fe-4495-aeca-3f058996eaa8.mp4
+
+ - Mode suggestion simple: (icone eclair). Propose tous les mots qui rentrent
+ - Mode suggestion avancé (icone marteau). Ne propse que des mots qui ne bloqueront pas,( si il n'y a pas de mots avec ZZ dans le dictoinnaire, il proposera pas un mot qui une fois dans la grille donnera ZZ) 
 
 
-## Project setup
+### Définitions
+
+https://user-images.githubusercontent.com/7451806/226173722-e1e6e5ba-1f39-4c68-9452-35094e7abe33.mp4
+
+ - Pour créer une case de définition: `echap`
+ - Pour séparer une case de définition: sauter deux lignes
+ - Ajout de flèches
+
+### Styles
+
+https://user-images.githubusercontent.com/7451806/226175011-0e5de156-70da-4955-9490-dbc411927484.mp4
+
+ - Format du papier (A4, A5, ou tout autre format)
+ - Marges
+ - Taille des cases
+ - Taille/coleur/police des textes
+ 
+
+
+## Contribuer (section en anglais, comme c'est l'usage)
+
+Clone the repository (or fork it)
+```sh
+git@github.com:Leo-Nicolle/mots-fleches.git
 ```
-cd server
+
+**install and run server: **
+```sh
+cd mots-fleches/server
 npm i
-npm run start
-cd ../client npm i
-npm run serve
+npm run watch
 ```
+and in annother terminal:
+```sh
+npm run nodemon
+```
+**install and run client: **
+```sh
+cd mots-fleches/client
+npm i
+npm run dev
+```
+Make a PR, I would be happy :).
