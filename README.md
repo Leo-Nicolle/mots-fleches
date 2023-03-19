@@ -43,7 +43,7 @@ Clone the repository (or fork it)
 git@github.com:Leo-Nicolle/mots-fleches.git
 ```
 
-**install and run server: **
+**install and run server:**
 ```sh
 cd mots-fleches/server
 npm i
@@ -53,7 +53,7 @@ and in annother terminal:
 ```sh
 npm run nodemon
 ```
-**install and run client: **
+**install and run client:**
 ```sh
 cd mots-fleches/client
 npm i
