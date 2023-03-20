@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "test": "vitest",
+
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
