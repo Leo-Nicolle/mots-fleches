@@ -1,18 +1,17 @@
 import { DicoIndex, OccurenceMap } from "./types";
-const { readFile,readdir } = require("fs").promises;
-const { resolve } = require("path");
+import { readFile, readdir } from "fs/promises";
+import { resolve } from "../utils";
 
 export class Dico {
   public words: string[] = [];
-  private wordsMap: Map<string, number> = new Map();
-  private loadingPromise: Promise<void> | null;
+  public wordsMap: Map<string, number> = new Map();
+  private loadingPromise: Promise<void>;
   public occurencies: OccurenceMap[];
   constructor() {
     this.words = [];
     this.wordsMap = new Map();
-    this.loadingPromise = null;
     this.occurencies = [{}, {}];
-    this.loadDictionary();
+    this.loadingPromise = this.loadDictionary();
   }
 
   /**
@@ -68,13 +67,19 @@ export class Dico {
 
   loadDictionary() {
     if (this.loadingPromise) return this.loadingPromise;
-    this.loadingPromise = readdir(resolve(__dirname, APP_CROSSWORDS_DICO_PATH)).then((files) => 
-    Promise.all(files.map((filePath) => readFile(resolve(__dirname, APP_CROSSWORDS_DICO_PATH, filePath), "utf8"))))
-    .then((responses) => {
-      responses.forEach((response) => {
-        this.addWordsToDictionnary(response as any as string);
+    this.loadingPromise = readdir(resolve(APP_CROSSWORDS_DICO_PATH))
+      .then((files) =>
+        Promise.all(
+          files.map((filePath) =>
+            readFile(resolve(APP_CROSSWORDS_DICO_PATH, filePath), "utf8")
+          )
+        )
+      )
+      .then((responses) => {
+        responses.forEach((response) => {
+          this.addWordsToDictionnary(response as any as string);
+        });
       });
-    });
     return this.loadingPromise;
   }
 

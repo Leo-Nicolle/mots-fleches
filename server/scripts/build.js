@@ -1,14 +1,19 @@
 const dotenv = require("dotenv");
-const path = require('path')
+const path = require("path");
 const decompress = require("decompress");
 
 const { parsed } = dotenv.config({
   path: process.env.MODE === "test" ? "test/.test.env" : ".env",
 });
-if(process.env.MODE === 'prod'){
+if (process.env.MODE === "prod") {
   parsed.APP_OPEN_BROWSER = 1;
 }
-decompress('../scripts/assets/dico.zip', path.resolve('dist', process.env.APP_CROSSWORDS_DICO_PATH));
+if (process.env.MODE !== "test") {
+  decompress(
+    "../scripts/assets/dico.zip",
+    path.resolve("dist", process.env.APP_CROSSWORDS_DICO_PATH)
+  );
+}
 
 const logPlugin = {
   name: "log",
