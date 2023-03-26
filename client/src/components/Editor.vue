@@ -6,7 +6,7 @@
           <h2>
             {{ grid.title ? grid.title : `Nouvelle Grille` }}
           </h2>
-          <ModalOptions :grid="grid" @update="emit('update')" />
+          <ModalOptions :modelValue="grid" @update:model-value="emit('update')" />
         </span>
         <Suggestion
           v-if="!focus.definition"

@@ -71,7 +71,6 @@ function fetch() {
 }
 
 function onUpdate() {
-  console.log("update");
   clearTimeout(saveTimeout.value);
   saveTimeout.value = setTimeout(() => {
     if (!options.value) return;
