@@ -9,6 +9,8 @@ import wordController from "./controllers/wordController";
 import gridController from "./controllers/gridController";
 import optionsController from "./controllers/optionsController";
 import searchController from "./controllers/search-controller";
+import dbController from "./controllers/db-controller";
+
 
 import dico from "./search/dico";
 
@@ -28,6 +30,8 @@ export function createApp() {
   gridController({ app, db });
   searchController({ app, db });
   optionsController({ app, db });
+  dbController({ app, db });
+
   const server = app.listen(+APP_CROSSWORDS_PORT || 3011, () => {
     const url = `http://localhost:${server.address().port}`;
     console.log(`server running at port ${url}`);

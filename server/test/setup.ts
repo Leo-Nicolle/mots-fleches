@@ -5,7 +5,6 @@ const globals = {
   APP_CROSSWORDS_GRIDS_PATH: "./dist/test/db/grids.json",
   APP_CROSSWORDS_OPTIONS_PATH: "./dist/db/options.json",
   APP_CROSSWORDS_DICO_PATH: "./dist/test/dico/",
-  APP_CROSSWORDS_MODE: "dev",
   APP_OPEN_BROWSER: "false",
   MODE: "test",
   APP_CROSSWORDS_PORT: 3011,

@@ -6,7 +6,7 @@
           <h2>
             {{ grid.title ? grid.title : `Nouvelle Grille` }}
           </h2>
-          <ModalOptions :modelValue="grid" @update:model-value="emit('update')" />
+          <ModalOptions :modelValue="grid" @update:model-value="emit('size-update')" />
         </span>
         <Suggestion
           v-if="!focus.definition"
@@ -65,7 +65,8 @@ import Suggestion from "./Suggestion.vue";
 const props = defineProps<{ grid: Grid; options: GridOptions }>();
 const emit = defineEmits<{
   (event: "update"): string;
-  (event: "update:modelValue", value: Grid): void;
+  (event: "update:modelValue"): void;
+  (event: "size-update"): void;
 }>();
 const editor = ref(null);
 const dir = ref<Direction>("horizontal");

@@ -8,14 +8,19 @@ import type { Browser, Page } from 'playwright';
 import axios from 'axios';
 import { expect } from '@playwright/test';
 
+const tests = [
+  {selector: '[role=rows] input', path: 'rows', value: '10'},
+  {selector: '[role=cols] input', path: 'cols', value: '10'},
+  {selector: '[role=title] input', path: 'title', value: 'My new title'},
+  {selector: '[role=comment] textarea', path: 'comment', value: 'My new comment'},
+];
 // unstable in Windows, TODO: investigate
-describe('basic', async () => {
+describe('ModalOptions', async () => {
   let server: PreviewServer;
   let browser: Browser;
   let page: Page;
 
   beforeAll(async () => {
-    await build();
     server = await preview({ preview: {port: 3016} });
     console.log(server.httpServer.address());
     browser = await chromium.launch({ headless: false });
@@ -32,34 +37,14 @@ describe('basic', async () => {
     });
   });
 
-  test('should update rows', async () => {
-    await page.locator('[role=rows] input').fill('10');
-    await new Promise(resolve => setTimeout(resolve, 500));
+  test.each(tests)('should update $path', async ({selector, path, value}) => {
+    await page.waitForTimeout(100);
+    await page.locator(selector).fill('');
+    await page.locator(selector).type(value, {delay: 100});
+    await page.waitForTimeout(500);
     const {data: grid} = await axios.get(`http://localhost:3015/grid/grid-1`);
-    expect(grid.rows).toBe(10);
-  });
-  test('should update cols', async () => {
-    await page.locator('[role=cols] input').fill('10');
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const {data: grid} = await axios.get(`http://localhost:3015/grid/grid-1`);
-    expect(grid.cols).toBe(10);
-  });
-
-  test('should update title', async () => {
-    const title = 'My new Title';
-    await page.locator('[role=title] input').fill(title);
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const {data: grid} = await axios.get(`http://localhost:3015/grid/grid-1`);
-    expect(grid.title).toBe(title);
-  });
-
-  test('should update comment', async () => {
-    const comment = 'My new comment';
-    // page.getByText('Commentaire').locator('textarea').fill(comment);
-    await page.locator('[role=comment] textarea').fill(comment);
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const {data: grid} = await axios.get(`http://localhost:3015/grid/grid-1`);
-    expect(grid.comment).toBe(comment);
+    console.log('LALAL', grid[path], value);
+    expect(`${grid[path]}`).toBe(`${value}`);
   });
 
 });

@@ -56,6 +56,7 @@ describe("Database", () => {
       }));
 
   it("should be able to update a grid", () => {
+    console.log(new Grid(5, 5, "grid-1").serialize());
     const oldGrid = database.grids[1];
     const newGrid = {
       ...oldGrid,
