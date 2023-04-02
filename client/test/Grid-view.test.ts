@@ -18,6 +18,8 @@ const tests = [
   { link: 'split-test?splits=false', name: 'no-splits' },
   { link: 'split-test?texts=false', name: 'no-texts' },
   { link: 'split-test?definitions=false', name: 'no-definitions' },
+  { link: 'split-test?arrows=false', name: 'no-arrows' },
+
 ];
 
 describe('Grid-view', async () => {
@@ -44,7 +46,7 @@ describe('Grid-view', async () => {
   });
   test.each(tests)(`Renders properlly: $name: ($url) `, async ({ link, name }) => {
     await page.goto(`http://localhost:${port}/#/grid-export/${link}`);
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     const actual = await page.evaluate(() => {
       const svg = document.querySelector('svg.grid') as SVGSVGElement;
