@@ -9,6 +9,7 @@ export type ExportOptions = {
   texts: boolean;
   highlight:boolean;
   splits: boolean;
+  margins: boolean;
 }
 
 export const defaultExportOptions: ExportOptions = {
@@ -19,6 +20,7 @@ export const defaultExportOptions: ExportOptions = {
   arrows: true,
   highlight: false,
   splits: true,
+  margins: true
 };
 
 export type Rect = {

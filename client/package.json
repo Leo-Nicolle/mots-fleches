@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "ppretest": "rm -rf reports/ && vite build --mode testing",
+    "pretest": "rm -rf reports/ && vite build --mode testing",
     "update:snapshot": "UPDATE_SNAPSHOTS=true vitest run --mode testing Grid-view",
     "test": "vitest run --mode testing Grid-view",
     "lint": "vue-cli-service lint"

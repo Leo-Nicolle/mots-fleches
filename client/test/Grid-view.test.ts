@@ -8,8 +8,16 @@ import type { Browser, Page } from 'playwright';
 import fs from 'fs-extra';
 import path from 'path';
 
+
 const tests = [
-  { link: 'split-test', name: 'basic-export' }
+  { link: 'split-test', name: 'basic-export' },
+  { link: 'split-test?borders=false', name: 'no-borders' },
+  { link: 'split-test?outerBorders=false', name: 'no-outerborder' },
+  { link: 'split-test?borders=false&outerBorders=false', name: 'no-any-border' },
+  { link: 'split-test?margins=false', name: 'no-margins' },
+  { link: 'split-test?splits=false', name: 'no-splits' },
+  { link: 'split-test?texts=false', name: 'no-texts' },
+  { link: 'split-test?definitions=false', name: 'no-definitions' },
 ];
 
 describe('Grid-view', async () => {
@@ -34,22 +42,6 @@ describe('Grid-view', async () => {
       server.httpServer.close(error => error ? reject(error) : resolve());
     });
   });
-  // test('renders properlly', async () => {
-  //   const actual = await page.evaluate(() => {
-  //     const svg = document.querySelector('svg.grid') as SVGSVGElement;
-  //     return svg.outerHTML;
-  //   });
-  //   if (process.env.UPDATE_SNAPSHOTS) {
-  //     console.log('Updating snapshots...')
-  //     await fs.writeFile(path.join(inputFolder, 'grid.svg'), actual);
-  //     return;
-  //   }
-
-  //   const expected = await fs.readFile(path.resolve(inputFolder, 'grid.svg'), 'utf-8');
-  //   await fs.writeFile(path.resolve(outputFolder, 'grid-actual.svg'), actual);
-  //   await fs.writeFile(path.resolve(outputFolder, 'grid-expected.svg'), expected);
-  //   expect(actual).equal(expected);
-  // });
   test.each(tests)(`Renders properlly: $name: ($url) `, async ({ link, name }) => {
     await page.goto(`http://localhost:${port}/#/grid-export/${link}`);
     await new Promise(resolve => setTimeout(resolve, 100));

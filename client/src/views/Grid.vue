@@ -11,19 +11,15 @@
 import axios from "axios";
 import GridPaper from "../components/GridPaper.vue";
 import { Grid, GridOptions } from "grid";
-import { getUrl } from "../js/utils";
+import { getUrl, mergeRouteWithDefault } from "../js/utils";
 import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 import { defaultExportOptions } from "../components/svg-renderer/types";
 
+const route = useRoute();
 const grid = ref<Grid>();
 const options = ref<GridOptions>();
-const exportOptions = ref({
-  ...defaultExportOptions,
-  texts: true,
-  highlight: true,
-});
-const route = useRoute();
+const exportOptions = computed(() => mergeRouteWithDefault(route, defaultExportOptions));
 function fetch() {
   return axios
     .get(getUrl(`grid/${route.params.id}`))

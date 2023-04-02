@@ -297,7 +297,7 @@
           "highlighted": false,
           "arrows": [],
           "suggestion": "",
-          "text": ""
+          "text": "A"
         },
         {
           "x": 4,
@@ -306,7 +306,7 @@
           "highlighted": false,
           "arrows": [],
           "suggestion": "",
-          "text": ""
+          "text": "B"
         }
       ],
       [
@@ -355,7 +355,7 @@
           "definition": false,
           "highlighted": false,
           "arrows": [],
-          "suggestion": "",
+          "suggestion": "S",
           "text": ""
         },
         {
