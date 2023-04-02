@@ -23,7 +23,7 @@ describe('ModalOptions', async () => {
   beforeAll(async () => {
     server = await preview({ preview: {port: 3016} });
     console.log(server.httpServer.address());
-    browser = await chromium.launch({ headless: false });
+    browser = await chromium.launch({ headless: true });
     page = await browser.newPage();
     await page.goto(`http://localhost:${3016}/#grid/grid-1`);
     await page.locator('[role=modal-options-button]').click();
@@ -41,9 +41,8 @@ describe('ModalOptions', async () => {
     await page.waitForTimeout(100);
     await page.locator(selector).fill('');
     await page.locator(selector).type(value, {delay: 100});
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(100);
     const {data: grid} = await axios.get(`http://localhost:3015/grid/grid-1`);
-    console.log('LALAL', grid[path], value);
     expect(`${grid[path]}`).toBe(`${value}`);
   });
 

@@ -36,7 +36,7 @@ describe('Options', async () => {
   beforeAll(async () => {
     server = await preview({ preview: {port} });
     console.log(server.httpServer.address());
-    browser = await chromium.launch({ headless: false, devtools: true });
+    browser = await chromium.launch({ headless: true, devtools: false });
     page = await browser.newPage();
     await page.goto(`http://localhost:${3017}/#options/default`);
     await new Promise(resolve => setTimeout(resolve, 100));
@@ -49,7 +49,7 @@ describe('Options', async () => {
     });
   });
   test.each(tests)(`should update $path`, async ({selector, path, type, value}) => {
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(100);
     await page.locator(selector).fill('');
     await page.locator(selector).type(type || value, {delay: 100});
     const {data: options} = await axios.get(`http://localhost:3015/options/default`);

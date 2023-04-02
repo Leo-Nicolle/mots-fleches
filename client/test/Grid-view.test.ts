@@ -1,34 +1,32 @@
 
 
-import { afterAll, beforeAll, describe, test } from 'vitest';
-import { preview, build } from 'vite';
+import { expect, afterAll, beforeAll, describe, test } from 'vitest';
+import { preview } from 'vite';
 import type { PreviewServer } from 'vite';
 import { chromium } from 'playwright';
 import type { Browser, Page } from 'playwright';
-import axios from 'axios';
-import { expect } from '@playwright/test';
-import { toMatchImageSnapshot } from 'jest-image-snapshot'
+import fs from 'fs-extra';
+import path from 'path';
 
-declare global {
-  namespace jest {
-    interface Matchers<R> {
-      toMatchImageSnapshot(): R
-    }
-  }
-}
-describe('GridView', async () => {
+const tests = [
+  { link: 'split-test', name: 'basic-export' }
+];
+
+describe('Grid-view', async () => {
   let server: PreviewServer;
   let browser: Browser;
   let page: Page;
   const port = 3018;
+  const outputFolder = 'dist/test/svg/';
+  const inputFolder = 'test/fixtures/';
 
   beforeAll(async () => {
-    server = await preview({ preview: {port} });
+    server = await preview({ preview: { port } });
     browser = await chromium.launch({ headless: false, devtools: true });
     page = await browser.newPage();
-    await page.goto(`http://localhost:${port}/#/grid-export/split-test`);
-    await new Promise(resolve => setTimeout(resolve, 100));
-  }, 60_000);
+    await fs.mkdir(path.resolve(outputFolder), { recursive: true });
+    await fs.mkdir(path.resolve(inputFolder), { recursive: true });
+  }, 2000);
 
   afterAll(async () => {
     await browser.close();
@@ -36,22 +34,39 @@ describe('GridView', async () => {
       server.httpServer.close(error => error ? reject(error) : resolve());
     });
   });
-  test('renders properlly', async () => {
-    const svg = await page.evaluate(() => {
-      return document.querySelector('svg.grid')?.outerHTML;
-    });
-    const snapshot = await page.screenshot();
+  // test('renders properlly', async () => {
+  //   const actual = await page.evaluate(() => {
+  //     const svg = document.querySelector('svg.grid') as SVGSVGElement;
+  //     return svg.outerHTML;
+  //   });
+  //   if (process.env.UPDATE_SNAPSHOTS) {
+  //     console.log('Updating snapshots...')
+  //     await fs.writeFile(path.join(inputFolder, 'grid.svg'), actual);
+  //     return;
+  //   }
 
-    expect(snapshot).toMatchSnapshot();
-
-    // page.locator('svg.grid').).toBe(true);
-  });
-  // test.each(tests)(`should update $path`, async ({selector, path, type, value}) => {
-  //   await page.locator(selector).fill('');
-  //   await page.locator(selector).type(type || value, {delay: 100});
-  //   const {data: options} = await axios.get(`http://localhost:3015/options/default`);
-  //   console.log(options);
-  //   await new Promise(resolve => setTimeout(resolve, 250));
-  //   expect(getFromPath(options, path)).toBe(`${value}`);
+  //   const expected = await fs.readFile(path.resolve(inputFolder, 'grid.svg'), 'utf-8');
+  //   await fs.writeFile(path.resolve(outputFolder, 'grid-actual.svg'), actual);
+  //   await fs.writeFile(path.resolve(outputFolder, 'grid-expected.svg'), expected);
+  //   expect(actual).equal(expected);
   // });
+  test.each(tests)(`Renders properlly: $name: ($url) `, async ({ link, name }) => {
+    await page.goto(`http://localhost:${port}/#/grid-export/${link}`);
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    const actual = await page.evaluate(() => {
+      const svg = document.querySelector('svg.grid') as SVGSVGElement;
+      return svg.outerHTML;
+    });
+    if (process.env.UPDATE_SNAPSHOTS) {
+      console.log('Updating snapshots...')
+      await fs.writeFile(path.join(inputFolder, `${name}.svg`), actual);
+      return;
+    }
+
+    const expected = await fs.readFile(path.resolve(inputFolder, `${name}.svg`), 'utf-8');
+    await fs.writeFile(path.resolve(outputFolder, `${name}-actual.svg`), actual);
+    await fs.writeFile(path.resolve(outputFolder, `${name}-expected.svg`), expected);
+    expect(actual).equal(expected);
+  });
 });
