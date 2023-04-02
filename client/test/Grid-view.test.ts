@@ -46,14 +46,13 @@ describe('Grid-view', async () => {
   });
   test.each(tests)(`Renders properlly: $name: ($url) `, async ({ link, name }) => {
     await page.goto(`http://localhost:${port}/#/grid-export/${link}`);
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 200));
 
     const actual = await page.evaluate(() => {
       const svg = document.querySelector('svg.grid') as SVGSVGElement;
       return svg.outerHTML;
     });
     if (process.env.UPDATE_SNAPSHOTS) {
-      console.log('Updating snapshots...')
       await fs.writeFile(path.join(inputFolder, `${name}.svg`), actual);
       return;
     }

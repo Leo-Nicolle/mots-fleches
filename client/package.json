@@ -7,7 +7,7 @@
     "build": "vite build",
     "pretest": "rm -rf reports/ && vite build --mode testing",
     "update:snapshot": "UPDATE_SNAPSHOTS=true vitest run --mode testing Grid-view",
-    "test": "vitest run --mode testing Grid-view",
+    "test": "vitest run --mode testing",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
