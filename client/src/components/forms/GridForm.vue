@@ -12,35 +12,24 @@
 
 <script setup lang="ts">
 import {
-  computed,
   defineEmits,
   defineProps,
-  ref,
   watch,
 } from "vue";
 import { Grid } from "grid";
+import { useModel } from "../../js/useModel";
 const props = defineProps<{
-  grid: Grid;
+  modelValue: Grid;
 }>();
 const emit = defineEmits<{
   (event: "update:modelValue", value: Grid): void;
   (event: "update"): void;
 }>();
-const value = computed({
-  get: () => props.grid,
-  set: (value) => {
-    return emit("update:modelValue", value);
-  },
+const value = useModel(props, emit);
+watch(value.value, () => {
+  emit("update:modelValue", value.value);
 });
-watch(props.grid, () => {
-  if (
-    value.value.rows !== props.grid.rows ||
-    value.value.cols !== props.grid.cols
-  ) {
-    props.grid.resize(value.value.rows, value.value.cols);
-    emit("update");
-  }
-});
+
 </script>
 
 <style scoped>

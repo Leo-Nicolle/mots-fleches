@@ -1,14 +1,30 @@
 const dotenv = require("dotenv");
-const path = require('path')
+const path = require("path");
 const decompress = require("decompress");
+const { copy } = require("fs-extra");
+const rimraf = require("rimraf");
 
 const { parsed } = dotenv.config({
-  path: process.env.MODE === "test" ? "test/.test.env" : ".env",
+  path:
+    process.env.MODE === "test"
+      ? "test/.test.env"
+      : process.env.MODE === "e2e-test"
+      ? "test/e2e/.env"
+      : ".env",
 });
-if(process.env.MODE === 'prod'){
+if (process.env.MODE === "prod") {
   parsed.APP_OPEN_BROWSER = 1;
 }
-decompress('../scripts/assets/dico.zip', path.resolve('dist', process.env.APP_CROSSWORDS_DICO_PATH));
+if (process.env.MODE !== "test" && process.env.MODE !== "e2e-test") {
+  decompress(
+    "../scripts/assets/dico.zip",
+    path.resolve("dist", process.env.APP_CROSSWORDS_DICO_PATH)
+  );
+}
+let outfile = "dist/server.js";
+if (process.env.MODE === "e2e-test") {
+  outfile = "dist/e2e-test/server.js";
+}
 
 const logPlugin = {
   name: "log",
@@ -23,7 +39,7 @@ require("esbuild").build({
   entryPoints: ["lib/index.js"],
   bundle: true,
   format: "cjs",
-  outfile: "dist/server.js",
+  outfile,
   platform: "node",
   watch,
   define: Object.entries(parsed).reduce((acc, [key, value]) => {

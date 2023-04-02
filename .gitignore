@@ -2,10 +2,12 @@ client/node_modules/
 client/dist/
 client/public/result*  
 client/public/allwords*  
-
+client/reports/
 server/node_modules
 server/dist
 server/public
 dist
 node_modules
 *.zip
+build/
+dist/

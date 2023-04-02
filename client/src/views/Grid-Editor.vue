@@ -4,6 +4,7 @@
       v-if="grid && options"
       :grid="grid"
       @update="onUpdate"
+      @size-update="onSizeUpdate"
       :options="options"
     ></Editor>
   </div>
@@ -11,7 +12,6 @@
 
 <script setup lang="ts">
 import axios from "axios";
-import apiMixin from "../js/apiMixin";
 import Editor from "../components/Editor.vue";
 import { Grid, GridOptions } from "grid";
 import { getUrl, save } from "../js/utils";
@@ -45,6 +45,14 @@ function onUpdate() {
   }, 50);
 }
 
+function onSizeUpdate() {
+  clearTimeout(saveTimeout.value);
+  saveTimeout.value = setTimeout(() => {
+    if (!grid.value) return;
+    grid.value.resize(grid.value.rows, grid.value.cols);
+    save(grid.value);
+  }, 50);
+}
 onMounted(() => {
   fetch();
 });

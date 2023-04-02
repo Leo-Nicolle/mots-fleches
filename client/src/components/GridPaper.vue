@@ -10,22 +10,24 @@
         :export-options="exportOptions"
       />
     </div>
-    <div class="border left" :style="{ left: 0 }"></div>
-    <div class="border right" :style="{ left: pageWidth }"></div>
-    <div class="border top" :style="{ top: 0 }"></div>
-    <div class="border bottom" :style="{ top: pageHeight }"></div>
-    <div class="footer"></div>
+    <div v-if="exportOptions.margins">
+      <div class="border left" :style="{ left: 0 }"></div>
+      <div class="border right" :style="{ left: pageWidth }"></div>
+      <div class="border top" :style="{ top: 0 }"></div>
+      <div class="border bottom" :style="{ top: pageHeight }"></div>
+      <div class="footer"></div>
 
-    <div class="margin left" :style="{ left: margins[3] }"></div>
-    <div
-      class="margin right"
-      :style="{ left: `calc(${pageWidth} - ${margins[1]})` }"
-    ></div>
-    <div class="margin top" :style="{ top: margins[0] }"></div>
-    <div
-      class="margin bottom"
-      :style="{ top: `calc(${pageHeight} - ${margins[2]})` }"
-    ></div>
+      <div class="margin left" :style="{ left: margins[3] }"></div>
+      <div
+        class="margin right"
+        :style="{ left: `calc(${pageWidth} - ${margins[1]})` }"
+      ></div>
+      <div class="margin top" :style="{ top: margins[0] }"></div>
+      <div
+        class="margin bottom"
+        :style="{ top: `calc(${pageHeight} - ${margins[2]})` }"
+      ></div>
+    </div>
     <div class="footer"></div>
   </div>
 </template>

@@ -11,50 +11,43 @@ const props = defineProps<{ modelValue: string }>();
 const emit = defineEmits<{
   (event: "update:modelValue", value: string): void;
 }>();
+const units = ["cm", "mm", "px", "pt", "em"];
+const unitSet = new Set(units);
 
 const options = ref([
-  {
-    label: "cm",
-    value: "cm",
-  },
-  {
-    label: "mm",
-    value: "mm",
-  },
-  {
-    label: "px",
-    value: "px",
-  },
-  {
-    label: "pt",
-    value: "pt",
-  },
-  {
-    label: "em",
-    value: "em",
-  },
+  units.map((u) => {
+    return { label: u, value: u };
+  }),
 ]);
 
-const value = computed({
-  get: () => +props.modelValue.slice(0, -2),
-  set: (value) => emit("update:modelValue", value + props.modelValue.slice(-2)),
+const value = computed<number>({
+  get: () => {
+    const res = +props.modelValue.slice(0, -2);
+    return isNaN(res) ? 0 : res;
+  },
+  set: (value) =>
+    emit(
+      "update:modelValue",
+      value ? `${value}${unit.value}` : `0${unit.value}`
+    ),
 });
 
-const unit = computed({
-  get: () => props.modelValue.slice(-2),
-  set: (unit) =>
-    emit("update:modelValue", props.modelValue.slice(0, -2) + unit),
+const unit = computed<string>({
+  get: () => {
+    const res = props.modelValue.slice(-2);
+    return unitSet.has(res) ? res : "px";
+  },
+  set: (unit) => emit("update:modelValue", `${value.value}${unit}`),
 });
 
 // const value = useModel(props, emit);
 </script>
 
 <style>
-
-.sizeinput{
+.sizeinput {
   display: flex;
 }
-.n-base-selection-label{
+.n-base-selection-label {
   min-width: 72px;
 }
 </style>

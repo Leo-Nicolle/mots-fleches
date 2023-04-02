@@ -8,23 +8,23 @@
         <n-select v-model:value="value.orientation" :options="orientations" />
       </n-form-item> -->
     <n-form-item label="Largeur" path="format.width">
-      <n-input-number v-model:value="value.width" />
+      <n-input-number role="format-width" v-model:value="value.width" />
     </n-form-item>
     <n-form-item label="Hauteur" path="format.height">
-      <n-input-number v-model:value="value.height" />
+      <n-input-number role="format-height" v-model:value="value.height" />
     </n-form-item>
     <h3>Marges</h3>
     <n-form-item label="Gauche" path="format.margin.left">
-      <n-input-number v-model:value="value.margin.left" />
+      <n-input-number role="format-margin-left" v-model:value="value.margin.left" />
     </n-form-item>
     <n-form-item label="Droite" path="format.margin.right">
-      <n-input-number v-model:value="value.margin.right" />
+      <n-input-number role="format-margin-right" v-model:value="value.margin.right" />
     </n-form-item>
     <n-form-item label="Haut" path="format.margin.top">
-      <n-input-number v-model:value="value.margin.top" />
+      <n-input-number role="format-margin-top" v-model:value="value.margin.top" />
     </n-form-item>
     <n-form-item label="Bas" path="format.margin.bottom">
-      <n-input-number v-model:value="value.margin.bottom" />
+      <n-input-number role="format-margin-bottom" v-model:value="value.margin.bottom" />
     </n-form-item>
   </span>
 </template>

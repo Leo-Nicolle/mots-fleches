@@ -1,14 +1,13 @@
 import dico from "../lib/search/dico";
-const fs = require("fs").promises;
-const chai = require("chai");
-const { expect } = chai;
+import fs from "fs/promises";
+import { beforeAll, describe, it, expect } from "vitest";
 
 let baseWordsCount = 2;
 let baseWords;
 const newWord = "grezo";
 const deleteWord = "zooo";
 
-function getExpected(words, excludeList = []) {
+function getExpected(words: string[], excludeList: string[] = []) {
   return words.reduce((acc, word, wordIndex) => {
     if (excludeList.includes(word)) return acc;
     for (let letterIndex = 0; letterIndex < word.length - 1; letterIndex++) {
@@ -24,14 +23,11 @@ function getExpected(words, excludeList = []) {
     return acc;
   }, {});
 }
-describe("Database", () => {
-  before(() => {
-    return dico
-      .loadDictionary()
-      .then(() => fs.readFile(process.env.APP_CROSSWORDS_DICO_PATH, "utf8"))
-      .then((data) => {
-        baseWords = data.split(",");
-      });
+describe("Dico", () => {
+  const baseWordsCount = 13;
+  let baseWords;
+  beforeAll(() => {
+    return dico.loadDictionary().then(() => (baseWords = dico.words));
   });
 
   it("should read the words from text files", () => {

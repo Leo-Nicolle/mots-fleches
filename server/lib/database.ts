@@ -1,5 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
+import { resolve } from "./utils";
 import { Grid, GridOptions, defaultOptions } from "grid";
 
 export class Database {
@@ -14,15 +15,19 @@ export class Database {
     this.options = [];
 
     console.log("loading database");
-    console.log("path words: ", APP_CROSSWORDS_WORDS_PATH);
-    console.log("path grids:", APP_CROSSWORDS_GRIDS_PATH);
-    console.log("path dico:", APP_CROSSWORDS_DICO_PATH);
-    console.log("path options:", APP_CROSSWORDS_OPTIONS_PATH);
+    console.log("path words: ", resolve(APP_CROSSWORDS_WORDS_PATH));
+    console.log("path grids:", resolve(APP_CROSSWORDS_GRIDS_PATH));
+    console.log("path dico:", resolve(APP_CROSSWORDS_DICO_PATH));
+    console.log("path options:", resolve(APP_CROSSWORDS_OPTIONS_PATH));
 
+    this.loadingPromise = this.load();
+  }
+
+  load() {
     this.loadingPromise = Promise.all([
-      this.loadFile(APP_CROSSWORDS_WORDS_PATH),
-      this.loadFile(APP_CROSSWORDS_GRIDS_PATH),
-      this.loadFile(APP_CROSSWORDS_OPTIONS_PATH),
+      this.loadFile(resolve(APP_CROSSWORDS_WORDS_PATH)),
+      this.loadFile(resolve(APP_CROSSWORDS_GRIDS_PATH)),
+      this.loadFile(resolve(APP_CROSSWORDS_OPTIONS_PATH)),
     ]).then(([words, grids, options]) => {
       this.words = words
         .split(",")
@@ -36,16 +41,15 @@ export class Database {
         this.options.push(defaultOptions);
       }
     });
+    return this.loadingPromise;
   }
 
   loadFile(file) {
     return fs
-      .mkdir(path.dirname(path.resolve(__dirname, file)), { recursive: true })
-      .then(() => fs.access(path.resolve(__dirname, file), 0))
-      .catch((e) =>
-        fs.writeFile(path.resolve(__dirname, file), file.match(/\.json/) ? "[]" : "")
-      )
-      .then(() => fs.readFile(path.resolve(__dirname, file), "utf-8"));
+      .mkdir(path.dirname(file), { recursive: true })
+      .then(() => fs.access(file, 0))
+      .catch((e) => fs.writeFile(file, file.match(/\.json/) ? "[]" : ""))
+      .then(() => fs.readFile(file, "utf-8"));
   }
 
   getWords() {
@@ -54,7 +58,7 @@ export class Database {
   saveWords() {
     return this.getWords().then((words) =>
       fs.writeFile(
-        path.resolve(__dirname, APP_CROSSWORDS_WORDS_PATH as string),
+        resolve(APP_CROSSWORDS_WORDS_PATH as string),
         words.join(",")
       )
     );
@@ -87,7 +91,7 @@ export class Database {
   saveGrids() {
     return this.getGrids().then((grids) =>
       fs.writeFile(
-        path.resolve(__dirname, APP_CROSSWORDS_GRIDS_PATH as string),
+        resolve(APP_CROSSWORDS_GRIDS_PATH as string),
         `[${grids.map((grid) => grid.serialize()).join(", ")}]`
       )
     );
@@ -100,11 +104,13 @@ export class Database {
   }
   updateGrid(gridstring: string) {
     const newgrid = Grid.unserialize(gridstring);
-    return this.getGrids().then(() => {
-      this.grids = this.grids.filter(({ id }) => id !== newgrid.id);
-      this.grids.push(newgrid);
-      return this.saveGrids();
-    });
+    return this.getGrids()
+      .then(() => {
+        this.grids = this.grids.filter(({ id }) => id !== newgrid.id);
+        this.grids.push(newgrid);
+        return this.saveGrids();
+      })
+      .then(() => newgrid.id);
   }
   deleteGrid(gridId) {
     return this.getGrids().then((grids) => {
@@ -126,7 +132,7 @@ export class Database {
   saveOptions() {
     return this.getOptions().then((options) =>
       fs.writeFile(
-        path.resolve(__dirname, APP_CROSSWORDS_OPTIONS_PATH as string),
+        resolve(APP_CROSSWORDS_OPTIONS_PATH as string),
         `[${options.map((option) => JSON.stringify(option)).join(", ")}]`
       )
     );

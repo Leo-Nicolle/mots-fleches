@@ -3,7 +3,7 @@
     <div class="leftpanel">
       <n-scrollbar y-scrollable style="max-height: calc(100vh - 100px)">
         <GridForm v-if="grid"
-          :grid="grid"
+          :model-value="grid"
         />
         <OptionsForm
           v-model="options"
@@ -71,14 +71,16 @@ function fetch() {
 }
 
 function onUpdate() {
-  console.log("update");
+  console.log('update')
   clearTimeout(saveTimeout.value);
   saveTimeout.value = setTimeout(() => {
     if (!options.value) return;
+    console.log('post')
+
     axios.post(getUrl(`options`), {
       options: options.value,
     });
-  }, 150);
+  }, 100);
 }
 
 onMounted(() => {

@@ -1,28 +1,27 @@
+import fs from "fs-extra";
+import { beforeAll, describe, it, expect } from "vitest";
+import { Grid } from "grid";
 import dico from "../lib/search/dico";
 import search, { Search } from "../lib/search/index";
-import { findBoundaries } from "../lib/search/utils";
 
-const fs = require("fs").promises;
-const chai = require("chai");
-const { expect } = chai;
+const grid = new Grid(3, 5, "grid1");
+grid.setDefinition({ x: 0, y: 0 }, true);
+grid.setDefinition({ x: 2, y: 2 }, true);
 
-const grid = [
-  ["\n", "A", "B", "C", ""],
-  ["", "B", "", "", ""],
-  ["", "C", "\n", "", ""],
-];
-const isDefinition = [
-  [true, false, false, false, false],
-  [false, false, false, false, false],
-  [false, false, true, false, false],
-];
+grid.setText({ x: 1, y: 0 }, "A");
+grid.setText({ x: 1, y: 1 }, "B");
+grid.setText({ x: 1, y: 2 }, "C");
 
-let baseWords;
+grid.setText({ x: 2, y: 0 }, "B");
+grid.setText({ x: 3, y: 0 }, "C");
+
 describe("Search", () => {
-  before(() => {
-    return dico
-      .loadDictionary()
-      .then(() => fs.readFile("./test/words-search-test.txt", "utf8"))
+  beforeAll(() => {
+    // return dico
+    // .loadDictionary()
+    // .then(() =>
+    return fs
+      .readFile("./test/dico/words-search-test.txt", "utf8")
       .then((data) => {
         dico.addWordsToDictionnary(data);
       });
@@ -30,19 +29,12 @@ describe("Search", () => {
 
   it("should get the lemme list correctly", () => {
     const coord = { x: 1, y: 1 };
-    const vec = { x: 1, y: 0 };
-    const { start, length } = findBoundaries({
-      grid,
-      coord,
-      vec,
-      isDefinition,
-    });
+    const { start, length } = grid.getBounds(coord, "horizontal");
     const lemmes = Search.getLemmes({
       grid,
-      isDefinition,
       coord: start,
       wordLength: length,
-      vec,
+      dir: "horizontal",
     });
     expect(lemmes).to.be.deep.equal([
       {
@@ -98,19 +90,13 @@ describe("Search", () => {
 
   it("should retrieve best words", () => {
     const coord = { x: 1, y: 1 };
-    const vec = { x: 1, y: 0 };
-    const { start, length } = findBoundaries({
-      grid,
-      coord,
-      vec,
-      isDefinition,
-    });
+    const dir = "horizontal";
+    const { start, length } = grid.getBounds(coord, dir);
     const lemmes = Search.getLemmes({
       grid,
-      isDefinition,
       coord: start,
       wordLength: length,
-      vec,
+      dir,
     });
     const words = dico.words.filter((w) => w.length === length);
     const results = search.getBestWords({
@@ -119,7 +105,7 @@ describe("Search", () => {
       grid,
       start,
       length,
-      vec,
+      dir,
     });
     expect(results.words).to.have.members(["ABAAT", "ABAOT"]);
   });
