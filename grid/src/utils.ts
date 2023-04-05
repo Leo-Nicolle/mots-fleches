@@ -1,5 +1,5 @@
 import { Grid, isSplited } from "./Grid";
-import { Cell, defaultOptions, GridOptions, } from "./types";
+import { Cell, defaultOptions, Direction, GridOptions, WordAndPosition, } from "./types";
 import { v4 as uuid } from "uuid";
 
 export function parse(str: string): [number, string] {
@@ -100,4 +100,41 @@ export function duplicate(options: GridOptions) {
 
 export function newOptions() {
   return duplicate(defaultOptions);
+}
+
+
+export function getWords(grid: Grid) {
+  const words = new Set<string>();
+  const wordsAndBounds: WordAndPosition[] = [];
+  (['horizontal', 'vertical'] as Direction[]).forEach(direction => {
+    const visited = new Array(grid.rows).fill(0).map(() => new Array(grid.cols).fill(false));
+    grid.cells.forEach((row) => {
+      row.forEach((cell) => {
+        if (cell.definition) return;
+        const bounds = grid.getBounds(cell, direction);
+        if (!bounds.length) return;
+        let word = '';
+        let valid = true;
+        bounds.cells.forEach((cell) => {
+          word += cell.text;
+          if (!cell.text) valid = false;
+          visited[cell.y][cell.x] = true;
+        });
+        if (!valid) return;
+        words.add(word);
+        wordsAndBounds.push({ word, start: bounds.start, direction });
+      });
+    })
+  })
+  return { words, wordsAndBounds };
+}
+
+export function getAllWords(grids: Grid[]) {
+
+  const words = new Set<string>();
+  grids.forEach(grid => {
+    const { words: gridWords } = getWords(grid);
+    gridWords.forEach(word => words.add(word));
+  })
+  return words;
 }

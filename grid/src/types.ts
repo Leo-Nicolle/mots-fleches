@@ -1,3 +1,4 @@
+import merge from 'merge';
 export type Vec = { x: number, y: number };
 export type Lookup<T> = { [key: number | string]: T };
 export type DefGrid = boolean[][];
@@ -97,6 +98,17 @@ export const defaultOptions: GridOptions = {
   }
 };
 
+export const defaultExportOptions: GridOptions = merge.recursive(
+  JSON.parse(JSON.stringify(defaultOptions)), 
+  {
+    id: 'defaultExport',
+    name: 'DefaultExport',
+    grid: {
+      cellSize: '20px'
+    }
+  }
+);
+
 export type GridState = {
   rows: number;
   cols: number;
@@ -107,4 +119,10 @@ export type GridState = {
   title: string;
   cells: Cell[][];
 };
+
+export type WordAndPosition = {
+  word: string;
+  start: Vec;
+  direction: Direction;
+}
 export const DPI_TO_PIXEL = 25.4;

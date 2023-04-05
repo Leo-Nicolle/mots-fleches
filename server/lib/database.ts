@@ -1,7 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import { resolve } from "./utils";
-import { Grid, GridOptions, defaultOptions } from "grid";
+import { Grid, GridOptions, defaultOptions, defaultExportOptions } from "grid";
 
 export class Database {
   public words: string[];
@@ -37,8 +37,11 @@ export class Database {
         Grid.unserialize(JSON.stringify(g))
       );
       this.options = options && options.length ? JSON.parse(options) : [];
-      if (!this.options.length) {
+      if (!this.options.find(({ id }) => id === "default")) {
         this.options.push(defaultOptions);
+      }
+      if (!this.options.find(({ id }) => id === "export")) {
+        this.options.push(defaultExportOptions);
       }
     });
     return this.loadingPromise;

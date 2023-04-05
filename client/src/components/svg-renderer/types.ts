@@ -7,7 +7,7 @@ export type ExportOptions = {
   outerBorders: boolean;
   borders: boolean;
   texts: boolean;
-  highlight:boolean;
+  highlight: boolean;
   splits: boolean;
   margins: boolean;
 }
@@ -23,15 +23,42 @@ export const defaultExportOptions: ExportOptions = {
   margins: true
 };
 
+export type SolutionOptions = {
+  grids: {
+    rows: number;
+    cols: number;
+    margin: number;
+  }
+  words: {
+    font: string;
+    size: string;
+    color: string;
+    cols: number;
+  }
+};
+
+export const defaultSolutionOptions: SolutionOptions = {
+  grids: {
+    rows: 4,
+    cols: 4
+  },
+  words: {
+    font: "sans-serif",
+    size: "12px",
+    color: "black",
+    cols: 2
+  }
+};
+
 export type Rect = {
   x: number;
   y: number;
-  width: number; 
+  width: number;
   height: number;
 }
-export type Handle ={
-  top:string;
-  left:string;
+export type Handle = {
+  top: string;
+  left: string;
   index: number;
   dirs: ArrowDir[];
 }

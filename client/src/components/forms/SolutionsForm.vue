@@ -23,48 +23,6 @@
           />
         </n-form-item>
       </div>
-      <div v-if="definition">
-        <h3>Définitions</h3>
-        <n-form-item label="Font" path="definition.font">
-          <n-input
-            role="definition-font"
-            v-model:value="value.definition.font"
-            placeholder="sans-serif"
-          />
-        </n-form-item>
-        <n-form-item label="Taille" path="definition.size">
-          <Sizeinput 
-          role="definition-size"          
-          v-model="value.definition.size" />
-        </n-form-item>
-        <n-form-item label="Couleur" path="definition.color">
-          <n-color-picker
-            role="definition-color"          
-            v-model:value="value.definition.color"
-            :show-alpha="false"
-            size="small"
-          />
-        </n-form-item>
-      </div>
-      <div v-if="arrows">
-        <h3>Flèches</h3>
-        <n-form-item label="Taille" path="arrow.size">
-          <Sizeinput 
-          role="arrow-size"          
-          v-model="value.arrow.size" />
-        </n-form-item>
-        <n-form-item label="Couleur" path="arrow.size">
-          <n-color-picker
-            role="arrow-color"          
-            v-model:value="value.arrow.color"
-            :show-alpha="false"
-            size="small"
-          />
-        </n-form-item>
-      </div>
-      <div v-if="format">
-        <format-picker v-model="value.paper"></format-picker>
-      </div>
     </n-form>
   </div>
 </template>
@@ -74,7 +32,6 @@ import { defineProps, defineEmits, watchEffect, watch } from "vue";
 import { useModel } from "../../js/useModel";
 import { GridOptions } from "grid";
 import Sizeinput from "./Sizeinput.vue";
-import FormatPicker from "./FormatPicker.vue";
 
 const props = defineProps<{
   modelValue: GridOptions;

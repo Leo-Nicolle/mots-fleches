@@ -86,7 +86,7 @@ import SVGGrid from "../components/svg-renderer/Grid.vue";
 import { defaultExportOptions } from "../components/svg-renderer/types";
 
 import { getUrl, save } from "../js/utils";
-import { Grid, GridOptions, nullCell } from "grid";
+import { getAllWords, Grid, GridOptions, nullCell } from "grid";
 const router = useRouter();
 const grids = ref<Grid[]>([]);
 const options = ref<GridOptions[]>([]);
@@ -110,6 +110,7 @@ function fetch() {
     .then(({ data }) => {
       grids.value = data.map((g) => Grid.unserialize(JSON.stringify(g)));
       selected.value = new Array(grids.value.length).fill(false);
+      console.log(getAllWords(grids.value));
     })
     .then(() =>
       Promise.all(

@@ -24,7 +24,6 @@ export class Grid {
   public cells: Cell[][];
   public id: string;
   public created: number;
-  public thumbnail: string;
   public optionsId: string;
 
 
@@ -33,7 +32,6 @@ export class Grid {
     this.rows = rows;
     this.comment = '';
     this.title = '';
-    this.thumbnail = '';
     this.optionsId = 'default';
     this.id = id || uuid();
     this.created = Date.now();
@@ -114,9 +112,6 @@ export class Grid {
     Grid.setArrow(this.cells[v.y][v.x], index, direction);
   }
 
-  setThumbnail(t: string) {
-    this.thumbnail = t;
-  }
 
   increment(v: Vec, direction: Direction): Cell {
     const { x, y } = new Vector(v.x, v.y).add(Grid.getDirVec(direction));
