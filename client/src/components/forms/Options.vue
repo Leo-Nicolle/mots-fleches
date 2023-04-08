@@ -1,7 +1,7 @@
 <template>
   <div class="options">
-    <slot></slot>
     <n-form ref="formRef" inline :label-width="80" :model="value">
+      <slot></slot>
       <div v-if="grid">
         <h3>Options</h3>
         <n-form-item label="Nom" path="name">

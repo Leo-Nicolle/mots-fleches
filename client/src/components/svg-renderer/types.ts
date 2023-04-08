@@ -39,8 +39,8 @@ export type SolutionOptions = {
 
 export const defaultSolutionOptions: SolutionOptions = {
   grids: {
-    rows: 4,
-    cols: 4
+    rows: 2,
+    cols: 2
   },
   words: {
     font: "sans-serif",

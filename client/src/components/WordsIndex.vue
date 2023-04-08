@@ -1,29 +1,12 @@
 <template>
-  <div v-if="grids && options">
-    <Paper
-      v-for="(gs, i) in gridsPerPage"
-      :key="i"
-      :format="options.paper"
-      :showMargins="exportOptions.margins"
-    >
-      <div class="grids">
-        <SVGGrid
-          v-for="(grid, j) in gs"
-          :key="j"
-          :grid="grid"
-          :focus="nullCell"
-          dir="horizontal"
-          :options="options"
-          :export-options="exportOptions"
-        />
-      </div>
-    </Paper>
-  </div>
+  <Paper :format="options.paper" :showMargins="exportOptions.margins">
+    <div v-if="grids && options" class="grids">
+    </div>
+  </Paper>
 </template>
 
 <script setup lang="ts">
 import { defineProps, watch } from "vue";
-import SVGGrid from "./svg-renderer/Grid.vue";
 import Paper from "./Paper.vue";
 import { Grid, GridOptions, nullCell } from "grid";
 import { computed } from "vue";
@@ -39,23 +22,23 @@ const props = defineProps<{
   solutionsOptions: SolutionOptions;
 }>();
 const rows = computed(() => {
-  if (!props.solutionsOptions) return "";
+  if (!props.solutionsOptions) return '';
   return `repeat(${props.solutionsOptions.grids.rows},0)`;
 });
 const cols = computed(() => {
-  if (!props.solutionsOptions) return "";
+  if (!props.solutionsOptions) return '';
   return `repeat(${props.solutionsOptions.grids.cols},0)`;
 });
-const gridsPerPage = computed(() => {
-  if (!props.solutionsOptions) return [props.grids];
-  const { rows, cols } = props.solutionsOptions.grids;
-  const perPage = rows * cols;
-  const pages = Math.ceil(props.grids.length / perPage);
-
-  return new Array(pages)
-    .fill(0)
-    .map((_, i) => props.grids.slice(i * perPage, (i + 1) * perPage));
+watch(props.solutionsOptions, () => {
+  console.log('solutionsOptions changed' ,props.solutionsOptions.grids.rows, props.solutionsOptions.grids.cols);
 });
+
+function getStyle(i: number) {
+  const row = Math.floor(i / props.solutionsOptions.grids.cols);
+  const col = i % props.solutionsOptions.grids.cols;
+
+  return { gridArea: `${row + 1} ${col + 1} 1 1` };
+}
 </script>
 
 <style lang="less">

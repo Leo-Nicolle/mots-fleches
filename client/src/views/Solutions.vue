@@ -6,10 +6,10 @@
           v-model="options"
           @update:modelValue="onUpdate"
           grid
-          definition
-          arrows
           format
-        />
+        >
+          <SolutionsForm v-model="solutionsOptions" @update:modelValue="onUpdateM"/>
+        </OptionsForm>
       </n-scrollbar>
     </div>
     <div class="viewer">
@@ -20,13 +20,13 @@
         <SolutionsPaper
           :grids="grids"
           :options="options"
+          class="paper"
           :export-options="exportOptions"
           :solutions-options="solutionsOptions"
         />
       </n-scrollbar>
     </div>
   </div>
-
 </template>
 
 <script setup lang="ts">
@@ -35,6 +35,8 @@ import { useRouter, useRoute } from "vue-router";
 import axios from "axios";
 import OptionsForm from "../components/forms/Options.vue";
 import SolutionsPaper from "../components/Solutions.vue";
+import SolutionsForm from "../components/forms/SolutionsForm.vue";
+
 import { getUrl, save } from "../js/utils";
 import { getAllWords, Grid, GridOptions, nullCell } from "grid";
 import {
@@ -47,17 +49,21 @@ const router = useRouter();
 const grids = ref<Grid[]>([]);
 const options = ref<GridOptions>();
 const solutionsOptions = ref<SolutionOptions>(defaultSolutionOptions);
-const exportOptions = ref<ExportOptions>(defaultExportOptions);
+const exportOptions = ref<ExportOptions>({
+  ...defaultExportOptions,
+  arrows: false,
+  definitions: false,
+});
 
 function fetch() {
   return axios
     .get(getUrl("grid"))
     .then(({ data }) => {
-      console.log('data', data);
+      console.log("data", data);
       grids.value = data.map((g) => Grid.unserialize(JSON.stringify(g)));
     })
     .then(() => axios.get(getUrl(`options/defaultExport`)))
-    .then(({data}) => {
+    .then(({ data }) => {
       options.value = data;
       console.log(options.value, grids.value);
     })
@@ -66,7 +72,9 @@ function fetch() {
     });
 }
 
-function onUpdate(){
+function onUpdate() {}
+function onUpdateM() {
+  console.log("updateM", solutionsOptions.value.grids.rows);
 }
 onMounted(() => {
   fetch();
@@ -74,7 +82,10 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.solutions{
+.paper {
+  margin: 20px;
+}
+.solutions {
   display: flex;
   flex-direction: row;
   height: 100%;

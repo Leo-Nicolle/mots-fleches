@@ -1,52 +1,27 @@
 <template>
-  <div class="options">
-    <slot></slot>
-    <n-form ref="formRef" inline :label-width="80" :model="value">
-      <div v-if="grid">
-        <h3>Options</h3>
-        <n-form-item label="Nom" path="name">
-          <n-input role="name" v-model:value="value.name" />
-        </n-form-item>
-
-        <n-form-item label="Taille cellule" path="grid.cellSize">
-          <Sizeinput role="cell-size" v-model="value.grid.cellSize" />
-        </n-form-item>
-        <n-form-item label="Taille bordure" path="grid.borderSize">
-          <Sizeinput role="border-size" v-model="value.grid.borderSize" />
-        </n-form-item>
-        <n-form-item label="Couleur bordure" path="grid.borderColor">
-          <n-color-picker
-            role="border-color"
-            v-model:value="value.grid.borderColor"
-            :show-alpha="false"
-            size="small"
-          />
-        </n-form-item>
-      </div>
-    </n-form>
-  </div>
+    <h3>Solutions</h3>
+    <n-form-item label="Lignes" path="rows">
+      <n-input-number role="rows" v-model:value="value.grids.rows" />
+    </n-form-item>
+    <n-form-item label="Colonnes" path="cols">
+      <n-input-number role="cols" v-model:value="value.grids.cols" />
+    </n-form-item>
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, watchEffect, watch } from "vue";
+import { defineProps, defineEmits, watch } from "vue";
 import { useModel } from "../../js/useModel";
-import { GridOptions } from "grid";
-import Sizeinput from "./Sizeinput.vue";
+import { SolutionOptions } from "../svg-renderer/types";
 
 const props = defineProps<{
-  modelValue: GridOptions;
-  grid: boolean;
-  definition: boolean;
-  arrows: boolean;
-  format: boolean;
+  modelValue: SolutionOptions;
 }>();
 const emit = defineEmits<{
-  (event: "update:modelValue", value: GridOptions): void;
+  (event: "update:modelValue", value: SolutionOptions): void;
 }>();
 const value = useModel(props, emit);
 
 watch(value.value, () => {
-  console.log("WATCH", value.value.name);
   emit("update:modelValue", value.value);
 });
 </script>
