@@ -22,7 +22,7 @@ import { renderIcon } from "./js/utils";
 const route = useRoute();
 
 const displayMenu = computed(() => {
-  return route.name !== "grid-export";
+  return !route.name || !route.name.includes('export');// !== "grid-export";
 });
 const collapsed = ref(true);
 

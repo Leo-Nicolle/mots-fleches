@@ -1,5 +1,5 @@
 <template>
-  <SolutionsPaper
+  <WordsIndex
     :grids="grids"
     :options="options"
     class="paper"
@@ -12,17 +12,16 @@
 import { ref, onMounted, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import axios from "axios";
-import SolutionsPaper from "../components/Solutions.vue";
+import WordsIndex from "../components/WordsIndex.vue";
 
 import { getUrl } from "../js/utils";
-import {  Grid, GridOptions } from "grid";
+import { Grid, GridOptions } from "grid";
 import {
   defaultExportOptions,
   defaultSolutionOptions,
   ExportOptions,
   SolutionOptions,
 } from "../components/svg-renderer/types";
-const router = useRouter();
 const grids = ref<Grid[]>([]);
 const options = ref<GridOptions>();
 const solutionsOptions = ref<SolutionOptions>(defaultSolutionOptions);

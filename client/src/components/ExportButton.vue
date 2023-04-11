@@ -7,10 +7,9 @@
 
 <script setup lang="ts">
 import { defineProps, computed } from "vue";
-import { Grid } from "grid";
 import router from "../router";
 
-const props = defineProps<{ grid: Grid }>();
+const props = defineProps<{ route: string, params: any }>();
 
 function print() {
   const iframe = document.querySelector(".print");
@@ -24,8 +23,8 @@ const iframeUrl = computed(() => {
   )
   const url =  `${window.location.origin}${
     router.resolve({
-      name: "grid-export",
-      params: { id: props.grid.id },
+      name: props.route,
+      params: props.params,
     }).href
   }`;
   return url;

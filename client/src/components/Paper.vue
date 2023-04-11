@@ -27,6 +27,7 @@
 import { Format } from "grid";
 import { defineProps } from "vue";
 import { computed } from "vue";
+import { getBodyPageHeight, getBodyPageWidth } from "../js/utils";
 
 const props = defineProps<{
   showMargins: boolean;
@@ -59,16 +60,8 @@ const bodyPadding = computed(() => {
   return [top, right, bottom, left].map(m => `${m}cm`).join(' ');
 });
 
-const bodyWidth = computed(() => {
-  const {width,  margin} = props.format;
-  const { left, right} = margin;
-  return `${width - left - right}cm`;
-});
-const bodyHeight = computed(() => {
-  const {height, margin} = props.format;
-  const {top, bottom} = margin;
-  return `${height - top - bottom}cm`;
-});
+const bodyWidth = computed(() => getBodyPageWidth(props.format));
+const bodyHeight = computed(() => getBodyPageHeight(props.format));
 
 
 </script>

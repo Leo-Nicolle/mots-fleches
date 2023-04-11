@@ -2,9 +2,7 @@
   <div class="options" v-if="options && grid">
     <div class="leftpanel">
       <n-scrollbar y-scrollable style="max-height: calc(100vh - 100px)">
-        <GridForm v-if="grid"
-          :model-value="grid"
-        />
+        <GridForm v-if="grid" :model-value="grid" />
         <OptionsForm
           v-model="options"
           @update:modelValue="onUpdate"
@@ -33,9 +31,8 @@
         />
       </n-scrollbar>
     </div>
-    <ExportButton :grid="grid" />
+    <ExportButton route="grid-export" :params="{ id: grid.id }" />
     <ExportSVGButton :grid="grid" />
-
   </div>
 </template>
 
@@ -46,7 +43,7 @@ import ExportButton from "../components/ExportButton.vue";
 import ExportSVGButton from "../components/ExportSVG.vue";
 import OptionsForm from "../components/forms/Options.vue";
 import GridForm from "../components/forms/GridForm.vue";
-import {defaultExportOptions} from "../components/svg-renderer/types";
+import { defaultExportOptions } from "../components/svg-renderer/types";
 import { Grid, GridOptions } from "grid";
 import { getUrl } from "../js/utils";
 import { ref, onMounted } from "vue";
@@ -71,11 +68,11 @@ function fetch() {
 }
 
 function onUpdate() {
-  console.log('update')
+  console.log("update");
   clearTimeout(saveTimeout.value);
   saveTimeout.value = setTimeout(() => {
     if (!options.value) return;
-    console.log('post')
+    console.log("post");
 
     axios.post(getUrl(`options`), {
       options: options.value,
