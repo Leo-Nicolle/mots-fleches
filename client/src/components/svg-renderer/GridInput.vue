@@ -69,7 +69,7 @@ import { Handle } from "./types";
 const container = ref(null as unknown as HTMLDivElement);
 const emit = defineEmits<{
   (event: "update"): string;
-  (event: "focus", value: Cell);
+  (event: "focus", value: Cell):void;
 }>();
 const props = defineProps<{
   cell: Cell;
@@ -79,9 +79,9 @@ const props = defineProps<{
   offset: [number, number];
 }>();
 const cellSize = computed(() => `${cellWidth(props.options)}px`);
-const textSize = computed(() => parse(props.options.grid.cellSize)[0]);
+const textSize = computed(() => props.options.grid.cellSize);
 const textFont = computed(() => `${textSize.value}px roboto`);
-const defSize = computed(() => parse(props.options.definition.size)[0]);
+const defSize = computed(() => props.options.definition.size);
 const defFont = computed(
   () => `${defSize.value}px ${props.options.definition.font}`
 );

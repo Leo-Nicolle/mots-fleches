@@ -15,18 +15,13 @@ export function format(num: number, unit: string): string {
 
 export function cellWidth(options: GridOptions) {
   const { cellSize } = options.grid;
-  const [width] = parse(cellSize);
-  return width;
+  return cellSize;
 }
 export function borderWidth(options: GridOptions) {
-  const { borderSize } = options.grid;
-  const [width] = parse(borderSize);
-  return width;
+  return options.grid.borderSize;
 }
 export function outerBorderWidth(options: GridOptions) {
-  const { outerBorderSize } = options.grid;
-  const [width] = parse(outerBorderSize);
-  return width;
+  return options.grid.outerBorderSize;
 }
 export function cellAndBorderWidth(options: GridOptions) {
   return cellWidth(options) + borderWidth(options);
@@ -35,16 +30,12 @@ export function cellAndBorderWidth(options: GridOptions) {
 export function gridWidth(grid: Grid, options: GridOptions) {
   const { cellSize, borderSize } = options.grid;
   const { cols } = grid;
-  const [cellWidth] = parse(cellSize);
-  const [border] = parse(borderSize);
-  return cols * cellWidth + (cols - 1) * border;
+  return cols * cellSize + (cols - 1) * borderSize;
 }
 export function gridHeight(grid: Grid, options: GridOptions) {
   const { cellSize, borderSize } = options.grid;
   const { rows } = grid;
-  const [cellHeight] = parse(cellSize);
-  const [border] = parse(borderSize);
-  return rows * cellHeight + (rows - 1) * border;
+  return rows * cellSize + (rows - 1) * borderSize;
 }
 
 export function gridTotalWidth(grid: Grid, options: GridOptions) {

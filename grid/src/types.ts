@@ -2,13 +2,20 @@ import merge from 'merge';
 export type Vec = { x: number, y: number };
 export type Lookup<T> = { [key: number | string]: T };
 export type DefGrid = boolean[][];
-
+export type DeepPartial<T> = T extends object ? {
+  [P in keyof T]?: DeepPartial<T[P]>;
+} : T;
 export type ArrowDir = 'right' | 'down' | 'rightdown' | 'downright' | 'none';
 export type Arrow = {
   position: Vec;
   direction: ArrowDir;
 }
 
+export interface TextSyle<T = string> {
+  font: string;
+  size: T;
+  color: string;
+}
 export type Cell = {
   x: number;
   y: number;
@@ -36,20 +43,17 @@ export type GridOptions = {
   id: string;
   name: string;
   grid: {
-    cellSize: string;
-    borderSize: string;
+    cellSize: number;
+    borderSize: number;
     borderColor: string;
-    outerBorderSize: string;
+    outerBorderSize: number;
     outerBorderColor: string;
   };
-  definition: {
-    font: string;
-    size: string;
-    color: string;
+  definition: TextSyle<number> & {
     backgroundColor: string;
   };
   arrow: {
-    size: string;
+    size: number;
     color: string;
   };
   paper: Format;
@@ -68,20 +72,20 @@ export const defaultOptions: GridOptions = {
   id: 'default',
   name: 'Default',
   grid: {
-    cellSize: '54px',
-    borderSize: '1px',
+    cellSize: 54,
+    borderSize: 1,
     borderColor: '#000000',
-    outerBorderSize: '2px',
+    outerBorderSize: 2,
     outerBorderColor: '#000000',
   },
   definition: {
     font: "sans-serif",
-    size: "12px",
+    size: 12,
     color: "black",
     backgroundColor: "#ccc",
   },
   arrow: {
-    size: '10px',
+    size: 10,
     color: '#000000',
   },
   paper: {
@@ -98,15 +102,16 @@ export const defaultOptions: GridOptions = {
   }
 };
 
-export const defaultExportOptions: GridOptions = merge.recursive(
-  JSON.parse(JSON.stringify(defaultOptions)), 
-  {
-    id: 'defaultExport',
-    name: 'DefaultExport',
-    grid: {
-      cellSize: '20px'
-    }
+const expOptions: DeepPartial<GridOptions> = {
+  id: 'defaultExport',
+  name: 'DefaultExport',
+  grid: {
+    cellSize: 20
   }
+}
+export const defaultExportOptions: GridOptions = merge.recursive(
+  JSON.parse(JSON.stringify(defaultOptions)),
+  expOptions
 );
 
 export type GridState = {

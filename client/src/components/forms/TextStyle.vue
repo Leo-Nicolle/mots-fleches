@@ -7,9 +7,12 @@
           />
         </n-form-item>
         <n-form-item label="Taille" path="size">
-          <Sizeinput 
+          <Sizeinput v-if="typeof value.size==='string'"
           role="size"          
           v-model="value.size" />
+          <n-input-number v-else
+          role="size"
+          v-model:value="value.size" />
         </n-form-item>
         <n-form-item label="Couleur" path="color">
           <n-color-picker

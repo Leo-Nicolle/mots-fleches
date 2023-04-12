@@ -9,15 +9,26 @@
         </n-form-item>
 
         <n-form-item label="Taille cellule" path="grid.cellSize">
-          <Sizeinput role="cell-size" v-model="value.grid.cellSize" />
+          <n-input-number role="cell-size" v-model:value="value.grid.cellSize" />
         </n-form-item>
         <n-form-item label="Taille bordure" path="grid.borderSize">
-          <Sizeinput role="border-size" v-model="value.grid.borderSize" />
+          <n-input-number role="border-size" v-model:value="value.grid.borderSize" />
         </n-form-item>
         <n-form-item label="Couleur bordure" path="grid.borderColor">
           <n-color-picker
             role="border-color"
             v-model:value="value.grid.borderColor"
+            :show-alpha="false"
+            size="small"
+          />
+        </n-form-item>
+        <n-form-item label="Taille bordure Ext" path="grid.outerBorderSize">
+          <n-input-number role="outerBorder-size" v-model:value="value.grid.outerBorderSize" />
+        </n-form-item>
+        <n-form-item label="Couleur bordure Ext" path="grid.outerBorderColor">
+          <n-color-picker
+            role="outerBorder-color"
+            v-model:value="value.grid.outerBorderColor"
             :show-alpha="false"
             size="small"
           />
@@ -30,9 +41,9 @@
       <div v-if="arrows">
         <h3>Flèches</h3>
         <n-form-item label="Taille" path="arrow.size">
-          <Sizeinput 
+          <n-input-number 
           role="arrow-size"          
-          v-model="value.arrow.size" />
+          v-model:value="value.arrow.size" />
         </n-form-item>
         <n-form-item label="Couleur" path="arrow.size">
           <n-color-picker
@@ -54,7 +65,6 @@
 import { defineProps, defineEmits, watchEffect, watch } from "vue";
 import { useModel } from "../../js/useModel";
 import { GridOptions } from "grid";
-import Sizeinput from "./Sizeinput.vue";
 import FormatPicker from "./FormatPicker.vue";
 import TextStyle from "./TextStyle.vue";
 
