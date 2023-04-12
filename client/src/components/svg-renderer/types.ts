@@ -24,35 +24,6 @@ export const defaultExportOptions: ExportOptions = {
   margins: true
 };
 
-export type SolutionOptions = {
-  grids: {
-    rows: number;
-    cols: number;
-  };
-  words: TextSyle & {
-    tolerance: number;
-  };
-  size: TextSyle;
-};
-
-export const defaultSolutionOptions: SolutionOptions = {
-  grids: {
-    rows: 2,
-    cols: 2
-  },
-  words: {
-    font: "sans-serif",
-    size: "1em",
-    color: "black",
-    tolerance: 2
-  },
-  size:{
-    font: "sans-serif",
-    size: "1.5em",
-    color: "black",
-  }
-};
-
 export type Rect = {
   x: number;
   y: number;

@@ -40,7 +40,7 @@ export class Database {
       if (!this.options.find(({ id }) => id === "default")) {
         this.options.push(defaultOptions);
       }
-      if (!this.options.find(({ id }) => id === "export")) {
+      if (!this.options.find(({ id }) => id === "solution")) {
         this.options.push(defaultExportOptions);
       }
     });

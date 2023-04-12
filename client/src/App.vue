@@ -54,6 +54,17 @@ const menuOptions = ref<MenuOption[]>([
           ),
         key: "go-to-options",
       },
+      {
+        label: () =>
+          h(
+            RouterLink,
+            {
+              to: "/solutions",
+            },
+            { default: () => "Solutions" }
+          ),
+        key: "go-to-solutions",
+      },
     ],
   },
 ]);

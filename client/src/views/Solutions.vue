@@ -4,7 +4,6 @@
     :options="options"
     class="paper"
     :export-options="exportOptions"
-    :solutions-options="solutionsOptions"
   />
 </template>
 
@@ -18,14 +17,12 @@ import { getUrl } from "../js/utils";
 import {  Grid, GridOptions } from "grid";
 import {
   defaultExportOptions,
-  defaultSolutionOptions,
   ExportOptions,
   SolutionOptions,
 } from "../components/svg-renderer/types";
 const router = useRouter();
 const grids = ref<Grid[]>([]);
-const options = ref<GridOptions>();
-const solutionsOptions = ref<SolutionOptions>(defaultSolutionOptions);
+const options = ref<SolutionOptions>();
 const exportOptions = ref<ExportOptions>({
   ...defaultExportOptions,
   arrows: false,
@@ -39,7 +36,7 @@ function fetch() {
       console.log("data", data);
       grids.value = data.map((g) => Grid.unserialize(JSON.stringify(g)));
     })
-    .then(() => axios.get(getUrl(`options/defaultExport`)))
+    .then(() => axios.get(getUrl(`options/solution`)))
     .then(({ data }) => {
       options.value = data;
       console.log(options.value, grids.value);

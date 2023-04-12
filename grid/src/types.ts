@@ -102,16 +102,44 @@ export const defaultOptions: GridOptions = {
   }
 };
 
-const expOptions: DeepPartial<GridOptions> = {
-  id: 'defaultExport',
-  name: 'DefaultExport',
+export type SolutionOptions = GridOptions & {
+  isSolution:true;
+  grids: {
+    rows: number;
+    cols: number;
+  };
+  words: TextSyle & {
+    tolerance: number;
+  };
+  size: TextSyle;
+};
+
+const expOptions: DeepPartial<SolutionOptions> = {
+  id: 'solution',
+  name: 'solution',
   grid: {
     cellSize: 20
-  }
+  },
+  grids: {
+    rows: 2,
+    cols: 2
+  },
+  words: {
+    font: "sans-serif",
+    size: "1em",
+    color: "black",
+    tolerance: 2
+  },
+  size:{
+    font: "sans-serif",
+    size: "1.5em",
+    color: "black",
+  },
+  isSolution: true
 }
-export const defaultExportOptions: GridOptions = merge.recursive(
+export const defaultSolutionOptions: SolutionOptions = merge.recursive(
   JSON.parse(JSON.stringify(defaultOptions)),
-  expOptions
+  expOptions,
 );
 
 export type GridState = {
