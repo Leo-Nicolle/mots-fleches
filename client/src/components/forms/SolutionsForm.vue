@@ -6,10 +6,15 @@
     <n-form-item label="Colonnes" path="cols">
       <n-input-number role="cols" v-model:value="value.grids.cols" />
     </n-form-item>
+    <h3>Index</h3>
+    <TextStyle v-model="value.words" />
+    <h3>Taille</h3>
+    <TextStyle v-model="value.size" />
 </template>
 
 <script setup lang="ts">
 import { defineProps, defineEmits, watch } from "vue";
+import TextStyle from "./TextStyle.vue";
 import { useModel } from "../../js/useModel";
 import { SolutionOptions } from "../svg-renderer/types";
 

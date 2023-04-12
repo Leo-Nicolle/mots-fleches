@@ -1,3 +1,4 @@
+import { TextSyle } from "grid";
 import { ArrowDir } from "grid";
 
 
@@ -27,14 +28,11 @@ export type SolutionOptions = {
   grids: {
     rows: number;
     cols: number;
-    margin: number;
-  }
-  words: {
-    font: string;
-    size: string;
-    color: string;
-    cols: number;
-  }
+  };
+  words: TextSyle & {
+    tolerance: number;
+  };
+  size: TextSyle;
 };
 
 export const defaultSolutionOptions: SolutionOptions = {
@@ -44,9 +42,14 @@ export const defaultSolutionOptions: SolutionOptions = {
   },
   words: {
     font: "sans-serif",
-    size: "12px",
+    size: "1em",
     color: "black",
-    cols: 2
+    tolerance: 2
+  },
+  size:{
+    font: "sans-serif",
+    size: "1.5em",
+    color: "black",
   }
 };
 

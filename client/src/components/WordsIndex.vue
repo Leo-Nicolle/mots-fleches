@@ -1,12 +1,16 @@
 <template>
   <div v-if="grids && options">
     <Paper
-      v-for="(words, i) in wordsPerPage"
+      v-for="(words, i) in layout.wordsPerPage"
       :key="i"
       :format="options.paper"
       :showMargins="exportOptions.margins"
+      bodyClass="body-index"
     >
-      <span class="words" ref="wordsContainer">
+      <span
+        class="words"
+        ref="wordsContainer"
+      >
         <span
           v-for="(word, j) in words"
           :class="typeof word === 'number' ? 'size' : 'word'"
@@ -15,6 +19,7 @@
           {{ word }}
         </span>
       </span>
+      <span class="pushup"></span>
     </Paper>
     <Paper class="paper ruler" :format="options.paper" :showMargins="false">
       <span class="words ruler" ref="ruler"> </span>
@@ -23,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, ref, watch } from "vue";
+import { defineProps, h, ref, watch } from "vue";
 import Paper from "./Paper.vue";
 import { Grid, GridOptions, getAllWords } from "grid";
 import { computed } from "vue";
@@ -57,20 +62,32 @@ function makeid(length) {
   return result;
 }
 const words = Array.from(getAllWords(props.grids));
-  new Array(1000).fill(0).forEach((_, i) => {
-    const length = 2 + Math.floor(Math.random() * 7);
-    words.push(makeid(length));
-  });
+new Array(1000).fill(0).forEach((_, i) => {
+  const length = 2 + Math.floor(Math.random() * 7);
+  words.push(makeid(length));
+});
 //   console.log(JSON.stringify(words));
 
 // const words = JSON.parse(
 //   `["ABCDEFGH","JAUNCDU","PYBPUKF","MF","KCGPGD","KWHA","HEQMXIMX","MFWUBC","ZLDD","RCTKDI","BMMWS","ISLBMNE","DKFH","VTUHZL","NGUTFRI","VEGVLE","QON","EE","NXRAQRFL","EXCGDR","EFLCVNZL"]`
 // );
-const  tolerance = 2;
-const wordsPerPage = computed(() => {
-  if (!props.grids || !ruler.value || !ruler.value.parentElement) return [];
+const wordFont = computed(
+  () =>
+    `${props.solutionsOptions.words.size} ${props.solutionsOptions.words.font}`
+);
+const wordsColor = computed(() => props.solutionsOptions.words.color);
+const sizeFont = computed(
+  () =>
+    `${props.solutionsOptions.size.size} ${props.solutionsOptions.size.font}`
+);
+const sizeColor = computed(() => props.solutionsOptions.size.color);
+
+const tolerance = 2;
+const layout = computed(() => {
+  if (!props.grids || !ruler.value || !ruler.value.parentElement)
+    return { wordsPerPage: [], heights: [] };
   const r = ruler.value as HTMLDivElement;
-  const bb = r.getBoundingClientRect();
+  let bb = r.getBoundingClientRect();
   const maxX = bb.x + bb.width;
   // const maxHeight= r.clientHeight;
 
@@ -86,27 +103,41 @@ const wordsPerPage = computed(() => {
     }, {} as WordMap);
 
   let wordsOnCurrentPage: (string | number)[] = [];
-
-  const res = Object.entries(wordsMap).reduce((wordsPerPage, [size, words]) => {
-    [+size, ...words.sort((a, b) => a.localeCompare(b))].forEach((word) => {
-      const span = document.createElement("span");
-      span.innerHTML = `${word}`;
-      span.classList.add(typeof word === "number" ? "size" : "word");
-      r.appendChild(span);
-      const { x, y, width, height } = span.getBoundingClientRect();
-      if (x + width > maxX - tolerance) {
-        r.innerHTML = "";
-        r.appendChild(span);
-        wordsPerPage.push(wordsOnCurrentPage);
-        wordsOnCurrentPage = [word];
-      } else {
-        wordsOnCurrentPage.push(word);
-      }
-    });
-    return wordsPerPage;
-  }, [] as (string | number)[][]);
+  const heights: string[] = [];
+  const res = Object.entries(wordsMap).reduce(
+    (wordsPerPage, [size, words], i, arr) => {
+      [+size, ...words.sort((a, b) => a.localeCompare(b))].forEach(
+        (word, j, arr1) => {
+          const span = document.createElement("span");
+          span.innerHTML = `${word}`;
+          span.classList.add(typeof word === "number" ? "size" : "word");
+          r.appendChild(span);
+          const { x, y, width, height } = span.getBoundingClientRect();
+          if (x + width > maxX - tolerance) {
+            r.innerHTML = "";
+            r.appendChild(span);
+            wordsPerPage.push(wordsOnCurrentPage);
+            wordsOnCurrentPage = [word];
+            heights.push("100%");
+          } else {
+            wordsOnCurrentPage.push(word);
+          }
+        }
+      );
+      return wordsPerPage;
+    },
+    [] as (string | number)[][]
+  );
   res.push(wordsOnCurrentPage);
-  return res;
+  bb = r.getBoundingClientRect();
+  const { x, y, width, height } = r.lastChild.getBoundingClientRect();
+  const area = (x - bb.x + width) * (y- bb.y + height) + (bb.height - y + bb.y) * (x - bb.x);
+  const totalArea = bb.width * bb.height;
+  const ratio = area / totalArea;
+  heights.push(ratio * 100 + "%");
+  console.log(ratio);
+
+  return { wordsPerPage: res.reverse(), heights:heights.reverse() };
 });
 </script>
 
@@ -138,12 +169,20 @@ const wordsPerPage = computed(() => {
   background: red;
 }
 .size {
-  font-size: 1.5em;
+  font: v-bind(sizeFont);
+  color: v-bind(sizeColor);
   font-weight: bold;
   text-align: center;
 }
 .word {
-  font-size: 1em;
+  font: v-bind(wordFont);
+  color: v-bind(wordsColor);
   text-align: center;
+}
+.body.body-index {
+  align-content: flex-start;
+}
+.pushup {
+  flex: 1;
 }
 </style>

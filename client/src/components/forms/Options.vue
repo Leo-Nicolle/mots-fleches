@@ -25,26 +25,7 @@
       </div>
       <div v-if="definition">
         <h3>Définitions</h3>
-        <n-form-item label="Font" path="definition.font">
-          <n-input
-            role="definition-font"
-            v-model:value="value.definition.font"
-            placeholder="sans-serif"
-          />
-        </n-form-item>
-        <n-form-item label="Taille" path="definition.size">
-          <Sizeinput 
-          role="definition-size"          
-          v-model="value.definition.size" />
-        </n-form-item>
-        <n-form-item label="Couleur" path="definition.color">
-          <n-color-picker
-            role="definition-color"          
-            v-model:value="value.definition.color"
-            :show-alpha="false"
-            size="small"
-          />
-        </n-form-item>
+        <TextStyle v-model="value.definition" />
       </div>
       <div v-if="arrows">
         <h3>Flèches</h3>
@@ -75,6 +56,7 @@ import { useModel } from "../../js/useModel";
 import { GridOptions } from "grid";
 import Sizeinput from "./Sizeinput.vue";
 import FormatPicker from "./FormatPicker.vue";
+import TextStyle from "./TextStyle.vue";
 
 const props = defineProps<{
   modelValue: GridOptions;

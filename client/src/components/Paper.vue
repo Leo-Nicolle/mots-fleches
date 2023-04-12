@@ -1,6 +1,6 @@
 <template>
   <div class="page">
-    <div class="body">
+    <div :class="`body ${bodyClass} || ''`">
       <slot></slot>
     </div>
     <div v-if="showMargins">
@@ -32,6 +32,7 @@ import { getBodyPageHeight, getBodyPageWidth } from "../js/utils";
 const props = defineProps<{
   showMargins: boolean;
   format: Format;
+  bodyClass?: string;
 }>();
 const margins = computed(() => {
   if (!props.format) return [0, 0, 0, 0];
@@ -56,14 +57,12 @@ const pageHeight = computed(() => {
   return `${props.format.height}cm`;
 });
 const bodyPadding = computed(() => {
-  const {top, left, right, bottom} = props.format.margin;
-  return [top, right, bottom, left].map(m => `${m}cm`).join(' ');
+  const { top, left, right, bottom } = props.format.margin;
+  return [top, right, bottom, left].map((m) => `${m}cm`).join(" ");
 });
 
 const bodyWidth = computed(() => getBodyPageWidth(props.format));
 const bodyHeight = computed(() => getBodyPageHeight(props.format));
-
-
 </script>
 
 <style lang="less">
