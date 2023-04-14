@@ -1,10 +1,12 @@
 <template>
-  <div class="options" v-if="options && grid">
-    <div class="leftpanel">
+  <Layout>
+    <template v-slot:header v-if="grid">
+      <ExportButton route="grid-export" :params="{ id: grid.id }" />
+      <ExportSVGButton :grid="grid" />
+    </template>
+    <template v-slot:left-panel v-if="options && grid">
       <n-scrollbar y-scrollable style="max-height: calc(100vh - 100px)">
-        <GridForm v-if="grid"
-          :model-value="grid"
-        />
+        <GridForm :model-value="grid" />
         <OptionsForm
           v-model="options"
           @update:modelValue="onUpdate"
@@ -14,12 +16,8 @@
           format
         />
       </n-scrollbar>
-    </div>
-    <div class="viewer">
-      <n-scrollbar
-        x-scrollable
-        style="max-height: calc(100vh - 100px); max-width: calc(100vw - 100px)"
-      >
+    </template>
+    <template v-slot:body>
         <GridPaper
           v-if="grid && options"
           class="paper"
@@ -31,12 +29,9 @@
           }"
           :options="options"
         />
-      </n-scrollbar>
-    </div>
-    <ExportButton :grid="grid" />
-    <ExportSVGButton :grid="grid" />
+    </template>
+</Layout>
 
-  </div>
 </template>
 
 <script setup lang="ts">
@@ -46,7 +41,8 @@ import ExportButton from "../components/ExportButton.vue";
 import ExportSVGButton from "../components/ExportSVG.vue";
 import OptionsForm from "../components/forms/Options.vue";
 import GridForm from "../components/forms/GridForm.vue";
-import {defaultExportOptions} from "../components/svg-renderer/types";
+import Layout from "../layouts/Main.vue";
+import { defaultExportOptions } from "../components/svg-renderer/types";
 import { Grid, GridOptions } from "grid";
 import { getUrl } from "../js/utils";
 import { ref, onMounted } from "vue";
@@ -71,11 +67,11 @@ function fetch() {
 }
 
 function onUpdate() {
-  console.log('update')
+  console.log("update");
   clearTimeout(saveTimeout.value);
   saveTimeout.value = setTimeout(() => {
     if (!options.value) return;
-    console.log('post')
+    console.log("post");
 
     axios.post(getUrl(`options`), {
       options: options.value,
@@ -94,19 +90,7 @@ onMounted(() => {
   flex-direction: row;
   height: 100%;
 }
-.leftpanel {
-  width: 210px;
-  min-width: 210px;
-  overflow: hidden;
-}
-.leftpanel > .n-scrollbar {
-  max-height: 100vh;
-}
 .paper {
   margin: 20px;
-}
-.viewer {
-  position: relative;
-  top: 20px;
 }
 </style>

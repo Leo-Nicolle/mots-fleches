@@ -198,15 +198,16 @@ const rows = computed(() =>
 const cols = computed(() =>
   new Array(props.grid.cols).fill(0).map((e, i) => i)
 );
-const arrowScale = computed(() => 0.01 * parse(props.options.arrow.size)[0]);
-const lineStroke = computed(() => parse(props.options.grid.borderSize)[0]);
+const arrowScale = computed(() => 0.01 * props.options.arrow.size);
+const lineStroke = computed(() => props.options.grid.borderSize);
 const lineColor = computed(() => props.options.grid.borderColor);
 const outerLineStroke = computed(
-  () => parse(props.options.grid.outerBorderSize)[0]
+  () => props.options.grid.outerBorderSize
 );
 const outerLineColor = computed(() => props.options.grid.outerBorderColor);
-const defSize = computed(() => parse(props.options.definition.size)[0]);
-const textSize = computed(() => parse(props.options.grid.cellSize)[0]);
+const defSize = computed(() => props.options.definition.size);
+// const defSize = computed(() => props.options.definition.size);
+const textSize = computed(() => props.options.grid.cellSize);
 const textFont = computed(() => `roboto`);
 const defFont = computed(() => `${props.options.definition.font}`);
 const defBackgroundColor = computed(
@@ -303,7 +304,7 @@ function lines(cell: Cell) {
   const splited = isSplited(cell);
   const split = splitIndex(cell);
   const lines = getLines(cell);
-  const borderSize = parse(props.options.grid.borderSize)[0];
+  const borderSize = props.options.grid.borderSize;
   const freeHeight =
     cellHeight - +splited * borderSize - lines.length * defSize.value;
 

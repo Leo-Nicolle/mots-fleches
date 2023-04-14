@@ -1,7 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import { resolve } from "./utils";
-import { Grid, GridOptions, defaultOptions } from "grid";
+import { Grid, GridOptions, defaultOptions, defaultSolutionOptions } from "grid";
 
 export class Database {
   public words: string[];
@@ -37,8 +37,11 @@ export class Database {
         Grid.unserialize(JSON.stringify(g))
       );
       this.options = options && options.length ? JSON.parse(options) : [];
-      if (!this.options.length) {
+      if (!this.options.find(({ id }) => id === "default")) {
         this.options.push(defaultOptions);
+      }
+      if (!this.options.find(({ id }) => id === "solution")) {
+        this.options.push(defaultSolutionOptions);
       }
     });
     return this.loadingPromise;
@@ -151,7 +154,7 @@ export class Database {
     });
   }
   deleteOption(optionId) {
-    if (optionId === "default")
+    if (optionId === "default" || optionId === "solution")
       throw new Error("Cannot delete default options");
     return this.getOptions()
       .then((options) => {

@@ -1,86 +1,11 @@
 <template>
-  <nav v-if="displayMenu">
-    <n-menu
-      class="burger"
-      :accordion="true"
-      :mode="'horizontal'"
-      :collapsed="collapsed"
-      :collapsed-width="64"
-      :collapsed-icon-size="22"
-      :options="menuOptions"
-    />
-  </nav>
   <router-view collapsed="true" />
 </template>
 
 <script setup lang="ts">
-import { MenuOutline } from "@vicons/ionicons5";
-import type { MenuOption } from "naive-ui";
-import { computed, h, ref } from "vue";
-import { RouterLink, useRoute } from "vue-router";
-import { renderIcon } from "./js/utils";
-const route = useRoute();
-
-const displayMenu = computed(() => {
-  return route.name !== "grid-export";
-});
-const collapsed = ref(true);
-
-const menuOptions = ref<MenuOption[]>([
-  {
-    label: "",
-    key: "",
-    icon: renderIcon(MenuOutline),
-    children: [
-      {
-        label: () =>
-          h(
-            RouterLink,
-            {
-              to: "/grids",
-            },
-            { default: () => "Grilles" }
-          ),
-        key: "go-back-home",
-      },
-      {
-        label: () =>
-          h(
-            RouterLink,
-            {
-              to: "/options",
-            },
-            { default: () => "Options" }
-          ),
-        key: "go-to-options",
-      },
-    ],
-  },
-]);
 </script>
 
 <style>
-body {
-  overflow: hidden;
-}
-#app {
-  width: 100vw;
-  max-height: 100vh;
-  min-height: 100vh;
-  overflow: hidden;
-}
-nav {
-  width: 100%;
-  display: flex;
-  padding: 5px;
-  right: 10px;
-}
-
-.burger {
-  margin-left: auto;
-  margin-right: 25px;
-}
-
 .scroll::-webkit-scrollbar {
   width: 5px;
 }
@@ -102,5 +27,15 @@ nav {
   pointer-events: none;
   visibility: hidden;
   display: block;
+}
+.title {
+  display: flex;
+  justify-content: space-between;
+}
+.title .n-button {
+  margin-right: 4px;
+}
+h2 {
+  margin-top: 0;
 }
 </style>

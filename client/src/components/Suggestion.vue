@@ -172,6 +172,7 @@ function onMouseEvt(evt: MouseEvent, click = false) {
   display: flex;
   flex-direction: column;
   height: 100%;
+  width: 100%;
 }
 .suggestion > .loading {
   flex: 1;

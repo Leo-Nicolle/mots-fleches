@@ -31,6 +31,26 @@ const routes: Array<RouteRecordRaw> = [
     name: 'options',
     component: () => import('../views/Options.vue')
   },
+  {
+    path: '/solutions',
+    name: 'solutions',
+    component: () => import('../views/SolutionsEditor.vue')
+  },
+  {
+    path: '/solutions-export',
+    name: 'solutions-export',
+    component: () => import('../views/Solutions.vue')
+  },
+  {
+    path: '/index-export',
+    name: 'index-export',
+    component: () => import('../views/Index.vue')
+  },
+  {
+    path: '/book-export',
+    name: 'book-export',
+    component: () => import('../views/Book.vue')
+  },
 ];
 
 const router = createRouter({

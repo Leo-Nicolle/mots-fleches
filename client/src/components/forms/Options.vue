@@ -1,6 +1,7 @@
 <template>
   <div class="options">
     <n-form ref="formRef" inline :label-width="80" :model="value">
+      <slot></slot>
       <div v-if="grid">
         <h3>Options</h3>
         <n-form-item label="Nom" path="name">
@@ -8,10 +9,10 @@
         </n-form-item>
 
         <n-form-item label="Taille cellule" path="grid.cellSize">
-          <Sizeinput role="cell-size" v-model="value.grid.cellSize" />
+          <n-input-number role="cell-size" v-model:value="value.grid.cellSize" />
         </n-form-item>
         <n-form-item label="Taille bordure" path="grid.borderSize">
-          <Sizeinput role="border-size" v-model="value.grid.borderSize" />
+          <n-input-number role="border-size" v-model:value="value.grid.borderSize" />
         </n-form-item>
         <n-form-item label="Couleur bordure" path="grid.borderColor">
           <n-color-picker
@@ -21,36 +22,28 @@
             size="small"
           />
         </n-form-item>
-      </div>
-      <div v-if="definition">
-        <h3>Définitions</h3>
-        <n-form-item label="Font" path="definition.font">
-          <n-input
-            role="definition-font"
-            v-model:value="value.definition.font"
-            placeholder="sans-serif"
-          />
+        <n-form-item label="Taille bordure Ext" path="grid.outerBorderSize">
+          <n-input-number role="outerBorder-size" v-model:value="value.grid.outerBorderSize" />
         </n-form-item>
-        <n-form-item label="Taille" path="definition.size">
-          <Sizeinput 
-          role="definition-size"          
-          v-model="value.definition.size" />
-        </n-form-item>
-        <n-form-item label="Couleur" path="definition.color">
+        <n-form-item label="Couleur bordure Ext" path="grid.outerBorderColor">
           <n-color-picker
-            role="definition-color"          
-            v-model:value="value.definition.color"
+            role="outerBorder-color"
+            v-model:value="value.grid.outerBorderColor"
             :show-alpha="false"
             size="small"
           />
         </n-form-item>
       </div>
+      <div v-if="definition">
+        <h3>Définitions</h3>
+        <TextStyle v-model="value.definition" />
+      </div>
       <div v-if="arrows">
         <h3>Flèches</h3>
         <n-form-item label="Taille" path="arrow.size">
-          <Sizeinput 
+          <n-input-number 
           role="arrow-size"          
-          v-model="value.arrow.size" />
+          v-model:value="value.arrow.size" />
         </n-form-item>
         <n-form-item label="Couleur" path="arrow.size">
           <n-color-picker
@@ -72,15 +65,15 @@
 import { defineProps, defineEmits, watchEffect, watch } from "vue";
 import { useModel } from "../../js/useModel";
 import { GridOptions } from "grid";
-import Sizeinput from "./Sizeinput.vue";
 import FormatPicker from "./FormatPicker.vue";
+import TextStyle from "./TextStyle.vue";
 
 const props = defineProps<{
   modelValue: GridOptions;
-  grid: boolean;
-  definition: boolean;
-  arrows: boolean;
-  format: boolean;
+  grid?: boolean;
+  definition?: boolean;
+  arrows?: boolean;
+  format?: boolean;
 }>();
 const emit = defineEmits<{
   (event: "update:modelValue", value: GridOptions): void;

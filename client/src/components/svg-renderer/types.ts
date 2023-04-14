@@ -7,7 +7,7 @@ export type ExportOptions = {
   outerBorders: boolean;
   borders: boolean;
   texts: boolean;
-  highlight:boolean;
+  highlight: boolean;
   splits: boolean;
   margins: boolean;
 }
@@ -26,12 +26,12 @@ export const defaultExportOptions: ExportOptions = {
 export type Rect = {
   x: number;
   y: number;
-  width: number; 
+  width: number;
   height: number;
 }
-export type Handle ={
-  top:string;
-  left:string;
+export type Handle = {
+  top: string;
+  left: string;
   index: number;
   dirs: ArrowDir[];
 }

@@ -40,12 +40,6 @@ function print(){
 </script>
 
 <style scoped>
-/* Targets all the pages */
-.exporter > button {
-  position: fixed;
-  top: 10px;
-  left: 100px;
-}
 .exporter > svg {
   position: fixed;
   top: 100%;

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Cell, Grid } from "grid";
+import { Cell, Format, Grid } from "grid";
 import { NIcon } from "naive-ui";
 import { h, Component, Ref, ref } from "vue";
 import { RouteLocationNormalizedLoaded } from "vue-router";
@@ -18,15 +18,6 @@ export function save(grid: Grid) {
     grid: grid.serialize(),
   });
 }
-
-export function measureText(text, size: string, font: string) {
-  const canvas = document.createElement("canvas");
-  const context = canvas.getContext("2d") as CanvasRenderingContext2D;
-  context.font = font;
-  const metrics = context.measureText(text);
-  return metrics;
-}
-
 
 export function getCellClass(cell: Cell, focus: Cell) {
   const classes = [cell.definition ? "definition" : "text"];
@@ -61,4 +52,20 @@ export function mergeRouteWithDefault<T extends { [s: string]: unknown; }>(route
 
       return acc;
     }, {} as T);
+}
+
+export function getBodyPageWidth(format: Format) {
+  return `${format.width - format.margin.left - format.margin.right}cm`;
+}
+
+export function getBodyPageHeight(format: Format) {
+  return `${format.height - format.margin.top - format.margin.bottom}cm`;
+}
+
+export function getSizeNoPadding(elt: HTMLDivElement) {
+  const computedStyle = getComputedStyle(elt);
+  return {
+    height: elt.clientHeight - parseFloat(computedStyle.paddingTop) - parseFloat(computedStyle.paddingBottom),
+    width: elt.clientWidth - parseFloat(computedStyle.paddingLeft) - parseFloat(computedStyle.paddingRight),
+  };
 }
