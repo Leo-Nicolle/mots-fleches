@@ -8,8 +8,11 @@
     @select="(s) => (selected = s)"
   >
     <template v-slot:left-panel>
-      <h3>Grilles</h3>
-      <ExportButton route="book-export" :params="params" />
+      <div class="left-panel">
+
+        <h3>Grilles</h3>
+        <ExportButton route="book-export" :params="params" />
+      </div>
       <!-- <n-button @click="onExportClick">Exporter</n-button> -->
     </template>
     <template #card-title="{ elt }">

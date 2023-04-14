@@ -38,7 +38,7 @@ const props = defineProps<{
 const gridExport = computed(() => ({
   ...defaultExportOptions,
   ...{
-    words: false,
+    texts: false,
     arrows: true,
     definitions: true,
     splits: true,

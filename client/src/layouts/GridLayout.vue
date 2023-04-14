@@ -1,10 +1,12 @@
 <template>
   <Layout>
     <template v-slot:left-panel>
-      <slot name="left-panel"></slot>
-      <n-button @click="deleteVisible = true" type="warning"
-        >Supprimer</n-button
-      >
+      <div class="left-panel">
+        <slot name="left-panel"></slot>
+        <n-button @click="deleteVisible = true" type="warning"
+          >Supprimer</n-button
+        >
+      </div>
     </template>
     <template v-slot:body>
       <div class="wrapper">
@@ -97,6 +99,15 @@ watch(selectedElements, () => {
 </script>
 
 <style scoped>
+.left-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 10px;
+  margin-left: 10px;
+}
+
 .n-grid {
   margin: 0 10px;
 }

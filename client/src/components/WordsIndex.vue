@@ -73,7 +73,7 @@ const layout = computed(() => {
     return { wordsPerPage: [], heights: [] };
   const words = Array.from(getAllWords(props.grids)).sort(
     (a, b) => a.length - b.length
-  );
+  ).filter(w => w.length > 1);
   const r = ruler.value as HTMLDivElement;
   let bb = r.getBoundingClientRect();
   const maxX = bb.x + bb.width;
