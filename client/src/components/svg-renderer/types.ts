@@ -1,4 +1,3 @@
-import { TextSyle } from "grid";
 import { ArrowDir } from "grid";
 
 

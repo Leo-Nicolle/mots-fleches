@@ -70,10 +70,10 @@ import TextStyle from "./TextStyle.vue";
 
 const props = defineProps<{
   modelValue: GridOptions;
-  grid: boolean;
-  definition: boolean;
-  arrows: boolean;
-  format: boolean;
+  grid?: boolean;
+  definition?: boolean;
+  arrows?: boolean;
+  format?: boolean;
 }>();
 const emit = defineEmits<{
   (event: "update:modelValue", value: GridOptions): void;

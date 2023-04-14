@@ -1,5 +1,6 @@
 <template>
-  <div class="page">
+  <div class="page" ref="page">
+    <div class="styleContainer"></div>
     <div :class="`body ${bodyClass} || ''`">
       <slot></slot>
     </div>
@@ -25,10 +26,9 @@
 
 <script setup lang="ts">
 import { Format } from "grid";
-import { defineProps } from "vue";
+import { defineProps, ref, watchEffect } from "vue";
 import { computed } from "vue";
-import { getBodyPageHeight, getBodyPageWidth } from "../js/utils";
-
+const page =ref();
 const props = defineProps<{
   showMargins: boolean;
   format: Format;
@@ -44,7 +44,8 @@ const margins = computed(() => {
   ];
 });
 const pageSize = computed(() => {
-  if (!props.format) return "A4";
+  if (true || !props.format) return "A4";
+  console.log(`${props.format.width}cm ${props.format.height}cm`);
   return `${props.format.width}cm ${props.format.height}cm`;
 });
 
@@ -56,33 +57,48 @@ const pageHeight = computed(() => {
   if (!props.format) return 0;
   return `${props.format.height}cm`;
 });
-const bodyPadding = computed(() => {
+const padding = computed(() => {
   const { top, left, right, bottom } = props.format.margin;
   return [top, right, bottom, left].map((m) => `${m}cm`).join(" ");
 });
+watchEffect(() => {
+   if(!page.value || !pageSize.value) return;
+   page.value.querySelector('.styleContainer')
+   .innerHTML = `
+   	<style>
+    	@page{
+      	size: ${pageSize.value};
+      }
+		</style>`;
+ }, )
 
-const bodyWidth = computed(() => getBodyPageWidth(props.format));
-const bodyHeight = computed(() => getBodyPageHeight(props.format));
 </script>
 
-<style lang="less">
+<style scoped>
 @page {
-  size: v-bind(pageSize);
   margin: 0;
+  padding:0;
+}
+@media print {
+  button {
+    display: none;
+  }
 }
 .page {
   height: v-bind(pageHeight);
   width: v-bind(pageWidth);
+  padding: v-bind(padding);
   position: relative;
+  break-inside: avoid;
+  box-sizing: border-box;
 }
 .body {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-around;
-  height: v-bind(bodyHeight);
-  width: v-bind(bodyWidth);
-  padding: v-bind(bodyPadding);
+  height: 100%;
+  width: 100%;
 }
 
 .border {

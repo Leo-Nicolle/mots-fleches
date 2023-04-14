@@ -1,7 +1,8 @@
 <template>
   <SolutionsPaper
+    v-if="grids && options"
     :grids="grids"
-    :options="options"
+    :solutionOptions="options"
     class="paper"
     :export-options="exportOptions"
   />
@@ -14,11 +15,11 @@ import axios from "axios";
 import SolutionsPaper from "../components/Solutions.vue";
 
 import { getUrl } from "../js/utils";
-import {  Grid, GridOptions } from "grid";
+import {  Grid, GridOptions,SolutionOptions } from "grid";
 import {
   defaultExportOptions,
   ExportOptions,
-  SolutionOptions,
+  
 } from "../components/svg-renderer/types";
 const router = useRouter();
 const grids = ref<Grid[]>([]);
@@ -51,25 +52,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.paper {
-  margin: 20px;
-}
-.solutions {
-  display: flex;
-  flex-direction: row;
-  height: 100%;
-}
-.leftpanel {
-  width: 210px;
-  min-width: 210px;
-  overflow: hidden;
-}
-.leftpanel > .n-scrollbar {
-  max-height: 100vh;
-}
-.viewer {
-  position: relative;
-  top: 20px;
-}
+
 </style>
 

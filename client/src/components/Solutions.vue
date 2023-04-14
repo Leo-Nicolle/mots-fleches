@@ -1,9 +1,9 @@
 <template>
-  <div v-if="grids && options">
+  <div v-if="grids && solutionOptions">
     <Paper
       v-for="(gs, i) in gridsPerPage"
       :key="i"
-      :format="options.paper"
+      :format="solutionOptions.paper"
       :showMargins="exportOptions.margins"
     >
       <div class="grids">
@@ -13,7 +13,7 @@
           :grid="grid"
           :focus="nullCell"
           dir="horizontal"
-          :options="options"
+          :options="solutionOptions"
           :export-options="exportOptions"
         />
       </div>
@@ -22,33 +22,29 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, watch } from "vue";
+import { defineProps } from "vue";
 import SVGGrid from "./svg-renderer/Grid.vue";
 import Paper from "./Paper.vue";
-import { Grid, GridOptions, nullCell } from "grid";
+import { Grid, nullCell, SolutionOptions } from "grid";
 import { computed } from "vue";
-import {
-  ExportOptions,
-  SolutionOptions,
-} from "../components/svg-renderer/types";
+import { ExportOptions } from "../components/svg-renderer/types";
 
 const props = defineProps<{
   grids: Grid[];
-  options: GridOptions;
+  solutionOptions: SolutionOptions;
   exportOptions: ExportOptions;
-  solutionsOptions: SolutionOptions;
 }>();
 const rows = computed(() => {
-  if (!props.solutionsOptions) return "";
-  return `repeat(${props.solutionsOptions.grids.rows},0)`;
+  if (!props.solutionOptions) return "";
+  return `repeat(${props.solutionOptions.grids.rows},0)`;
 });
 const cols = computed(() => {
-  if (!props.solutionsOptions) return "";
-  return `repeat(${props.solutionsOptions.grids.cols},0)`;
+  if (!props.solutionOptions) return "";
+  return `repeat(${props.solutionOptions.grids.cols},0)`;
 });
 const gridsPerPage = computed(() => {
-  if (!props.solutionsOptions) return [props.grids];
-  const { rows, cols } = props.solutionsOptions.grids;
+  if (!props.solutionOptions) return [props.grids];
+  const { rows, cols } = props.solutionOptions.grids;
   const perPage = rows * cols;
   const pages = Math.ceil(props.grids.length / perPage);
 

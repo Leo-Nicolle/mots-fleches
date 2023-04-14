@@ -16,7 +16,7 @@
 import { defineProps, defineEmits, watch } from "vue";
 import TextStyle from "./TextStyle.vue";
 import { useModel } from "../../js/useModel";
-import { SolutionOptions } from "../svg-renderer/types";
+import { SolutionOptions } from "grid";
 
 const props = defineProps<{
   modelValue: SolutionOptions;

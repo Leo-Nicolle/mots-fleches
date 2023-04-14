@@ -1,16 +1,13 @@
 <template>
-  <div v-if="grids && options">
+  <div v-if="grids && solutionOptions">
     <Paper
       v-for="(words, i) in layout.wordsPerPage"
       :key="i"
-      :format="options.paper"
+      :format="solutionOptions.paper"
       :showMargins="exportOptions.margins"
       bodyClass="body-index"
     >
-      <span
-        class="words"
-        ref="wordsContainer"
-      >
+      <span class="words" ref="wordsContainer">
         <span
           v-for="(word, j) in words"
           :class="typeof word === 'number' ? 'size' : 'word'"
@@ -19,35 +16,31 @@
           {{ word }}
         </span>
       </span>
-      <span class="pushup"></span>
     </Paper>
-    <Paper class="paper ruler" :format="options.paper" :showMargins="false">
+    <Paper
+      class="paper ruler"
+      :format="solutionOptions.paper"
+      :showMargins="false"
+    >
       <span class="words ruler" ref="ruler"> </span>
     </Paper>
   </div>
 </template>
 
 <script setup lang="ts">
-import { defineProps, h, ref, watch } from "vue";
+import { defineProps, ref } from "vue";
 import Paper from "./Paper.vue";
-import { Grid, GridOptions, getAllWords } from "grid";
+import { Grid, GridOptions, getAllWords,SolutionOptions } from "grid";
 import { computed } from "vue";
 import {
   ExportOptions,
-  SolutionOptions,
 } from "../components/svg-renderer/types";
-import {
-  getBodyPageHeight,
-  getBodyPageWidth,
-  getSizeNoPadding,
-} from "../js/utils";
 type WordMap = { [key: number]: string[] };
 const ruler = ref(null);
 const props = defineProps<{
   grids: Grid[];
-  options: GridOptions;
   exportOptions: ExportOptions;
-  solutionsOptions: SolutionOptions;
+  solutionOptions: SolutionOptions;
 }>();
 
 function makeid(length) {
@@ -61,26 +54,23 @@ function makeid(length) {
   }
   return result;
 }
-const words = Array.from(getAllWords(props.grids));
-new Array(1000).fill(0).forEach((_, i) => {
-  const length = 2 + Math.floor(Math.random() * 7);
-  words.push(makeid(length));
-});
-//   console.log(JSON.stringify(words));
-
-// const words = JSON.parse(
-//   `["ABCDEFGH","JAUNCDU","PYBPUKF","MF","KCGPGD","KWHA","HEQMXIMX","MFWUBC","ZLDD","RCTKDI","BMMWS","ISLBMNE","DKFH","VTUHZL","NGUTFRI","VEGVLE","QON","EE","NXRAQRFL","EXCGDR","EFLCVNZL"]`
-// );
+const words = Array.from(getAllWords(props.grids)).sort(
+  (a, b) => a.length - b.length
+);
+// new Array(1000).fill(0).forEach((_, i) => {
+//   const length = 2 + Math.floor(Math.random() * 7);
+//   words.push(makeid(length));
+// });
 const wordFont = computed(
   () =>
-    `${props.solutionsOptions.words.size} ${props.solutionsOptions.words.font}`
+    `${props.solutionOptions.words.size} ${props.solutionOptions.words.font}`
 );
-const wordsColor = computed(() => props.solutionsOptions.words.color);
+const wordsColor = computed(() => props.solutionOptions.words.color);
 const sizeFont = computed(
   () =>
-    `${props.solutionsOptions.size.size} ${props.solutionsOptions.size.font}`
+    `${props.solutionOptions.size.size} ${props.solutionOptions.size.font}`
 );
-const sizeColor = computed(() => props.solutionsOptions.size.color);
+const sizeColor = computed(() => props.solutionOptions.size.color);
 
 const tolerance = 2;
 const layout = computed(() => {
@@ -89,18 +79,15 @@ const layout = computed(() => {
   const r = ruler.value as HTMLDivElement;
   let bb = r.getBoundingClientRect();
   const maxX = bb.x + bb.width;
-  // const maxHeight= r.clientHeight;
 
-  const wordsMap = words
-    .sort((a, b) => a.length - b.length)
-    .reduce((acc, word) => {
-      if (acc[word.length]) {
-        acc[word.length].push(word);
-      } else {
-        acc[word.length] = [word];
-      }
-      return acc;
-    }, {} as WordMap);
+  const wordsMap = words.reduce((acc, word) => {
+    if (acc[word.length]) {
+      acc[word.length].push(word);
+    } else {
+      acc[word.length] = [word];
+    }
+    return acc;
+  }, {} as WordMap);
 
   let wordsOnCurrentPage: (string | number)[] = [];
   const heights: string[] = [];
@@ -131,13 +118,15 @@ const layout = computed(() => {
   res.push(wordsOnCurrentPage);
   bb = r.getBoundingClientRect();
   const { x, y, width, height } = r.lastChild.getBoundingClientRect();
-  const area = (x - bb.x + width) * (y- bb.y + height) + (bb.height - y + bb.y) * (x - bb.x);
+  const area =
+    (x - bb.x + width) * (y - bb.y + height) +
+    (bb.height - y + bb.y) * (x - bb.x);
   const totalArea = bb.width * bb.height;
   const ratio = area / totalArea;
   heights.push(ratio * 100 + "%");
   console.log(ratio);
 
-  return { wordsPerPage: res.reverse(), heights:heights.reverse() };
+  return { wordsPerPage: res.reverse(), heights: heights.reverse() };
 });
 </script>
 

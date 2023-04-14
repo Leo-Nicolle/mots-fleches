@@ -8,7 +8,7 @@
           grid
           format
         >
-          <SolutionsForm v-model="solutionsOptions" @update:modelValue="onUpdateM"/>
+          <SolutionsForm v-model="options" @update:modelValue="onUpdateM" />
         </OptionsForm>
       </n-scrollbar>
     </div>
@@ -16,25 +16,21 @@
       <n-scrollbar
         x-scrollable
         style="max-height: calc(100vh - 100px); max-width: calc(100vw - 100px)"
-        >
+      >
         <WordsIndex
           :grids="grids"
-          :options="options"
           class="paper"
           :export-options="exportOptions"
-          :solutions-options="solutionsOptions"
+          :solutionOptions="options"
         />
         <SolutionsPaper
           :grids="grids"
-          :options="options"
+          :solutionOptions="options"
           class="paper"
           :export-options="exportOptions"
-          :solutions-options="solutionsOptions"
         />
       </n-scrollbar>
     </div>
-    <ExportButton route="index-export" />
-
   </div>
 </template>
 
@@ -50,17 +46,21 @@ import WordsIndex from "../components/WordsIndex.vue";
 import SolutionsForm from "../components/forms/SolutionsForm.vue";
 
 import { getUrl, save } from "../js/utils";
-import { getAllWords, Grid, GridOptions, nullCell } from "grid";
+import {
+  getAllWords,
+  Grid,
+  GridOptions,
+  nullCell,
+  SolutionOptions,
+} from "grid";
 import {
   defaultExportOptions,
-  defaultSolutionOptions,
   ExportOptions,
-  SolutionOptions,
 } from "../components/svg-renderer/types";
-const router = useRouter();
+const route = useRoute();
+
 const grids = ref<Grid[]>([]);
-const options = ref<GridOptions>();
-const solutionsOptions = ref<SolutionOptions>(defaultSolutionOptions);
+const options = ref<SolutionOptions>();
 const exportOptions = ref<ExportOptions>({
   ...defaultExportOptions,
   arrows: false,
@@ -68,13 +68,19 @@ const exportOptions = ref<ExportOptions>({
 });
 
 function fetch() {
-  return axios
-    .get(getUrl("grid"))
-    .then(({ data }) => {
-      console.log("data", data);
-      grids.value = data.map((g) => Grid.unserialize(JSON.stringify(g)));
-    })
-    .then(() => axios.get(getUrl(`options/defaultExport`)))
+  const promise = route.query.ids
+    ? Promise.all(
+        (route.query.ids as string)
+          .split(",")
+          .map((id) => axios.get(getUrl(`grid/${id}`)).then(({ data }) => data))
+      ).then((data) => {
+        grids.value = data.map((g) => Grid.unserialize(JSON.stringify(g)));
+      })
+    : axios.get(getUrl("grid")).then(({ data }) => {
+        grids.value = data.map((g) => Grid.unserialize(JSON.stringify(g)));
+      });
+  return promise
+    .then(() => axios.get(getUrl(`options/solution`)))
     .then(({ data }) => {
       options.value = data;
       console.log(options.value, grids.value);
@@ -85,9 +91,7 @@ function fetch() {
 }
 
 function onUpdate() {}
-function onUpdateM() {
-  console.log("updateM", solutionsOptions.value.grids.rows);
-}
+function onUpdateM() {}
 onMounted(() => {
   fetch();
 });

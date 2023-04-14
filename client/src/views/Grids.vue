@@ -1,13 +1,14 @@
 <template>
-  <div class="grids">
-    <div v-if="!exporting">
-      <div class="leftpanel">
-        <h3>Grilles</h3>
-        <n-button @click="onExportClick">Exporter</n-button>
-        <n-button @click="deleteVisible = true" type="warning"
-          >Supprimer</n-button
-        >
-      </div>
+  <Layout>
+    <template v-slot:left-panel>
+      <h3>Grilles</h3>
+      <n-button @click="onExportClick">Exporter</n-button>
+      <n-button @click="deleteVisible = true" type="warning"
+        >Supprimer</n-button
+      >
+    </template>
+
+    <template v-slot:body>
       <div class="wrapper scroll" v-if="grids.length === options.length">
         <div>
           <n-card v-for="(grid, i) in grids" :key="i" :hoverable="true">
@@ -72,9 +73,8 @@
           </template>
         </n-modal>
       </div>
-    </div>
-    <!-- <Exporting v-else :grids="selectedGrids" :options="options" /> -->
-  </div>
+    </template>
+  </Layout>
 </template>
 
 <script setup lang="ts">
@@ -83,6 +83,7 @@ import { useRouter, useRoute } from "vue-router";
 import axios from "axios";
 import { AddCircleOutline as AddIcon } from "@vicons/ionicons5";
 import SVGGrid from "../components/svg-renderer/Grid.vue";
+import Layout from "../layouts/Main.vue";
 import { defaultExportOptions } from "../components/svg-renderer/types";
 
 import { getUrl, save } from "../js/utils";
@@ -110,7 +111,6 @@ function fetch() {
     .then(({ data }) => {
       grids.value = data.map((g) => Grid.unserialize(JSON.stringify(g)));
       selected.value = new Array(grids.value.length).fill(false);
-      console.log(getAllWords(grids.value));
     })
     .then(() =>
       Promise.all(
@@ -130,6 +130,11 @@ function fetch() {
 
 function onExportClick() {
   exporting.value = true;
+  console.log("exporting", selectedGrids.value.map(({ id }) => id).join(","));
+  router.push({
+    path: "solutions",
+    query: { ids: selectedGrids.value.map(({ id }) => id).join(",") },
+  });
 }
 function onDelete() {
   Promise.all(
@@ -162,14 +167,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.leftpanel {
-  width: 210px;
-  min-width: 210px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+
 .leftpanel > button {
   margin-bottom: 5px;
   width: 95px;
@@ -194,7 +192,7 @@ onMounted(() => {
   gap: 8px 12px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 200px));
-  width: calc(100vw - 210px);
+  width: 100%;
 }
 
 .wrapper {
@@ -236,12 +234,6 @@ onMounted(() => {
 }
 .add svg {
   transform: scale(5);
-}
-
-.card-body {
-  /* max-width: 170px;
-  max-height: 170px;
-  overflow: hidden; */
 }
 .card-body > svg {
   max-width: 340px;

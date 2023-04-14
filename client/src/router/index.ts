@@ -46,6 +46,11 @@ const routes: Array<RouteRecordRaw> = [
     name: 'index-export',
     component: () => import('../views/Index.vue')
   },
+  {
+    path: '/book-export',
+    name: 'book-export',
+    component: () => import('../views/Book.vue')
+  },
 ];
 
 const router = createRouter({

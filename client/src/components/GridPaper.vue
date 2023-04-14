@@ -16,7 +16,6 @@ import { defineProps } from "vue";
 import SVGGrid from "./svg-renderer/Grid.vue";
 import Paper from "./Paper.vue";
 import { Grid, GridOptions, nullCell } from "grid";
-import { computed } from "vue";
 import { ExportOptions } from "../components/svg-renderer/types";
 
 const props = defineProps<{
