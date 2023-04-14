@@ -28,7 +28,7 @@
 import { Format } from "grid";
 import { defineProps, ref, watchEffect } from "vue";
 import { computed } from "vue";
-const page =ref();
+const page = ref();
 const props = defineProps<{
   showMargins: boolean;
   format: Format;
@@ -43,11 +43,7 @@ const margins = computed(() => {
     `${props.format.margin.left}cm`,
   ];
 });
-const pageSize = computed(() => {
-  if (true || !props.format) return "A4";
-  console.log(`${props.format.width}cm ${props.format.height}cm`);
-  return `${props.format.width}cm ${props.format.height}cm`;
-});
+const pageSize = computed(() => {});
 
 const pageWidth = computed(() => {
   if (!props.format) return 0;
@@ -62,22 +58,21 @@ const padding = computed(() => {
   return [top, right, bottom, left].map((m) => `${m}cm`).join(" ");
 });
 watchEffect(() => {
-   if(!page.value || !pageSize.value) return;
-   page.value.querySelector('.styleContainer')
-   .innerHTML = `
+  if (!page.value || !props.format) return;
+  const format = `${props.format.width}cm ${props.format.height}cm`;
+  page.value.querySelector(".styleContainer").innerHTML = `
    	<style>
     	@page{
-      	size: ${pageSize.value};
+      	size: ${format};
       }
 		</style>`;
- }, )
-
+});
 </script>
 
 <style scoped>
 @page {
   margin: 0;
-  padding:0;
+  padding: 0;
 }
 @media print {
   button {

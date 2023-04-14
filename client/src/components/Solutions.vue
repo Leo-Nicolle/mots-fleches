@@ -7,15 +7,16 @@
       :showMargins="exportOptions.margins"
     >
       <div class="grids">
-        <SVGGrid
-          v-for="(grid, j) in gs"
-          :key="j"
-          :grid="grid"
-          :focus="nullCell"
-          dir="horizontal"
-          :options="solutionOptions"
-          :export-options="exportOptions"
-        />
+        <div v-for="(grid, j) in gs" :key="j" class="grid-c">
+          <span class="gridN">{{ j + 1 }}</span>
+          <SVGGrid
+            :grid="grid"
+            :focus="nullCell"
+            dir="horizontal"
+            :options="solutionOptions"
+            :export-options="exportOptions"
+          />
+        </div>
       </div>
     </Paper>
   </div>
@@ -42,6 +43,14 @@ const cols = computed(() => {
   if (!props.solutionOptions) return "";
   return `repeat(${props.solutionOptions.grids.cols},0)`;
 });
+const gridNFont = computed(() => {
+  if (!props.solutionOptions) return "";
+  return `${props.solutionOptions.grids.gridN.size} ${props.solutionOptions.grids.gridN.font}`;
+});
+const gridNColor = computed(() => {
+  if (!props.solutionOptions) return "";
+  return props.solutionOptions.grids.gridN.color;
+});
 const gridsPerPage = computed(() => {
   if (!props.solutionOptions) return [props.grids];
   const { rows, cols } = props.solutionOptions.grids;
@@ -55,6 +64,15 @@ const gridsPerPage = computed(() => {
 </script>
 
 <style lang="less">
+.grid-c {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.gridN {
+  font: v-bind(gridNFont);
+  color: v-bind(gridNColor);
+}
 .grids {
   display: grid;
   align-content: space-around;

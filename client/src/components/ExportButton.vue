@@ -32,12 +32,6 @@ const iframeUrl = computed(() => {
 </script>
 
 <style scoped>
-/* Targets all the pages */
-.exporter > button {
-  position: fixed;
-  top: 10px;
-  left: 10px;
-}
 .exporter > iframe {
   position: fixed;
   top: 100%;

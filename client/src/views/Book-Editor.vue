@@ -1,11 +1,11 @@
 <template>
-  <Book
-    v-if="grids && options && solutionOptions"
+ <Book
+      v-if="grids && options && solutionOptions"
     :grids="grids"
     :options="options"
     :solutionOptions="solutionOptions"
     :exportOptions="exportOptions"
-  />
+    />
 </template>
 
 <script setup lang="ts">
@@ -14,8 +14,14 @@ import { useRoute } from "vue-router";
 import axios from "axios";
 
 import { getUrl } from "../js/utils";
-import { Grid, GridOptions, SolutionOptions } from "grid";
-import { ExportOptions } from "../components/svg-renderer/types";
+import {
+  Grid,
+  GridOptions,
+  SolutionOptions,
+} from "grid";
+import {
+  ExportOptions,
+} from "../components/svg-renderer/types";
 import Book from "../components/Book.vue";
 const route = useRoute();
 

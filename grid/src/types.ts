@@ -103,10 +103,11 @@ export const defaultOptions: GridOptions = {
 };
 
 export type SolutionOptions = GridOptions & {
-  isSolution:true;
+  isSolution: true;
   grids: {
     rows: number;
     cols: number;
+    gridN: TextSyle;
   };
   words: TextSyle & {
     tolerance: number;
@@ -122,7 +123,12 @@ const expOptions: DeepPartial<SolutionOptions> = {
   },
   grids: {
     rows: 2,
-    cols: 2
+    cols: 2,
+    gridN: {
+      font: "sans-serif",
+      size: "1em",
+      color: "black",
+    },
   },
   words: {
     font: "sans-serif",
@@ -130,7 +136,7 @@ const expOptions: DeepPartial<SolutionOptions> = {
     color: "black",
     tolerance: 2
   },
-  size:{
+  size: {
     font: "sans-serif",
     size: "1.5em",
     color: "black",

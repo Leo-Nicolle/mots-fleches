@@ -15,13 +15,11 @@
 
     <div class="body">
       <div class="left-panel">
-        <slot name="left-panel"> </slot>
+        <n-scrollbar x-scrollable class="scroll">
+          <slot name="left-panel"> </slot>
+        </n-scrollbar>
       </div>
-      <n-scrollbar
-        x-scrollable
-        :on-scroll="onScroll"
-        style="max-height: calc(100vh - 100px); max-width: calc(100vw - 100px)"
-      >
+      <n-scrollbar x-scrollable :on-scroll="onScroll" class="scroll">
         <slot name="body"></slot>
       </n-scrollbar>
     </div>
@@ -107,16 +105,40 @@ nav {
   margin-left: auto;
   margin-right: 25px;
 }
-.body{
+.body {
   display: flex;
-  width: 100%;
-  height: 100%;
+  max-height: calc(100vh - 42px);
+  height: calc(100vh - 42px);
+  max-width: 100vw;
+  width: 100vw;
   overflow: hidden;
 }
-.leftpanel {
+.left-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   width: 210px;
   min-width: 210px;
   overflow: hidden;
+  align-items: center;
+  justify-content: flex-start;
+}
+.header {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 12px;
+  overflow: hidden;
+  align-items: center;
+  justify-content: flex-start;
+  height: 42px;
+  box-sizing: border-box;
+}
+.scroll {
+  max-height: 100%;
+  max-width: calc(100vw - 210px);
+  width: calc(100vw - 210px);
 }
 .leftpanel > .n-scrollbar {
   max-height: 100vh;

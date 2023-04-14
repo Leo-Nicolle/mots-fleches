@@ -30,11 +30,9 @@
 <script setup lang="ts">
 import { defineProps, ref } from "vue";
 import Paper from "./Paper.vue";
-import { Grid, GridOptions, getAllWords,SolutionOptions } from "grid";
+import { Grid, GridOptions, getAllWords, SolutionOptions } from "grid";
 import { computed } from "vue";
-import {
-  ExportOptions,
-} from "../components/svg-renderer/types";
+import { ExportOptions } from "../components/svg-renderer/types";
 type WordMap = { [key: number]: string[] };
 const ruler = ref(null);
 const props = defineProps<{
@@ -54,9 +52,7 @@ function makeid(length) {
   }
   return result;
 }
-const words = Array.from(getAllWords(props.grids)).sort(
-  (a, b) => a.length - b.length
-);
+
 // new Array(1000).fill(0).forEach((_, i) => {
 //   const length = 2 + Math.floor(Math.random() * 7);
 //   words.push(makeid(length));
@@ -67,15 +63,17 @@ const wordFont = computed(
 );
 const wordsColor = computed(() => props.solutionOptions.words.color);
 const sizeFont = computed(
-  () =>
-    `${props.solutionOptions.size.size} ${props.solutionOptions.size.font}`
+  () => `${props.solutionOptions.size.size} ${props.solutionOptions.size.font}`
 );
 const sizeColor = computed(() => props.solutionOptions.size.color);
 
 const tolerance = 2;
 const layout = computed(() => {
-  if (!props.grids || !ruler.value || !ruler.value.parentElement)
+  if (!props.grids || !ruler.value || !ruler.value)
     return { wordsPerPage: [], heights: [] };
+  const words = Array.from(getAllWords(props.grids)).sort(
+    (a, b) => a.length - b.length
+  );
   const r = ruler.value as HTMLDivElement;
   let bb = r.getBoundingClientRect();
   const maxX = bb.x + bb.width;
@@ -117,7 +115,9 @@ const layout = computed(() => {
   );
   res.push(wordsOnCurrentPage);
   bb = r.getBoundingClientRect();
-  const { x, y, width, height } = r.lastChild.getBoundingClientRect();
+  const { x, y, width, height } = r.lastChild
+    ? r.lastChild.getBoundingClientRect()
+    : { x: 0, y: 0, width: 0, height: 0 };
   const area =
     (x - bb.x + width) * (y - bb.y + height) +
     (bb.height - y + bb.y) * (x - bb.x);
@@ -131,6 +131,11 @@ const layout = computed(() => {
 </script>
 
 <style lang="less">
+@media print {
+  .ruler{
+    display: none;
+  }
+}
 .words {
   max-width: 100%;
   max-height: 100%;

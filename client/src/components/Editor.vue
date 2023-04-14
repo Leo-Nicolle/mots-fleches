@@ -1,32 +1,31 @@
 <template>
-  <div ref="editor" class="editor" :version="version">
-    <div class="leftpanel">
-      <slot>
-        <span class="title">
-          <h2>
-            {{ grid.title ? grid.title : `Nouvelle Grille` }}
-          </h2>
-          <ModalOptions :modelValue="grid" @update:model-value="emit('size-update')" />
-        </span>
-        <Suggestion
-          v-if="!focus.definition"
-          :point="focus"
-          :dir="dir"
-          :query="''"
-          :grid-id="grid.id"
-          @hover="onHover"
-          @click="onClick"
-          @dir="(d) => (dir = d)"
-          @mouseout="onMouseOut"
-        >
-        </Suggestion>
-      </slot>
-    </div>
-    <n-scrollbar
-      x-scrollable
-      :on-scroll="onScroll"
-      style="max-height: calc(100vh - 100px); max-width: calc(100vw - 100px)"
-    >
+  <Layout @scroll="onScroll">
+    <template #left-panel>
+      <span class="title">
+        <h2>
+          {{ grid.title ? grid.title : `Nouvelle Grille` }}
+        </h2>
+        <ModalOptions
+          :modelValue="grid"
+          @update:model-value="emit('size-update')"
+        />
+      </span>
+      <Suggestion
+        v-if="!focus.definition"
+        :point="focus"
+        :dir="dir"
+        :query="''"
+        :grid-id="grid.id"
+        @hover="onHover"
+        @click="onClick"
+        @dir="(d) => (dir = d)"
+        @mouseout="onMouseOut"
+      >
+      </Suggestion>
+    </template>
+    <template #body>
+      <div class="container">
+
       <SVGGrid
         @focus="(cell) => (focus = cell)"
         :grid="grid"
@@ -49,13 +48,16 @@
         @update="emit('update')"
       >
       </GridInput>
-    </n-scrollbar>
-  </div>
+    </div>
+
+    </template>
+  </Layout>
 </template>
 
 <script setup lang="ts">
 import { defineProps, defineEmits, ref, computed, watchEffect } from "vue";
 import { Grid, Cell, Direction, nullCell, GridOptions } from "grid";
+import Layout from "../layouts/Main.vue";
 import SVGGrid from "./svg-renderer/Grid.vue";
 import GridInput from "./svg-renderer/GridInput.vue";
 import { defaultExportOptions } from "./svg-renderer/types";
@@ -68,7 +70,6 @@ const emit = defineEmits<{
   (event: "update:modelValue"): void;
   (event: "size-update"): void;
 }>();
-const editor = ref(null);
 const dir = ref<Direction>("horizontal");
 const focus = ref<Cell>(nullCell);
 const version = ref(0);
@@ -102,39 +103,5 @@ function onClick(value: string) {
 }
 </script>
 
-<style scoped>
-.title {
-  display: flex;
-  justify-content: space-between;
-}
-.title .n-button {
-  margin-right: 4px;
-}
-h2 {
-  margin-top: 0;
-}
-.editor-wrapper {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  width: 100vw;
-}
-.editor {
-  display: flex;
-  flex-direction: row;
-  max-width: 100vw;
-  overflow: hidden;
-}
-.editor > .suggestion {
-  margin-right: 2px;
-  max-width: 180px;
-}
-.leftpanel {
-  width: 210px;
-  min-width: 210px;
-  overflow: hidden;
-}
-.leftpanel > .n-scrollbar {
-  max-height: 100vh;
-}
+<style>
 </style>
