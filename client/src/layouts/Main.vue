@@ -34,7 +34,6 @@ import { RouterLink, useRoute } from "vue-router";
 import { renderIcon } from "../js/utils";
 
 const route = useRoute();
-const props = defineProps<{}>();
 const emit = defineEmits<{ (event: "scroll"): void }>();
 const collapsed = ref(true);
 

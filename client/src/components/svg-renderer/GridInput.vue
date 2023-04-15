@@ -69,7 +69,8 @@ import { Handle } from "./types";
 const container = ref(null as unknown as HTMLDivElement);
 const emit = defineEmits<{
   (event: "update"): string;
-  (event: "focus", value: Cell):void;
+  (event: "keyup", value: KeyboardEvent): void;
+  (event: "focus", value: Cell): void;
 }>();
 const props = defineProps<{
   cell: Cell;
@@ -88,10 +89,12 @@ const defFont = computed(
 const transform = computed(() => {
   return `translate(${
     props.cell.x * cellAndBorderWidth(props.options) +
-    outerBorderWidth(props.options)- props.offset[0]
+    outerBorderWidth(props.options) -
+    props.offset[0]
   }px, ${
     props.cell.y * cellAndBorderWidth(props.options) +
-    outerBorderWidth(props.options) - props.offset[1]
+    outerBorderWidth(props.options) -
+    props.offset[1]
   }px)`;
 });
 function onChange(evt: Event) {
@@ -115,6 +118,10 @@ function onChange(evt: Event) {
   emit("focus", next);
 }
 function onKeyup(evt: KeyboardEvent) {
+
+  emit("keyup", evt);
+  // @ts-ignore
+  if (evt.canceled) return;
   if (evt.key === "Escape") {
     props.grid.setDefinition(props.cell, !props.cell.definition);
     props.grid.setText(props.cell, "");
@@ -165,7 +172,6 @@ function setArrow(dir: ArrowDir, index: number) {
   Grid.setArrow(props.cell, index, dir);
   container.value.querySelector("textarea")?.focus();
   emit("update");
-
 }
 const handleW = 4;
 const handles = computed<Handle[]>(() => {
