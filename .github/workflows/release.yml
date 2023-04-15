@@ -35,11 +35,6 @@ runs:
       uses: dragonraid/changelog-emitter@v0.3.1
       with:
         github_token: ${{ inputs.github_token }}
-      print_title_of_pr:
-    runs-on: ubuntu-20.04
-    steps:
-    - name : Print Title of PR
-      run: echo The Title of your PR is ${{ github.event.pull_request.title }}
 
     - name: Setup Node.js
       uses: actions/setup-node@v3
