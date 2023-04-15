@@ -29,7 +29,7 @@
       {
         "assets": [
           {"path": "dist/mots-flex.deb", "label": "Linux distribution"},
-          {"path": "dist/mots-flex-js.zip", "label": "JS distribution (MacOS, Windows, Linux)"},
+          {"path": "dist/mots-flex-js.zip", "label": "JS distribution (MacOS, Windows, Linux)"}
         ]
       }
     ]

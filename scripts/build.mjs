@@ -90,6 +90,7 @@ function buildLinux() {
 
 // rimraf(outFolder)
 Promise.resolve()
+.then(() => rimraf('dist'))
 .then(() => fs.copy('server/dist', outFolder))
 .then(() => fs.copy('client/dist', path.resolve(outFolder, 'public')))
 .then(() => fs.copy('scripts/assets/dico.zip', path.resolve(outFolder, 'dico.zip')))
