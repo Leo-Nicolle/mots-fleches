@@ -16,40 +16,43 @@
         :dir="dir"
         :query="''"
         :grid-id="grid.id"
+        :method="method"
+        :ordering="ordering"
         @hover="onHover"
         @click="onClick"
         @dir="(d) => (dir = d)"
         @mouseout="onMouseOut"
+        @methodswitch="method = method === 'simple' ? 'fastest' : 'simple'"
+        @orderswitch="ordering = ordering === 1 ? -1 : 1"
       >
       </Suggestion>
     </template>
     <template #body>
       <div class="container">
-
-      <SVGGrid
-        @focus="(cell) => (focus = cell)"
-        :grid="grid"
-        :focus="focus"
-        :dir="dir"
-        :options="options"
-        :export-options="{
-          ...defaultExportOptions,
-          texts: true,
-          highlight: true,
-        }"
-      ></SVGGrid>
-      <GridInput
-        :grid="grid"
-        :dir="dir"
-        :options="options"
-        :cell="focus"
-        :offset="offset"
-        @focus="(point) => (focus = point)"
-        @update="emit('update')"
-      >
-      </GridInput>
-    </div>
-
+        <SVGGrid
+          @focus="(cell) => (focus = cell)"
+          :grid="grid"
+          :focus="focus"
+          :dir="dir"
+          :options="options"
+          :export-options="{
+            ...defaultExportOptions,
+            texts: true,
+            highlight: true,
+          }"
+        ></SVGGrid>
+        <GridInput
+          :grid="grid"
+          :dir="dir"
+          :options="options"
+          :cell="focus"
+          :offset="offset"
+          @focus="(point) => (focus = point)"
+          @update="emit('update')"
+          @keyup="onKeyUp"
+        >
+        </GridInput>
+      </div>
     </template>
   </Layout>
 </template>
@@ -74,7 +77,8 @@ const dir = ref<Direction>("horizontal");
 const focus = ref<Cell>(nullCell);
 const version = ref(0);
 const offset = ref<[number, number]>([0, 0]);
-
+const method = ref<"simple" | "fastest">("fastest");
+const ordering = ref<number>(1);
 function refresh() {
   version.value++;
 }
@@ -100,6 +104,27 @@ function onClick(value: string) {
   if (!cells || !cells.length) return;
   props.grid.setWord(value, cells[0], dir.value);
   emit("update");
+}
+function onKeyUp(evt: KeyboardEvent) {
+  console.log(evt);
+  if (!evt.ctrlKey) return;
+  if (evt.key === "ArrowUp" || evt.key === "ArrowDown") {
+    dir.value = "vertical";
+  }
+  if (evt.key === "ArrowLeft" || evt.key === "ArrowRight") {
+    dir.value = "horizontal";
+  }
+  if (evt.key === ">" || evt.key === "<") {
+    ordering.value = ordering.value * -1;
+  }
+  if (evt.code === "Space") {
+    method.value = method.value === "simple" ? "fastest" : "simple";
+  }
+  evt.preventDefault();
+  evt.stopPropagation();
+  evt.stopImmediatePropagation();
+  // @ts-ignore
+  evt.canceled = true;
 }
 </script>
 
