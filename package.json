@@ -4,10 +4,10 @@
   "description": "Generateur de mots fleches",
   "homepage": "https://github.com/Leo-Nicolle/mots-fleches",
   "scripts": {
+    "prepare": "cd client && npm i && cd ../server && npm i",
     "build:client": "cd client && npm run build",
     "build:server": "cd server && npm run build",
-    "pprebuild": "npm run build:client && npm run build:server",
-    "prepare": "npm run build",
+    "prebuild": "npm run build:client && npm run build:server",
     "build": "node scripts/build.mjs",
     "semantic-release": "semantic-release"
   },
