@@ -24,6 +24,8 @@ export type Cell = {
   suggestion: string;
   arrows: ArrowDir[];
   text: string;
+  spaceV: boolean;
+  spaceH: boolean;
 }
 
 export type Format = {
@@ -48,6 +50,7 @@ export type GridOptions = {
     borderColor: string;
     outerBorderSize: number;
     outerBorderColor: string;
+    spaceSize: number;
   };
   definition: TextSyle<number> & {
     backgroundColor: string;
@@ -77,6 +80,7 @@ export const defaultOptions: GridOptions = {
     borderColor: '#000000',
     outerBorderSize: 2,
     outerBorderColor: '#000000',
+    spaceSize: 4,
   },
   definition: {
     font: "sans-serif",

@@ -129,8 +129,22 @@
         :y1="line.y1"
         :x2="line.x2"
         :y2="line.y2"
-        class="line"
+        class="split"
         :stroke-width="lineStroke"
+        stroke-miterlimit="10"
+        :stroke="lineColor"
+      />
+    </g>
+    <g class="spaces" v-if="exportOptions.spaces">
+      <line
+        v-for="(line, i) in spaces"
+        :key="i"
+        :x1="line.x1"
+        :y1="line.y1"
+        :x2="line.x2"
+        :y2="line.y2"
+        class="space"
+        :stroke-width="spaceStroke"
         stroke-miterlimit="10"
         :stroke="lineColor"
       />
@@ -201,12 +215,10 @@ const cols = computed(() =>
 const arrowScale = computed(() => 0.01 * props.options.arrow.size);
 const lineStroke = computed(() => props.options.grid.borderSize);
 const lineColor = computed(() => props.options.grid.borderColor);
-const outerLineStroke = computed(
-  () => props.options.grid.outerBorderSize
-);
+const spaceStroke = computed(() => 4);
+const outerLineStroke = computed(() => props.options.grid.outerBorderSize);
 const outerLineColor = computed(() => props.options.grid.outerBorderColor);
 const defSize = computed(() => props.options.definition.size);
-// const defSize = computed(() => props.options.definition.size);
 const textSize = computed(() => props.options.grid.cellSize);
 const textFont = computed(() => `roboto`);
 const defFont = computed(() => `${props.options.definition.font}`);
@@ -253,21 +265,22 @@ const splits = computed(() =>
     .map((cell) => {
       const lines = getLines(cell).length;
       const split = splitIndex(cell);
-      const ratio = lines === 4
-       ? split === 2
-        ? 0.5
-        :split === 1
-        ? 1/4
-        : 3/4
-       : lines === 3
-        ? split === 1
-         ? 2/3
-         : 1/3
-        : lines === 2
-         ? split === 1
-          ? 0.5
-          : 0
-        : 0;
+      const ratio =
+        lines === 4
+          ? split === 2
+            ? 0.5
+            : split === 1
+            ? 1 / 4
+            : 3 / 4
+          : lines === 3
+          ? split === 1
+            ? 2 / 3
+            : 1 / 3
+          : lines === 2
+          ? split === 1
+            ? 0.5
+            : 0
+          : 0;
       const y =
         cell.y * cellAndBorderWidth(props.options) +
         ratio * cellWidth(props.options);
@@ -280,6 +293,34 @@ const splits = computed(() =>
       };
     })
 );
+
+const spaces = computed(() => {
+  return props.grid.cells
+    .flat()
+    .filter((c) => !c.definition && (c.spaceH || c.spaceV))
+    .reduce((spaces, cell) => {
+      const xTop = cell.x * cellAndBorderWidth(props.options);
+      const yTop = cell.y * cellAndBorderWidth(props.options);
+      const width = cellWidth(props.options);
+      if (cell.spaceH) {
+        spaces.push({
+          x1: xTop + width,
+          x2: xTop + width,
+          y1: yTop,
+          y2: yTop + width,
+        });
+      }
+      if (cell.spaceV) {
+        spaces.push({
+          y1: yTop + width,
+          y2: yTop + width,
+          x1: xTop,
+          x2: xTop + width,
+        });
+      }
+      return spaces;
+    }, [] as { x1: number; x2: number; y1: number; y2: number }[]);
+});
 
 function xText(cell: Cell) {
   return (

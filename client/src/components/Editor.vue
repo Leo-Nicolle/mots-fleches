@@ -7,7 +7,8 @@
         </h2>
         <ModalOptions
           :modelValue="grid"
-          @update:model-value="emit('size-update')"
+          @update-size="emit('size-update')"
+          @update:model-value="emit('update')"
         />
       </span>
       <Suggestion
@@ -106,25 +107,26 @@ function onClick(value: string) {
   emit("update");
 }
 function onKeyUp(evt: KeyboardEvent) {
-  console.log(evt);
   if (!evt.ctrlKey) return;
+  let consumed = false;
   if (evt.key === "ArrowUp" || evt.key === "ArrowDown") {
     dir.value = "vertical";
+    consumed = true;
   }
   if (evt.key === "ArrowLeft" || evt.key === "ArrowRight") {
     dir.value = "horizontal";
+    consumed = true;
   }
   if (evt.key === ">" || evt.key === "<") {
     ordering.value = ordering.value * -1;
+    consumed = true;
   }
   if (evt.code === "Space") {
     method.value = method.value === "simple" ? "fastest" : "simple";
+    consumed = true;
   }
-  evt.preventDefault();
-  evt.stopPropagation();
-  evt.stopImmediatePropagation();
   // @ts-ignore
-  evt.canceled = true;
+  evt.canceled = consumed;
 }
 </script>
 

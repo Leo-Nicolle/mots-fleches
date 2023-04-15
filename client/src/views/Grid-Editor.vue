@@ -38,6 +38,8 @@ function fetch() {
     });
 }
 function onUpdate() {
+  console.log('update', grid.value?.cols, grid.value?.rows)
+
   clearTimeout(saveTimeout.value);
   saveTimeout.value = setTimeout(() => {
     if (!grid.value) return;
@@ -46,9 +48,10 @@ function onUpdate() {
 }
 
 function onSizeUpdate() {
+  console.log('size update', grid.value?.cols, grid.value?.rows)
   clearTimeout(saveTimeout.value);
   saveTimeout.value = setTimeout(() => {
-    if (!grid.value) return;
+    if (!grid.value ) return;
     grid.value.resize(grid.value.rows, grid.value.cols);
     save(grid.value);
   }, 50);

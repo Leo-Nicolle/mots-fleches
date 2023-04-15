@@ -6,11 +6,17 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master' 
     steps:
+      - name: Install
+        uses: actions/checkout@v3
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+        run: npm i
+      
       - name: Create changelog
         id: changelog
         uses: dragonraid/changelog-emitter@v0.3.1
-        with:
-          github_token: ${{ github.token }}
+          run: node ./scripts/changelog.js
 
       - name: Build
         id: build

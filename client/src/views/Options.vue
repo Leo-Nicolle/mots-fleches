@@ -18,20 +18,19 @@
       </n-scrollbar>
     </template>
     <template v-slot:body>
-        <GridPaper
-          v-if="grid && options"
-          class="paper"
-          :grid="grid"
-          :export-options="{
-            ...defaultExportOptions,
-            texts: true,
-            highlight: true,
-          }"
-          :options="options"
-        />
+      <GridPaper
+        v-if="grid && options"
+        class="paper"
+        :grid="grid"
+        :export-options="{
+          ...defaultExportOptions,
+          texts: true,
+          highlight: true,
+        }"
+        :options="options"
+      />
     </template>
-</Layout>
-
+  </Layout>
 </template>
 
 <script setup lang="ts">
