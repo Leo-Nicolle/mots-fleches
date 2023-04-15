@@ -46,6 +46,18 @@ function buildMac() {
   return pkg(['build/server.js', '--target', 'macos', '--output', `dist/${name}.app`, '--assets', '[build/dico, build/public]']);
 }
 
+function buildjs() {
+  const outDir = 'dist/';
+  const tmpDir = path.resolve(tmpdir(), `mots-flex-js${Date.now()}`);
+  return fs.mkdir(outDir, { recursive: true })
+    .then(() => Promise.all([
+      fs.copy("build/public", path.resolve(tmpDir, "public")),
+      fs.copy("build/dico", path.resolve(tmpDir, "dico")),
+      fs.copy("build/server.js", path.resolve(tmpDir, "server.js")),
+    ]))
+    .then(() => wz.mZip.zipFolder(tmpDir, 'dist/mots-flex-js.zip'))
+}
+
 function buildLinux() {
   const tmpDir = path.resolve(tmpdir(), `mots-flex-deb${0}`);
   const control = Object.entries({
@@ -81,8 +93,8 @@ Promise.resolve()
 .then(() => fs.copy('server/dist', outFolder))
 .then(() => fs.copy('client/dist', path.resolve(outFolder, 'public')))
 .then(() => fs.copy('scripts/assets/dico.zip', path.resolve(outFolder, 'dico.zip')))
-.then(() => decompress(path.resolve(outFolder, 'dico.zip'), path.resolve(outFolder, 'public/')))
 .then(() => fs.rm(path.resolve(outFolder, 'dico.zip')))
+.then(() => buildjs())
 // .then(() => buildExe())
 // .then(() => buildMac())
 .then(() => buildLinux())
