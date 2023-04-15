@@ -1,7 +1,7 @@
 <template>
   <div ref="suggestion" class="suggestion" :version="version">
     <span>
-      <n-button icon-placement="right" @click="ordering *= -1">
+      <n-button icon-placement="right" @click="emit('orderswitch')">
         <template #icon>
           <n-icon>
             <ArrowDown v-if="ordering === 1" />
@@ -9,10 +9,7 @@
           </n-icon>
         </template>
       </n-button>
-      <n-button
-        icon-placement="right"
-        @click="method = method === 'fastest' ? 'simple' : 'fastest'"
-      >
+      <n-button icon-placement="right" @click="emit('methodswitch')">
         <template #icon>
           <n-icon>
             <Hammer v-if="method === 'fastest'" />
@@ -56,8 +53,8 @@
 </template>
 
 <script setup lang="ts">
-import { CancelablePromise as CPromise } from 'cancelable-promise';
-import { defineProps, defineEmits, ref, watchEffect } from "vue";
+import { CancelablePromise as CPromise } from "cancelable-promise";
+import { defineProps, defineEmits, ref, watchEffect, computed } from "vue";
 import {
   ArrowDown,
   ArrowUp,
@@ -71,25 +68,29 @@ import axios from "axios";
 import { Direction, Vec } from "grid";
 import { getUrl } from "../js/utils";
 
-const method = ref("fastest");
-const ordering = ref(1);
 const results = ref([]);
 const totalResults = ref(0);
 const suggestion = ref(null);
 const loading = ref(false);
 const version = ref(0);
-const props =
-  defineProps<{ query: string; gridId: string; point: Vec; dir: Direction }>();
+let hovered = "";
+let queryPromise: CPromise<void> = CPromise.resolve();
+
+const props = defineProps<{
+  query: string;
+  gridId: string;
+  point: Vec;
+  dir: Direction;
+  method: string;
+  ordering: number;
+}>();
 const emit = defineEmits<{
   (event: "hover", value: string): void;
   (event: "click", value: string): void;
   (event: "dir", value: Direction): void;
+  (event: "methodswitch"): void;
+  (event: "orderswitch"): void;
 }>();
-
-let hovered = "";
-let queryPromise: CPromise<void> = CPromise.resolve();
-
-
 function getSuggestions(
   point: Vec,
   dir: Direction,
@@ -103,22 +104,20 @@ function getSuggestions(
     return CPromise.resolve();
   }
   loading.value = true;
-  queryPromise =  new CPromise((resolve) => setTimeout(() => resolve(null), 200))
-      .then(
-        () =>
-          axios.post(getUrl("search"), {
-            gridId: gridId,
-            coord: point,
-            dir: dir,
-            ordering: ordering,
-            query: "",
-            method: method,
-            max: 100,
-          })
-      )
+  queryPromise = new CPromise((resolve) => setTimeout(() => resolve(null), 200))
+    .then(() =>
+      axios.post(getUrl("search"), {
+        gridId: gridId,
+        coord: point,
+        dir: dir,
+        ordering: ordering,
+        query: "",
+        method: method,
+        max: 100,
+      })
+    )
     .then((response) => response.data)
     .then(({ words, cells, impossible, nbResults }) => {
-
       if (!words) return;
       loading.value = false;
       totalResults.value = nbResults;
@@ -147,8 +146,8 @@ watchEffect(() => {
   getSuggestions(
     props.point,
     props.dir,
-    ordering.value,
-    method.value,
+    props.ordering,
+    props.method,
     props.gridId
   );
 });
@@ -161,7 +160,6 @@ function onMouseEvt(evt: MouseEvent, click = false) {
   hovered = text;
   return click ? emit("click", text) : emit("hover", text);
 }
-
 </script>
 
 <style>
@@ -177,5 +175,4 @@ function onMouseEvt(evt: MouseEvent, click = false) {
 .suggestion > .loading {
   flex: 1;
 }
-
 </style>
