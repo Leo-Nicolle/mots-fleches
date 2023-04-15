@@ -9,8 +9,9 @@ import wordController from "./controllers/wordController";
 import gridController from "./controllers/gridController";
 import optionsController from "./controllers/optionsController";
 import searchController from "./controllers/search-controller";
-import dbController from "./controllers/db-controller";
+import exitController from "./controllers/exitController";
 
+import dbController from "./controllers/db-controller";
 
 import dico from "./search/dico";
 
@@ -39,5 +40,7 @@ export function createApp() {
       open(url);
     }
   });
+  exitController({ app, server });
+
   return { app, server };
 }
