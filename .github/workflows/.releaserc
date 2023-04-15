@@ -11,12 +11,27 @@
     "@semantic-release/release-notes-generator",
     "@semantic-release/changelog",
     [
+      "@semantic-release/npm",
+      {
+        "npmPublish": false,
+        "tarballDir": "dist"
+      }
+    ],
+    [
       "@semantic-release/git",
       {
         "assets": ["package.json", "CHANGELOG.md"],
         "message": "chore(release): :bookmark: ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
       }
     ],
-    "@semantic-release/github"
+    [
+      "@semantic-release/github",
+      {
+        "assets": [
+          {"path": "dist/mots-flex.deb", "label": "Linux distribution"},
+          {"path": "dist/mots-flex-js.zip", "label": "JS distribution (MacOS, Windows, Linux)"},
+        ]
+      }
+    ]
   ]
 }
