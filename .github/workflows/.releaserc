@@ -1,7 +1,7 @@
 {
   "branches": [
     "master",
-    { "name": "alpha", "prerelease": true }
+    { "name": "develop", "prerelease": true }
   ],
   "debug": true,
   "ci": true,
