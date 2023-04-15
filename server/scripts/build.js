@@ -14,6 +14,7 @@ const { parsed } = dotenv.config({
 });
 if (process.env.MODE === "prod") {
   parsed.APP_OPEN_BROWSER = 1;
+  parsed.APP_CROSSWORDS_MODE = "prod";
 }
 if (process.env.MODE !== "test" && process.env.MODE !== "e2e-test") {
   decompress(

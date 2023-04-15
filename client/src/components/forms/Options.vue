@@ -1,13 +1,12 @@
 <template>
   <div class="options">
-    <n-form ref="formRef" inline :label-width="80" :model="value">
+    <n-form ref="formRef" :label-width="80" :model="value">
       <slot></slot>
       <div v-if="grid">
         <h3>Options</h3>
         <n-form-item label="Nom" path="name">
           <n-input role="name" v-model:value="value.name" />
         </n-form-item>
-
         <n-form-item label="Taille cellule" path="grid.cellSize">
           <n-input-number role="cell-size" v-model:value="value.grid.cellSize" />
         </n-form-item>
@@ -32,6 +31,9 @@
             :show-alpha="false"
             size="small"
           />
+        </n-form-item>
+        <n-form-item label="Taille espace" path="grid.spaceSize">
+          <n-input-number role="space" v-model:value="value.grid.spaceSize" />
         </n-form-item>
       </div>
       <div v-if="definition">
@@ -89,6 +91,7 @@ watch(value.value, () => {
 <style scoped>
 .n-form {
   flex-direction: column;
+  width: 192px;
 }
 .n-color-picker {
   width: 150px;

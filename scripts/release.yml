@@ -30,19 +30,17 @@ outputs:
 runs:
   using: 'composite'
   steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 18
+    - run: npm i
+    
     - name: Create changelog
       id: changelog
       uses: dragonraid/changelog-emitter@v0.3.1
       with:
         github_token: ${{ inputs.github_token }}
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: 18
-
-    - name: Install dependencies
-      run: npm i
 
     - name: Build
       id: build

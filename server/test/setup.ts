@@ -6,7 +6,7 @@ const globals = {
   APP_CROSSWORDS_OPTIONS_PATH: "./dist/db/options.json",
   APP_CROSSWORDS_DICO_PATH: "./dist/test/dico/",
   APP_OPEN_BROWSER: "false",
-  MODE: "test",
+  APP_CROSSWORDS_MODE: "test",
   APP_CROSSWORDS_PORT: 3011,
 };
 Object.entries(globals).forEach(([key, value]) => {

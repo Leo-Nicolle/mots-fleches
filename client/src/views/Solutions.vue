@@ -28,6 +28,7 @@ const exportOptions = ref<ExportOptions>({
   ...defaultExportOptions,
   arrows: false,
   definitions: false,
+  spaces: false,
 });
 
 function fetch() {

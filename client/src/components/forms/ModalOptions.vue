@@ -19,6 +19,7 @@
           <n-form-item label="Titre" path="title">
             <n-input
               role="title"
+              type="text"
               placeholder="Nouvelle Grille"
               v-model:value="value.title"
             />
@@ -45,10 +46,18 @@
           </n-form-item>
           <span class="rowcols">
             <n-form-item label="Lignes" path="rows">
-              <n-input-number role="rows" v-model:value="value.rows" />
+              <n-input-number
+                role="rows"
+                v-model:value="value.rows"
+                :on-update:value="(v) => onUpdate('rows', v)"
+              />
             </n-form-item>
             <n-form-item label="Colones" path="grid.cols">
-              <n-input-number role="cols" v-model:value="value.cols" />
+              <n-input-number
+                role="cols"
+                v-model:value="value.cols"
+                :on-update:value="(v) => onUpdate('cols', v)"
+              />
             </n-form-item>
           </span>
         </n-form>
@@ -58,7 +67,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineEmits, defineProps, onMounted, ref, watch } from "vue";
+import {
+  computed,
+  defineEmits,
+  defineProps,
+  nextTick,
+  onMounted,
+  ref,
+  watch,
+} from "vue";
 import { CogOutline as CogIcon } from "@vicons/ionicons5";
 import { Grid } from "grid";
 import { getUrl } from "../../js/utils";
@@ -71,17 +88,26 @@ const opts = ref<{ label: string; value: string }[]>([]);
 const visible = ref(false);
 const emit = defineEmits<{
   (event: "update:modelValue", value: Grid): void;
+  (event: "update-size", value: Grid): void;
   (event: "close", value: boolean): void;
   (event: "update"): void;
 }>();
 const value = useModel(props, emit);
+function onUpdate(path: string, newvalue: string | number) {
+  value.value[path] = newvalue;
+  nextTick(() => {
+    emit("update-size", value.value);
+  });
+}
+
 watch(value.value, () => {
+  if (!visible.value) return;
   emit("update:modelValue", value.value);
 });
-
 const defaultSelectOpt = computed(() => {
   if (!props.modelValue) return "default";
-  return opts.value.find((opt) => opt.value === props.modelValue.optionsId)?.label;
+  return opts.value.find((opt) => opt.value === props.modelValue.optionsId)
+    ?.label;
 });
 onMounted(() => {
   axios

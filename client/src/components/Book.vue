@@ -52,6 +52,7 @@ const solutionExport = computed(() => ({
     words: true,
     arrows: false,
     splits: false,
+    spaces: false,
     definitions: false,
   },
   ...props.exportOptions,

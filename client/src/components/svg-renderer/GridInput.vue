@@ -100,6 +100,11 @@ const transform = computed(() => {
 function onChange(evt: Event) {
   const { x, y } = props.cell;
   let text = (evt.target as HTMLInputElement).value || "";
+  if (text.includes("_") || text.includes("|")) {
+    text = text.replace("_", "").replace("|", "");
+    (evt.target as HTMLInputElement).value = props.cell.text;
+    return;
+  }
   if (!props.cell.definition) {
     text = text.trim().slice(-1).toUpperCase();
   }
@@ -118,10 +123,22 @@ function onChange(evt: Event) {
   emit("focus", next);
 }
 function onKeyup(evt: KeyboardEvent) {
-
+  if (evt.key === "|") {
+    props.grid.setSpaceH(props.cell, !props.cell.spaceH);
+    console.log('ICI', props.cell.spaceH)
+    emit("update");
+    return;
+  }
+  if (evt.key === "_") {
+    console.log('LA', props.cell.spaceV)
+    props.grid.setSpaceV(props.cell, !props.cell.spaceV);
+    emit("update");
+    return;
+  }
   emit("keyup", evt);
   // @ts-ignore
   if (evt.canceled) return;
+
   if (evt.key === "Escape") {
     props.grid.setDefinition(props.cell, !props.cell.definition);
     props.grid.setText(props.cell, "");

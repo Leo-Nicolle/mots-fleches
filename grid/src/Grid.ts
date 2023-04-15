@@ -7,6 +7,8 @@ export const nullCell: Cell = {
   y: -1,
   definition: false,
   highlighted: false,
+  spaceH: false,
+  spaceV: false,
   suggestion: '',
   arrows: [],
   text: ''
@@ -112,6 +114,12 @@ export class Grid {
     Grid.setArrow(this.cells[v.y][v.x], index, direction);
   }
 
+  setSpaceH({ x, y }: Vec, value: boolean): void {
+    this.cells[y][x].spaceH = value;
+  }
+  setSpaceV({ x, y }: Vec, value: boolean): void {
+    this.cells[y][x].spaceV = value;
+  }
 
   increment(v: Vec, direction: Direction): Cell {
     const { x, y } = new Vector(v.x, v.y).add(Grid.getDirVec(direction));
@@ -235,12 +243,14 @@ export class Grid {
     return res;
   }
 
-  static newCell(x: number, y: number) {
+  static newCell(x: number, y: number): Cell {
     return {
       x,
       y,
       definition: false,
       highlighted: false,
+      spaceV: false,
+      spaceH: false,
       arrows: [],
       suggestion: '',
       text: "",
