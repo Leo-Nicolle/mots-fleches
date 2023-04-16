@@ -3,7 +3,7 @@
     <template v-slot:left-panel>
       <div class="left-panel">
         <slot name="left-panel"></slot>
-        <n-button @click="deleteVisible = true" type="warning"
+        <n-button @click="deleteVisible = true" type="warning" round
           >Supprimer</n-button
         >
       </div>
@@ -36,7 +36,7 @@
         <n-card @click="onCreate" title="Créer">
           <template #default>
             <div class="card-body">
-              <n-button class="add preview">
+              <n-button class="add preview" round>
                 <n-icon>
                   <AddIcon />
                 </n-icon>
@@ -93,21 +93,23 @@ watchEffect(() => {
   selected.value = props.eltList.map(() => false);
 });
 watch(selectedElements, () => {
-  console.log(selectedElements.value);
   emit("select", selectedElements.value);
 });
 </script>
 
-<style scoped>
+<style>
 .left-panel {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
   gap: 10px;
   margin-left: 10px;
+  justify-content: space-evenly;
+  align-items: center;
+  align-content: space-around;
 }
-
+.n-scrollbar-container:has(> .n-scrollbar-content > .wrapper) { 
+  border-left: 1px solid black;
+}
 .n-grid {
   margin: 0 10px;
 }

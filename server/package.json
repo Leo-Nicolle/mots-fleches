@@ -61,6 +61,7 @@
     "express": "^4.17.1",
     "express-validator": "^6.12.1",
     "grid": "file:../grid",
+    "http-terminator": "^3.2.0",
     "lowdb": "^3.0.0",
     "open": "^8.4.2"
   }

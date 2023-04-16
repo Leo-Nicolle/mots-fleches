@@ -1,6 +1,6 @@
 <template>
   <div ref="exporter" class="exporter">
-    <n-button @click="print">Imprimer</n-button>
+    <n-button @click="print" round>Imprimer</n-button>
     <iframe class="print" :src="iframeUrl"></iframe>
   </div>
 </template>
@@ -16,11 +16,6 @@ function print() {
   iframe.contentWindow.print();
 }
 const iframeUrl = computed(() => {
-  console.log(
-    router.currentRoute.value.path,
-    router.currentRoute.value.fullPath,
-    router.currentRoute.value.meta,
-  )
   const url =  `${window.location.origin}${
     router.resolve({
       name: props.route,

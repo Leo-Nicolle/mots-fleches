@@ -77,14 +77,14 @@ const emit = defineEmits<{
 const dir = ref<Direction>("horizontal");
 const focus = ref<Cell>(nullCell);
 const version = ref(0);
-const offset = ref<[number, number]>([0, 0]);
+const offset = ref<[number, number]>([-10, 0]);
 const method = ref<"simple" | "fastest">("fastest");
 const ordering = ref<number>(1);
 function refresh() {
   version.value++;
 }
 function onScroll(e) {
-  offset.value = [e.target.scrollLeft, e.target.scrollTop];
+  offset.value = [e.target.scrollLeft - 10, e.target.scrollTop];
 }
 watchEffect(() => {
   props.grid.highlight(props.grid.getBounds(focus.value, dir.value).cells);
@@ -131,4 +131,13 @@ function onKeyUp(evt: KeyboardEvent) {
 </script>
 
 <style>
+.container {
+  box-sizing: border-box;
+  margin-left: 10px;
+}
+.title {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+}
 </style>

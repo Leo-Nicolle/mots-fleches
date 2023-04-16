@@ -135,7 +135,6 @@ function placeDefinition({minWord, rows, cols, scaledDistib, grid}){
       return acc;
     }, {total: 0, chosen: null}).chosen;
 
-    // console.log(actDistrib.reduce((acc, e, i) => Math.abs(e - scaledDistib[i]), 0))
     //@ts-ignore
     grid[cut.y][cut.x] = true;
 }

@@ -43,7 +43,6 @@ function fetch() {
     .then(() => axios.get(getUrl(`options/solution`)))
     .then(({ data }) => {
       solutionOptions.value = data;
-      console.log(solutionOptions.value, grids.value);
     })
     .then(() => axios.get(getUrl(`options/default`)))
     .then(({ data }) => {

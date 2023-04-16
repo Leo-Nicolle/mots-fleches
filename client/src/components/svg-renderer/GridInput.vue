@@ -125,12 +125,10 @@ function onChange(evt: Event) {
 function onKeyup(evt: KeyboardEvent) {
   if (evt.key === "|") {
     props.grid.setSpaceH(props.cell, !props.cell.spaceH);
-    console.log('ICI', props.cell.spaceH)
     emit("update");
     return;
   }
   if (evt.key === "_") {
-    console.log('LA', props.cell.spaceV)
     props.grid.setSpaceV(props.cell, !props.cell.spaceV);
     emit("update");
     return;

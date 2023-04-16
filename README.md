@@ -4,8 +4,17 @@
 Generateur de mots fléchés.
 
 ## Installation
- 
- TODO. I am currently working on packaging and publishing scripts.
+
+### Windows/Mac
+
+Sous windows et mac il va vous falloir [nodejs](https://nodejs.org/en/download), ensuite, [téléchargez la dernière verion](https://github.com/octo-org/octo-repo/releases/latest), dezipez ouvrez un terminal dans le dossier `mots-flex`: 
+```bash
+node server.js
+```
+
+### Linux
+Vous pouvez soit directement lancer le serveur dans un terminal, soit installer le `.deb` [téléchargeable ici](https://github.com/octo-org/octo-repo/releases/latest)
+
 
 ## Fonctionalités
 
@@ -33,7 +42,14 @@ https://user-images.githubusercontent.com/7451806/226175011-0e5de156-70da-4955-9
  - Marges
  - Taille des cases
  - Taille/coleur/police des textes
+
+### Export
+
  
+
+https://user-images.githubusercontent.com/7451806/232314140-940b8ddf-0f99-47fa-a0ac-4db266715133.mp4
+
+
 
 
 ## Contribuer (section en anglais, comme c'est l'usage)

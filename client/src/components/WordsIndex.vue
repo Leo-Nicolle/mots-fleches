@@ -124,7 +124,6 @@ const layout = computed(() => {
   const totalArea = bb.width * bb.height;
   const ratio = area / totalArea;
   heights.push(ratio * 100 + "%");
-  console.log(ratio);
 
   return { wordsPerPage: res.reverse(), heights: heights.reverse() };
 });

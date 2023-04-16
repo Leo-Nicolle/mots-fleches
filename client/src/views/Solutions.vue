@@ -35,13 +35,11 @@ function fetch() {
   return axios
     .get(getUrl("grid"))
     .then(({ data }) => {
-      console.log("data", data);
       grids.value = data.map((g) => Grid.unserialize(JSON.stringify(g)));
     })
     .then(() => axios.get(getUrl(`options/solution`)))
     .then(({ data }) => {
       options.value = data;
-      console.log(options.value, grids.value);
     })
     .catch((e) => {
       console.error("E", e);

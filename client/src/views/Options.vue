@@ -66,12 +66,9 @@ function fetch() {
 }
 
 function onUpdate() {
-  console.log("update");
   clearTimeout(saveTimeout.value);
   saveTimeout.value = setTimeout(() => {
     if (!options.value) return;
-    console.log("post");
-
     axios.post(getUrl(`options`), {
       options: options.value,
     });
