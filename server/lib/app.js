@@ -34,13 +34,13 @@ export function createApp() {
   dbController({ app, db });
 
   const server = app.listen(+APP_CROSSWORDS_PORT || 3011, () => {
+    exitController({ app, server });
     const url = `http://localhost:${server.address().port}`;
     console.log(`server running at port ${url}`);
     if (+APP_OPEN_BROWSER) {
       open(url);
     }
   });
-  exitController({ app, server });
 
   return { app, server };
 }

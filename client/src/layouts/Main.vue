@@ -1,21 +1,40 @@
 <template>
   <div class="main-layout">
     <div class="header">
-      <slot name="header"> </slot>
-      <n-menu
-        class="burger"
-        :accordion="true"
-        :mode="'horizontal'"
-        :collapsed="collapsed"
-        :collapsed-width="64"
-        :collapsed-icon-size="22"
-        :options="menuOptions"
-      />
+      <span class="left">
+        <n-menu
+          class="burger"
+          :accordion="true"
+          :mode="'horizontal'"
+          :collapsed="collapsed"
+          :collapsed-width="64"
+          :collapsed-icon-size="22"
+          :options="menuOptions"
+        />
+        <slot name="header"> </slot>
+      </span>
+      <span class="right">
+        <n-button
+          strong
+          secondary
+          type="warning"
+          class="exit-button"
+          icon-placement="right"
+          @click="exit"
+        >
+          ciao
+          <template #icon>
+            <n-icon>
+              <LogOutOutline />
+            </n-icon>
+          </template>
+        </n-button>
+      </span>
     </div>
 
     <div class="body">
       <div class="left-panel">
-        <n-scrollbar x-scrollable class="scroll">
+        <n-scrollbar x-scrollable>
           <slot name="left-panel"> </slot>
         </n-scrollbar>
       </div>
@@ -30,10 +49,11 @@
 import { MenuOutline } from "@vicons/ionicons5";
 import type { MenuOption } from "naive-ui";
 import { defineProps, h, ref, defineEmits, computed } from "vue";
-import { RouterLink, useRoute } from "vue-router";
+import { RouterLink, useRouter } from "vue-router";
 import { renderIcon } from "../js/utils";
+import { LogOutOutline } from "@vicons/ionicons5";
 
-const route = useRoute();
+const router = useRouter();
 const emit = defineEmits<{ (event: "scroll"): void }>();
 const collapsed = ref(true);
 
@@ -83,14 +103,44 @@ const menuOptions = ref<MenuOption[]>([
 function onScroll(e: Event) {
   emit("scroll", e);
 }
+function exit() {
+  router.push("/logout");
+}
 </script>
 
-<style scoped>
+<style>
 .main-layout {
   width: 100vw;
   max-height: 100vh;
   min-height: 100vh;
   overflow: hidden;
+}
+
+.header {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  margin-top: 2px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  align-items: center;
+  justify-content: space-between;
+  height: 42px;
+  box-shadow: 0px 1px 3px #888;
+}
+.header > .left {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
+}
+.header > .right {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 nav {
@@ -104,6 +154,10 @@ nav {
   margin-left: auto;
   margin-right: 25px;
 }
+.exit-button {
+  margin-right: 5px;
+}
+
 .body {
   display: flex;
   max-height: calc(100vh - 42px);
@@ -116,28 +170,25 @@ nav {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  width: 210px;
-  min-width: 210px;
+  width: 235px;
+  min-width: 235px;
   overflow: hidden;
   align-items: center;
   justify-content: flex-start;
+  margin-left: 5px;
 }
-.header {
+
+.left-panel .n-scrollbar-content {
   display: flex;
-  flex-direction: row;
-  gap: 10px;
-  width: 100%;
-  margin-bottom: 12px;
-  overflow: hidden;
+  flex-direction: column;
+  justify-content: space-evenly;
   align-items: center;
-  justify-content: flex-start;
-  height: 42px;
-  box-sizing: border-box;
+  align-content: space-around;
 }
 .scroll {
   max-height: 100%;
-  max-width: calc(100vw - 210px);
-  width: calc(100vw - 210px);
+  max-width: calc(100vw - 235px);
+  width: calc(100vw - 235px);
 }
 .leftpanel > .n-scrollbar {
   max-height: 100vh;

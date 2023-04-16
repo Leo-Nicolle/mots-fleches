@@ -51,6 +51,11 @@ const routes: Array<RouteRecordRaw> = [
     name: 'book-export',
     component: () => import('../views/Book.vue')
   },
+  {
+    path: '/logout',
+    name: 'logout',
+    component: () => import('../views/Logout.vue')
+  },
 ];
 
 const router = createRouter({

@@ -67,7 +67,6 @@ function fetch() {
     .then(() => axios.get(getUrl(`options/solution`)))
     .then(({ data }) => {
       options.value = data;
-      console.log(options.value, grids.value);
     })
     .catch((e) => {
       console.error("E", e);

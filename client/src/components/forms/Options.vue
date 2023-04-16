@@ -83,7 +83,6 @@ const emit = defineEmits<{
 const value = useModel(props, emit);
 
 watch(value.value, () => {
-  console.log("WATCH", value.value.name);
   emit("update:modelValue", value.value);
 });
 </script>

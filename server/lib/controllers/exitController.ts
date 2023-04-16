@@ -1,29 +1,22 @@
 import { Express } from "express";
 import { Server } from "http";
+import { createHttpTerminator } from 'http-terminator';
 
-function exit(server: Server, timeout = 10_000) {
-  return setTimeout(() => {
-    if (
-      process.env.nobail ||
-      APP_CROSSWORDS_MODE === "dev" ||
-      APP_CROSSWORDS_MODE === "test"
-    )
-      return;
-    server.close();
-  }, timeout);
-}
 
-export default function gridController({
+export default function exitController({
   app,
   server,
 }: {
   app: Express;
   server: Server;
 }) {
-  let timeout = exit(server);
+  const terminator = createHttpTerminator({ server });
   app.get("/ping", async (req, res) => {
-    clearTimeout(timeout);
-    timeout = exit(server);
-    res.send(200);
+    res.status(200).send("Server is alive");
+  });
+  app.get("/kill", async (req, res) => {
+    res.status(200).send("Server is shutting down");
+    console.log("Server is shutting down");
+    terminator.terminate();
   });
 }

@@ -1,6 +1,6 @@
 <template>
   <div ref="suggestion" class="suggestion" :version="version">
-    <span>
+    <span class="buttons">
       <n-button icon-placement="right" @click="emit('orderswitch')">
         <template #icon>
           <n-icon>
@@ -174,5 +174,11 @@ function onMouseEvt(evt: MouseEvent, click = false) {
 }
 .suggestion > .loading {
   flex: 1;
+}
+.buttons{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 2px;
 }
 </style>

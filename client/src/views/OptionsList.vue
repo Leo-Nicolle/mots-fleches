@@ -48,7 +48,6 @@ function fetch() {
     });
 }
 function onDelete() {
-  console.log("onDelete", selected.value)
   Promise.all(
     selected.value.map((option, i) =>
       axios.delete(getUrl(`options/${option.id}`))

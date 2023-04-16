@@ -1,6 +1,6 @@
 <template>
   <div ref="exporter" class="exporter">
-    <n-button @click="print">Exporter</n-button>
+    <n-button @click="print" round>Exporter</n-button>
     <SVGGrid  ref="grid" v-if="grid && options" :grid="grid" dir="horizontal" 
     :export-options="{...defaultExportOptions, texts: true, highlight: true}"
     :focus="nullCell" :options="options"/>
