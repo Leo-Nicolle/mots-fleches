@@ -1,6 +1,13 @@
 <template>
   <div>
-    <n-alert v-if="alert" class="alert-toaster" :title="alert.title" :type="alert.type" bordered closable>
+    <n-alert
+      v-if="alert"
+      class="alert-toaster"
+      :title="alert.title"
+      :type="alert.type"
+      bordered
+      closable
+    >
       {{ alert.content }}
     </n-alert>
     <router-view />
@@ -11,6 +18,9 @@
 import { onMounted, ref } from "vue";
 import { getUrl } from "./js/utils";
 import axios from "axios";
+/**
+ * Main Component: handles the alert toaster for server disconnection
+ */
 const alert = ref<false | { content: string; title: string; type: string }>(
   false
 );
@@ -41,7 +51,7 @@ onMounted(async () => {
 </script>
 
 <style>
-.alert-toaster{
+.alert-toaster {
   width: 100vw;
 }
 .scroll::-webkit-scrollbar {

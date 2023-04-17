@@ -184,26 +184,34 @@ import {
   arrowPositions,
   ArrowDir,
 } from "grid";
-import { defaultExportOptions, ExportOptions } from "./types";
+import { defaultExportOptions, ExportOptions } from "../../types";
 import { getCellClass } from "../../js/utils";
+/**
+ * Component to render a grid as an SVG
+ */
 const container = ref<SVGSVGElement>(null as unknown as SVGSVGElement);
-const props = withDefaults(
-  defineProps<{
-    grid: Grid;
-    dir: Direction;
-    options: GridOptions;
-    focus: Cell;
-    exportOptions: Partial<ExportOptions>;
-  }>(),
-  {
-    dir: "horizontal",
-    focus: nullCell,
-    highlight: false,
-    exportOptions: () => defaultExportOptions,
-  }
-);
+const props = defineProps<{
+  /**
+   * The grid to render
+   */
+  grid: Grid;
+  /**
+   * The style of the grid
+   */
+  options: GridOptions;
+  /**
+   * The focused cell (can be nullCell)
+   */
+  focus: Cell;
+  /**
+   * What to display or not (arrows, definitions, etc.)
+   */
+  exportOptions: Partial<ExportOptions>;
+}>();
 const emit = defineEmits<{
-  (event: "type", value: number): void;
+  /**
+   * Emitted when a cell is clicked
+   */
   (event: "focus", value: Cell): void;
 }>();
 const rows = computed(() =>
@@ -227,6 +235,9 @@ const defBackgroundColor = computed(
 );
 const defColor = computed(() => props.options.definition.color);
 
+/**
+ * The arrows to display
+ */
 const arrows = computed(
   () =>
     props.grid.cells
@@ -258,6 +269,9 @@ const arrows = computed(
       transform: string;
     }[]
 );
+/**
+ * The splits to display
+ */
 const splits = computed(() =>
   props.grid.cells
     .flat()
@@ -293,7 +307,9 @@ const splits = computed(() =>
       };
     })
 );
-
+/**
+ * The spaces to display
+ */
 const spaces = computed(() => {
   return props.grid.cells
     .flat()
@@ -330,6 +346,10 @@ function xText(cell: Cell) {
 function yText(cell: Cell) {
   return cell.y * cellAndBorderWidth(props.options);
 }
+/**
+ * For a definition cell, 
+ * computes the lines to display
+ */
 function lines(cell: Cell) {
   if (!cell.definition) {
     return [

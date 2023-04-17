@@ -28,11 +28,19 @@ import { defineProps, defineEmits, watch } from "vue";
 import { useModel } from "../../js/useModel";
 import { TextSyle } from "grid";
 import Sizeinput from "./Sizeinput.vue";
-
+/**
+ * Form to modify TextStyle.
+ */
 const props = defineProps<{
+  /**
+   * The TextStyle to edit
+   */
   modelValue: TextSyle;
 }>();
 const emit = defineEmits<{
+  /**
+   * v-model event
+   */
   (event: "update:modelValue", value: TextSyle): void;
 }>();
 const value = useModel(props, emit);

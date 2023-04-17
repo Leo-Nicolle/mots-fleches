@@ -41,12 +41,14 @@ import ExportSVGButton from "../components/ExportSVG.vue";
 import OptionsForm from "../components/forms/Options.vue";
 import GridForm from "../components/forms/GridForm.vue";
 import Layout from "../layouts/Main.vue";
-import { defaultExportOptions } from "../components/svg-renderer/types";
+import { defaultExportOptions } from "../types";
 import { Grid, GridOptions } from "grid";
 import { getUrl } from "../js/utils";
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
-
+/**
+ * View to edit a grid style
+ */
 const grid = ref<Grid>();
 const options = ref<GridOptions>();
 const saveTimeout = ref(0);

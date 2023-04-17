@@ -8,9 +8,8 @@
     @select="(s) => (selected = s)"
   >
     <template v-slot:left-panel>
-
-        <h3>Grilles</h3>
-        <ExportButton route="book-export" :params="params" />
+      <h3>Grilles</h3>
+      <ExportButton route="book-export" :params="params" />
       <!-- <n-button @click="onExportClick">Exporter</n-button> -->
     </template>
     <template #card-title="{ elt }">
@@ -44,10 +43,12 @@ import axios from "axios";
 import SVGGrid from "../components/svg-renderer/Grid.vue";
 import ExportButton from "../components/ExportButton.vue";
 import Layout from "../layouts/GridLayout.vue";
-import { defaultExportOptions } from "../components/svg-renderer/types";
-
+import { defaultExportOptions } from "../types";
 import { getUrl } from "../js/utils";
 import { Grid, GridOptions, nullCell } from "grid";
+/**
+ * View to display all grids in a grid layout
+ */
 const router = useRouter();
 const grids = ref<Grid[]>([]);
 const options = ref<GridOptions[]>([]);

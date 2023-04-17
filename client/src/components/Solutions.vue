@@ -28,11 +28,22 @@ import SVGGrid from "./svg-renderer/Grid.vue";
 import Paper from "./Paper.vue";
 import { Grid, nullCell, SolutionOptions } from "grid";
 import { computed } from "vue";
-import { ExportOptions } from "../components/svg-renderer/types";
-
+import { ExportOptions } from "../types";
+/**
+ * Component to render solution Grids
+ */
 const props = defineProps<{
+  /**
+   * The grids to render
+   */
   grids: Grid[];
+  /**
+   * The styles to render the grids
+   */
   solutionOptions: SolutionOptions;
+  /**
+   * What to export
+   */
   exportOptions: ExportOptions;
 }>();
 const rows = computed(() => {

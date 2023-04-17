@@ -1,6 +1,6 @@
 <template>
   <div class="lougout">
-    <n-icon v-if="!closed" size="5em" class="loader" >
+    <n-icon v-if="!closed" size="5em" class="loader">
       <RefreshCircleOutline />
     </n-icon>
     <span>
@@ -14,8 +14,11 @@ import { ref, onMounted } from "vue";
 import axios from "axios";
 import { RefreshCircleOutline } from "@vicons/ionicons5";
 import { getUrl } from "../js/utils";
+/**
+ * View to logout and close the server
+ */
 const closed = ref(false);
-const waiting = "Fermeture du serveur..."
+const waiting = "Fermeture du serveur...";
 const message = ref<string>(waiting);
 function ping(): Promise<any> {
   return axios.get(getUrl("ping"));
@@ -65,7 +68,7 @@ onMounted(() => {
     transform: rotate(360deg);
   }
 }
-.loader{
+.loader {
   animation: 1s linear 1s infinite running rotate;
 }
 </style>
