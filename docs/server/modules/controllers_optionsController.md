@@ -24,4 +24,4 @@ Controller for CRUD operations on options
 
 #### Defined in
 
-[controllers/optionsController.ts:8](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/server/lib/controllers/optionsController.ts#L8)
+[controllers/optionsController.ts:8](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/controllers/optionsController.ts#L8)

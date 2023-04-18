@@ -3,7 +3,7 @@ import { beforeAll, describe, it, expect } from "vitest";
 import { Grid } from "grid";
 import dico from "../lib/search/dico";
 import search, { Search } from "../lib/search/index";
-
+import { resolve } from "./utils";
 const grid = new Grid(3, 5, "grid1");
 grid.setDefinition({ x: 0, y: 0 }, true);
 grid.setDefinition({ x: 2, y: 2 }, true);
@@ -21,7 +21,7 @@ describe("Search", () => {
     // .loadDictionary()
     // .then(() =>
     return fs
-      .readFile("./test/dico/words-search-test.txt", "utf8")
+      .readFile(resolve("./test/dico/words-search-test.txt"), "utf8")
       .then((data) => {
         dico.addWordsToDictionnary(data);
       });
@@ -39,20 +39,6 @@ describe("Search", () => {
     expect(lemmes).to.be.deep.equal([
       {
         indexLemme: 0,
-        indexWord: 1,
-        length: 3,
-        totalLength: 3,
-        lemme: "ABC",
-      },
-      {
-        indexLemme: 1,
-        indexWord: 1,
-        length: 2,
-        totalLength: 3,
-        lemme: "BC",
-      },
-      {
-        indexLemme: 0,
         indexWord: 2,
         length: 2,
         totalLength: 2,
@@ -66,27 +52,57 @@ describe("Search", () => {
         lemme: "C.*",
       },
     ]);
-    console.log({ lemmes });
+    const lemmes2 = Search.getLemmes({
+      grid,
+      coord: { x: 1, y: 0 },
+      wordLength: length,
+      dir: "vertical",
+    });
+    expect(lemmes2).to.be.deep.equal([
+      {
+        indexLemme: 0,
+        indexWord: 0,
+        length: 3,
+        totalLength: 4,
+        lemme: "ABC",
+      },
+      {
+        indexLemme: 1,
+        indexWord: 0,
+        length: 3,
+        totalLength: 4,
+        lemme: "BC*",
+      },
+      {
+        indexLemme: 2,
+        indexWord: 0,
+        length: 2,
+        totalLength: 4,
+        lemme: "C*",
+      },
+      {
+        indexLemme: 0,
+        indexWord: 1,
+        length: 3,
+        totalLength: 5,
+        lemme: "*B*",
+      },
+      {
+        indexLemme: 1,
+        indexWord: 1,
+        length: 3,
+        totalLength: 5,
+        lemme: "B**",
+      },
+      {
+        indexLemme: 0,
+        indexWord: 2,
+        length: 2,
+        totalLength: 2,
+        lemme: "*C",
+      },
+    ]);
   });
-  // it("should find lemmes 2", () => {
-  //   const coord = { x: 1, y: 1 };
-  //   const vec = { x: 0, y: 1 };
-  //   const { start, length } = findBoundaries({
-  //     grid,
-  //     coord,
-  //     vec,
-  //     isDefinition,
-  //   });
-  //   const lemmes = Search.getLemmes({
-  //     grid,
-  //     isDefinition,
-  //     coord: start,
-  //     wordLength: length,
-  //     vec,
-  //   });
-  //   // here we see problems: there should not be overlapping lemmes
-  //   // console.log({ lemmes });
-  // });
 
   it("should retrieve best words", () => {
     const coord = { x: 1, y: 1 };
@@ -108,5 +124,19 @@ describe("Search", () => {
       dir,
     });
     expect(results.words).to.have.members(["ABAAT", "ABAOT"]);
+  });
+
+  it("getLemme should ignore filled words", () => {
+    const coord = { x: 1, y: 1 };
+    debugger;
+    const dir = "horizontal";
+    const { start, length } = grid.getBounds(coord, dir);
+    const lemmes = Search.getLemmes({
+      grid,
+      coord: start,
+      wordLength: length,
+      dir,
+    });
+    expect(lemmes.filter(({ indexWord }) => indexWord === 1)).to.have.length(0);
   });
 });

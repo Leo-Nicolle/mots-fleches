@@ -58,6 +58,17 @@ Une fois que l'appli est lancée, commencez par créer une grille. Cliquez dessu
  - Ajouter, Enlever des flêches: passez la souris sur les bouttons `.` sur les bords de la cellule cliquez sur la flêche désirée.
  - Changer la taille de la grille: Cliques sur l'icone :gear: et utilisez le formulaire. Rechargez la page si quelque chose bloque. 
 
+## Comment ajouter mes propres mots
+Allez à la page `/wprds` (mots dans le burger menu) et ajoutez, supprimez vos mots. Vous ne pouvezpas modifier le dictionnaire de base depuis cette page, pour ce faire, vous derez modifier les fichier dans le dossier `dico`.
+
+## Comment ajouter un autre language dans les suggestiosn
+
+Par defaut, les suggestions sont en français, si vous voulez créer des grilles dans une autre langue, il va vous falloir un dictionnaire: un fichier ou un enssemble de fichiers qui contiennent tous les mots possibles d'une langue, avec toutes leur variations (pluriels, conjugaisons etc), separes par des virgules:
+```txt
+UN,DICTIONNAIRE,VRAIMENT,SIMPLE,UNE,UNS,UNES,DICTIONNAIRES,SIMPLES
+```
+Ensuite, il faudra placer ce/ces fichiers dans le dossier `dico` avec l'extension `.txt`. Contactez-moi, je suis interressé par l'ajout de nouveaux dictionnaires.
+
 ## Contribuer (section en anglais, comme c'est l'usage)
 
 Clone the repository (or fork it)

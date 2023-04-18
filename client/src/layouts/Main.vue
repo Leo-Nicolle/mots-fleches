@@ -104,6 +104,17 @@ const menuOptions = ref<MenuOption[]>([
           ),
         key: "go-to-solutions",
       },
+      {
+        label: () =>
+          h(
+            RouterLink,
+            {
+              to: "/words",
+            },
+            { default: () => "Mots" }
+          ),
+        key: "go-to-words",
+      },
     ],
   },
 ]);

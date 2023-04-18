@@ -2,6 +2,7 @@ import { beforeAll, afterAll, describe, it, expect } from "vitest";
 import fs from "fs-extra";
 import { Grid } from "grid";
 import database from "../lib/database";
+
 describe("Database", () => {
   beforeAll(() => {
     const words = ["aa", "bb", "cc"].join(",");

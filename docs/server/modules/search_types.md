@@ -10,7 +10,7 @@
 
 #### Defined in
 
-[search/types.d.ts:17](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/server/lib/search/types.d.ts#L17)
+[search/types.d.ts:17](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/search/types.d.ts#L17)
 
 ___
 
@@ -20,7 +20,7 @@ ___
 
 #### Defined in
 
-[search/types.d.ts:16](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/server/lib/search/types.d.ts#L16)
+[search/types.d.ts:16](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/search/types.d.ts#L16)
 
 ___
 
@@ -30,7 +30,7 @@ ___
 
 #### Defined in
 
-[search/types.d.ts:18](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/server/lib/search/types.d.ts#L18)
+[search/types.d.ts:18](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/search/types.d.ts#L18)
 
 ___
 
@@ -52,7 +52,7 @@ Part of a word withing a grid
 
 #### Defined in
 
-[search/types.d.ts:57](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/server/lib/search/types.d.ts#L57)
+[search/types.d.ts:57](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/search/types.d.ts#L57)
 
 ___
 
@@ -66,7 +66,7 @@ Value is a set of indexes within the words array
 
 #### Defined in
 
-[search/types.d.ts:24](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/server/lib/search/types.d.ts#L24)
+[search/types.d.ts:24](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/search/types.d.ts#L24)
 
 ___
 
@@ -80,7 +80,7 @@ value is an OccurenceByIndex.
 
 #### Defined in
 
-[search/types.d.ts:30](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/server/lib/search/types.d.ts#L30)
+[search/types.d.ts:30](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/search/types.d.ts#L30)
 
 ___
 
@@ -101,4 +101,4 @@ Result of a search
 
 #### Defined in
 
-[search/types.d.ts:35](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/server/lib/search/types.d.ts#L35)
+[search/types.d.ts:35](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/search/types.d.ts#L35)

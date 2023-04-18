@@ -194,6 +194,17 @@ export class Search {
         current,
         Grid.perpendicular(dir)
       );
+      //if the perpendicular word is already filled, ignore it
+      if (
+        new Array(length).fill(0).every((_e, j) => {
+          const coord = {
+            y: start.y + perp.y * j,
+            x: start.x + perp.x * j,
+          };
+          return grid.cells[coord.y][coord.x].text.length > 0;
+        })
+      )
+        continue;
       const { cells } = grid;
       for (let j = 0; j < length; j++) {
         const letters = new Array(Math.max(0, Math.min(3, length - j)))
@@ -249,7 +260,7 @@ export class Search {
    * @param coord A position in the grid
    * @param dir The searching direction
    * @param method The method to use (simple | fastest)
-   * @returns 
+   * @returns
    */
   findWords({
     grid,

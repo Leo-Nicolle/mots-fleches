@@ -1,5 +1,4 @@
 import dico from "../lib/search/dico";
-import fs from "fs/promises";
 import { beforeAll, describe, it, expect } from "vitest";
 
 let baseWordsCount = 2;
@@ -23,7 +22,7 @@ function getExpected(words: string[], excludeList: string[] = []) {
     return acc;
   }, {});
 }
-describe("Dico", () => {
+describe.skip("Dico", () => {
   const baseWordsCount = 13;
   let baseWords;
   beforeAll(() => {

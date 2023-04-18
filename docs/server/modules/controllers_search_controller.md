@@ -25,4 +25,4 @@ It can handle only a single request at a time
 
 #### Defined in
 
-[controllers/search-controller.ts:11](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/server/lib/controllers/search-controller.ts#L11)
+[controllers/search-controller.ts:11](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/controllers/search-controller.ts#L11)
