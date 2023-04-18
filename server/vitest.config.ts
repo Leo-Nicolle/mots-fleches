@@ -1,9 +1,7 @@
 import { defineConfig } from "vitest/config";
+import { resolve } from "./test/utils";
 
-const setupFiles = process.cwd().endsWith("server")
-  ? "test/setup.ts"
-  : "server/test/setup.ts";
-
+const setupFiles = resolve("test/setup.ts");
 export default defineConfig({
   test: {
     setupFiles,
