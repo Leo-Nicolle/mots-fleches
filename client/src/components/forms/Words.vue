@@ -37,14 +37,15 @@
 import axios from "axios";
 import { computed, onMounted, ref } from "vue";
 import { getUrl } from "../../js/utils";
+/**
+ * Component to add and delete words
+ * Also has a list of all the words
+ */
 const value = ref<string>("");
 const words = ref<string[]>([]);
 onMounted(() => {
   getWords();
 });
-function onRefresh() {
-  getWords();
-}
 function getWords() {
   axios.get(getUrl("word")).then(({ data }) => {
     words.value = data.sort((a, b) => a.localeCompare(b));
