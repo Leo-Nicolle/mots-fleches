@@ -1,7 +1,7 @@
 # Mots Fléchés - Crosswords
 
 Generateur de mots fléchés.
-Documentation dispo ICI.
+[Documentation dispo ICI](https://leo-nicolle.github.io/mots-fleches/).
 ## Installation
 
 ### Windows/Mac
