@@ -41,7 +41,7 @@ export default function wordController({
    * Add a word
    */
   app.post("/word", [body("word").isString().notEmpty()], async (req, res) => {
-    const word = req.body.word.trim() as string;
+    const word = req.body.word.trim().toUpperCase() as string;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(500).json({ errors: errors.array() });
@@ -63,8 +63,8 @@ export default function wordController({
    * Delete a word
    */
   app.delete("/word/:word", async (req, res) => {
-    const word = req.params.word.trim();
-    await db.deleteWord(req.params.word);
+    const word = req.params.word.trim().toUpperCase();
+    await db.deleteWord(word);
     dico.removeWordsFromDictionary([word]);
     res.sendStatus(200);
   });
