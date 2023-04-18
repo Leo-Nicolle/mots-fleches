@@ -67,7 +67,12 @@ export class Grid {
    */
   public optionsId: string;
 
-
+  /**
+   * Grid constructor
+   * @param rows Number of rows
+   * @param cols Number of columns
+   * @param id id of the grid
+   */
   constructor(rows: number, cols: number, id?: string) {
     this.cols = cols;
     this.rows = rows;

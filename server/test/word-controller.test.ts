@@ -50,7 +50,7 @@ describe("Word controller", () => {
         expect(res.status).to.equal(200);
         expect(err).to.be.null;
         expect(res.data).to.have.length(4);
-        expect(res.data).to.deep.equal([...baseWords, "newWord"]);
+        expect(res.data).to.deep.equal([...baseWords, "NEWWORD"]);
       });
   });
   it("should not add an already there word", () => {
@@ -74,7 +74,7 @@ describe("Word controller", () => {
         expect(res.status).to.equal(200);
         expect(err).to.be.null;
         expect(res.data).to.have.length(4);
-        expect(res.data).to.deep.equal([...baseWords, "newWord"]);
+        expect(res.data).to.deep.equal([...baseWords, "NEWWORD"]);
       });
   });
 
@@ -94,8 +94,8 @@ describe("Word controller", () => {
         expect(err).to.be.null;
         expect(res.data).to.have.length(3);
         expect(res.data).to.deep.equal([
-          ...baseWords.filter((w) => w !== "bb"),
-          "newWord",
+          ...baseWords.filter((w) => w !== "BB"),
+          "NEWWORD",
         ]);
       });
   });
