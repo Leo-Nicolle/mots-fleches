@@ -3,6 +3,7 @@ import cors from "cors";
 import open from "open";
 import bodyParser from "body-parser";
 import { existsSync } from "fs";
+import { AddressInfo } from "net";
 import { resolve } from "./utils";
 import db from "./database";
 import wordController from "./controllers/wordController";
@@ -35,7 +36,7 @@ export function createApp() {
 
   const server = app.listen(+APP_CROSSWORDS_PORT || 3011, () => {
     exitController({ app, server });
-    const url = `http://localhost:${server.address().port}`;
+    const url = `http://localhost:${(server.address() as AddressInfo).port}`;
     console.log(`server running at port ${url}`);
     if (+APP_OPEN_BROWSER) {
       open(url);

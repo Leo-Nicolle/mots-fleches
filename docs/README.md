@@ -44,6 +44,18 @@ sudo dpkg -i mots-flex.deb
  
 ![](https://user-images.githubusercontent.com/7451806/232314140-940b8ddf-0f99-47fa-a0ac-4db266715133.mp4)
 
+### How to use the editor
+
+Once you have the app running, start by creating a Grid. Click on it to enter the grid editor. 
+
+ - Make/Delete a definition cell: press <kbd>Escape</kbd>
+ - Navigate within the grid: use arrows &uarr; &larr; &rarr; &darr; If you are within a definition cell, press <kbd>Ctrl</kbd> + <kbd>Enter</kbd> to leave it
+ - Switch between horizontal and vertial mode: Press the button in the left panel, or press <kbd>Ctrl</kbd> + &darr; or <kbd>Ctrl</kbd> + &rarr;
+ - Add/Remove a space between words: press `_` or `-`
+ - Split a definition cell: insert two new lines
+ - Add/Remove arrows: hover the `.` buttons in the cell and click on the appropritate button.
+ - Change Grid size: click on the :gear: icon and use the inputs within the modal. Refresh the page if something goes wrong 
+
 ## Contribute
 
 Clone the repository (or fork it)

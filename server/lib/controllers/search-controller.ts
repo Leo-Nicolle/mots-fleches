@@ -2,6 +2,12 @@ import { Express } from "express";
 import { Database } from "../database";
 import search from "../search";
 let isBusy = false;
+
+
+/**
+ * Controller for search operations
+ * It can handle only a single request at a time
+ */
 export default function wordController({
   app,
   db,
@@ -9,10 +15,16 @@ export default function wordController({
   app: Express;
   db: Database;
 }) {
+  /**
+   * Get all words
+   */
   app.get("/dico", async (req, res) => {
     const words = await db.getWords();
     res.send(words);
   });
+  /**
+   * Get a list of sugestions
+   */
   app.post("/search", async (req, res) => {
     const { gridId, coord, ordering, dir, method, max } = req.body;
     if (isBusy) {

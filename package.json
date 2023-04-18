@@ -10,6 +10,7 @@
     "prebuild": "npm run build:client && npm run build:server",
     "build": "node scripts/build.mjs",
     "doc:grid": "cd grid && typedoc --plugin typedoc-plugin-markdown --out ../docs/grid src/index.ts",
+    "doc:server": "cd server && typedoc --plugin typedoc-plugin-markdown --out ../docs/server lib/**/*.ts",
     "docgen:dev": "vue-docgen -c docs/docgen.config.js -w",
     "docgen:build": "vue-docgen -c docs/docgen.config.js",
     "docs:dev": "vuepress dev docs --config docs/vuepress.config.ts",

@@ -12,9 +12,8 @@ function removeSection(md, title) {
   const [m, g] = match;
   const endIndex = match.index + m.length;
   const nextMatch = md.slice(endIndex).match(new RegExp(`\n${g} ?.*\n`))
-  console.log(m, g, match.index)
-  console.log(nextMatch[0], nextMatch.index);
-  ;
+  // console.log(m, g, match.index)
+  // console.log(nextMatch[0], nextMatch.index);
   if (!nextMatch) return md.slice(0, match.index)
   return md.slice(0, match.index).concat(md.slice(endIndex + nextMatch.index));
 }
@@ -52,17 +51,29 @@ async function walkDir(root: string, transform = false) {
   return menu;
 
 }
+try {
+  await fs.rm('docs/client/README.md', { recursive: true });
+} catch (e) {
+  console.log('client readme deleted already');
+}
+try {
+  await fs.rm('docs/server/README.md', { recursive: true });
+} catch (e) {
+  console.log('server readme deleted already');
+}
 const clientMenu = await walkDir('client');
 const gridMenu = await walkDir('grid', true);
-
-console.log(gridMenu);
+const serverMenu = await walkDir('server', true);
 const menu: SidebarConfigArray = [
   "/",
   {
     text: 'Developers',
     collapsible: true,
-    // link: '/dev/',
     children: [
+      {
+        text: 'Introduction',
+        link: '/dev/',
+      },
       {
         text: 'Client',
         children: clientMenu,
@@ -71,6 +82,11 @@ const menu: SidebarConfigArray = [
       {
         text: 'Grid',
         children: gridMenu,
+        collapsible: true
+      },
+      {
+        text: 'Server',
+        children: serverMenu,
         collapsible: true
       }
     ]

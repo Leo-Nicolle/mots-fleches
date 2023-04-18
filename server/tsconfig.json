@@ -6,6 +6,7 @@
       "module": "ES6",
       "moduleResolution": "node",
       "downlevelIteration": true,
+      "skipLibCheck": true,
       "allowSyntheticDefaultImports": true,
       "lib": [
           "ES5",
@@ -19,6 +20,6 @@
   },
   "include": [
       "./lib/**/*.ts",
-      "./src/**/*.d.ts"
-  ]
+  ],
+  "exclude": ["node_modules/**/*","../node_modules/**/*"]
 }

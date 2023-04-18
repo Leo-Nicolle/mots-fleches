@@ -46,6 +46,18 @@ Vous pouvez soit directement lancer le serveur dans un terminal, soit installer 
 
 ![](https://user-images.githubusercontent.com/7451806/232314140-940b8ddf-0f99-47fa-a0ac-4db266715133.mp4)
 
+
+### Comment utiliser l'editeur
+Une fois que l'appli est lancée, commencez par créer une grille. Cliquez dessus pour entrer dans l'éditeur:
+
+ - Ajouter/Supprimer une case de définition: <kbd>Echap<kbd>
+ - Nqviguer dans la grille: utilisez les flêches &uarr; &larr; &rarr; &darr; Si vous êtes dans une définition,appuyez <kbd>Ctrl</kbd> + <kbd>Enter</kbd> pour en sortir
+ - Passer en mode vertical/horizontal: Appuyez  sur le button dans le panneau à gauche, ou <kbd>Ctrl</kbd> + &darr; or <kbd>Ctrl</kbd> + &rarr;
+ - Ajouter/Supprimer un espace entre les mots: Appuyez sur `_` ou `-`
+ - Diviser une case de définition: insérez deux lignes vides:
+ - Ajouter, Enlever des flêches: passez la souris sur les bouttons `.` sur les bords de la cellule cliquez sur la flêche désirée.
+ - Changer la taille de la grille: Cliques sur l'icone :gear: et utilisez le formulaire. Rechargez la page si quelque chose bloque. 
+
 ## Contribuer (section en anglais, comme c'est l'usage)
 
 Clone the repository (or fork it)
