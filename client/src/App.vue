@@ -1,5 +1,6 @@
 <template>
   <div>
+    
     <n-alert
       v-if="alert"
       class="alert-toaster"
@@ -50,7 +51,6 @@ onMounted(async () => {
   }, 500);
 });
 </script>
-
 <style>
 .alert-toaster {
   width: 100vw;

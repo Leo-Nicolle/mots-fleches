@@ -15,6 +15,18 @@
         <slot name="header"> </slot>
       </span>
       <span class="right">
+        <span>{{ $t('buttons.changeLanguage') }}</span>
+
+        <n-popselect v-model:value="locale" :options="localeOptions">
+          <n-button>
+            <template #icon>
+              <n-icon>
+                <LanguageOutline />
+              </n-icon>
+            </template>
+            {{ selected?.label }}
+          </n-button>
+        </n-popselect>
         <n-button
           strong
           secondary
@@ -51,11 +63,13 @@
 <script setup lang="ts">
 import { MenuOutline } from "@vicons/ionicons5";
 import type { MenuOption } from "naive-ui";
-import { defineProps, h, ref, defineEmits, computed } from "vue";
+import { defineProps, h, ref, defineEmits, computed, watchEffect } from "vue";
 import { RouterLink, useRouter } from "vue-router";
 import { renderIcon } from "../js/utils";
-import { LogOutOutline } from "@vicons/ionicons5";
+import { LogOutOutline, LanguageOutline } from "@vicons/ionicons5";
+import { i18n, setLanguage } from "../i18n";
 
+const locale = ref(i18n.global.locale);
 const router = useRouter();
 const emit = defineEmits<{
   /**
@@ -118,6 +132,25 @@ const menuOptions = ref<MenuOption[]>([
     ],
   },
 ]);
+
+const localeOptions = ref([
+  {
+    label: "Français",
+    value: "fr-fr",
+  },
+  {
+    label: "English",
+    value: "en-en",
+  },
+]);
+const selected = computed(() => {
+  return localeOptions.value.find((option) => option.value === locale.value);
+});
+watchEffect(() => {
+  console.log("locale changed", locale.value);
+  localStorage.setItem("locale", locale.value);
+  setLanguage(locale.value);
+});
 
 function onScroll(e: Event) {
   emit("scroll", e);
