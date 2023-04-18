@@ -1,11 +1,12 @@
 <template>
   <div class="book" v-if="grids && options && solutionOptions">
-    <GridPaper 
-    v-for="(grid, i) in grids"
-    :key="grid.id"
-    :grid="grid"
-    :options="options"
-    :exportOptions="gridExport"/>
+    <GridPaper
+      v-for="(grid, i) in grids"
+      :key="grid.id"
+      :grid="grid"
+      :options="options"
+      :exportOptions="gridExport"
+    />
     <IndexPaper
       :grids="grids"
       :solutionOptions="solutionOptions"
@@ -23,18 +24,35 @@
 import { defineProps, watch } from "vue";
 import { Grid, GridOptions, SolutionOptions, nullCell } from "grid";
 import { computed } from "vue";
-import { defaultExportOptions, ExportOptions } from "./svg-renderer/types";
+import { defaultExportOptions, ExportOptions } from "../types";
 import GridPaper from "./GridPaper.vue";
 import SVGGrid from "./svg-renderer/Grid.vue";
 import IndexPaper from "./WordsIndex.vue";
 import SolutionPaper from "./Solutions.vue";
 
+/**
+ * Component to render the whole book: grids, index and solutions
+ */
 const props = defineProps<{
+  /**
+   * The grids to render
+   */
   grids: Grid[];
+  /**
+   * The options to render the grids
+   */
   options: GridOptions;
+  /**
+   * The options to render the solutions
+   */
   solutionOptions: SolutionOptions;
+  /**
+   * Extra options to override the options and solutionOptions
+   */
   exportOptions: Partial<ExportOptions>;
 }>();
+
+
 const gridExport = computed(() => ({
   ...defaultExportOptions,
   ...{

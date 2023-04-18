@@ -28,10 +28,22 @@
 import { Format } from "grid";
 import { defineProps, ref, watchEffect } from "vue";
 import { computed } from "vue";
+/**
+ * Component to render a Page (for printing)
+ */
 const page = ref();
 const props = defineProps<{
+  /**
+   * Whether to show the margins lines
+   */
   showMargins: boolean;
+  /**
+   * Paper format
+   */
   format: Format;
+  /**
+   * Class to add to the body
+   */
   bodyClass?: string;
 }>();
 const margins = computed(() => {
@@ -43,7 +55,6 @@ const margins = computed(() => {
     `${props.format.margin.left}cm`,
   ];
 });
-const pageSize = computed(() => {});
 
 const pageWidth = computed(() => {
   if (!props.format) return 0;

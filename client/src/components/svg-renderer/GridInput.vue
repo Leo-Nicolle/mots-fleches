@@ -65,18 +65,45 @@ import {
 } from "grid";
 import { getCellClass } from "../../js/utils";
 import { getD } from "../../js/paths";
-import { Handle } from "./types";
+import { Handle } from "../../types";
+/**
+ * Component to type text on the grid
+ */
 const container = ref(null as unknown as HTMLDivElement);
 const emit = defineEmits<{
+  /**
+   * The grid is updated
+   */
   (event: "update"): string;
+  /**
+   * Keyup event
+   */
   (event: "keyup", value: KeyboardEvent): void;
+  /**
+   * A cell is focused
+   */
   (event: "focus", value: Cell): void;
 }>();
 const props = defineProps<{
+  /**
+   * The cell to type on
+   */
   cell: Cell;
+  /**
+   * The grid
+   */
   grid: Grid;
+  /**
+   * The style of the grid
+   */
   options: GridOptions;
+  /**
+   * Typing direction
+   */
   dir: Direction;
+  /**
+   * Scrolling offset
+   */
   offset: [number, number];
 }>();
 const cellSize = computed(() => `${cellWidth(props.options)}px`);
@@ -123,6 +150,7 @@ function onChange(evt: Event) {
   emit("focus", next);
 }
 function onKeyup(evt: KeyboardEvent) {
+  // | and _ are used to toggle spaceH and spaceV
   if (evt.key === "|") {
     props.grid.setSpaceH(props.cell, !props.cell.spaceH);
     emit("update");
@@ -133,16 +161,19 @@ function onKeyup(evt: KeyboardEvent) {
     emit("update");
     return;
   }
+  // The editor migt use the event, if so, it sets canceled to true
+  // and we ignore it
   emit("keyup", evt);
   // @ts-ignore
   if (evt.canceled) return;
-
+  // escape to toggle definition
   if (evt.key === "Escape") {
     props.grid.setDefinition(props.cell, !props.cell.definition);
     props.grid.setText(props.cell, "");
     emit("update");
     return;
   }
+  // ctrl + enter to moveout from definition
   if (props.cell.definition && evt.key === "Enter" && evt.ctrlKey) {
     let next = props.grid.increment(props.cell, props.dir);
     if (!props.grid.isValid(next)) {
@@ -156,6 +187,7 @@ function onKeyup(evt: KeyboardEvent) {
     }
     return emit("focus", next);
   }
+  // arrows to move around in the grid
   if (!props.cell.definition) {
     if (evt.key === "ArrowUp") {
       const next = props.grid.decrement(props.cell, "vertical");
@@ -183,12 +215,18 @@ function onKeyup(evt: KeyboardEvent) {
     }
   }
 }
+/**
+ * Updates the arrows of the cell
+ */
 function setArrow(dir: ArrowDir, index: number) {
   Grid.setArrow(props.cell, index, dir);
   container.value.querySelector("textarea")?.focus();
   emit("update");
 }
 const handleW = 4;
+/**
+ * Computes the position of the dots to add arrows
+ */
 const handles = computed<Handle[]>(() => {
   const splited = isSplited(props.cell);
   const w = cellAndBorderWidth(props.options);

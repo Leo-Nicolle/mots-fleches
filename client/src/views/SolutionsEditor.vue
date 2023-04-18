@@ -36,12 +36,12 @@ import SolutionsForm from "../components/forms/SolutionsForm.vue";
 
 import { getUrl, save } from "../js/utils";
 import { Grid, SolutionOptions } from "grid";
-import {
-  defaultExportOptions,
-  ExportOptions,
-} from "../components/svg-renderer/types";
-const route = useRoute();
+import { defaultExportOptions, ExportOptions } from "../types";
+/**
+ * View to edit solutions options
+ */
 
+const route = useRoute();
 const grids = ref<Grid[]>([]);
 const options = ref<SolutionOptions>();
 const exportOptions = ref<ExportOptions>({

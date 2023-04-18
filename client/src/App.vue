@@ -1,6 +1,13 @@
 <template>
   <div>
-    <n-alert v-if="alert" class="alert-toaster" :title="alert.title" :type="alert.type" bordered closable>
+    <n-alert
+      v-if="alert"
+      class="alert-toaster"
+      :title="alert.title"
+      :type="alert.type"
+      bordered
+      closable
+    >
       {{ alert.content }}
     </n-alert>
     <router-view />
@@ -11,15 +18,19 @@
 import { onMounted, ref } from "vue";
 import { getUrl } from "./js/utils";
 import axios from "axios";
+/**
+ * Main Component: handles the alert toaster for server disconnection
+ */
 const alert = ref<false | { content: string; title: string; type: string }>(
   false
 );
 
-function ping(retry = 0) : Promise<any>{
-  return axios.get(getUrl('ping'))
-    .then(() => alert.value = false)
+function ping(retry = 0): Promise<any> {
+  return axios
+    .get(getUrl("ping"))
+    .then(() => (alert.value = false))
     .catch((e) => {
-      if (retry < 5){
+      if (retry < 5) {
         return ping(retry + 1);
       }
       throw e;
@@ -28,10 +39,10 @@ function ping(retry = 0) : Promise<any>{
 
 onMounted(async () => {
   const i = setInterval(() => {
-    ping()
-    .catch(() => {
+    ping().catch(() => {
       alert.value = {
-        content: "You have been disconnected from the server. Please refresh the page.",
+        content:
+          "You have been disconnected from the server. Please refresh the page.",
         title: "Disconnected",
         type: "error",
       };
@@ -41,7 +52,7 @@ onMounted(async () => {
 </script>
 
 <style>
-.alert-toaster{
+.alert-toaster {
   width: 100vw;
 }
 .scroll::-webkit-scrollbar {

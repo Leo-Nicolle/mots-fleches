@@ -19,11 +19,20 @@ import { defineProps, defineEmits, watch } from "vue";
 import TextStyle from "./TextStyle.vue";
 import { useModel } from "../../js/useModel";
 import { SolutionOptions } from "grid";
-
+/**
+ * Form to modify SolutionOptions.
+ */
 const props = defineProps<{
+  /**
+   * The SolutionOptions to edit
+   */
   modelValue: SolutionOptions;
 }>();
 const emit = defineEmits<{
+  /**
+   * v-model event
+   * @param value The new SolutionOptions
+   */
   (event: "update:modelValue", value: SolutionOptions): void;
 }>();
 const value = useModel(props, emit);

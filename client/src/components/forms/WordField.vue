@@ -23,7 +23,9 @@
 <script lang="ts">
 import axios from "axios";
 import apiMixin from "../js/apiMixin";
-
+/**
+ * TODO: turn to composition API
+ */
 export default {
   name: "WordField",
   props: ["label", "icon", "mode", "words"],

@@ -81,16 +81,31 @@ import { Grid } from "grid";
 import { getUrl } from "../../js/utils";
 import axios from "axios";
 import { useModel } from "../../js/useModel";
+/**
+ * Form to edit grid metadata: rows, cols. title, comment and options
+ */
 const props = defineProps<{
+  /**
+   * The grid to edit
+   */
   modelValue: Grid;
 }>();
 const opts = ref<{ label: string; value: string }[]>([]);
 const visible = ref(false);
 const emit = defineEmits<{
+  /**
+   * v-model event
+   * @param value The new grid
+   */
   (event: "update:modelValue", value: Grid): void;
+  /**
+   * Grid size changed
+   */
   (event: "update-size", value: Grid): void;
+  /**
+   * Modal close
+   */
   (event: "close", value: boolean): void;
-  (event: "update"): void;
 }>();
 const value = useModel(props, emit);
 function onUpdate(path: string, newvalue: string | number) {

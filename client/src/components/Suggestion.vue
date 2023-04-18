@@ -67,7 +67,9 @@ import {
 import axios from "axios";
 import { Direction, Vec } from "grid";
 import { getUrl } from "../js/utils";
-
+/**
+ * Component to display words suggestions
+ */
 const results = ref([]);
 const totalResults = ref(0);
 const suggestion = ref(null);
@@ -77,18 +79,51 @@ let hovered = "";
 let queryPromise: CPromise<void> = CPromise.resolve();
 
 const props = defineProps<{
+  /**
+   * The letters in the current line
+   */
   query: string;
+  /**
+   * The grid id
+   */
   gridId: string;
+  /**
+   * The coords of the current cell
+   */
   point: Vec;
+  /**
+   * input direction
+   */
   dir: Direction;
+  /**
+   * search method
+   */
   method: string;
+  /**
+   * ordering asc/desc(-1|1)
+   */
   ordering: number;
 }>();
 const emit = defineEmits<{
+  /**
+   * Hover of a suggestion
+   */
   (event: "hover", value: string): void;
+  /**
+   * Click on a suggestion
+   */
   (event: "click", value: string): void;
+  /**
+   * Change direction
+   */
   (event: "dir", value: Direction): void;
+  /**
+   * Change method
+   */
   (event: "methodswitch"): void;
+  /**
+   * Change ordering
+   */
   (event: "orderswitch"): void;
 }>();
 function getSuggestions(
@@ -142,6 +177,7 @@ function getSuggestions(
   return queryPromise;
 }
 
+// send request everytime props change
 watchEffect(() => {
   getSuggestions(
     props.point,
@@ -175,7 +211,7 @@ function onMouseEvt(evt: MouseEvent, click = false) {
 .suggestion > .loading {
   flex: 1;
 }
-.buttons{
+.buttons {
   display: flex;
   flex-direction: row;
   justify-content: center;

@@ -59,19 +59,35 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, ref, computed, watchEffect } from "vue";
+import { defineProps, defineEmits, ref, watchEffect } from "vue";
 import { Grid, Cell, Direction, nullCell, GridOptions } from "grid";
 import Layout from "../layouts/Main.vue";
 import SVGGrid from "./svg-renderer/Grid.vue";
 import GridInput from "./svg-renderer/GridInput.vue";
-import { defaultExportOptions } from "./svg-renderer/types";
+import { defaultExportOptions } from "../types";
 import ModalOptions from "./forms/ModalOptions.vue";
 import Suggestion from "./Suggestion.vue";
-
-const props = defineProps<{ grid: Grid; options: GridOptions }>();
+/**
+ * Component to edit a grid
+ */
+const props = defineProps<{
+  /**
+   * The grid to edit
+   */
+  grid: Grid;
+  /**
+   * The grid options
+   */
+  options: GridOptions;
+}>();
 const emit = defineEmits<{
+  /**
+   * The grid has been updated
+   */
   (event: "update"): string;
-  (event: "update:modelValue"): void;
+  /**
+   * The grid cols/rows changed
+   */
   (event: "size-update"): void;
 }>();
 const dir = ref<Direction>("horizontal");

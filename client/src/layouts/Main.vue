@@ -11,6 +11,7 @@
           :collapsed-icon-size="22"
           :options="menuOptions"
         />
+        <!-- @slot Slot for element in the left of the header  -->
         <slot name="header"> </slot>
       </span>
       <span class="right">
@@ -35,10 +36,12 @@
     <div class="body">
       <div class="left-panel">
         <n-scrollbar x-scrollable>
+          <!-- @slot Slot for element in the left panel  -->
           <slot name="left-panel"> </slot>
         </n-scrollbar>
       </div>
       <n-scrollbar x-scrollable :on-scroll="onScroll" class="scroll">
+        <!-- @slot Slot for element in the main panel  -->
         <slot name="body"></slot>
       </n-scrollbar>
     </div>
@@ -54,7 +57,12 @@ import { renderIcon } from "../js/utils";
 import { LogOutOutline } from "@vicons/ionicons5";
 
 const router = useRouter();
-const emit = defineEmits<{ (event: "scroll"): void }>();
+const emit = defineEmits<{
+  /**
+   * Scroll within main panel
+   */
+  (event: "scroll"): void;
+}>();
 const collapsed = ref(true);
 
 const menuOptions = ref<MenuOption[]>([

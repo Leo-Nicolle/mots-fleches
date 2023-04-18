@@ -18,7 +18,7 @@ import { Grid, GridOptions, SolutionOptions } from "grid";
 import {
   defaultExportOptions,
   ExportOptions,
-} from "../components/svg-renderer/types";
+} from "../types";
 const grids = ref<Grid[]>([]);
 const options = ref<SolutionOptions>();
 const exportOptions = ref<ExportOptions>({

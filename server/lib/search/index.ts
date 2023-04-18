@@ -10,9 +10,13 @@ import {
 } from "./types";
 import { getCoords, strToReg, distance, cantor } from "./utils";
 
+/**
+ * Search is a singleton containing the search algorithm
+ * It is used to find the suggestions
+ */
 export class Search {
   /**
-   *
+   * Returns all the words that would not block the grid on next step
    * @param words: the list of words candidates to be returned (they match simple criteria)
    * @param lemmes: The list of lemmes in the perpendicular direction words have to match with
    * @param grid: the grid
@@ -155,6 +159,15 @@ export class Search {
     };
   }
 
+  /**
+   * Given a position and a direction, get all the lemmes
+   * Usefull for search algo
+   * @param grid The grid
+   * @param coord The start position of the word
+   * @param wordLength The length of the word
+   * @param dir The direction of the word
+   * @returns A list of lemmes of length 2 and 3
+   */
   static getLemmes({
     grid,
     coord,
@@ -230,6 +243,14 @@ export class Search {
     return [...map.values()];
   }
 
+  /**
+   * Entry point of the search algo
+   * @param grid The grid
+   * @param coord A position in the grid
+   * @param dir The searching direction
+   * @param method The method to use (simple | fastest)
+   * @returns 
+   */
   findWords({
     grid,
     coord,
@@ -275,12 +296,16 @@ export class Search {
     return dico
       .getWords()
       .then((words) => {
+        // get all the words that fit
         const matches = words.reduce((acc, word, i) => {
           if (word.length === length && word.match(reg)) {
             acc.push(word);
           }
           return acc;
         }, [] as string[]);
+        // if method is fastest, race between `getBestWords` and a timeout
+        // if the timeout is reached, return the simple matches
+        // else return the best words
         if (method === "fastest") {
           return Promise.race([
             this.getBestWords({

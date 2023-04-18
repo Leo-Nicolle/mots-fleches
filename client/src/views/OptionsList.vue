@@ -33,6 +33,9 @@ import "highlight.js/styles/monokai.css";
 import Layout from "../layouts/GridLayout.vue";
 import { getUrl } from "../js/utils";
 import { Grid, GridOptions } from "grid";
+/**
+ * View to display all options in a grid layout
+ */
 const router = useRouter();
 const optionsList = ref<GridOptions[]>([]);
 const selected = ref<GridOptions[]>([]);
