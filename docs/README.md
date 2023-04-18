@@ -44,7 +44,7 @@ sudo dpkg -i mots-flex.deb
  
 ![](https://user-images.githubusercontent.com/7451806/232314140-940b8ddf-0f99-47fa-a0ac-4db266715133.mp4)
 
-### How to use the editor
+## How to use the editor
 
 Once you have the app running, start by creating a Grid. Click on it to enter the grid editor. 
 

@@ -11,9 +11,10 @@
     "build": "node scripts/build.mjs",
     "doc:grid": "cd grid && typedoc --plugin typedoc-plugin-markdown --out ../docs/grid src/index.ts",
     "doc:server": "cd server && typedoc --plugin typedoc-plugin-markdown --out ../docs/server lib/**/*.ts",
-    "docgen:dev": "vue-docgen -c docs/docgen.config.js -w",
-    "docgen:build": "vue-docgen -c docs/docgen.config.js",
+    "docdev:client": "vue-docgen -c docs/docgen.config.js -w",
+    "doc:client": "vue-docgen -c docs/docgen.config.js",
     "docs:dev": "vuepress dev docs --config docs/vuepress.config.ts",
+    "predocs:build": "npm run doc:server && npm run doc:grid && npm run doc:client",
     "docs:build": "vuepress build docs --config docs/vuepress.config.ts",
     "semantic-release": "semantic-release"
   },
