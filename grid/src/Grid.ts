@@ -2,6 +2,10 @@ import { ArrowDir, Bounds, Cell, Direction, GridState, Vec } from "./types";
 import Vector from "vector2js";
 import { v4 as uuid } from "uuid";
 
+/**
+ * Null cell
+ * Used to represent a cell that is not in the grid
+ */
 export const nullCell: Cell = {
   x: -1,
   y: -1,
@@ -13,19 +17,54 @@ export const nullCell: Cell = {
   arrows: [],
   text: ''
 };
+/**
+ * Checks that a definition cell is splited or not
+ * @param cell cell to check 
+ * @returns wether the cell is splited or not
+ */
 export function isSplited(cell: Cell) {
   return cell.text.includes("\n\n");
 }
 
-
+/**
+ * Grid class
+ * Represents a grid
+ * has many helper functions to manipulate the grid
+ */
 export class Grid {
+  /**
+   * nuber of rows within the grid
+   */
   public rows: number;
+  /**
+   * number of columns within the grid
+   */
   public cols: number;
+  /**
+   * Comment of the grid
+   */
   public comment: string;
+  /**
+   * Title of the grid
+   */
   public title: string;
+  /**
+   * Cells of the grid
+   */
   public cells: Cell[][];
+  /**
+   * Id of the grid(db)
+   */
   public id: string;
+  /**
+   * Date of creation(db)
+   */
   public created: number;
+  /**
+   * Id of the options(db)
+   * @see GridOptions
+   * Might be removed soon with books
+   */
   public optionsId: string;
 
 
@@ -45,14 +84,28 @@ export class Grid {
       );
   }
 
+  /**
+   * Checks wether coordinates are within the bounds of the grid
+   * @param point coordinates 
+   * @returns false if x or y is out of bounds
+   */
   isValid({ x, y }: Vec): boolean {
     return x >= 0 && x < this.cols && y >= 0 && y < this.rows;
   }
-
+  /**
+   * Checks if the cell at the given coordinates is a definition cell
+   * @param point coordinates
+   * @returns true if the cell is a definition cell
+   */
   isDefinition({ x, y }: Vec): boolean {
     return this.isValid({ x, y }) && this.cells[y][x].definition;
   }
 
+  /**
+   * Resizes the grid to the given dimensions
+   * @param rows height of the grid
+   * @param cols width of the grid
+   */
   resize(rows: number, cols: number) {
     const newCells = new Array(rows)
       .fill(0)
@@ -68,6 +121,11 @@ export class Grid {
     this.cells = newCells;
   }
 
+  /**
+   * Set the cell at the given coordinates as a definition cell (or not)
+   * @param coordinates
+   * @param value true to make it a definition cell, false to make it a normal cell 
+   */
   setDefinition({ x, y }: Vec, value: boolean): void {
     this.cells[y][x].definition = value;
     this.cells[y][x].text = '';
@@ -79,6 +137,11 @@ export class Grid {
     }
   }
 
+  /**
+   * Set the text to the cell at the given coordinates
+   * @param coordinates 
+   * @param value text to set 
+   */
   setText({ x, y }: Vec, value: string) {
     const cell = this.cells[y][x];
     if (cell.definition) {
@@ -87,7 +150,12 @@ export class Grid {
       cell.text = value.slice(-1);
     }
   }
-
+  /**
+   * Write a word within the grid, one letter per cell 
+   * @param word word to write
+   * @param point start coordinates of the word
+   * @param direction writing direction
+   */
   setWord(word: string, point: Vec, direction: Direction) {
     const v = Grid.getDirVec(direction);
     const s = new Vector(point.x, point.y);
@@ -98,7 +166,12 @@ export class Grid {
         this.cells[y][x].suggestion = '';
       });
   }
-
+  /**
+   * Set one of the arrows of a definition cell
+   * @param cell cell to set the arrow 
+   * @param index The index of the arrow to set
+   * @param direction arrow direction
+   */
   static setArrow(cell: Cell, index: number, direction: ArrowDir): void {
     if (!cell.arrows) {
       cell.arrows = ['none', 'none', 'none'];
@@ -109,34 +182,70 @@ export class Grid {
     cell.arrows[index] = direction;
   }
 
+  /**
+   * Set the arrow of a definition cell
+   * @param coordinates coordinates of the cell
+   * @param index The index of the arrow to set
+   * @param direction arrow direction
+   * @see Grid.setArrow
+   */
   setArrow(v: Vec, index: number, direction: ArrowDir): void {
     if (!this.isValid(v)) return;
     Grid.setArrow(this.cells[v.y][v.x], index, direction);
   }
-
+  /**
+   * Set horizontal space of a cell
+   * @param coordinates coordinates of the cell
+   * @param value true to set the space, false to remove it
+   */
   setSpaceH({ x, y }: Vec, value: boolean): void {
     this.cells[y][x].spaceH = value;
   }
+  /**
+   * Set vertical space of a cell
+   * @param coordinates coordinates of the cell
+   * @param value true to set the space, false to remove it
+   */
   setSpaceV({ x, y }: Vec, value: boolean): void {
     this.cells[y][x].spaceV = value;
   }
 
+  /**
+   * Increment a position by a direction, and return the cell at the new position
+   * @param v starting position
+   * @param direction direction to increment
+   * @returns the cell at the new position, or nullCell if the new position is out of bounds
+   */
   increment(v: Vec, direction: Direction): Cell {
     const { x, y } = new Vector(v.x, v.y).add(Grid.getDirVec(direction));
     if (this.isValid({ x, y })) return this.cells[y][x];
     return nullCell;
   }
 
+  /**
+   * Decrement a position by a direction, and return the cell at the new position
+   * @param v starting position
+   * @param direction direction to decrement
+   * @returns the cell at the new position, or nullCell if the new position is out of bounds
+   */
   decrement(v: Vec, direction: Direction): Cell {
     const { x, y } = new Vector(v.x, v.y).sub(Grid.getDirVec(direction));
     if (this.isValid({ x, y })) return this.cells[y][x];
     return nullCell;
   }
 
+  /**
+   * Get the cell at the given coordinates
+   * @param coordinates coordinates of the cell
+   * @returns the cell at the given coordinates
+   */
   getCell({ x, y }: Vec): Cell {
     return this.cells[y][x];
   }
-
+  /**
+   * Highlight the given cells (unhighlight all other cells)
+   * @param cells cells to highlight
+   */
   highlight(cells: Cell[]) {
     this.cells.forEach((row) => {
       row.forEach((cell) => {
@@ -147,7 +256,12 @@ export class Grid {
       c.highlighted = true;
     });
   }
-
+  /**
+   * Set the suggestion of the given cells
+   * @param words Words to suggest
+   * @param start start position of each word
+   * @param directions direction of each word
+   */
   suggest(words: string[], start: Vec[], directions: Direction[]) {
     this.cells.forEach((row) => {
       row.forEach((cell) => {
@@ -163,21 +277,40 @@ export class Grid {
       });
     });
   }
-
+  /**
+   * Checks if two cells have the same coordinates
+   * @param a First cell
+   * @param b Second cell
+   * @returns Weather the two cells have the same coordinates
+   */
   static equal(a: Vec, b: Vec): boolean {
     return a.x === b.x && a.y === b.y;
   }
 
+  /**
+   * Converts a direction to a vector
+   * @param direction Direction to convert
+   * @returns Vector corresponding to the direction
+   */
   static getDirVec(direction: Direction): Vector {
     return direction === 'horizontal'
       ? new Vector(1, 0)
       : new Vector(0, 1);
   }
-
+  /**
+   * Converts a direction to its perpendicular vector
+   * @param direction Direction to convert
+   * @returns Vector perpendicular to the direction
+   */
   static perpendicular(direction: Direction): Direction {
     return direction === 'vertical' ? 'horizontal' : 'vertical';
   }
-
+  /**
+   * Given a cell and a direction, returns the bounds of the word
+   * @param coordinates coordinates of the cell
+   * @param direction The direction of the word
+   * @returns All the cells of the word, and the start and end positions
+   */
   getBounds({ x, y }: Vec, direction: Direction): Bounds {
     if (!this.isValid({ x, y }) || this.isDefinition({ x, y })) return {
       start: { x, y },
@@ -211,7 +344,10 @@ export class Grid {
       cells
     };
   }
-
+  /**
+   * Converts the grid to a sreialized string
+   * @returns GridState JSON string
+   */
   serialize() {
     const gridState: GridState = {
       id: this.id,
@@ -225,7 +361,11 @@ export class Grid {
     };
     return JSON.stringify(gridState);
   }
-
+  /**
+   * Creates a grid from a serialized string
+   * @param s GridState JSON string
+   * @returns A new grid
+   */
   static unserialize(s: string) {
     const { rows, cols, comment, title, id, cells, created, optionsId } = JSON.parse(s) as GridState
     const res = new Grid(rows, cols, id);
@@ -242,7 +382,12 @@ export class Grid {
     res.optionsId = optionsId;
     return res;
   }
-
+  /**
+   * Creates a new cell
+   * @param x x coordinate
+   * @param y y coordinate
+   * @returns new cell
+   */
   static newCell(x: number, y: number): Cell {
     return {
       x,

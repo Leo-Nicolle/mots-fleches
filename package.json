@@ -9,6 +9,9 @@
     "build:server": "cd server && npm run build",
     "prebuild": "npm run build:client && npm run build:server",
     "build": "node scripts/build.mjs",
+    "doc:grid": "cd grid && typedoc --plugin typedoc-plugin-markdown --out ../docs/grid src/index.ts",
+    "docgen:dev": "vue-docgen -c docs/docgen.config.js -w",
+    "docgen:build": "vue-docgen -c docs/docgen.config.js",
     "docs:dev": "vuepress dev docs --config docs/vuepress.config.ts",
     "docs:build": "vuepress build docs --config docs/vuepress.config.ts",
     "semantic-release": "semantic-release"
@@ -46,7 +49,10 @@
     "pkg": "^5.8.1",
     "rimraf": "^4.4.0",
     "semantic-release": "^21.0.1",
+    "typedoc": "^0.24.4",
+    "typedoc-plugin-markdown": "^3.15.1",
     "vitest": "^0.29.5",
+    "vue-docgen-cli": "^4.65.0",
     "vuepress": "next",
     "w-zip": "^1.0.15"
   },

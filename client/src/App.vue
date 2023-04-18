@@ -25,11 +25,12 @@ const alert = ref<false | { content: string; title: string; type: string }>(
   false
 );
 
-function ping(retry = 0) : Promise<any>{
-  return axios.get(getUrl('ping'))
-    .then(() => alert.value = false)
+function ping(retry = 0): Promise<any> {
+  return axios
+    .get(getUrl("ping"))
+    .then(() => (alert.value = false))
     .catch((e) => {
-      if (retry < 5){
+      if (retry < 5) {
         return ping(retry + 1);
       }
       throw e;
@@ -38,10 +39,10 @@ function ping(retry = 0) : Promise<any>{
 
 onMounted(async () => {
   const i = setInterval(() => {
-    ping()
-    .catch(() => {
+    ping().catch(() => {
       alert.value = {
-        content: "You have been disconnected from the server. Please refresh the page.",
+        content:
+          "You have been disconnected from the server. Please refresh the page.",
         title: "Disconnected",
         type: "error",
       };

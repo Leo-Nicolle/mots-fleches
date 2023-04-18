@@ -1,33 +1,33 @@
-# Mots-flex
+grid / [Exports](modules.md)
 
-Bienvenue chez Mots-Flex, un outil de génération de mots fléchés.
+# Mots Fléchés - Crosswords
+
+Generateur de mots fléchés.
 
 ## Installation
 
 ### Windows/Mac
 
-Sous windows et mac il va vous falloir [nodejs](https://nodejs.org/en/download), ensuite, [téléchargez la dernière verion](https://github.com/Leo-Nicolle/mots-fleches/releases/latest), dezipez ouvrez un terminal dans le dossier `mots-flex`: 
+Sous windows et mac il va vous falloir [nodejs](https://nodejs.org/en/download), ensuite, [téléchargez la dernière verion](https://github.com/octo-org/octo-repo/releases/latest), dezipez ouvrez un terminal dans le dossier `mots-flex`: 
 ```bash
 node server.js
 ```
 
 ### Linux
-Vous pouvez soit directement lancer le serveur dans un terminal, soit installer le `.deb` [téléchargeable ici](https://github.com/Leo-Nicolle/mots-fleches/releases/latest)
-
+Vous pouvez soit directement lancer le serveur dans un terminal, soit installer le `.deb` [téléchargeable ici](https://github.com/octo-org/octo-repo/releases/latest)
 
 ## Fonctionalités
 
 ### Suggestions
 
-![](https://user-images.githubusercontent.com/7451806/226173711-224940ab-17fe-4495-aeca-3f058996eaa8.mp4)
+https://user-images.githubusercontent.com/7451806/226173711-224940ab-17fe-4495-aeca-3f058996eaa8.mp4
 
  - Mode suggestion simple: (icone eclair). Propose tous les mots qui rentrent
  - Mode suggestion avancé (icone marteau). Ne propse que des mots qui ne bloqueront pas,( si il n'y a pas de mots avec ZZ dans le dictoinnaire, il proposera pas un mot qui une fois dans la grille donnera ZZ) 
 
-
 ### Définitions
 
-![](https://user-images.githubusercontent.com/7451806/226173722-e1e6e5ba-1f39-4c68-9452-35094e7abe33.mp4)
+https://user-images.githubusercontent.com/7451806/226173722-e1e6e5ba-1f39-4c68-9452-35094e7abe33.mp4
 
  - Pour créer une case de définition: `echap`
  - Pour séparer une case de définition: sauter deux lignes
@@ -35,7 +35,7 @@ Vous pouvez soit directement lancer le serveur dans un terminal, soit installer 
 
 ### Styles
 
-![](https://user-images.githubusercontent.com/7451806/226175011-0e5de156-70da-4955-9490-dbc411927484.mp4)
+https://user-images.githubusercontent.com/7451806/226175011-0e5de156-70da-4955-9490-dbc411927484.mp4
 
  - Format du papier (A4, A5, ou tout autre format)
  - Marges
@@ -44,7 +44,9 @@ Vous pouvez soit directement lancer le serveur dans un terminal, soit installer 
 
 ### Export
 
-![](https://user-images.githubusercontent.com/7451806/232314140-940b8ddf-0f99-47fa-a0ac-4db266715133.mp4)
+ 
+
+https://user-images.githubusercontent.com/7451806/232314140-940b8ddf-0f99-47fa-a0ac-4db266715133.mp4
 
 ## Contribuer (section en anglais, comme c'est l'usage)
 
