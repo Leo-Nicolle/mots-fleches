@@ -1,0 +1,1 @@
+const e=JSON.parse('{"key":"v-2119413c","path":"/client/components/forms/AddWord.html","title":"AddWord","lang":"en-US","frontmatter":{},"headers":[],"git":{"updatedTime":1681814333000,"contributors":[{"name":"Leo Nicolle","email":"leo@linkurio.us","commits":1}]},"filePathRelative":"client/components/forms/AddWord.md"}');export{e as data};

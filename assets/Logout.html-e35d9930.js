@@ -1,0 +1,1 @@
+import{_ as t,p as o,q as a,R as e,t as s}from"./framework-5866ffd3.js";const c={},n=e("h1",{id:"logout",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#logout","aria-hidden":"true"},"#"),s(" Logout")],-1),r=e("hr",null,null,-1),_=[n,r];function l(d,u){return o(),a("div",null,_)}const i=t(c,[["render",l],["__file","Logout.html.vue"]]);export{i as default};

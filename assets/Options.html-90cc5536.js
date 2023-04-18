@@ -1,0 +1,1 @@
+import{_ as t,p as o,q as s,R as e,t as n}from"./framework-5866ffd3.js";const a={},c=e("h1",{id:"options",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#options","aria-hidden":"true"},"#"),n(" Options")],-1),r=e("hr",null,null,-1),_=[c,r];function i(d,l){return o(),s("div",null,_)}const p=t(a,[["render",i],["__file","Options.html.vue"]]);export{p as default};

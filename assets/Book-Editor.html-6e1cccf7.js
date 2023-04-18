@@ -1,0 +1,1 @@
+import{_ as o,p as t,q as r,R as e,t as a}from"./framework-5866ffd3.js";const s={},c=e("h1",{id:"book-editor",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#book-editor","aria-hidden":"true"},"#"),a(" Book-Editor")],-1),d=e("hr",null,null,-1),n=[c,d];function _(i,l){return t(),r("div",null,n)}const f=o(s,[["render",_],["__file","Book-Editor.html.vue"]]);export{f as default};

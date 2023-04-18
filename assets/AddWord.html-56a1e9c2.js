@@ -1,0 +1,1 @@
+import{_ as d,p as t,q as o,R as e,t as r}from"./framework-5866ffd3.js";const a={},s=e("h1",{id:"addword",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#addword","aria-hidden":"true"},"#"),r(" AddWord")],-1),c=e("hr",null,null,-1),n=[s,c];function _(l,h){return t(),o("div",null,n)}const f=d(a,[["render",_],["__file","AddWord.html.vue"]]);export{f as default};

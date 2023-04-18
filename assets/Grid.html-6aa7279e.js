@@ -1,0 +1,1 @@
+import{_ as t,p as r,q as a,R as e,t as s}from"./framework-5866ffd3.js";const c={},d=e("h1",{id:"grid",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#grid","aria-hidden":"true"},"#"),s(" Grid")],-1),n=e("hr",null,null,-1),o=[d,n];function _(i,l){return r(),a("div",null,o)}const f=t(c,[["render",_],["__file","Grid.html.vue"]]);export{f as default};

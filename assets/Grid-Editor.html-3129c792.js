@@ -1,0 +1,1 @@
+import{_ as t,p as r,q as d,R as e,t as o}from"./framework-5866ffd3.js";const i={},a=e("h1",{id:"grid-editor",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#grid-editor","aria-hidden":"true"},"#"),o(" Grid-Editor")],-1),s=e("hr",null,null,-1),c=[a,s];function n(_,l){return r(),d("div",null,c)}const f=t(i,[["render",n],["__file","Grid-Editor.html.vue"]]);export{f as default};
