@@ -12,7 +12,7 @@
 
 #### Defined in
 
-[search/types.d.ts:13](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/server/lib/search/types.d.ts#L13)
+[search/types.d.ts:13](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/search/types.d.ts#L13)
 
 ___
 
@@ -22,4 +22,4 @@ ___
 
 #### Defined in
 
-[search/types.d.ts:14](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/server/lib/search/types.d.ts#L14)
+[search/types.d.ts:14](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/search/types.d.ts#L14)

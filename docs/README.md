@@ -56,6 +56,17 @@ Once you have the app running, start by creating a Grid. Click on it to enter th
  - Add/Remove arrows: hover the `.` buttons in the cell and click on the appropritate button.
  - Change Grid size: click on the :gear: icon and use the inputs within the modal. Refresh the page if something goes wrong 
 
+ ## How to add custom words
+Just go to the `Words` page and add/delete your own words. You cannot modify the base dictionnary from this page. If you want to delete words from the base dictionnary, you will have to edit the files wihin the `dico` folder.
+
+## How to set annother language for suggestion
+
+By default, we suggest words in french, but as you are reading this section in english, you might want to create grids in annother language. Well it is possible, you just need a dictionnary: a file or a list of files containing all the words posssible in your language(with all their variations: plurial, conjugasions), separated by comma: 
+
+```txt
+A,VERY,LIMITED,DICTIONNARY,LIMIT,DICTIONNARYS
+```
+Once you have a dictionnary, just place it within the `dico` folder as a `.txt` file. Contact me, I am interrested into adding more dictionnaries, I will add it to the default release and it will be easier for the next users.
 ## Contribute
 
 Clone the repository (or fork it)

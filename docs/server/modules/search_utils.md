@@ -21,7 +21,7 @@
 
 #### Defined in
 
-[search/utils.ts:44](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/server/lib/search/utils.ts#L44)
+[search/utils.ts:44](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/search/utils.ts#L44)
 
 ___
 
@@ -42,7 +42,7 @@ ___
 
 #### Defined in
 
-[search/utils.ts:4](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/server/lib/search/utils.ts#L4)
+[search/utils.ts:4](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/search/utils.ts#L4)
 
 ___
 
@@ -56,7 +56,7 @@ ___
 
 #### Defined in
 
-[search/utils.ts:38](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/server/lib/search/utils.ts#L38)
+[search/utils.ts:38](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/search/utils.ts#L38)
 
 ___
 
@@ -76,7 +76,7 @@ ___
 
 #### Defined in
 
-[search/utils.ts:27](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/server/lib/search/utils.ts#L27)
+[search/utils.ts:27](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/search/utils.ts#L27)
 
 ___
 
@@ -102,7 +102,7 @@ ___
 
 #### Defined in
 
-[search/utils.ts:20](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/server/lib/search/utils.ts#L20)
+[search/utils.ts:20](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/search/utils.ts#L20)
 
 ___
 
@@ -123,4 +123,4 @@ ___
 
 #### Defined in
 
-[search/utils.ts:8](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/server/lib/search/utils.ts#L8)
+[search/utils.ts:8](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/search/utils.ts#L8)

@@ -10,4 +10,4 @@
 
 #### Defined in
 
-[search/index.ts:350](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/server/lib/search/index.ts#L350)
+[search/index.ts:350](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/search/index.ts#L350)

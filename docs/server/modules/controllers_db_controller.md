@@ -24,4 +24,4 @@ Controler for database operations
 
 #### Defined in
 
-[controllers/db-controller.ts:7](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/server/lib/controllers/db-controller.ts#L7)
+[controllers/db-controller.ts:7](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/controllers/db-controller.ts#L7)

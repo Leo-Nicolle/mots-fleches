@@ -19,7 +19,7 @@ Arrow
 
 #### Defined in
 
-[types.ts:16](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/types.ts#L16)
+[types.ts:16](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/types.ts#L16)
 
 ___
 
@@ -31,7 +31,7 @@ Arrow directions
 
 #### Defined in
 
-[types.ts:11](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/types.ts#L11)
+[types.ts:11](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/types.ts#L11)
 
 ___
 
@@ -52,7 +52,7 @@ Bounds of a word within a cell
 
 #### Defined in
 
-[types.ts:175](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/types.ts#L175)
+[types.ts:175](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/types.ts#L175)
 
 ___
 
@@ -76,7 +76,7 @@ ___
 
 #### Defined in
 
-[types.ts:43](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/types.ts#L43)
+[types.ts:43](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/types.ts#L43)
 
 ___
 
@@ -92,7 +92,7 @@ ___
 
 #### Defined in
 
-[types.ts:5](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/types.ts#L5)
+[types.ts:5](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/types.ts#L5)
 
 ___
 
@@ -102,7 +102,7 @@ ___
 
 #### Defined in
 
-[types.ts:4](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/types.ts#L4)
+[types.ts:4](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/types.ts#L4)
 
 ___
 
@@ -112,7 +112,7 @@ ___
 
 #### Defined in
 
-[types.ts:193](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/types.ts#L193)
+[types.ts:193](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/types.ts#L193)
 
 ___
 
@@ -138,7 +138,7 @@ Format for printing
 
 #### Defined in
 
-[types.ts:84](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/types.ts#L84)
+[types.ts:84](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/types.ts#L84)
 
 ___
 
@@ -170,7 +170,7 @@ defines the style of the grid
 
 #### Defined in
 
-[types.ts:116](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/types.ts#L116)
+[types.ts:116](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/types.ts#L116)
 
 ___
 
@@ -196,7 +196,7 @@ Used to serialize and deserialize the grid
 
 #### Defined in
 
-[types.ts:298](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/types.ts#L298)
+[types.ts:298](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/types.ts#L298)
 
 ___
 
@@ -216,7 +216,7 @@ ___
 
 #### Defined in
 
-[types.ts:3](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/types.ts#L3)
+[types.ts:3](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/types.ts#L3)
 
 ___
 
@@ -228,7 +228,7 @@ Options for the solution
 
 #### Defined in
 
-[types.ts:234](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/types.ts#L234)
+[types.ts:234](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/types.ts#L234)
 
 ___
 
@@ -245,7 +245,7 @@ ___
 
 #### Defined in
 
-[types.ts:2](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/types.ts#L2)
+[types.ts:2](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/types.ts#L2)
 
 ___
 
@@ -263,7 +263,7 @@ ___
 
 #### Defined in
 
-[types.ts:309](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/types.ts#L309)
+[types.ts:309](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/types.ts#L309)
 
 ## Variables
 
@@ -273,7 +273,7 @@ ___
 
 #### Defined in
 
-[types.ts:314](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/types.ts#L314)
+[types.ts:314](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/types.ts#L314)
 
 ___
 
@@ -283,7 +283,7 @@ ___
 
 #### Defined in
 
-[utils.ts:132](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/utils.ts#L132)
+[utils.ts:132](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/utils.ts#L132)
 
 ___
 
@@ -293,7 +293,7 @@ ___
 
 #### Defined in
 
-[types.ts:196](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/types.ts#L196)
+[types.ts:196](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/types.ts#L196)
 
 ___
 
@@ -303,7 +303,7 @@ ___
 
 #### Defined in
 
-[types.ts:290](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/types.ts#L290)
+[types.ts:290](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/types.ts#L290)
 
 ___
 
@@ -316,7 +316,7 @@ Used to represent a cell that is not in the grid
 
 #### Defined in
 
-[Grid.ts:9](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/Grid.ts#L9)
+[Grid.ts:9](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/Grid.ts#L9)
 
 ## Functions
 
@@ -338,7 +338,7 @@ From a definition cell, returns the position of the arrows
 
 #### Defined in
 
-[utils.ts:109](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/utils.ts#L109)
+[utils.ts:109](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/utils.ts#L109)
 
 ___
 
@@ -358,7 +358,7 @@ ___
 
 #### Defined in
 
-[utils.ts:30](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/utils.ts#L30)
+[utils.ts:30](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/utils.ts#L30)
 
 ___
 
@@ -380,7 +380,7 @@ Returns the width of a cell and its border
 
 #### Defined in
 
-[utils.ts:41](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/utils.ts#L41)
+[utils.ts:41](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/utils.ts#L41)
 
 ___
 
@@ -400,7 +400,7 @@ ___
 
 #### Defined in
 
-[utils.ts:26](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/utils.ts#L26)
+[utils.ts:26](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/utils.ts#L26)
 
 ___
 
@@ -437,7 +437,7 @@ ___
 
 #### Defined in
 
-[utils.ts:134](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/utils.ts#L134)
+[utils.ts:134](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/utils.ts#L134)
 
 ___
 
@@ -462,7 +462,7 @@ the formatted string
 
 #### Defined in
 
-[utils.ts:22](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/utils.ts#L22)
+[utils.ts:22](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/utils.ts#L22)
 
 ___
 
@@ -484,7 +484,7 @@ From a list of grids, returns all the words
 
 #### Defined in
 
-[utils.ts:180](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/utils.ts#L180)
+[utils.ts:180](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/utils.ts#L180)
 
 ___
 
@@ -506,7 +506,7 @@ From a definition cell, returns the lines of text
 
 #### Defined in
 
-[utils.ts:90](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/utils.ts#L90)
+[utils.ts:90](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/utils.ts#L90)
 
 ___
 
@@ -533,7 +533,7 @@ From a grid, returns all the words and their positions
 
 #### Defined in
 
-[utils.ts:150](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/utils.ts#L150)
+[utils.ts:150](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/utils.ts#L150)
 
 ___
 
@@ -556,7 +556,7 @@ Returns the height of the grid (without outer border)
 
 #### Defined in
 
-[utils.ts:61](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/utils.ts#L61)
+[utils.ts:61](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/utils.ts#L61)
 
 ___
 
@@ -579,7 +579,7 @@ Returns the total height of the grid (with outer border)
 
 #### Defined in
 
-[utils.ts:82](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/utils.ts#L82)
+[utils.ts:82](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/utils.ts#L82)
 
 ___
 
@@ -602,7 +602,7 @@ Returns the total width of the grid (with outer border)
 
 #### Defined in
 
-[utils.ts:72](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/utils.ts#L72)
+[utils.ts:72](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/utils.ts#L72)
 
 ___
 
@@ -625,7 +625,7 @@ Returns the width of the grid (without outer border)
 
 #### Defined in
 
-[utils.ts:50](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/utils.ts#L50)
+[utils.ts:50](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/utils.ts#L50)
 
 ___
 
@@ -649,7 +649,7 @@ wether the cell is splited or not
 
 #### Defined in
 
-[Grid.ts:25](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/Grid.ts#L25)
+[Grid.ts:25](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/Grid.ts#L25)
 
 ___
 
@@ -680,7 +680,7 @@ ___
 
 #### Defined in
 
-[utils.ts:141](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/utils.ts#L141)
+[utils.ts:141](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/utils.ts#L141)
 
 ___
 
@@ -700,7 +700,7 @@ ___
 
 #### Defined in
 
-[utils.ts:33](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/utils.ts#L33)
+[utils.ts:33](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/utils.ts#L33)
 
 ___
 
@@ -724,7 +724,7 @@ From a string like 10cm returns [10.cm]
 
 #### Defined in
 
-[utils.ts:10](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/utils.ts#L10)
+[utils.ts:10](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/utils.ts#L10)
 
 ___
 
@@ -746,4 +746,4 @@ From a definition cell, returns where is the split
 
 #### Defined in
 
-[utils.ts:98](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/utils.ts#L98)
+[utils.ts:98](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/utils.ts#L98)
