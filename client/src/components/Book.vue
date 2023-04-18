@@ -51,6 +51,8 @@ const props = defineProps<{
    */
   exportOptions: Partial<ExportOptions>;
 }>();
+
+
 const gridExport = computed(() => ({
   ...defaultExportOptions,
   ...{

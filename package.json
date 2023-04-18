@@ -15,6 +15,8 @@
     "doc:client": "vue-docgen -c docs/docgen.config.js",
     "docs:dev": "vuepress dev docs --config docs/vuepress.config.ts",
     "predocs:build": "npm run doc:server && npm run doc:grid && npm run doc:client",
+    "predocs:publish": "npm run docs:build",
+    "docs:publish": "gh-pages -d docs/.vuepress/dist",
     "docs:build": "vuepress build docs --config docs/vuepress.config.ts",
     "semantic-release": "semantic-release"
   },
@@ -45,6 +47,7 @@
     "decompress": "^4.2.1",
     "execa": "^7.1.1",
     "fs-extra": "^11.1.0",
+    "gh-pages": "^5.0.0",
     "jsdom": "^21.1.1",
     "markdown-it-html5-media": "^0.7.1",
     "npm-pkgbuild": "file:../npm-pkgbuild",

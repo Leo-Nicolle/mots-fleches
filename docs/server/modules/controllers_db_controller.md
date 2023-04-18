@@ -8,6 +8,8 @@
 
 ▸ **default**(`«destructured»`): `void`
 
+Controler for database operations
+
 #### Parameters
 
 | Name | Type |
@@ -22,4 +24,4 @@
 
 #### Defined in
 
-[controllers/db-controller.ts:3](https://github.com/Leo-Nicolle/mots-fleches/blob/4846021/server/lib/controllers/db-controller.ts#L3)
+[controllers/db-controller.ts:7](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/server/lib/controllers/db-controller.ts#L7)

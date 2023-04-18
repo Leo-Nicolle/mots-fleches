@@ -3,7 +3,7 @@ grid / [Exports](modules.md)
 # Mots Fléchés - Crosswords
 
 Generateur de mots fléchés.
-
+Documentation dispo ICI.
 ## Installation
 
 ### Windows/Mac
@@ -12,7 +12,6 @@ Sous windows et mac il va vous falloir [nodejs](https://nodejs.org/en/download),
 ```bash
 node server.js
 ```
-
 ### Linux
 Vous pouvez soit directement lancer le serveur dans un terminal, soit installer le `.deb` [téléchargeable ici](https://github.com/octo-org/octo-repo/releases/latest)
 
@@ -42,9 +41,7 @@ https://user-images.githubusercontent.com/7451806/226175011-0e5de156-70da-4955-9
  - Taille des cases
  - Taille/couleur/police des textes
 
-### Export
-
- 
+### Export 
 
 https://user-images.githubusercontent.com/7451806/232314140-940b8ddf-0f99-47fa-a0ac-4db266715133.mp4
 

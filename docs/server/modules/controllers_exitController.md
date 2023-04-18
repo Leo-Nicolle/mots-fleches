@@ -24,4 +24,4 @@ Controller for ping and exiting the server
 
 #### Defined in
 
-[controllers/exitController.ts:8](https://github.com/Leo-Nicolle/mots-fleches/blob/4846021/server/lib/controllers/exitController.ts#L8)
+[controllers/exitController.ts:8](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/server/lib/controllers/exitController.ts#L8)

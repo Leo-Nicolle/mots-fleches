@@ -15,7 +15,7 @@ It is used to search for words in the grid
 
 #### Defined in
 
-[search/dico.ts:27](https://github.com/Leo-Nicolle/mots-fleches/blob/4846021/server/lib/search/dico.ts#L27)
+[search/dico.ts:27](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/server/lib/search/dico.ts#L27)
 
 ## Properties
 
@@ -27,7 +27,7 @@ The promise that will resolve when the dictionnary is loaded
 
 #### Defined in
 
-[search/dico.ts:20](https://github.com/Leo-Nicolle/mots-fleches/blob/4846021/server/lib/search/dico.ts#L20)
+[search/dico.ts:20](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/server/lib/search/dico.ts#L20)
 
 ___
 
@@ -41,7 +41,7 @@ The second element is for 3 letters lemmes
 
 #### Defined in
 
-[search/dico.ts:26](https://github.com/Leo-Nicolle/mots-fleches/blob/4846021/server/lib/search/dico.ts#L26)
+[search/dico.ts:26](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/server/lib/search/dico.ts#L26)
 
 ___
 
@@ -53,7 +53,7 @@ The list of words in the dictionnary
 
 #### Defined in
 
-[search/dico.ts:12](https://github.com/Leo-Nicolle/mots-fleches/blob/4846021/server/lib/search/dico.ts#L12)
+[search/dico.ts:12](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/server/lib/search/dico.ts#L12)
 
 ___
 
@@ -65,7 +65,7 @@ The map of words in the dictionnary
 
 #### Defined in
 
-[search/dico.ts:16](https://github.com/Leo-Nicolle/mots-fleches/blob/4846021/server/lib/search/dico.ts#L16)
+[search/dico.ts:16](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/server/lib/search/dico.ts#L16)
 
 ## Methods
 
@@ -87,7 +87,7 @@ Add a word or a list of words to the dictionnary
 
 #### Defined in
 
-[search/dico.ts:119](https://github.com/Leo-Nicolle/mots-fleches/blob/4846021/server/lib/search/dico.ts#L119)
+[search/dico.ts:119](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/server/lib/search/dico.ts#L119)
 
 ___
 
@@ -116,7 +116,7 @@ The occurence map of the words
 
 #### Defined in
 
-[search/dico.ts:43](https://github.com/Leo-Nicolle/mots-fleches/blob/4846021/server/lib/search/dico.ts#L43)
+[search/dico.ts:43](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/server/lib/search/dico.ts#L43)
 
 ___
 
@@ -134,7 +134,7 @@ All the words in the dictionnary
 
 #### Defined in
 
-[search/dico.ts:210](https://github.com/Leo-Nicolle/mots-fleches/blob/4846021/server/lib/search/dico.ts#L210)
+[search/dico.ts:210](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/server/lib/search/dico.ts#L210)
 
 ___
 
@@ -152,7 +152,7 @@ All the words in the dictionnary
 
 #### Defined in
 
-[search/dico.ts:217](https://github.com/Leo-Nicolle/mots-fleches/blob/4846021/server/lib/search/dico.ts#L217)
+[search/dico.ts:217](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/server/lib/search/dico.ts#L217)
 
 ___
 
@@ -171,7 +171,7 @@ The promise that will resolve when the dictionnary is loaded
 
 #### Defined in
 
-[search/dico.ts:98](https://github.com/Leo-Nicolle/mots-fleches/blob/4846021/server/lib/search/dico.ts#L98)
+[search/dico.ts:98](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/server/lib/search/dico.ts#L98)
 
 ___
 
@@ -195,7 +195,7 @@ Remove the occurences of a word from the occurences map
 
 #### Defined in
 
-[search/dico.ts:75](https://github.com/Leo-Nicolle/mots-fleches/blob/4846021/server/lib/search/dico.ts#L75)
+[search/dico.ts:75](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/server/lib/search/dico.ts#L75)
 
 ___
 
@@ -219,4 +219,4 @@ from the occurence map and from the wordsMap
 
 #### Defined in
 
-[search/dico.ts:161](https://github.com/Leo-Nicolle/mots-fleches/blob/4846021/server/lib/search/dico.ts#L161)
+[search/dico.ts:161](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/server/lib/search/dico.ts#L161)

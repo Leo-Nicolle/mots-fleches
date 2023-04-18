@@ -59,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, ref, computed, watchEffect } from "vue";
+import { defineProps, defineEmits, ref, watchEffect } from "vue";
 import { Grid, Cell, Direction, nullCell, GridOptions } from "grid";
 import Layout from "../layouts/Main.vue";
 import SVGGrid from "./svg-renderer/Grid.vue";

@@ -20,7 +20,7 @@ Text color
 
 #### Defined in
 
-[types.ts:41](https://github.com/Leo-Nicolle/mots-fleches/blob/fb08d26/grid/src/types.ts#L41)
+[types.ts:41](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/types.ts#L41)
 
 ___
 
@@ -32,7 +32,7 @@ Font family
 
 #### Defined in
 
-[types.ts:33](https://github.com/Leo-Nicolle/mots-fleches/blob/fb08d26/grid/src/types.ts#L33)
+[types.ts:33](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/types.ts#L33)
 
 ___
 
@@ -44,4 +44,4 @@ Font size: number if no unit (for SVG)
 
 #### Defined in
 
-[types.ts:37](https://github.com/Leo-Nicolle/mots-fleches/blob/fb08d26/grid/src/types.ts#L37)
+[types.ts:37](https://github.com/Leo-Nicolle/mots-fleches/blob/9fcaad3/grid/src/types.ts#L37)

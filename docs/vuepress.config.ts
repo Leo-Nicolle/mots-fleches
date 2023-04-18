@@ -99,7 +99,7 @@ export default defineUserConfig({
   head: [["link", { rel: "icon", type: "image/x-icon", href: "/icon.svg" }]],
   base: "/mots-fleches/",
   theme: defaultTheme({
-    logo: "/icon.svg",
+    logo: "/mots-fleches/icon.svg",
     sidebar: menu,
     repo: "Leo-Nicolle/mots-fleches",
   }),
