@@ -8,13 +8,12 @@
     @select="(s) => (selected = s)"
   >
     <template v-slot:left-panel>
-      <h3>Grilles</h3>
+      <h3>{{ $t("nav.grids") }}</h3>
       <ExportButton route="book-export" :params="params" />
-      <!-- <n-button @click="onExportClick">Exporter</n-button> -->
     </template>
     <template #card-title="{ elt }">
       <span>
-        {{ elt.title ? elt.title : `Nouvelle Grille` }}
+        {{ elt.title ? elt.title : $t('buttons.newGrid') }}
       </span>
     </template>
     <template #card-body="{ elt, i }">
@@ -31,7 +30,7 @@
           }"
         ></SVGGrid>
       </div>
-      {{ elt.comment ? elt.comment : "Nouvelle Grille" }}
+      {{ elt.comment ? elt.comment : $t('buttons.newGrid') }}
     </template>
   </Layout>
 </template>

@@ -1,16 +1,16 @@
 <template>
-  <h3>Solutions</h3>
-  <n-form-item label="Lignes" path="rows">
+  <h3>{{ $t("forms.solutions") }}</h3>
+  <n-form-item :label="$t('forms.rows')" path="rows">
     <n-input-number role="rows" v-model:value="value.grids.rows" />
   </n-form-item>
-  <n-form-item label="Colonnes" path="cols">
+  <n-form-item :label="$t('forms.cols')" path="cols">
     <n-input-number role="cols" v-model:value="value.grids.cols" />
   </n-form-item>
-  <h3>Num grille</h3>
+  <h3>{{ $t("forms.gridNum") }}</h3>
   <TextStyle v-model="value.grids.gridN" />
-  <h3>Index</h3>
+  <h3>{{ $t("forms.wordIndex") }}</h3>
   <TextStyle v-model="value.words" />
-  <h3>Taille</h3>
+  <h3>{{ $t("forms.size") }}</h3>
   <TextStyle v-model="value.size" />
 </template>
 

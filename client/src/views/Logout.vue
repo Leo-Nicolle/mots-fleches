@@ -1,10 +1,10 @@
 <template>
   <div class="lougout">
-    <n-icon v-if="!closed" size="5em" class="loader">
-      <RefreshCircleOutline />
+    <n-icon v-if="!closed" size="5em" >
+      <LoaderIcon />
     </n-icon>
     <span>
-      {{ message }}
+      {{ $t(`logout.${message}`) }}
     </span>
   </div>
 </template>
@@ -12,14 +12,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import axios from "axios";
-import { RefreshCircleOutline } from "@vicons/ionicons5";
+import LoaderIcon from "../components/LoaderIcon.vue";
 import { getUrl } from "../js/utils";
 /**
  * View to logout and close the server
  */
 const closed = ref(false);
-const waiting = "Fermeture du serveur...";
-const message = ref<string>(waiting);
+const message = ref<string>("waiting");
 function ping(): Promise<any> {
   return axios.get(getUrl("ping"));
 }
@@ -34,11 +33,11 @@ onMounted(() => {
   const interval = setInterval(() => {
     ping()
       .then(() => {
-        message.value = waiting;
+        message.value = "waiting";
       })
       .catch(() => {
         closed.value = true;
-        message.value = "Serveur fermé.";
+        message.value = "success";
         clearInterval(interval);
       });
   }, 1000);
@@ -58,18 +57,6 @@ onMounted(() => {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-}
-@keyframes rotate {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-}
-.loader {
-  animation: 1s linear 1s infinite running rotate;
 }
 </style>
 

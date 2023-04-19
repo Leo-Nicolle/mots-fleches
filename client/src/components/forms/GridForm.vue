@@ -1,10 +1,10 @@
 <template>
   <n-form :label-width="80" :model="value">
-    <h3>Grille</h3>
-    <n-form-item label="Lignes" path="rows">
+    <h3>{{ $t("forms.grid") }}</h3>
+    <n-form-item :label="$t('forms.rows')" path="rows">
       <n-input-number v-model:value="value.rows" />
     </n-form-item>
-    <n-form-item label="Colones" path="grid.cols">
+    <n-form-item :label="$t('forms.cols')" path="grid.cols">
       <n-input-number v-model:value="value.cols" />
     </n-form-item>
   </n-form>

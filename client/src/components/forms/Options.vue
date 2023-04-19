@@ -4,17 +4,25 @@
       <!-- @slot Slot to add additional inputs  -->
       <slot></slot>
       <div v-if="grid">
-        <h3>Options</h3>
-        <n-form-item label="Nom" path="name">
+        <h3>
+          {{ $t("forms.options") }}
+        </h3>
+        <n-form-item :label="$t('forms.name')" path="name">
           <n-input role="name" v-model:value="value.name" />
         </n-form-item>
-        <n-form-item label="Taille cellule" path="grid.cellSize">
-          <n-input-number role="cell-size" v-model:value="value.grid.cellSize" />
+        <n-form-item :label="$t('forms.cellSize')" path="grid.cellSize">
+          <n-input-number
+            role="cell-size"
+            v-model:value="value.grid.cellSize"
+          />
         </n-form-item>
-        <n-form-item label="Taille bordure" path="grid.borderSize">
-          <n-input-number role="border-size" v-model:value="value.grid.borderSize" />
+        <n-form-item :label="$t('forms.borderSize')" path="grid.borderSize">
+          <n-input-number
+            role="border-size"
+            v-model:value="value.grid.borderSize"
+          />
         </n-form-item>
-        <n-form-item label="Couleur bordure" path="grid.borderColor">
+        <n-form-item :label="$t('forms.borderColor')" path="grid.borderColor">
           <n-color-picker
             role="border-color"
             v-model:value="value.grid.borderColor"
@@ -22,10 +30,13 @@
             size="small"
           />
         </n-form-item>
-        <n-form-item label="Taille bordure Ext" path="grid.outerBorderSize">
-          <n-input-number role="outerBorder-size" v-model:value="value.grid.outerBorderSize" />
+        <n-form-item :label="$t('forms.outBorderSize')" path="grid.outerBorderSize">
+          <n-input-number
+            role="outerBorder-size"
+            v-model:value="value.grid.outerBorderSize"
+          />
         </n-form-item>
-        <n-form-item label="Couleur bordure Ext" path="grid.outerBorderColor">
+        <n-form-item :label="$t('forms.borderColor')" path="grid.outerBorderColor">
           <n-color-picker
             role="outerBorder-color"
             v-model:value="value.grid.outerBorderColor"
@@ -33,24 +44,22 @@
             size="small"
           />
         </n-form-item>
-        <n-form-item label="Taille espace" path="grid.spaceSize">
+        <n-form-item :label="$t('forms.spaceWidth')" path="grid.spaceSize">
           <n-input-number role="space" v-model:value="value.grid.spaceSize" />
         </n-form-item>
       </div>
       <div v-if="definition">
-        <h3>Définitions</h3>
+        <h3>{{$t('forms.definitions')}}</h3>
         <TextStyle v-model="value.definition" />
       </div>
       <div v-if="arrows">
-        <h3>Flèches</h3>
-        <n-form-item label="Taille" path="arrow.size">
-          <n-input-number 
-          role="arrow-size"          
-          v-model:value="value.arrow.size" />
+        <h3>{{ $t('forms.arrows') }}</h3>
+        <n-form-item :label="$t('forms.size')" path="arrow.size">
+          <n-input-number role="arrow-size" v-model:value="value.arrow.size" />
         </n-form-item>
-        <n-form-item label="Couleur" path="arrow.size">
+        <n-form-item :label="$t('forms.color')" path="arrow.size">
           <n-color-picker
-            role="arrow-color"          
+            role="arrow-color"
             v-model:value="value.arrow.color"
             :show-alpha="false"
             size="small"

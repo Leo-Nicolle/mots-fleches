@@ -7,7 +7,7 @@
     </n-button>
     <n-modal
       preset="dialog"
-      title="Options"
+      :title="$t('forms.options')"
       :showIcon="false"
       v-model:show="visible"
     >
@@ -16,7 +16,7 @@
       </template>
       <template #action>
         <n-form :label-width="80" :model="value">
-          <n-form-item label="Titre" path="title">
+          <n-form-item :label="$t('forms.title')" path="title">
             <n-input
               role="title"
               type="text"
@@ -24,7 +24,7 @@
               v-model:value="value.title"
             />
           </n-form-item>
-          <n-form-item label="Options" path="optionsId" v-if="opts.length">
+          <n-form-item :label="$t('forms.options')" path="optionsId" v-if="opts.length">
             <n-select
               role="options"
               :options="opts"
@@ -33,11 +33,11 @@
               def
             />
           </n-form-item>
-          <n-form-item label="Commentaire" path="description">
+          <n-form-item :label="$t('forms.comment')" path="description">
             <n-input
               role="comment"
               type="textarea"
-              placeholder="Commentaire..."
+              :placeholder="`${$t('forms.comment')}...`"
               v-model:value="value.comment"
               :autosize="{
                 minRows: 3,
@@ -45,14 +45,14 @@
             />
           </n-form-item>
           <span class="rowcols">
-            <n-form-item label="Lignes" path="rows">
+            <n-form-item :label="$t('forms.rows')" path="rows">
               <n-input-number
                 role="rows"
                 v-model:value="value.rows"
                 :on-update:value="(v) => onUpdate('rows', v)"
               />
             </n-form-item>
-            <n-form-item label="Colones" path="grid.cols">
+            <n-form-item :label="$t('forms.cols')" path="grid.cols">
               <n-input-number
                 role="cols"
                 v-model:value="value.cols"

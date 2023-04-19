@@ -36,7 +36,7 @@
       :single-line="false"
       :columns="[
         {
-          title: `${totalResults} résultats`,
+          title: `${totalResults} ${$t('suggestions.results')}`,
           key: 'word',
         },
       ]"

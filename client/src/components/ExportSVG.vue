@@ -1,6 +1,6 @@
 <template>
   <div ref="exporter" class="exporter">
-    <n-button @click="print" round>Exporter</n-button>
+    <n-button @click="print" round>{{ $t("buttons.export") }}</n-button>
     <SVGGrid
       ref="grid"
       v-if="grid && options"

@@ -37,7 +37,7 @@ Entry point of the search algo
 
 #### Defined in
 
-[search/index.ts:254](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/search/index.ts#L254)
+[search/index.ts:265](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/server/lib/search/index.ts#L265)
 
 ___
 
@@ -72,7 +72,7 @@ a list of words that match the perpandicular lemmes
 
 #### Defined in
 
-[search/index.ts:27](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/search/index.ts#L27)
+[search/index.ts:27](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/server/lib/search/index.ts#L27)
 
 ___
 
@@ -101,4 +101,4 @@ A list of lemmes of length 2 and 3
 
 #### Defined in
 
-[search/index.ts:171](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/search/index.ts#L171)
+[search/index.ts:171](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/server/lib/search/index.ts#L171)

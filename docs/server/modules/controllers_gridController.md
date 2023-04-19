@@ -24,4 +24,4 @@ Controller for CRUD operations on grids
 
 #### Defined in
 
-[controllers/gridController.ts:8](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/controllers/gridController.ts#L8)
+[controllers/gridController.ts:8](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/server/lib/controllers/gridController.ts#L8)

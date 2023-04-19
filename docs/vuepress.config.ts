@@ -125,6 +125,11 @@ export default defineUserConfig({
       lang: 'Français',
       title: '',
       description: 'Mots-Flex documentation'
+    },
+    '/es/': {
+      lang: 'Español',
+      title: '',
+      description: 'Mots-Flex documentación'
     }
   }
 

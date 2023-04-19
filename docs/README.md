@@ -22,8 +22,11 @@ sudo dpkg -i mots-flex.deb
 
 ## Features
 
-### Suggestions
+### International
 
+![](https://user-images.githubusercontent.com/7451806/233158317-e1bd727d-6dcc-4ea6-8683-e1d800f02a99.mp4)
+
+### Suggestions
 ![](https://user-images.githubusercontent.com/7451806/226173711-224940ab-17fe-4495-aeca-3f058996eaa8.mp4)
 
  - Simple mode: (flashlight icon). Suggests all the words that fits.
@@ -61,10 +64,10 @@ Just go to the `Words` page and add/delete your own words. You cannot modify the
 
 ## How to set annother language for suggestion
 
-By default, we suggest words in french, but as you are reading this section in english, you might want to create grids in annother language. Well it is possible, you just need a dictionnary: a file or a list of files containing all the words posssible in your language(with all their variations: plurial, conjugasions), separated by comma: 
+By default, we suggest words in french,spanish and english, but as you are reading this section in english, you might want to create grids in annother language. Well it is possible, you just need a dictionnary: a file or a list of files containing all the words posssible in your language(with all their variations: plurial, conjugasions), separated by comma: 
 
 ```txt
-A,VERY,LIMITED,DICTIONNARY,LIMIT,DICTIONNARYS
+A,VERY,LIMITED,DICTIONNARY,LIMIT,DICTIONNARIES
 ```
 Once you have a dictionnary, just place it within the `dico` folder as a `.txt` file. Contact me, I am interrested into adding more dictionnaries, I will add it to the default release and it will be easier for the next users.
 ## Contribute

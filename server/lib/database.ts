@@ -1,7 +1,12 @@
 import fs from "fs/promises";
 import path from "path";
 import { resolve } from "./utils";
-import { Grid, GridOptions, defaultOptions, defaultSolutionOptions } from "grid";
+import {
+  Grid,
+  GridOptions,
+  defaultOptions,
+  defaultSolutionOptions,
+} from "grid";
 
 /**
  * Database is a singleton class that contains the database
@@ -66,7 +71,7 @@ export class Database {
   }
   /**
    * read a database file
-   * @param file 
+   * @param file
    * @returns Promise<string>
    */
   loadFile(file) {

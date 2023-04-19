@@ -17,17 +17,24 @@ export class Dico {
   /**
    * The promise that will resolve when the dictionnary is loaded
    */
-  private loadingPromise: Promise<void>;
+  private loadingPromise: Promise<void> | undefined;
   /**
    * The occurences of the words in the dictionnary
    * The first element is for 2 letters lemmes
    * The second element is for 3 letters lemmes
    */
   public occurencies: OccurenceMap[];
+
+  /**
+   * The locale dictionary folder
+   */
+  public locale: string;
+
   constructor() {
     this.words = [];
     this.wordsMap = new Map();
     this.occurencies = [{}, {}];
+    this.locale = "fr-fr";
     this.loadingPromise = this.loadDictionary();
   }
 
@@ -97,11 +104,16 @@ export class Dico {
    */
   loadDictionary() {
     if (this.loadingPromise) return this.loadingPromise;
-    this.loadingPromise = readdir(resolve(APP_CROSSWORDS_DICO_PATH))
+    this.loadingPromise = readdir(
+      resolve(APP_CROSSWORDS_DICO_PATH, this.locale)
+    )
       .then((files) =>
         Promise.all(
           files.map((filePath) =>
-            readFile(resolve(APP_CROSSWORDS_DICO_PATH, filePath), "utf8")
+            readFile(
+              resolve(APP_CROSSWORDS_DICO_PATH, this.locale, filePath),
+              "utf8"
+            )
           )
         )
       )
@@ -216,6 +228,18 @@ export class Dico {
    */
   getWordsSync() {
     return this.words;
+  }
+
+  /**
+   * Set locale and reload dictionnary
+   */
+  setLocale(locale: string) {
+    this.locale = locale;
+    this.loadingPromise = undefined;
+    this.words = [];
+    this.wordsMap = new Map();
+    this.occurencies = [{}, {}];
+    return this.loadDictionary();
   }
 }
 
