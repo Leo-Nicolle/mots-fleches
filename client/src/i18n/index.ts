@@ -1,4 +1,4 @@
-import { createI18n } from "vue-i18n"
+import { createI18n } from "vue-i18n";
 
 export function loadLanguages() {
     const context = import.meta.globEager("./languages/*.ts");
@@ -10,9 +10,8 @@ export function loadLanguages() {
         let name = key.replace(/(\.\/languages\/|\.ts)/g, '');
         languages[name] = lang;
     }
-    
-    console.log(languages)
-    return languages
+
+    return languages;
 }
 const locale = localStorage.getItem('locale') || 'fr';
 export const i18n = createI18n({
@@ -21,7 +20,7 @@ export const i18n = createI18n({
     locale: locale,
     fallbackLocale: 'fr',
     messages: loadLanguages()
-})
+});
 
 export const i18nt = i18n.global.t;
 export function setLanguage(locale: string) {

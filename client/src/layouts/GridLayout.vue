@@ -2,10 +2,10 @@
   <Layout>
     <template v-slot:left-panel>
       <div class="left-panel">
-         <!-- @slot Slot to add elements within left panel  -->
+        <!-- @slot Slot to add elements within left panel  -->
         <slot name="left-panel"></slot>
-        <n-button @click="deleteVisible = true" type="warning" round
-          >Supprimer</n-button
+        <n-button @click="deleteVisible = true" type="warning" round>
+          {{ $t("buttons.delete") }}</n-button
         >
       </div>
     </template>
@@ -36,7 +36,7 @@
             </div>
           </template>
         </n-card>
-        <n-card @click="onCreate" title="Créer">
+        <n-card @click="onCreate" :title="$t('buttons.create')">
           <template #default>
             <div class="card-body">
               <n-button class="add preview" round>
@@ -50,15 +50,17 @@
 
         <n-modal
           preset="dialog"
-          title="Supprimer ?"
+          :title="`${$t('buttons.delete')} ?`"
           :showIcon="false"
           v-model:show="deleteVisible"
         >
           <template #action>
-            <n-button @click="deleteVisible = false">Non</n-button>
-            <n-button @click="onDelete(selectedElements)" type="warning"
-              >Oui</n-button
-            >
+            <n-button @click="deleteVisible = false">{{
+              $t("buttons.no")
+            }}</n-button>
+            <n-button @click="onDelete(selectedElements)" type="warning">{{
+              $t("buttons.yes")
+            }}</n-button>
           </template>
         </n-modal>
       </div>

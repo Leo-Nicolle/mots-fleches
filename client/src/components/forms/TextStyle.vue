@@ -1,12 +1,12 @@
 <template>
-        <n-form-item label="Font" path="font">
+        <n-form-item :label="$t('forms.font')" path="font">
           <n-input
             role="font"
             v-model:value="value.font"
             placeholder="sans-serif"
           />
         </n-form-item>
-        <n-form-item label="Taille" path="size">
+        <n-form-item :label="$t('forms.size')" path="size">
           <Sizeinput v-if="typeof value.size==='string'"
           role="size"          
           v-model="value.size" />
@@ -14,7 +14,7 @@
           role="size"
           v-model:value="value.size" />
         </n-form-item>
-        <n-form-item label="Couleur" path="color">
+        <n-form-item :label="$t('forms.color')" path="color">
           <n-color-picker
             role="color"          
             v-model:value="value.color"

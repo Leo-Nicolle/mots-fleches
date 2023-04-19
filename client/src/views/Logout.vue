@@ -4,7 +4,7 @@
       <RefreshCircleOutline />
     </n-icon>
     <span>
-      {{ message }}
+      {{ $t(`logout.${message}`) }}
     </span>
   </div>
 </template>
@@ -18,8 +18,7 @@ import { getUrl } from "../js/utils";
  * View to logout and close the server
  */
 const closed = ref(false);
-const waiting = "Fermeture du serveur...";
-const message = ref<string>(waiting);
+const message = ref<string>("waiting");
 function ping(): Promise<any> {
   return axios.get(getUrl("ping"));
 }
@@ -34,11 +33,11 @@ onMounted(() => {
   const interval = setInterval(() => {
     ping()
       .then(() => {
-        message.value = waiting;
+        message.value = "waiting";
       })
       .catch(() => {
         closed.value = true;
-        message.value = "Serveur fermé.";
+        message.value = "success";
         clearInterval(interval);
       });
   }, 1000);

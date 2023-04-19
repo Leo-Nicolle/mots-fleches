@@ -3,7 +3,7 @@
     <template #left-panel>
       <span class="title">
         <h2>
-          {{ grid.title ? grid.title : `Nouvelle Grille` }}
+          {{ grid.title ? grid.title : $t("buttons.newGrid") }}
         </h2>
         <ModalOptions
           :modelValue="grid"

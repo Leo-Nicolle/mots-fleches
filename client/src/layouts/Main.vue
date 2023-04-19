@@ -15,8 +15,6 @@
         <slot name="header"> </slot>
       </span>
       <span class="right">
-        <span>{{ $t('buttons.changeLanguage') }}</span>
-
         <n-popselect v-model:value="locale" :options="localeOptions">
           <n-button>
             <template #icon>
@@ -35,7 +33,7 @@
           icon-placement="right"
           @click="exit"
         >
-          ciao
+          {{ $t("buttons.exit") }}
           <template #icon>
             <n-icon>
               <LogOutOutline />
@@ -63,73 +61,86 @@
 <script setup lang="ts">
 import { MenuOutline } from "@vicons/ionicons5";
 import type { MenuOption } from "naive-ui";
-import { defineProps, h, ref, defineEmits, computed, watchEffect } from "vue";
+import {
+  defineProps,
+  h,
+  ref,
+  defineEmits,
+  computed,
+  watchEffect,
+  onMounted,
+} from "vue";
 import { RouterLink, useRouter } from "vue-router";
 import { renderIcon } from "../js/utils";
 import { LogOutOutline, LanguageOutline } from "@vicons/ionicons5";
 import { i18n, setLanguage } from "../i18n";
 
 const locale = ref(i18n.global.locale);
+const nav = ref<MenuOption[]>([]);
 const router = useRouter();
+const collapsed = ref(true);
 const emit = defineEmits<{
   /**
    * Scroll within main panel
    */
   (event: "scroll"): void;
 }>();
-const collapsed = ref(true);
+// use this to try to make sure we dont watch the whole global object
+function getNavChildren() {
+  return [
+    {
+      label: () =>
+        h(
+          RouterLink,
+          {
+            to: "/grids",
+          },
+          { default: () => i18n.global.t("nav.grids") }
+        ),
+      key: "go-back-home",
+    },
+    {
+      label: () =>
+        h(
+          RouterLink,
+          {
+            to: "/options",
+          },
+          { default: () => i18n.global.t("nav.options") }
+        ),
+      key: "go-to-options",
+    },
+    {
+      label: () =>
+        h(
+          RouterLink,
+          {
+            to: "/solutions",
+          },
+          { default: () => i18n.global.t("nav.solutions") }
+        ),
+      key: "go-to-solutions",
+    },
+    {
+      label: () =>
+        h(
+          RouterLink,
+          {
+            to: "/words",
+          },
+          { default: () => i18n.global.t("nav.words") }
+        ),
+      key: "go-to-words",
+    },
+  ];
+}
 
-const menuOptions = ref<MenuOption[]>([
+const menuOptions = computed<MenuOption[]>(() => [
   {
     label: "",
     key: "",
     icon: renderIcon(MenuOutline),
-    children: [
-      {
-        label: () =>
-          h(
-            RouterLink,
-            {
-              to: "/grids",
-            },
-            { default: () => "Grilles" }
-          ),
-        key: "go-back-home",
-      },
-      {
-        label: () =>
-          h(
-            RouterLink,
-            {
-              to: "/options",
-            },
-            { default: () => "Options" }
-          ),
-        key: "go-to-options",
-      },
-      {
-        label: () =>
-          h(
-            RouterLink,
-            {
-              to: "/solutions",
-            },
-            { default: () => "Solutions" }
-          ),
-        key: "go-to-solutions",
-      },
-      {
-        label: () =>
-          h(
-            RouterLink,
-            {
-              to: "/words",
-            },
-            { default: () => "Mots" }
-          ),
-        key: "go-to-words",
-      },
-    ],
+    children: nav.value,
   },
 ]);
 
@@ -142,6 +153,10 @@ const localeOptions = ref([
     label: "English",
     value: "en-en",
   },
+  {
+    label: "Español",
+    value: "es-es",
+  },
 ]);
 const selected = computed(() => {
   return localeOptions.value.find((option) => option.value === locale.value);
@@ -150,6 +165,10 @@ watchEffect(() => {
   console.log("locale changed", locale.value);
   localStorage.setItem("locale", locale.value);
   setLanguage(locale.value);
+  nav.value = getNavChildren();
+});
+onMounted(() => {
+  nav.value = getNavChildren();
 });
 
 function onScroll(e: Event) {

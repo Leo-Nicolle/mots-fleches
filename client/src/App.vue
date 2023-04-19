@@ -1,15 +1,14 @@
 <template>
   <div>
-    
     <n-alert
       v-if="alert"
       class="alert-toaster"
-      :title="alert.title"
+      :title="$t(`alert.${alert.id}.title`)"
       :type="alert.type"
       bordered
       closable
     >
-      {{ alert.content }}
+      {{ $t(`alert.${alert.id}.content`) }}
     </n-alert>
     <router-view />
   </div>
@@ -22,9 +21,7 @@ import axios from "axios";
 /**
  * Main Component: handles the alert toaster for server disconnection
  */
-const alert = ref<false | { content: string; title: string; type: string }>(
-  false
-);
+const alert = ref<false | { type: string; id: string }>(false);
 
 function ping(retry = 0): Promise<any> {
   return axios
@@ -37,16 +34,10 @@ function ping(retry = 0): Promise<any> {
       throw e;
     });
 }
-
 onMounted(async () => {
   const i = setInterval(() => {
     ping().catch(() => {
-      alert.value = {
-        content:
-          "You have been disconnected from the server. Please refresh the page.",
-        title: "Disconnected",
-        type: "error",
-      };
+      alert.value = {type: 'error', id: "disconnected"};
     });
   }, 500);
 });

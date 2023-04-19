@@ -1,6 +1,6 @@
 <template>
   <div ref="exporter" class="exporter">
-    <n-button @click="print" round>Imprimer</n-button>
+    <n-button @click="print" round>{{$t('buttons.print')}}</n-button>
     <iframe class="print" :src="iframeUrl"></iframe>
   </div>
 </template>

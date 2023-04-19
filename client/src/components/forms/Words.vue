@@ -1,30 +1,30 @@
 <template>
   <section>
     <n-form inline>
-      <n-form-item label="Ajouter" path="add">
+      <n-form-item :label="$t('forms.add')" path="add">
         <n-auto-complete
           v-model:value="value"
           :input-props="{
             autocomplete: 'enabled',
           }"
           :options="options"
-          placeholder="Ajouter un mot"
+          :placeholder="$t('forms.addWord')"
           @keyup="onAddKeyup"
         />
       </n-form-item>
-      <n-form-item label="Supprimer" path="delete">
+      <n-form-item :label="$t('forms.delete')" path="delete">
         <n-auto-complete
           v-model:value="value"
           :input-props="{
             autocomplete: 'enabled',
           }"
           :options="options"
-          placeholder="Supprimer un mot"
+          :placeholder="$t('forms.deleteWord')"
           @keyup="onDeleteKeyup"
         />
       </n-form-item>
     </n-form>
-    <h3>Mes mots</h3>
+    <h3>{{ $t('forms.myWords') }}</h3>
     <div class="words">
       <span v-for="word in words" :key="word">
         {{ word }}
