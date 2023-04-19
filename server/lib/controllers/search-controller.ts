@@ -1,8 +1,9 @@
 import { Express } from "express";
 import { Database } from "../database";
 import search from "../search";
-let isBusy = false;
+import dico from "../search/dico";
 
+let isBusy = false;
 
 /**
  * Controller for search operations
@@ -58,10 +59,27 @@ export default function wordController({
         impossible,
       });
     } catch (e) {
-      console.log('Errore', e)
+      console.log("Errore", e);
       isBusy = false;
       // console.error(e);
       res.status(500).send(e);
     }
+  });
+
+  /**
+   * Set locale
+   */
+  app.post("/set-locale", async (req, res) => {
+    const { locale } = req.body;
+    if (locale === dico.locale) return res.sendStatus(200);
+    if (["fr-fr", "en-en", "es-es"].indexOf(locale) === -1)
+      return res.sendStatus(400);
+    dico
+      .setLocale(locale)
+      .then(() => db.getWords())
+      .then((words) => {
+        dico.addWordsToDictionnary(words);
+      })
+      .then(() => res.sendStatus(200));
   });
 }
