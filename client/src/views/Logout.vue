@@ -1,7 +1,7 @@
 <template>
   <div class="lougout">
-    <n-icon v-if="!closed" size="5em" class="loader">
-      <RefreshCircleOutline />
+    <n-icon v-if="!closed" size="5em" >
+      <LoaderIcon />
     </n-icon>
     <span>
       {{ $t(`logout.${message}`) }}
@@ -12,7 +12,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import axios from "axios";
-import { RefreshCircleOutline } from "@vicons/ionicons5";
+import LoaderIcon from "../components/LoaderIcon.vue";
 import { getUrl } from "../js/utils";
 /**
  * View to logout and close the server
@@ -57,18 +57,6 @@ onMounted(() => {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-}
-@keyframes rotate {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-}
-.loader {
-  animation: 1s linear 1s infinite running rotate;
 }
 </style>
 

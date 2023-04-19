@@ -16,10 +16,11 @@
       </span>
       <span class="right">
         <n-popselect v-model:value="locale" :options="localeOptions">
-          <n-button>
+          <n-button :type="switchingLocale ? 'warning' : ''">
             <template #icon>
               <n-icon>
-                <LanguageOutline />
+                <LoaderIcon v-if="switchingLocale"/>
+                <LanguageOutline v-else/>
               </n-icon>
             </template>
             {{ selected?.label }}
@@ -60,6 +61,7 @@
 
 <script setup lang="ts">
 import { MenuOutline } from "@vicons/ionicons5";
+import LoaderIcon from "../components/LoaderIcon.vue";
 import type { MenuOption } from "naive-ui";
 import {
   defineProps,
@@ -71,14 +73,16 @@ import {
   onMounted,
 } from "vue";
 import { RouterLink, useRouter } from "vue-router";
-import { renderIcon } from "../js/utils";
+import { getUrl, renderIcon } from "../js/utils";
 import { LogOutOutline, LanguageOutline } from "@vicons/ionicons5";
 import { i18n, setLanguage } from "../i18n";
+import axios from "axios";
 
 const locale = ref(i18n.global.locale);
 const nav = ref<MenuOption[]>([]);
 const router = useRouter();
 const collapsed = ref(true);
+const switchingLocale = ref(false);
 const emit = defineEmits<{
   /**
    * Scroll within main panel
@@ -161,14 +165,22 @@ const localeOptions = ref([
 const selected = computed(() => {
   return localeOptions.value.find((option) => option.value === locale.value);
 });
+function setServerLocale() {
+  switchingLocale.value = true;
+  axios.post(getUrl('set-locale'), { locale: locale.value })
+  .finally(() => {
+    switchingLocale.value = false;
+  });
+}
 watchEffect(() => {
-  console.log("locale changed", locale.value);
   localStorage.setItem("locale", locale.value);
   setLanguage(locale.value);
   nav.value = getNavChildren();
+  setServerLocale();
 });
 onMounted(() => {
   nav.value = getNavChildren();
+  setServerLocale();
 });
 
 function onScroll(e: Event) {

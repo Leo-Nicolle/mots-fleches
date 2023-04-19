@@ -66,7 +66,6 @@ function onDeleteKeyup(evt: KeyboardEvent) {
 
 const options = computed(() => {
   return words.value
-    .concat(["abc", "abbc", "abcc"])
     .filter((w) => w.startsWith(value.value))
     .map((suffix) => {
       return {

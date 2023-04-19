@@ -42,6 +42,7 @@ export const lang = {
         format: "Format",
         width: "Width",
         height: "Height",
+        margins: "Margins",
         left: "Left",
         top: "Top",
         right: "Right",
