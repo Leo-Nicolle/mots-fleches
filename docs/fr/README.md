@@ -16,7 +16,9 @@ Vous pouvez soit directement lancer le serveur dans un terminal, soit installer 
 
 
 ## Fonctionalités
+### International
 
+![](https://user-images.githubusercontent.com/7451806/233158317-e1bd727d-6dcc-4ea6-8683-e1d800f02a99.mp4)
 ### Suggestions
 
 ![](https://user-images.githubusercontent.com/7451806/226173711-224940ab-17fe-4495-aeca-3f058996eaa8.mp4)
@@ -59,11 +61,11 @@ Une fois que l'appli est lancée, commencez par créer une grille. Cliquez dessu
  - Changer la taille de la grille: Cliques sur l'icone :gear: et utilisez le formulaire. Rechargez la page si quelque chose bloque. 
 
 ## Comment ajouter mes propres mots
-Allez à la page `/wprds` (mots dans le burger menu) et ajoutez, supprimez vos mots. Vous ne pouvezpas modifier le dictionnaire de base depuis cette page, pour ce faire, vous derez modifier les fichier dans le dossier `dico`.
+Allez à la page `/words` (mots dans le burger menu) et ajoutez, supprimez vos mots. Vous ne pouvezpas modifier le dictionnaire de base depuis cette page, pour ce faire, vous derez modifier les fichier dans le dossier `dico`.
 
 ## Comment ajouter un autre language dans les suggestiosn
 
-Par defaut, les suggestions sont en français, si vous voulez créer des grilles dans une autre langue, il va vous falloir un dictionnaire: un fichier ou un enssemble de fichiers qui contiennent tous les mots possibles d'une langue, avec toutes leur variations (pluriels, conjugaisons etc), separes par des virgules:
+Par defaut, Mots-flex a trois dictionnaires: français, espagnol et anglais, si vous voulez créer des grilles dans une autre langue, il va vous falloir un dictionnaire: un fichier ou un enssemble de fichiers qui contiennent tous les mots possibles d'une langue, avec toutes leur variations (pluriels, conjugaisons etc), separes par des virgules:
 ```txt
 UN,DICTIONNAIRE,VRAIMENT,SIMPLE,UNE,UNS,UNES,DICTIONNAIRES,SIMPLES
 ```

@@ -24,4 +24,4 @@ Controller for CRUD operations on words
 
 #### Defined in
 
-[controllers/wordController.ts:9](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/controllers/wordController.ts#L9)
+[controllers/wordController.ts:9](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/server/lib/controllers/wordController.ts#L9)

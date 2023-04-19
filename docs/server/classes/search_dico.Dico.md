@@ -15,19 +15,31 @@ It is used to search for words in the grid
 
 #### Defined in
 
-[search/dico.ts:27](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/search/dico.ts#L27)
+[search/dico.ts:33](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/server/lib/search/dico.ts#L33)
 
 ## Properties
 
 ### loadingPromise
 
-• `Private` **loadingPromise**: `Promise`<`void`\>
+• `Private` **loadingPromise**: `undefined` \| `Promise`<`void`\>
 
 The promise that will resolve when the dictionnary is loaded
 
 #### Defined in
 
-[search/dico.ts:20](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/search/dico.ts#L20)
+[search/dico.ts:20](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/server/lib/search/dico.ts#L20)
+
+___
+
+### locale
+
+• **locale**: `string`
+
+The locale dictionary folder
+
+#### Defined in
+
+[search/dico.ts:31](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/server/lib/search/dico.ts#L31)
 
 ___
 
@@ -41,7 +53,7 @@ The second element is for 3 letters lemmes
 
 #### Defined in
 
-[search/dico.ts:26](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/search/dico.ts#L26)
+[search/dico.ts:26](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/server/lib/search/dico.ts#L26)
 
 ___
 
@@ -53,7 +65,7 @@ The list of words in the dictionnary
 
 #### Defined in
 
-[search/dico.ts:12](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/search/dico.ts#L12)
+[search/dico.ts:12](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/server/lib/search/dico.ts#L12)
 
 ___
 
@@ -65,7 +77,7 @@ The map of words in the dictionnary
 
 #### Defined in
 
-[search/dico.ts:16](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/search/dico.ts#L16)
+[search/dico.ts:16](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/server/lib/search/dico.ts#L16)
 
 ## Methods
 
@@ -87,7 +99,7 @@ Add a word or a list of words to the dictionnary
 
 #### Defined in
 
-[search/dico.ts:119](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/search/dico.ts#L119)
+[search/dico.ts:131](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/server/lib/search/dico.ts#L131)
 
 ___
 
@@ -116,7 +128,7 @@ The occurence map of the words
 
 #### Defined in
 
-[search/dico.ts:43](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/search/dico.ts#L43)
+[search/dico.ts:50](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/server/lib/search/dico.ts#L50)
 
 ___
 
@@ -134,7 +146,7 @@ All the words in the dictionnary
 
 #### Defined in
 
-[search/dico.ts:210](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/search/dico.ts#L210)
+[search/dico.ts:222](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/server/lib/search/dico.ts#L222)
 
 ___
 
@@ -152,7 +164,7 @@ All the words in the dictionnary
 
 #### Defined in
 
-[search/dico.ts:217](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/search/dico.ts#L217)
+[search/dico.ts:229](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/server/lib/search/dico.ts#L229)
 
 ___
 
@@ -171,7 +183,7 @@ The promise that will resolve when the dictionnary is loaded
 
 #### Defined in
 
-[search/dico.ts:98](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/search/dico.ts#L98)
+[search/dico.ts:105](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/server/lib/search/dico.ts#L105)
 
 ___
 
@@ -195,7 +207,7 @@ Remove the occurences of a word from the occurences map
 
 #### Defined in
 
-[search/dico.ts:75](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/search/dico.ts#L75)
+[search/dico.ts:82](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/server/lib/search/dico.ts#L82)
 
 ___
 
@@ -219,4 +231,26 @@ from the occurence map and from the wordsMap
 
 #### Defined in
 
-[search/dico.ts:161](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/server/lib/search/dico.ts#L161)
+[search/dico.ts:173](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/server/lib/search/dico.ts#L173)
+
+___
+
+### setLocale
+
+▸ **setLocale**(`locale`): `Promise`<`void`\>
+
+Set locale and reload dictionnary
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `locale` | `string` |
+
+#### Returns
+
+`Promise`<`void`\>
+
+#### Defined in
+
+[search/dico.ts:236](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/server/lib/search/dico.ts#L236)

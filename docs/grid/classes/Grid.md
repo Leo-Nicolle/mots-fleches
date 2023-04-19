@@ -12,17 +12,19 @@ has many helper functions to manipulate the grid
 
 • **new Grid**(`rows`, `cols`, `id?`)
 
+Grid constructor
+
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `rows` | `number` |
-| `cols` | `number` |
-| `id?` | `string` |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `rows` | `number` | Number of rows |
+| `cols` | `number` | Number of columns |
+| `id?` | `string` | id of the grid |
 
 #### Defined in
 
-[Grid.ts:71](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/Grid.ts#L71)
+[Grid.ts:76](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/grid/src/Grid.ts#L76)
 
 ## Properties
 
@@ -34,7 +36,7 @@ Cells of the grid
 
 #### Defined in
 
-[Grid.ts:54](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/Grid.ts#L54)
+[Grid.ts:54](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/grid/src/Grid.ts#L54)
 
 ___
 
@@ -46,7 +48,7 @@ number of columns within the grid
 
 #### Defined in
 
-[Grid.ts:42](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/Grid.ts#L42)
+[Grid.ts:42](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/grid/src/Grid.ts#L42)
 
 ___
 
@@ -58,7 +60,7 @@ Comment of the grid
 
 #### Defined in
 
-[Grid.ts:46](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/Grid.ts#L46)
+[Grid.ts:46](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/grid/src/Grid.ts#L46)
 
 ___
 
@@ -70,7 +72,7 @@ Date of creation(db)
 
 #### Defined in
 
-[Grid.ts:62](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/Grid.ts#L62)
+[Grid.ts:62](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/grid/src/Grid.ts#L62)
 
 ___
 
@@ -82,7 +84,7 @@ Id of the grid(db)
 
 #### Defined in
 
-[Grid.ts:58](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/Grid.ts#L58)
+[Grid.ts:58](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/grid/src/Grid.ts#L58)
 
 ___
 
@@ -99,7 +101,7 @@ Might be removed soon with books
 
 #### Defined in
 
-[Grid.ts:68](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/Grid.ts#L68)
+[Grid.ts:68](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/grid/src/Grid.ts#L68)
 
 ___
 
@@ -111,7 +113,7 @@ nuber of rows within the grid
 
 #### Defined in
 
-[Grid.ts:38](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/Grid.ts#L38)
+[Grid.ts:38](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/grid/src/Grid.ts#L38)
 
 ___
 
@@ -123,7 +125,7 @@ Title of the grid
 
 #### Defined in
 
-[Grid.ts:50](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/Grid.ts#L50)
+[Grid.ts:50](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/grid/src/Grid.ts#L50)
 
 ## Methods
 
@@ -148,7 +150,7 @@ the cell at the new position, or nullCell if the new position is out of bounds
 
 #### Defined in
 
-[Grid.ts:231](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/Grid.ts#L231)
+[Grid.ts:236](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/grid/src/Grid.ts#L236)
 
 ___
 
@@ -173,7 +175,7 @@ All the cells of the word, and the start and end positions
 
 #### Defined in
 
-[Grid.ts:314](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/Grid.ts#L314)
+[Grid.ts:319](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/grid/src/Grid.ts#L319)
 
 ___
 
@@ -197,7 +199,7 @@ the cell at the given coordinates
 
 #### Defined in
 
-[Grid.ts:242](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/Grid.ts#L242)
+[Grid.ts:247](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/grid/src/Grid.ts#L247)
 
 ___
 
@@ -219,7 +221,7 @@ Highlight the given cells (unhighlight all other cells)
 
 #### Defined in
 
-[Grid.ts:249](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/Grid.ts#L249)
+[Grid.ts:254](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/grid/src/Grid.ts#L254)
 
 ___
 
@@ -244,7 +246,7 @@ the cell at the new position, or nullCell if the new position is out of bounds
 
 #### Defined in
 
-[Grid.ts:219](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/Grid.ts#L219)
+[Grid.ts:224](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/grid/src/Grid.ts#L224)
 
 ___
 
@@ -268,7 +270,7 @@ true if the cell is a definition cell
 
 #### Defined in
 
-[Grid.ts:100](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/Grid.ts#L100)
+[Grid.ts:105](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/grid/src/Grid.ts#L105)
 
 ___
 
@@ -292,7 +294,7 @@ false if x or y is out of bounds
 
 #### Defined in
 
-[Grid.ts:92](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/Grid.ts#L92)
+[Grid.ts:97](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/grid/src/Grid.ts#L97)
 
 ___
 
@@ -315,7 +317,7 @@ Resizes the grid to the given dimensions
 
 #### Defined in
 
-[Grid.ts:109](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/Grid.ts#L109)
+[Grid.ts:114](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/grid/src/Grid.ts#L114)
 
 ___
 
@@ -333,7 +335,7 @@ GridState JSON string
 
 #### Defined in
 
-[Grid.ts:351](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/Grid.ts#L351)
+[Grid.ts:356](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/grid/src/Grid.ts#L356)
 
 ___
 
@@ -361,7 +363,7 @@ Grid.setArrow
 
 #### Defined in
 
-[Grid.ts:192](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/Grid.ts#L192)
+[Grid.ts:197](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/grid/src/Grid.ts#L197)
 
 ___
 
@@ -384,7 +386,7 @@ Set the cell at the given coordinates as a definition cell (or not)
 
 #### Defined in
 
-[Grid.ts:129](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/Grid.ts#L129)
+[Grid.ts:134](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/grid/src/Grid.ts#L134)
 
 ___
 
@@ -407,7 +409,7 @@ Set horizontal space of a cell
 
 #### Defined in
 
-[Grid.ts:201](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/Grid.ts#L201)
+[Grid.ts:206](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/grid/src/Grid.ts#L206)
 
 ___
 
@@ -430,7 +432,7 @@ Set vertical space of a cell
 
 #### Defined in
 
-[Grid.ts:209](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/Grid.ts#L209)
+[Grid.ts:214](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/grid/src/Grid.ts#L214)
 
 ___
 
@@ -453,7 +455,7 @@ Set the text to the cell at the given coordinates
 
 #### Defined in
 
-[Grid.ts:145](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/Grid.ts#L145)
+[Grid.ts:150](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/grid/src/Grid.ts#L150)
 
 ___
 
@@ -477,7 +479,7 @@ Write a word within the grid, one letter per cell
 
 #### Defined in
 
-[Grid.ts:159](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/Grid.ts#L159)
+[Grid.ts:164](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/grid/src/Grid.ts#L164)
 
 ___
 
@@ -501,7 +503,7 @@ Set the suggestion of the given cells
 
 #### Defined in
 
-[Grid.ts:265](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/Grid.ts#L265)
+[Grid.ts:270](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/grid/src/Grid.ts#L270)
 
 ___
 
@@ -526,7 +528,7 @@ Weather the two cells have the same coordinates
 
 #### Defined in
 
-[Grid.ts:286](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/Grid.ts#L286)
+[Grid.ts:291](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/grid/src/Grid.ts#L291)
 
 ___
 
@@ -550,7 +552,7 @@ Vector corresponding to the direction
 
 #### Defined in
 
-[Grid.ts:295](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/Grid.ts#L295)
+[Grid.ts:300](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/grid/src/Grid.ts#L300)
 
 ___
 
@@ -575,7 +577,7 @@ new cell
 
 #### Defined in
 
-[Grid.ts:391](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/Grid.ts#L391)
+[Grid.ts:396](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/grid/src/Grid.ts#L396)
 
 ___
 
@@ -599,7 +601,7 @@ Vector perpendicular to the direction
 
 #### Defined in
 
-[Grid.ts:305](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/Grid.ts#L305)
+[Grid.ts:310](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/grid/src/Grid.ts#L310)
 
 ___
 
@@ -623,7 +625,7 @@ Set one of the arrows of a definition cell
 
 #### Defined in
 
-[Grid.ts:175](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/Grid.ts#L175)
+[Grid.ts:180](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/grid/src/Grid.ts#L180)
 
 ___
 
@@ -647,4 +649,4 @@ A new grid
 
 #### Defined in
 
-[Grid.ts:369](https://github.com/Leo-Nicolle/mots-fleches/blob/35dd9ba/grid/src/Grid.ts#L369)
+[Grid.ts:374](https://github.com/Leo-Nicolle/mots-fleches/blob/cc7533b/grid/src/Grid.ts#L374)
