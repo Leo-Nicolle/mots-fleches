@@ -1,7 +1,12 @@
 # Mots Fléchés - Crosswords
 
-Generateur de mots fléchés.
-Documentation dispo ICI.
+Generateur de mots fléchés. Crosswords generator. Generator de Crucigramas.
+
+# [Documentation](https://leo-nicolle.github.io/mots-fleches/)
+ - [Français]()
+ - [Español]()
+ - [English]()
+
 ## Installation
 
 ### Windows/Mac
@@ -39,9 +44,14 @@ https://user-images.githubusercontent.com/7451806/226175011-0e5de156-70da-4955-9
  - Taille des cases
  - Taille/couleur/police des textes
 
-### Export 
+### Export
 
 https://user-images.githubusercontent.com/7451806/232314140-940b8ddf-0f99-47fa-a0ac-4db266715133.mp4
+
+### Multilangues
+
+https://user-images.githubusercontent.com/7451806/233158317-e1bd727d-6dcc-4ea6-8683-e1d800f02a99.mp4
+
 
 ## Contribuer (section en anglais, comme c'est l'usage)
 
