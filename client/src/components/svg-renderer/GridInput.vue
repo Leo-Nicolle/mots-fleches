@@ -3,6 +3,7 @@
     <textarea
       @input="onChange($event)"
       @keyup="onKeyup($event)"
+      @keydown="onKeydown($event)"
       :value="
         cell.text.length
           ? cell.text
@@ -149,6 +150,13 @@ function onChange(evt: Event) {
   if (!props.grid.isValid(next) || next.definition) return;
   emit("focus", next);
 }
+let shouldGoBackwards = false;
+function onKeydown(evt: KeyboardEvent) {
+  let text = (evt.target as HTMLInputElement).value || "";
+  if (props.cell.definition || text.length || evt.code !=='Backspace') return;
+  // go backwards on backspace keydown if the cell is empty
+  shouldGoBackwards = true;
+}
 function onKeyup(evt: KeyboardEvent) {
   // | and _ are used to toggle spaceH and spaceV
   if (evt.key === "|") {
@@ -171,6 +179,13 @@ function onKeyup(evt: KeyboardEvent) {
     props.grid.setDefinition(props.cell, !props.cell.definition);
     props.grid.setText(props.cell, "");
     emit("update");
+    return;
+  }
+  if(shouldGoBackwards) {
+    shouldGoBackwards = false;
+    const next = props.grid.decrement(props.cell, props.dir);
+    if (!props.grid.isValid(next)) return;
+    emit("focus", next);
     return;
   }
   // ctrl + enter to moveout from definition
