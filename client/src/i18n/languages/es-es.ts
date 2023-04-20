@@ -57,6 +57,8 @@ export const lang = {
         deleteWord: "Borrar palabra",
         myWords: "Mis palabras",
         grid: "Cuadrícula",
+        wordLength: "Longitud de las palabras",
+
     },
     alert: {
         disconnected: {

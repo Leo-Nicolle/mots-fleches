@@ -184,7 +184,7 @@ import {
   arrowPositions,
   ArrowDir,
 } from "grid";
-import { defaultExportOptions, ExportOptions } from "../../types";
+import { ExportOptions } from "../../types";
 import { getCellClass } from "../../js/utils";
 /**
  * Component to render a grid as an SVG

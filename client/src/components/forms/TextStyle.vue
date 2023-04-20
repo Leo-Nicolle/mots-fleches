@@ -1,27 +1,31 @@
 <template>
-        <n-form-item :label="$t('forms.font')" path="font">
-          <n-input
-            role="font"
-            v-model:value="value.font"
-            placeholder="sans-serif"
-          />
-        </n-form-item>
-        <n-form-item :label="$t('forms.size')" path="size">
-          <Sizeinput v-if="typeof value.size==='string'"
-          role="size"          
-          v-model="value.size" />
-          <n-input-number v-else
-          role="size"
-          v-model:value="value.size" />
-        </n-form-item>
-        <n-form-item :label="$t('forms.color')" path="color">
-          <n-color-picker
-            role="color"          
-            v-model:value="value.color"
-            :show-alpha="false"
-            size="small"
-          />
-        </n-form-item>
+  <n-form-item :label="$t('forms.font')" path="font">
+    <n-input
+      :role="`${rolePrefix}-font`"
+      v-model:value="value.font"
+      placeholder="sans-serif"
+    />
+  </n-form-item>
+  <n-form-item :label="$t('forms.size')" path="size">
+    <Sizeinput
+      v-if="typeof value.size === 'string'"
+      :role="`${rolePrefix}-size`"
+      v-model="value.size"
+    />
+    <n-input-number
+      v-else
+      :role="`${rolePrefix}-size`"
+      v-model:value="value.size"
+    />
+  </n-form-item>
+  <n-form-item :label="$t('forms.color')" path="color">
+    <n-color-picker
+      :role="`${rolePrefix}-color`"
+      v-model:value="value.color"
+      :show-alpha="false"
+      size="small"
+    />
+  </n-form-item>
 </template>
 <script setup lang="ts">
 import { defineProps, defineEmits, watch } from "vue";
@@ -36,6 +40,7 @@ const props = defineProps<{
    * The TextStyle to edit
    */
   modelValue: TextSyle;
+  rolePrefix: string;
 }>();
 const emit = defineEmits<{
   /**

@@ -1,10 +1,8 @@
 import { defineConfig } from "vitest/config";
-import { resolve } from "./test/utils";
 
-const setupFiles = resolve("test/setup.ts");
 export default defineConfig({
   test: {
-    setupFiles,
+    setupFiles: "test/setup.ts",
     threads: false,
     outputDiffMaxLines: Infinity,
     environment: "node",

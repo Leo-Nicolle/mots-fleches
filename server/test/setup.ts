@@ -1,5 +1,5 @@
 import fs from "fs-extra";
-import { resolve } from "./utils";
+import { resolve } from "path";
 
 const globals = {
   APP_CROSSWORDS_WORDS_PATH: "./dist/test/db/words.txt",

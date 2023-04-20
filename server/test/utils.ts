@@ -105,10 +105,3 @@ export function writeDb({ grids = 2 } = {}) {
       ])
     );
 }
-export function resolve(...args: string[]) {
-  if (process.cwd().endsWith("server")) {
-    return path.resolve(...args);
-  }
-
-  return path.resolve("server", ...args);
-}

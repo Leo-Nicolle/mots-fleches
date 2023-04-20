@@ -57,6 +57,7 @@ export const lang = {
         deleteWord: "Delete word",
         myWords: "My words",
         grid: "Grid",
+        wordLength: "Words Length",
     },
     alert: {
         disconnected: {

@@ -50,7 +50,7 @@
       </div>
       <div v-if="definition">
         <h3>{{$t('forms.definitions')}}</h3>
-        <TextStyle v-model="value.definition" />
+        <TextStyle v-model="value.definition" rolePrefix="definition" />
       </div>
       <div v-if="arrows">
         <h3>{{ $t('forms.arrows') }}</h3>

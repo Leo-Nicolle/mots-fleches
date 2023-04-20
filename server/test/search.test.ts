@@ -3,7 +3,7 @@ import { beforeAll, describe, it, expect } from "vitest";
 import { Grid } from "grid";
 import dico from "../lib/search/dico";
 import search, { Search } from "../lib/search/index";
-import { resolve } from "./utils";
+import { resolve } from "path";
 const grid = new Grid(3, 5, "grid1");
 grid.setDefinition({ x: 0, y: 0 }, true);
 grid.setDefinition({ x: 2, y: 2 }, true);
@@ -21,7 +21,7 @@ describe("Search", () => {
     // .loadDictionary()
     // .then(() =>
     return fs
-      .readFile(resolve("./test/dico/words-search-test.txt"), "utf8")
+      .readFile(resolve("./test/dico/fr-fr/words-search-test.txt"), "utf8")
       .then((data) => {
         dico.addWordsToDictionnary(data);
       });
@@ -128,7 +128,6 @@ describe("Search", () => {
 
   it("getLemme should ignore filled words", () => {
     const coord = { x: 1, y: 1 };
-    debugger;
     const dir = "horizontal";
     const { start, length } = grid.getBounds(coord, dir);
     const lemmes = Search.getLemmes({

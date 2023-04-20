@@ -57,7 +57,7 @@ export const lang = {
         deleteWord: "Supprimer un mot",
         myWords: "Mes mots",
         grid: "Grille",
-
+        wordLength: "Longueur des mots",
     },
     alert: {
         disconnected: {
