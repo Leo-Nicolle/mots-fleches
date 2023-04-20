@@ -9,6 +9,7 @@
           :modelValue="grid"
           @update-size="emit('size-update')"
           @update:model-value="emit('update')"
+          @open="focus = nullCell"
         />
       </span>
       <Suggestion
@@ -29,13 +30,28 @@
       </Suggestion>
     </template>
     <template #body>
-      <div class="container">
+      <div class="container" ref="container">
+        <div class="controls">
+          Zoom
+          <n-button @click="onZoomIn" circle>
+            <n-icon>
+              <AddCircleOutline />
+            </n-icon>
+          </n-button>
+          <n-button @click="onZoomOut" circle>
+            <n-icon>
+              <RemoveCircleOutline />
+            </n-icon>
+          </n-button>
+        </div>
         <SVGGrid
           @focus="(cell) => (focus = cell)"
           :grid="grid"
           :focus="focus"
           :dir="dir"
           :options="options"
+          :zoom="1 / zoom"
+          class="svg-grid"
           :export-options="{
             ...defaultExportOptions,
             texts: true,
@@ -48,6 +64,7 @@
           :options="options"
           :cell="focus"
           :offset="offset"
+          :zoom="zoom"
           @focus="(point) => (focus = point)"
           @update="emit('update')"
           @keyup="onKeyUp"
@@ -59,7 +76,15 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, ref, watchEffect } from "vue";
+import {
+  defineProps,
+  defineEmits,
+  ref,
+  watchEffect,
+  onMounted,
+  computed,
+} from "vue";
+import { AddCircleOutline, RemoveCircleOutline } from "@vicons/ionicons5";
 import { Grid, Cell, Direction, nullCell, GridOptions } from "grid";
 import Layout from "../layouts/Main.vue";
 import SVGGrid from "./svg-renderer/Grid.vue";
@@ -93,18 +118,40 @@ const emit = defineEmits<{
 const dir = ref<Direction>("horizontal");
 const focus = ref<Cell>(nullCell);
 const version = ref(0);
+const container = ref(null as unknown as HTMLDivElement);
 const offset = ref<[number, number]>([-10, 0]);
 const method = ref<"simple" | "fastest">("fastest");
 const ordering = ref<number>(1);
+const zoom = ref(1);
+
 function refresh() {
   version.value++;
 }
+function computeOffset(e) {
+  const topOffset =
+    container.value.querySelector(".svg-grid").getBoundingClientRect().top -
+    container.value.getBoundingClientRect().top;
+  console.log(topOffset, container.value.scrollTop);
+  offset.value = [
+    (e ? e.target.scrollLeft : 0) - 10,
+    (e ? e.target.scrollTop : 0) - topOffset,
+  ];
+}
 function onScroll(e) {
-  offset.value = [e.target.scrollLeft - 10, e.target.scrollTop];
+  computeOffset(e);
 }
 watchEffect(() => {
   props.grid.highlight(props.grid.getBounds(focus.value, dir.value).cells);
 });
+onMounted(() => {
+  computeOffset(null);
+});
+function onZoomIn() {
+  zoom.value = zoom.value + 0.1;
+}
+function onZoomOut() {
+  zoom.value = Math.max(1 ,zoom.value - 0.1);
+}
 
 function onHover(value: string) {
   const cells = props.grid.getBounds(focus.value, dir.value).cells;
@@ -155,5 +202,19 @@ function onKeyUp(evt: KeyboardEvent) {
   display: flex;
   justify-content: space-around;
   width: 100%;
+}
+.svg-grid {
+  padding-right: 20px;
+  padding-bottom: 20px;
+}
+.controls {
+  margin-bottom: 5px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  margin-left: 10px;
+  justify-content: flex-start;
 }
 </style>

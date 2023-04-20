@@ -6,8 +6,8 @@
       grid,
       options
     )} ${gridTotalHeight(grid, options)}`"
-    :width="`${gridTotalWidth(grid, options)}px`"
-    :height="`${gridTotalHeight(grid, options)}px`"
+    :width="`${gridTotalWidth(grid, options) / (zoom || 1)}px`"
+    :height="`${gridTotalHeight(grid, options) / (zoom || 1)}px`"
     @click="onClick"
     xmlns="http://www.w3.org/2000/svg"
   >
@@ -207,6 +207,8 @@ const props = defineProps<{
    * What to display or not (arrows, definitions, etc.)
    */
   exportOptions: Partial<ExportOptions>;
+
+  zoom?: number;
 }>();
 const emit = defineEmits<{
   /**
@@ -347,7 +349,7 @@ function yText(cell: Cell) {
   return cell.y * cellAndBorderWidth(props.options);
 }
 /**
- * For a definition cell, 
+ * For a definition cell,
  * computes the lines to display
  */
 function lines(cell: Cell) {
@@ -394,8 +396,8 @@ function lines(cell: Cell) {
 function onClick(evt: MouseEvent) {
   const x = evt.offsetX - outerLineStroke.value;
   const y = evt.offsetY - outerLineStroke.value;
-  const maxX = gridTotalWidth(props.grid, props.options);
-  const maxY = gridTotalHeight(props.grid, props.options);
+  const maxX = gridTotalWidth(props.grid, props.options) / (props.zoom || 1);
+  const maxY = gridTotalHeight(props.grid, props.options)/ (props.zoom || 1);
   const cWidth =
     container.value && container.value.getBoundingClientRect()
       ? container.value.getBoundingClientRect().width

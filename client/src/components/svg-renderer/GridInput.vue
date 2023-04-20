@@ -107,22 +107,28 @@ const props = defineProps<{
    * Scrolling offset
    */
   offset: [number, number];
+  /**
+   * Zoom level
+   */
+  zoom: number;
 }>();
-const cellSize = computed(() => `${cellWidth(props.options)}px`);
-const textSize = computed(() => props.options.grid.cellSize);
+const cellSize = computed(() => `${cellWidth(props.options) * props.zoom}px`);
+const textSize = computed(() => props.options.grid.cellSize * props.zoom);
 const textFont = computed(() => `${textSize.value}px roboto`);
-const defSize = computed(() => props.options.definition.size);
+const defSize = computed(() => props.options.definition.size * props.zoom);
 const defFont = computed(
   () => `${defSize.value}px ${props.options.definition.font}`
 );
 const transform = computed(() => {
   return `translate(${
-    props.cell.x * cellAndBorderWidth(props.options) +
-    outerBorderWidth(props.options) -
+    (props.cell.x * cellAndBorderWidth(props.options) +
+      outerBorderWidth(props.options)) *
+      props.zoom -
     props.offset[0]
   }px, ${
-    props.cell.y * cellAndBorderWidth(props.options) +
-    outerBorderWidth(props.options) -
+    (props.cell.y * cellAndBorderWidth(props.options) +
+      outerBorderWidth(props.options)) *
+      props.zoom -
     props.offset[1]
   }px)`;
 });
@@ -244,12 +250,12 @@ const handleW = 4;
  * Computes the position of the dots to add arrows
  */
 const handles = computed<Handle[]>(() => {
-  const w = cellAndBorderWidth(props.options);
-  return arrowPositions(props.cell).map(({ x, y }) => {
+  const w = cellAndBorderWidth(props.options) * props.zoom;
+  return arrowPositions(props.cell).map(({ x, y }, i) => {
     return {
       top: `${y * w - handleW}px`,
       left: `${x * w - handleW}px`,
-      index: 0,
+      index: x === 1 ? i : 2,
       dirs:
         x === 1
           ? ["right", "rightdown", "none"]
