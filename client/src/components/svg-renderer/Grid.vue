@@ -288,8 +288,8 @@ const splits = computed(() =>
             : 3 / 4
           : lines === 3
           ? split === 1
-            ? 2 / 3
-            : 1 / 3
+            ? 1 / 3
+            : 2 / 3
           : lines === 2
           ? split === 1
             ? 0.5

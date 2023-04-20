@@ -63,6 +63,7 @@ import {
   parse,
   ArrowDir,
   outerBorderWidth,
+  arrowPositions,
 } from "grid";
 import { getCellClass } from "../../js/utils";
 import { getD } from "../../js/paths";
@@ -153,7 +154,7 @@ function onChange(evt: Event) {
 let shouldGoBackwards = false;
 function onKeydown(evt: KeyboardEvent) {
   let text = (evt.target as HTMLInputElement).value || "";
-  if (props.cell.definition || text.length || evt.code !=='Backspace') return;
+  if (props.cell.definition || text.length || evt.code !== "Backspace") return;
   // go backwards on backspace keydown if the cell is empty
   shouldGoBackwards = true;
 }
@@ -181,7 +182,7 @@ function onKeyup(evt: KeyboardEvent) {
     emit("update");
     return;
   }
-  if(shouldGoBackwards) {
+  if (shouldGoBackwards) {
     shouldGoBackwards = false;
     const next = props.grid.decrement(props.cell, props.dir);
     if (!props.grid.isValid(next)) return;
@@ -243,43 +244,18 @@ const handleW = 4;
  * Computes the position of the dots to add arrows
  */
 const handles = computed<Handle[]>(() => {
-  const splited = isSplited(props.cell);
   const w = cellAndBorderWidth(props.options);
-  return splited
-    ? [
-        {
-          top: `${0.25 * w - handleW}px`,
-          left: `${w}px`,
-          index: 0,
-          dirs: ["right", "rightdown", "none"],
-        },
-        {
-          top: `${0.75 * w - handleW}px`,
-          left: `${w}px`,
-          index: 1,
-          dirs: ["right", "rightdown", "none"],
-        },
-        {
-          top: `${w}px`,
-          left: `${0.5 * w - handleW}px`,
-          index: 2,
-          dirs: ["down", "downright", "none"],
-        },
-      ]
-    : [
-        {
-          top: `${0.5 * w - handleW}px`,
-          left: `${w}px`,
-          index: 0,
-          dirs: ["right", "rightdown", "none"],
-        },
-        {
-          top: `${w}px`,
-          left: `${0.5 * w - handleW}px`,
-          index: 2,
-          dirs: ["down", "downright", "none"],
-        },
-      ];
+  return arrowPositions(props.cell).map(({ x, y }) => {
+    return {
+      top: `${y * w - handleW}px`,
+      left: `${x * w - handleW}px`,
+      index: 0,
+      dirs:
+        x === 1
+          ? ["right", "rightdown", "none"]
+          : ["down", "downright", "none"],
+    };
+  });
 });
 
 watchEffect(() => {
@@ -333,7 +309,7 @@ textarea:focus-visible {
 }
 
 .handle {
-  position: relative;
+  position: absolute;
   cursor: pointer;
   padding: 4px;
   height: 0;
