@@ -318,7 +318,7 @@ textarea:focus-visible {
 }
 
 .handle {
-  position: absolute;
+  position: relative;
   cursor: pointer;
   padding: 4px;
   height: 0;
