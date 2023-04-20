@@ -68,4 +68,20 @@ export default function wordController({
     dico.removeWordsFromDictionary([word]);
     res.sendStatus(200);
   });
+
+  /**
+   * Get length distribution within dico
+   */
+  app.get("/word/distribution", async (req, res) => {
+    const words = await dico.getWords();
+    const distribution = words.reduce((acc, w) => {
+      if (!acc[w.length]) acc[w.length] = 0;
+      acc[w.length] += 1;
+      return acc;
+    }, {} as { [key: number]: number });
+    Object.entries(distribution).forEach(([key, value]) => {
+      distribution[key] = value / words.length;
+    });
+    res.send(distribution);
+  });
 }

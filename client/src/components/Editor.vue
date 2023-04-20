@@ -131,7 +131,6 @@ function computeOffset(e) {
   const topOffset =
     container.value.querySelector(".svg-grid").getBoundingClientRect().top -
     container.value.getBoundingClientRect().top;
-  console.log(topOffset, container.value.scrollTop);
   offset.value = [
     (e ? e.target.scrollLeft : 0) - 10,
     (e ? e.target.scrollTop : 0) - topOffset,
