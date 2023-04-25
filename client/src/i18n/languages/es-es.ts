@@ -60,6 +60,12 @@ export const lang = {
         wordLength: "Longitud de las palabras",
 
     },
+    tooltips: {
+        incomplete: "esta incompleto",
+        nodef: "no tiene definición",
+        noarrow: "no tiene flecha",
+        add: "Añadir {word} al diccionario",
+    },
     alert: {
         disconnected: {
             title: "Desconectado",

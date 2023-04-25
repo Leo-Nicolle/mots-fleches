@@ -9,11 +9,17 @@
     >
       <span v-if="tooltip === 'unknown'">
         <n-button @click="add" circle> + </n-button>
-        add {{ word }} to dictionnary
+        {{ $t("tooltips.add", { word }) }}
       </span>
-      <span v-if="tooltip === 'incomplete'"> Incomplete word </span>
-      <span v-if="tooltip === 'nodef'"> {{ word }} has no definition</span>
-      <span v-if="tooltip === 'noarrow'"> {{ word }} has no arrow</span>
+      <span v-if="tooltip === 'incomplete'">
+        {{ word }} {{ $t("tooltips.incomplete") }}
+      </span>
+      <span v-if="tooltip === 'nodef'">
+        {{ word }} {{ $t("tooltips.nodef") }}</span
+      >
+      <span v-if="tooltip === 'noarrow'">
+        {{ word }} {{ $t("tooltips.noarrow") }}</span
+      >
     </span>
   </span>
 </template>

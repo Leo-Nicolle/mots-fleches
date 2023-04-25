@@ -59,13 +59,19 @@ export const lang = {
         grid: "Grille",
         wordLength: "Longueur des mots",
     },
+    tooltips: {
+        incomplete: "est incomplet",
+        nodef: "n'a pas de définition",
+        noarrow: "n'a pas de flèche",
+        add: "Ajouter {word} au dictionnaire",
+    },
     alert: {
         disconnected: {
             title: "Déconnecté",
             message: "Vous avez été déconnecté du serveur.",
         }
     },
-    logout:{
+    logout: {
         waiting: "Déconnexion en cours...",
         success: "Déconnexion réussie.",
     }
