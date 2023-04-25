@@ -43,14 +43,17 @@
               <RemoveCircleOutline />
             </n-icon>
           </n-button>
+          <n-button @click="onCheck" round> Check </n-button>
         </div>
         <SVGGrid
           @focus="(cell) => (focus = cell)"
+          @hover="(cell) => (hoveredCell = cell)"
           :grid="grid"
           :focus="focus"
           :dir="dir"
           :options="options"
           :zoom="1 / zoom"
+          :highlights="highlights"
           class="svg-grid"
           :export-options="{
             ...defaultExportOptions,
@@ -66,10 +69,20 @@
           :offset="offset"
           :zoom="zoom"
           @focus="(point) => (focus = point)"
-          @update="emit('update')"
+          @update="emit('update'); refresh();"
           @keyup="onKeyUp"
         >
         </GridInput>
+        <GridHighlight
+          :grid="grid"
+          :options="options"
+          :cell="hoveredCell"
+          :validity="validity"
+          :zoom="zoom"
+          :offset="offset"
+          :dir="dir"
+          @update="emit('update'); refresh();"
+        />
       </div>
     </template>
   </Layout>
@@ -85,13 +98,24 @@ import {
   computed,
 } from "vue";
 import { AddCircleOutline, RemoveCircleOutline } from "@vicons/ionicons5";
-import { Grid, Cell, Direction, nullCell, GridOptions } from "grid";
+import {
+  Grid,
+  Cell,
+  Direction,
+  nullCell,
+  GridOptions,
+  GridValidity,
+} from "grid";
 import Layout from "../layouts/Main.vue";
 import SVGGrid from "./svg-renderer/Grid.vue";
 import GridInput from "./svg-renderer/GridInput.vue";
 import { defaultExportOptions } from "../types";
 import ModalOptions from "./forms/ModalOptions.vue";
+import GridHighlight from "./svg-renderer/GridHighlight.vue";
 import Suggestion from "./Suggestion.vue";
+import { getUrl } from "../js/utils";
+import axios from "axios";
+import { Bounds } from "grid";
 /**
  * Component to edit a grid
  */
@@ -117,12 +141,15 @@ const emit = defineEmits<{
 }>();
 const dir = ref<Direction>("horizontal");
 const focus = ref<Cell>(nullCell);
-const version = ref(0);
+const hoveredCell = ref<Cell>(nullCell);
+const validity = ref<GridValidity>();
+const version = ref(1);
 const container = ref(null as unknown as HTMLDivElement);
 const offset = ref<[number, number]>([-10, 0]);
 const method = ref<"simple" | "fastest">("fastest");
 const ordering = ref<number>(1);
 const zoom = ref(1);
+const highlights = ref(new Map());
 
 function refresh() {
   version.value++;
@@ -149,7 +176,17 @@ function onZoomIn() {
   zoom.value = zoom.value + 0.1;
 }
 function onZoomOut() {
-  zoom.value = Math.max(1 ,zoom.value - 0.1);
+  zoom.value = Math.max(1, zoom.value - 0.1);
+}
+function onCheck() {
+  axios
+    .get(getUrl(`word-check/${props.grid.id}`))
+    .then(({ data }) => {
+      console.log(data);
+    })
+    .catch((e) => {
+      console.log(e);
+    });
 }
 
 function onHover(value: string) {
@@ -190,6 +227,18 @@ function onKeyUp(evt: KeyboardEvent) {
   // @ts-ignore
   evt.canceled = consumed;
 }
+watchEffect(async () => {
+  if (!props.grid || !dir.value || !version.value) return;
+  const gridValidity = await axios
+    .get(getUrl(`word-check/${props.grid.id}`))
+    .then(({ data }) => data as GridValidity);
+  validity.value = gridValidity;
+  const newMap = new Map();
+  Object.values(gridValidity[dir.value]).forEach(({ cells, problem }) => {
+    cells.forEach(({ x, y }) => newMap.set(`${y}-${x}`, problem));
+  });
+  highlights.value = newMap;
+});
 </script>
 
 <style>
@@ -207,13 +256,34 @@ function onKeyUp(evt: KeyboardEvent) {
   padding-bottom: 20px;
 }
 .controls {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
   margin-bottom: 5px;
   display: flex;
-  flex-direction: row;
   align-items: center;
   gap: 5px;
   width: 100%;
   margin-left: 10px;
-  justify-content: flex-start;
+  justify-content: flex-end;
+}
+.controls > * {
+  background: #fff;
+}
+
+.unknown {
+  fill: rgba(0, 0, 255, 0.2);
+}
+.incomplete {
+  fill: rgba(255, 0, 0, 0.5);
+}
+text.highlighted {
+  fill: #000;
+}
+.text.suggested {
+  fill: #777;
+}
+.text.highlighted > rect {
+  fill: #def;
 }
 </style>

@@ -68,6 +68,7 @@ import {
 import { getCellClass } from "../../js/utils";
 import { getD } from "../../js/paths";
 import { Handle } from "../../types";
+import { useSvgSizes, useTransform } from "./utils";
 /**
  * Component to type text on the grid
  */
@@ -112,26 +113,8 @@ const props = defineProps<{
    */
   zoom: number;
 }>();
-const cellSize = computed(() => `${cellWidth(props.options) * props.zoom}px`);
-const textSize = computed(() => props.options.grid.cellSize * props.zoom);
-const textFont = computed(() => `${textSize.value}px roboto`);
-const defSize = computed(() => props.options.definition.size * props.zoom);
-const defFont = computed(
-  () => `${defSize.value}px ${props.options.definition.font}`
-);
-const transform = computed(() => {
-  return `translate(${
-    (props.cell.x * cellAndBorderWidth(props.options) +
-      outerBorderWidth(props.options)) *
-      props.zoom -
-    props.offset[0]
-  }px, ${
-    (props.cell.y * cellAndBorderWidth(props.options) +
-      outerBorderWidth(props.options)) *
-      props.zoom -
-    props.offset[1]
-  }px)`;
-});
+const { cellSize, textSize, textFont, defSize, defFont } = useSvgSizes(props);
+const transform = computed(() => useTransform(props, props.cell));
 function onChange(evt: Event) {
   const { x, y } = props.cell;
   let text = (evt.target as HTMLInputElement).value || "";

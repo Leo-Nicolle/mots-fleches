@@ -84,4 +84,15 @@ export default function wordController({
     });
     res.send(distribution);
   });
+
+  /**
+   * Returns the list of unexisting words in the grid
+   */
+  app.get("/word-check/:gridId", async (req, res) => {
+    const words = await dico.getWordsMap();
+    const grid = await db.getGrid(req.params.gridId);
+    if (!grid) return res.sendStatus(400);
+    console.log(grid.check(words));
+    res.send(grid.check(words));
+  });
 }

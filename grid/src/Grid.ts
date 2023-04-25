@@ -1,4 +1,4 @@
-import { ArrowDir, Bounds, Cell, Direction, GridState, Vec } from "./types";
+import { ArrowDir, Bounds, Cell, Direction, GridState, GridValidity, ProblemBound, Vec } from "./types";
 import Vector from "vector2js";
 import { v4 as uuid } from "uuid";
 
@@ -405,5 +405,45 @@ export class Grid {
       suggestion: '',
       text: "",
     };
+  }
+
+  getWords(direction: Direction) {
+    const words: Bounds[] = [];
+    const visited = new Set<string>();
+    for (let i = 0; i < this.rows; i++) {
+      for (let j = 0; j < this.cols; j++) {
+        const id = `${i}-${j}`;
+        if (visited.has(id)) continue;
+        const bounds = this.getBounds({ x: j, y: i }, direction);
+        if (bounds.length < 1) continue;
+        for (let k = 0; k < bounds.length; k++) {
+          visited.add(`${bounds.start.y + k}-${bounds.start.x + k}`);
+        }
+        words.push(bounds);
+      }
+    }
+    return words;
+  }
+
+  check(words: Map<string, number>): GridValidity {
+    const [horizontal, vertical] = [this.getWords('horizontal'), this.getWords('vertical')]
+      .map((boundsVH) => boundsVH
+        .reduce((acc, bounds) => {
+          const text = bounds.cells.map((c) => c.text).join('');
+          if (text.length !== bounds.length) {
+            acc[`${bounds.start.y}-${bounds.start.x}`] = {
+              ...bounds,
+              problem: 'incomplete'
+            };
+          } else if (!words.has(text)) {
+            acc[`${bounds.start.y}-${bounds.start.x}`] = {
+              ...bounds,
+              problem: 'unknown'
+            };
+          }
+          return acc;
+        }, {} as Record<string, ProblemBound>));
+
+    return { horizontal, vertical };
   }
 }
