@@ -13,7 +13,7 @@
     </template>
     <template #card-title="{ elt }">
       <span>
-        {{ elt.title ? elt.title : $t('buttons.newGrid') }}
+        {{ elt.title ? elt.title : $t("buttons.newGrid") }}
       </span>
     </template>
     <template #card-body="{ elt, i }">
@@ -30,7 +30,7 @@
           }"
         ></SVGGrid>
       </div>
-      {{ elt.comment ? elt.comment : $t('buttons.newGrid') }}
+      {{ elt.comment ? elt.comment : $t("buttons.newGrid") }}
     </template>
   </Layout>
 </template>
@@ -45,6 +45,7 @@ import Layout from "../layouts/GridLayout.vue";
 import { defaultExportOptions } from "../types";
 import { getUrl } from "../js/utils";
 import { Grid, GridOptions, nullCell } from "grid";
+import generate from "../js/maze-generator";
 /**
  * View to display all grids in a grid layout
  */
@@ -93,7 +94,11 @@ function createGrid() {
   const newGrid = new Grid(10, 10);
   newGrid.title = "Nouvelle Grille";
   return axios
-    .post(getUrl("grid"), { grid: newGrid.serialize() })
+    .get(getUrl("word/distribution"))
+    .then(({ data }) => {
+      generate({ grid: newGrid, distribution: data });
+    })
+    .then(() => axios.post(getUrl("grid"), { grid: newGrid.serialize() }))
     .then(() => fetch());
 }
 

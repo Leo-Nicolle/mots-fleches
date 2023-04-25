@@ -1,4 +1,4 @@
-import { ArrowDir, Bounds, Cell, Direction, GridState, Vec } from "./types";
+import { ArrowDir, Bounds, Cell, Direction, GridState, GridValidity, ProblemBound, Vec } from "./types";
 import Vector from "vector2js";
 import { v4 as uuid } from "uuid";
 
@@ -405,5 +405,90 @@ export class Grid {
       suggestion: '',
       text: "",
     };
+  }
+
+  getWords(direction: Direction) {
+    const words: Bounds[] = [];
+    const visited = new Set<string>();
+    for (let i = 0; i < this.rows; i++) {
+      for (let j = 0; j < this.cols; j++) {
+        const id = `${i}-${j}`;
+        if (visited.has(id)) continue;
+        const bounds = this.getBounds({ x: j, y: i }, direction);
+        if (bounds.length < 1) continue;
+        for (let k = 0; k < bounds.length; k++) {
+          visited.add(`${bounds.start.y + k}-${bounds.start.x + k}`);
+        }
+        words.push(bounds);
+      }
+    }
+    return words;
+  }
+
+  check(words: Map<string, number>): GridValidity {
+    const arrows: { x: number; y: number; arrow: ArrowDir }[][] = [
+      [
+        { x: -1, y: 0, arrow: 'right' },
+        { x: 0, y: -1, arrow: 'downright' },
+      ],
+      [
+        { x: 0, y: -1, arrow: 'down' },
+        { x: -1, y: 0, arrow: 'rightdown' },
+      ]
+    ];
+
+
+    const [horizontal, vertical] = [this.getWords('horizontal'), this.getWords('vertical')]
+      .map((boundsVH, i) => boundsVH
+        .reduce((acc, bounds) => {
+          if (bounds.length < 2) return acc;
+          const text = bounds.cells.map((c) => c.text).join('');
+          if (text.length !== bounds.length) {
+            acc[`${bounds.start.y}-${bounds.start.x}`] = {
+              ...bounds,
+              problem: 'incomplete'
+            };
+          } else if (!words.has(text)) {
+            acc[`${bounds.start.y}-${bounds.start.x}`] = {
+              ...bounds,
+              problem: 'unknown'
+            };
+          } else if (!arrows[i].some(({ x, y, arrow }) => {
+            const pos = { x: bounds.start.x + x, y: bounds.start.y + y };
+            if (!this.isValid(pos)) return false;
+            const cell = this.cells[pos.y][pos.x];
+            return cell && this.isDefinition(cell) && cell.arrows.includes(arrow);
+          })) {
+            acc[`${bounds.start.y}-${bounds.start.x}`] = {
+              ...bounds,
+              problem: 'noarrow'
+            };
+          } else if (arrows[i].some(({ x, y, arrow }) => {
+            const pos = { x: bounds.start.x + x, y: bounds.start.y + y };
+            if (!this.isValid(pos)) return false;
+            const cell = this.cells[pos.y][pos.x];
+            if (!this.isDefinition(cell)) return false;
+            const arrowIndex = cell.arrows.findIndex(a => a === arrow);
+            if (arrowIndex < 0) return false;
+            const lines = cell.text.split('\n\n');
+            const lineIndex = arrowIndex === 2 ? 1 : 0;
+            return !lines[lineIndex] || !lines[lineIndex].length;
+          })) {
+            acc[`${bounds.start.y}-${bounds.start.x}`] = {
+              ...bounds,
+              problem: 'nodef'
+            };
+          }
+
+          return acc;
+        }, {} as Record<string, ProblemBound>));
+    // const definitions = this.cells
+    //   .flat()
+    //   .filter(c => c.definition)
+    //   .reduce((acc, c) => {
+    //     const splited = isSplited(c);
+    //     const arrows = c.arrows;
+    //   }, {} as Record<string, ProblemBound>)
+    return { horizontal, vertical };
   }
 }

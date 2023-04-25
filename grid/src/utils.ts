@@ -120,8 +120,8 @@ export function arrowPositions(cell: Cell) {
           : [3 / 8, 7 / 8]
       : lines === 3
         ? index === 1
-          ? [1 / 3, 5 / 6]
-          : [1 / 6, 2 / 3]
+          ? [1 / 6, 2 / 3]
+          : [1 / 3, 5 / 6]
         : [0.25, 0.75]
     : [0.5, 0.5];
   return rightArrowYs.map(y => ({ x: 1, y })).concat({

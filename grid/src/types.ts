@@ -311,4 +311,11 @@ export type WordAndPosition = {
   start: Vec;
   direction: Direction;
 }
+
+export type ProblemBound = Bounds & { problem: string };
+export type GridValidity = {
+  horizontal: Record<string, ProblemBound>;
+  vertical: Record<string, ProblemBound>;
+}
+
 export const DPI_TO_PIXEL = 25.4;

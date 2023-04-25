@@ -25,6 +25,7 @@ const options = ref<GridOptions>();
 const exportOptions = computed(() =>
   mergeRouteWithDefault(route, defaultExportOptions)
 );
+console.log("exportOptions", exportOptions.value);
 function fetch() {
   return axios
     .get(getUrl(`grid/${route.params.id}`))

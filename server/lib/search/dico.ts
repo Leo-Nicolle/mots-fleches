@@ -231,6 +231,14 @@ export class Dico {
   }
 
   /**
+   * Get the map of words in the dictionnary
+   * @returns All the words in the dictionnary
+   */
+  getWordsMap() {
+    return this.loadDictionary().then(() => this.wordsMap);
+  }
+
+  /**
    * Set locale and reload dictionnary
    */
   setLocale(locale: string) {

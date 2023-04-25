@@ -49,10 +49,10 @@ function onUpdate() {
 }
 
 function onSizeUpdate() {
+  grid.value.resize(grid.value.rows, grid.value.cols);
   clearTimeout(saveTimeout.value);
   saveTimeout.value = setTimeout(() => {
     if (!grid.value) return;
-    grid.value.resize(grid.value.rows, grid.value.cols);
     save(grid.value);
   }, 50);
 }

@@ -158,7 +158,7 @@ export class Database {
    * @param grid The grid to add
    * @returns The saving promise
    */
-  pushGrid(grid) {
+  pushGrid(grid: Grid) {
     return this.getGrids().then((grids) => {
       grids.push(grid);
       return this.saveGrids();

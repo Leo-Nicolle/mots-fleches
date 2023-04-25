@@ -57,6 +57,13 @@ export const lang = {
         deleteWord: "Delete word",
         myWords: "My words",
         grid: "Grid",
+        wordLength: "Words Length",
+    },
+    tooltips: {
+        incomplete: "is incomplete",
+        nodef: "has no definition",
+        noarrow: "has no arrow",
+        add: "Add {word} to dictionary",
     },
     alert: {
         disconnected: {

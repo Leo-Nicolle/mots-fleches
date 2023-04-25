@@ -3,6 +3,7 @@
     <textarea
       @input="onChange($event)"
       @keyup="onKeyup($event)"
+      @keydown="onKeydown($event)"
       :value="
         cell.text.length
           ? cell.text
@@ -62,10 +63,12 @@ import {
   parse,
   ArrowDir,
   outerBorderWidth,
+  arrowPositions,
 } from "grid";
 import { getCellClass } from "../../js/utils";
 import { getD } from "../../js/paths";
 import { Handle } from "../../types";
+import { useSvgSizes, useTransform } from "./utils";
 /**
  * Component to type text on the grid
  */
@@ -105,25 +108,13 @@ const props = defineProps<{
    * Scrolling offset
    */
   offset: [number, number];
+  /**
+   * Zoom level
+   */
+  zoom: number;
 }>();
-const cellSize = computed(() => `${cellWidth(props.options)}px`);
-const textSize = computed(() => props.options.grid.cellSize);
-const textFont = computed(() => `${textSize.value}px roboto`);
-const defSize = computed(() => props.options.definition.size);
-const defFont = computed(
-  () => `${defSize.value}px ${props.options.definition.font}`
-);
-const transform = computed(() => {
-  return `translate(${
-    props.cell.x * cellAndBorderWidth(props.options) +
-    outerBorderWidth(props.options) -
-    props.offset[0]
-  }px, ${
-    props.cell.y * cellAndBorderWidth(props.options) +
-    outerBorderWidth(props.options) -
-    props.offset[1]
-  }px)`;
-});
+const { cellSize, textSize, textFont, defSize, defFont } = useSvgSizes(props);
+const transform = computed(() => useTransform(props, props.cell));
 function onChange(evt: Event) {
   const { x, y } = props.cell;
   let text = (evt.target as HTMLInputElement).value || "";
@@ -138,9 +129,6 @@ function onChange(evt: Event) {
   props.grid.setText({ x, y }, text);
   emit("update");
   if (props.grid.isDefinition(props.cell)) {
-    if (!isSplited(props.cell)) {
-      Grid.setArrow(props.cell, 1, "none");
-    }
     return;
   }
   const next = text.length
@@ -148,6 +136,13 @@ function onChange(evt: Event) {
     : props.grid.decrement(props.cell, props.dir);
   if (!props.grid.isValid(next) || next.definition) return;
   emit("focus", next);
+}
+let shouldGoBackwards = false;
+function onKeydown(evt: KeyboardEvent) {
+  let text = (evt.target as HTMLInputElement).value || "";
+  if (props.cell.definition || text.length || evt.code !== "Backspace") return;
+  // go backwards on backspace keydown if the cell is empty
+  shouldGoBackwards = true;
 }
 function onKeyup(evt: KeyboardEvent) {
   // | and _ are used to toggle spaceH and spaceV
@@ -171,6 +166,13 @@ function onKeyup(evt: KeyboardEvent) {
     props.grid.setDefinition(props.cell, !props.cell.definition);
     props.grid.setText(props.cell, "");
     emit("update");
+    return;
+  }
+  if (shouldGoBackwards) {
+    shouldGoBackwards = false;
+    const next = props.grid.decrement(props.cell, props.dir);
+    if (!props.grid.isValid(next)) return;
+    emit("focus", next);
     return;
   }
   // ctrl + enter to moveout from definition
@@ -228,43 +230,18 @@ const handleW = 4;
  * Computes the position of the dots to add arrows
  */
 const handles = computed<Handle[]>(() => {
-  const splited = isSplited(props.cell);
-  const w = cellAndBorderWidth(props.options);
-  return splited
-    ? [
-        {
-          top: `${0.25 * w - handleW}px`,
-          left: `${w}px`,
-          index: 0,
-          dirs: ["right", "rightdown", "none"],
-        },
-        {
-          top: `${0.75 * w - handleW}px`,
-          left: `${w}px`,
-          index: 1,
-          dirs: ["right", "rightdown", "none"],
-        },
-        {
-          top: `${w}px`,
-          left: `${0.5 * w - handleW}px`,
-          index: 2,
-          dirs: ["down", "downright", "none"],
-        },
-      ]
-    : [
-        {
-          top: `${0.5 * w - handleW}px`,
-          left: `${w}px`,
-          index: 0,
-          dirs: ["right", "rightdown", "none"],
-        },
-        {
-          top: `${w}px`,
-          left: `${0.5 * w - handleW}px`,
-          index: 2,
-          dirs: ["down", "downright", "none"],
-        },
-      ];
+  const w = cellAndBorderWidth(props.options) * props.zoom;
+  return arrowPositions(props.cell).map(({ x, y }, i) => {
+    return {
+      top: `${y * w - handleW}px`,
+      left: `${x * w - handleW}px`,
+      index: x === 1 ? i : 2,
+      dirs:
+        x === 1
+          ? ["right", "rightdown", "none"]
+          : ["down", "downright", "none"],
+    };
+  });
 });
 
 watchEffect(() => {

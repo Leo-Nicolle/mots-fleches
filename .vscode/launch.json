@@ -7,8 +7,9 @@
       "name": "Debug Client Test File",
       "autoAttachChildProcesses": true,
       "skipFiles": [],
+      "cwd": "${workspaceRoot}/client",
       "program": "${workspaceRoot}/client/node_modules/vitest/vitest.mjs",
-      "args": ["--config", "client/vitest.config.ts", "run", "${relativeFile}", "-u"],
+      "args": ["--config", "vitest.config.ts", "run", "${relativeFile}", "-u"],
       "smartStep": true,
       "console": "integratedTerminal"
     }
@@ -18,8 +19,9 @@
       "name": "Debug Server Test File",
       "autoAttachChildProcesses": true,
       "skipFiles": [],
+      "cwd": "${workspaceRoot}/server",
       "program": "${workspaceRoot}/server/node_modules/vitest/vitest.mjs",
-      "args": ["--config", "server/vitest.config.ts", "run", "${relativeFile}", "-u"],
+      "args": ["--config", "vitest.config.ts", "run", "${relativeFile}", "-u"],
       "smartStep": true,
       "console": "integratedTerminal"
     }

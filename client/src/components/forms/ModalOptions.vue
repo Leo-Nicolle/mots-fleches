@@ -24,7 +24,11 @@
               v-model:value="value.title"
             />
           </n-form-item>
-          <n-form-item :label="$t('forms.options')" path="optionsId" v-if="opts.length">
+          <n-form-item
+            :label="$t('forms.options')"
+            path="optionsId"
+            v-if="opts.length"
+          >
             <n-select
               role="options"
               :options="opts"
@@ -75,6 +79,7 @@ import {
   onMounted,
   ref,
   watch,
+  watchEffect,
 } from "vue";
 import { CogOutline as CogIcon } from "@vicons/ionicons5";
 import { Grid } from "grid";
@@ -103,9 +108,9 @@ const emit = defineEmits<{
    */
   (event: "update-size", value: Grid): void;
   /**
-   * Modal close
+   * Modal open
    */
-  (event: "close", value: boolean): void;
+  (event: "open"): void;
 }>();
 const value = useModel(props, emit);
 function onUpdate(path: string, newvalue: string | number) {
@@ -114,7 +119,10 @@ function onUpdate(path: string, newvalue: string | number) {
     emit("update-size", value.value);
   });
 }
-
+watchEffect(() => {
+  if (!visible.value) return;
+  emit("open");
+});
 watch(value.value, () => {
   if (!visible.value) return;
   emit("update:modelValue", value.value);

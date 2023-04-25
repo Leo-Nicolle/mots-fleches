@@ -42,7 +42,7 @@
       ]"
       :data="results"
       :pagination="{
-        pageSize: 10,
+        pageSize: 13,
         simple: true,
       }"
       @mousemove="onMouseEvt($event, false)"

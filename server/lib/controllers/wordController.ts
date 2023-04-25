@@ -2,6 +2,7 @@ import { body, validationResult } from "express-validator";
 import dico from "../search/dico";
 import { Express } from "express";
 import { Database } from "../database";
+import { Grid } from "grid";
 
 /**
  * Controller for CRUD operations on words
@@ -67,5 +68,31 @@ export default function wordController({
     await db.deleteWord(word);
     dico.removeWordsFromDictionary([word]);
     res.sendStatus(200);
+  });
+
+  /**
+   * Get length distribution within dico
+   */
+  app.get("/word/distribution", async (req, res) => {
+    const words = await dico.getWords();
+    const distribution = words.reduce((acc, w) => {
+      if (!acc[w.length]) acc[w.length] = 0;
+      acc[w.length] += 1;
+      return acc;
+    }, {} as { [key: number]: number });
+    Object.entries(distribution).forEach(([key, value]) => {
+      distribution[key] = value / words.length;
+    });
+    res.send(distribution);
+  });
+
+  /**
+   * Returns the list of unexisting words in the grid
+   */
+  app.post("/word-check", async (req, res) => {
+    const words = await dico.getWordsMap();
+    const grid = Grid.unserialize(req.body.grid);
+    if (!grid) return res.sendStatus(400);
+    res.send(grid.check(words));
   });
 }

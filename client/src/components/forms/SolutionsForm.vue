@@ -7,11 +7,11 @@
     <n-input-number role="cols" v-model:value="value.grids.cols" />
   </n-form-item>
   <h3>{{ $t("forms.gridNum") }}</h3>
-  <TextStyle v-model="value.grids.gridN" />
+  <TextStyle v-model="value.grids.gridN" role-prefix="gridN"/>
   <h3>{{ $t("forms.wordIndex") }}</h3>
-  <TextStyle v-model="value.words" />
-  <h3>{{ $t("forms.size") }}</h3>
-  <TextStyle v-model="value.size" />
+  <TextStyle v-model="value.words" role-prefix="wordIndex"/>
+  <h3>{{ $t("forms.wordLength") }}</h3>
+  <TextStyle v-model="value.size" role-prefix="wordLength"/>
 </template>
 
 <script setup lang="ts">
