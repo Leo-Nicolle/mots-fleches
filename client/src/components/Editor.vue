@@ -12,6 +12,9 @@
           @open="focus = nullCell"
         />
       </span>
+      <span>
+        <n-button @click="onCheck"> Check </n-button>
+      </span>
       <Suggestion
         v-if="!focus.definition"
         :point="focus"
@@ -32,18 +35,19 @@
     <template #body>
       <div class="container" ref="container">
         <div class="controls">
-          Zoom
-          <n-button @click="onZoomIn" circle>
-            <n-icon>
-              <AddCircleOutline />
-            </n-icon>
-          </n-button>
-          <n-button @click="onZoomOut" circle>
-            <n-icon>
-              <RemoveCircleOutline />
-            </n-icon>
-          </n-button>
-          <n-button @click="onCheck" round> Check </n-button>
+          <span class="zoom-controls">
+            Zoom
+            <n-button @click="onZoomIn" circle>
+              <n-icon>
+                <AddCircleOutline />
+              </n-icon>
+            </n-button>
+            <n-button @click="onZoomOut" circle>
+              <n-icon>
+                <RemoveCircleOutline />
+              </n-icon>
+            </n-button>
+          </span>
         </div>
         <SVGGrid
           @focus="(cell) => (focus = cell)"
@@ -69,7 +73,10 @@
           :offset="offset"
           :zoom="zoom"
           @focus="(point) => (focus = point)"
-          @update="emit('update'); refresh();"
+          @update="
+            emit('update');
+            refresh();
+          "
           @keyup="onKeyUp"
         >
         </GridInput>
@@ -81,7 +88,10 @@
           :zoom="zoom"
           :offset="offset"
           :dir="dir"
-          @update="emit('update'); refresh();"
+          @update="
+            emit('update');
+            refresh();
+          "
         />
       </div>
     </template>
@@ -97,7 +107,11 @@ import {
   onMounted,
   computed,
 } from "vue";
-import { AddCircleOutline, RemoveCircleOutline } from "@vicons/ionicons5";
+import {
+  AddCircleOutline,
+  RemoveCircleOutline,
+  SwapVertical,
+} from "@vicons/ionicons5";
 import {
   Grid,
   Cell,
@@ -150,6 +164,8 @@ const method = ref<"simple" | "fastest">("fastest");
 const ordering = ref<number>(1);
 const zoom = ref(1);
 const highlights = ref(new Map());
+const highlightModes = ["", "invalids"];
+const highlightMode = ref(highlightModes[0]);
 
 function refresh() {
   version.value++;
@@ -179,14 +195,10 @@ function onZoomOut() {
   zoom.value = Math.max(1, zoom.value - 0.1);
 }
 function onCheck() {
-  axios
-    .get(getUrl(`word-check/${props.grid.id}`))
-    .then(({ data }) => {
-      console.log(data);
-    })
-    .catch((e) => {
-      console.log(e);
-    });
+  const newIndex =
+    (highlightModes.findIndex((m) => m === highlightMode.value) + 1) %
+    highlightModes.length;
+  highlightMode.value = highlightModes[newIndex];
 }
 
 function onHover(value: string) {
@@ -229,15 +241,22 @@ function onKeyUp(evt: KeyboardEvent) {
 }
 watchEffect(async () => {
   if (!props.grid || !dir.value || !version.value) return;
-  const gridValidity = await axios
-    .get(getUrl(`word-check/${props.grid.id}`))
-    .then(({ data }) => data as GridValidity);
-  validity.value = gridValidity;
-  const newMap = new Map();
-  Object.values(gridValidity[dir.value]).forEach(({ cells, problem }) => {
-    cells.forEach(({ x, y }) => newMap.set(`${y}-${x}`, problem));
-  });
-  highlights.value = newMap;
+  if (highlightMode.value === "invalids") {
+    const gridValidity = await axios
+      .post(getUrl(`word-check`), {
+        grid: props.grid.serialize(),
+      })
+      .then(({ data }) => data as GridValidity);
+    validity.value = gridValidity;
+    const newMap = new Map();
+    Object.values(gridValidity[dir.value]).forEach(({ cells, problem }) => {
+      cells.forEach(({ x, y }) => newMap.set(`${y}-${x}`, problem));
+    });
+    highlights.value = newMap;
+  } else {
+    highlights.value = new Map();
+    validity.value = { horizontal: {}, vertical: {} };
+  }
 });
 </script>
 
@@ -266,16 +285,30 @@ watchEffect(async () => {
   width: 100%;
   margin-left: 10px;
   justify-content: flex-end;
+  z-index: 100;
+  pointer-events: none;
 }
-.controls > * {
-  background: #fff;
+.zoom-controls {
+  pointer-events: auto;
+  background-color: #fff;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .unknown {
-  fill: rgba(0, 0, 255, 0.2);
+  fill: rgba(252, 226, 42, 0.8);
 }
 .incomplete {
-  fill: rgba(255, 0, 0, 0.5);
+  fill: rgba(214, 19, 85, 0.8);
+}
+.nodef {
+  fill: rgba(249, 74, 41, 0.8);
+}
+.noarrow {
+  fill: rgba(237, 43, 42, 0.8);
 }
 text.highlighted {
   fill: #000;

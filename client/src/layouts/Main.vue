@@ -267,6 +267,7 @@ nav {
   justify-content: space-evenly;
   align-items: center;
   align-content: space-around;
+  gap: 4px;
 }
 .scroll {
   max-height: 100%;

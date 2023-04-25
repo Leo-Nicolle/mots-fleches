@@ -12,6 +12,8 @@
         add {{ word }} to dictionnary
       </span>
       <span v-if="tooltip === 'incomplete'"> Incomplete word </span>
+      <span v-if="tooltip === 'nodef'"> {{ word }} has no definition</span>
+      <span v-if="tooltip === 'noarrow'"> {{ word }} has no arrow</span>
     </span>
   </span>
 </template>

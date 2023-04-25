@@ -129,9 +129,6 @@ function onChange(evt: Event) {
   props.grid.setText({ x, y }, text);
   emit("update");
   if (props.grid.isDefinition(props.cell)) {
-    if (!isSplited(props.cell)) {
-      Grid.setArrow(props.cell, 1, "none");
-    }
     return;
   }
   const next = text.length

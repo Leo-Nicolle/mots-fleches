@@ -2,6 +2,7 @@ import { body, validationResult } from "express-validator";
 import dico from "../search/dico";
 import { Express } from "express";
 import { Database } from "../database";
+import { Grid } from "grid";
 
 /**
  * Controller for CRUD operations on words
@@ -88,11 +89,10 @@ export default function wordController({
   /**
    * Returns the list of unexisting words in the grid
    */
-  app.get("/word-check/:gridId", async (req, res) => {
+  app.post("/word-check", async (req, res) => {
     const words = await dico.getWordsMap();
-    const grid = await db.getGrid(req.params.gridId);
+    const grid = Grid.unserialize(req.body.grid);
     if (!grid) return res.sendStatus(400);
-    console.log(grid.check(words));
     res.send(grid.check(words));
   });
 }
