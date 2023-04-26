@@ -75,10 +75,7 @@
           :offset="offset"
           :zoom="zoom"
           @focus="(point) => (focus = point)"
-          @update="
-            emit('update');
-            refresh();
-          "
+          @update="onGridUpdate()"
           @keyup="onKeyUp"
         >
         </GridInput>
@@ -89,12 +86,10 @@
           :validity="validity"
           :zoom="zoom"
           :mode="highlightMode"
+          :gridVersion="gridVersion"
           :offset="offset"
           :dir="dir"
-          @update="
-            emit('update');
-            refresh();
-          "
+          @update="onGridUpdate()"
         />
       </div>
     </template>
@@ -160,7 +155,7 @@ const dir = ref<Direction>("horizontal");
 const focus = ref<Cell>(nullCell);
 const hoveredCell = ref<Cell>(nullCell);
 const validity = ref<GridValidity>();
-const version = ref(1);
+const gridVersion = ref(1);
 const container = ref(null as unknown as HTMLDivElement);
 const offset = ref<[number, number]>([-10, 0]);
 const method = ref<"simple" | "fastest">("fastest");
@@ -168,10 +163,12 @@ const ordering = ref<number>(1);
 const zoom = ref(1);
 const highlights = ref(new Map());
 const highlightModes = ["normal", "check", "heatmap"] as Mode[];
-const highlightMode = ref<Mode>(highlightModes[0]);
+const highlightMode = ref<Mode>(highlightModes[2]);
 
-function refresh() {
-  version.value++;
+function onGridUpdate() {
+  //refresh the children components that need it.
+  gridVersion.value = gridVersion.value + 1;
+  emit("update");
 }
 function computeOffset(e) {
   const topOffset =
@@ -208,11 +205,9 @@ function onHover(value: string) {
   const cells = props.grid.getBounds(focus.value, dir.value).cells;
   if (!cells || !cells.length) return;
   props.grid.suggest([value], [cells[0]], [dir.value]);
-  refresh();
 }
 function onMouseOut(value: string) {
   props.grid.suggest([], [], []);
-  refresh();
 }
 function onClick(value: string) {
   const cells = props.grid.getBounds(focus.value, dir.value).cells;
@@ -243,7 +238,7 @@ function onKeyUp(evt: KeyboardEvent) {
   evt.canceled = consumed;
 }
 watchEffect(async () => {
-  if (!props.grid || !dir.value || !version.value) return;
+  if (!props.grid || !dir.value) return;
   if (highlightMode.value === "check") {
     const gridValidity = await axios
       .post(getUrl(`word-check`), {

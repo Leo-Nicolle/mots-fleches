@@ -251,5 +251,4 @@ export class Dico {
   }
 }
 
-const dico = new Dico();
-export default dico;
+export const dico = new Dico();

@@ -1,8 +1,8 @@
 import { body, validationResult } from "express-validator";
-import dico from "../search/dico";
 import { Express } from "express";
 import { Database } from "../database";
 import { Grid } from "grid";
+import { heatmap, dico } from "../search";
 
 /**
  * Controller for CRUD operations on words
@@ -94,5 +94,12 @@ export default function wordController({
     const grid = Grid.unserialize(req.body.grid);
     if (!grid) return res.sendStatus(400);
     res.send(grid.check(words));
+  });
+
+  app.post("/heatmap", async (req, res) => {
+    const words = await dico.getWords();
+    const grid = Grid.unserialize(req.body.grid);
+    if (!grid) return res.sendStatus(400);
+    res.send(heatmap(grid, words));
   });
 }

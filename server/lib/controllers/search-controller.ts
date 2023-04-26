@@ -1,7 +1,6 @@
 import { Express } from "express";
 import { Database } from "../database";
-import search from "../search";
-import dico from "../search/dico";
+import { search, dico } from "../search";
 
 let isBusy = false;
 

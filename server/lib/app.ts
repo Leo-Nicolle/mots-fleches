@@ -14,7 +14,7 @@ import exitController from "./controllers/exitController";
 
 import dbController from "./controllers/db-controller";
 
-import dico from "./search/dico";
+import { dico } from "./search";
 
 export function createApp() {
   const app = express();

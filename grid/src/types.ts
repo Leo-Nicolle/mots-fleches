@@ -318,4 +318,54 @@ export type GridValidity = {
   vertical: Record<string, ProblemBound>;
 }
 
+/**
+ * Type returned by the heatmap function
+ */
+export type CellProba = {
+  /**
+   * Wether the cell is empty or not
+   */
+  empty: boolean;
+  /**
+   * number of words having each letter horizontally 
+   */
+  horizontalL: Record<string, number>;
+  /**
+   * number of words having each letter vertically 
+   */
+  verticalL: Record<string, number>;
+  /**
+   * number of words having each letter horizontally and vertically
+   */
+  inter: Record<string, number>;
+  /**
+   * Total of all inter
+   */
+  totalInter: number;
+  /**
+   * number of words horizontally
+   */
+  horizontal: number;
+  /**
+   * number of words vertically
+   */
+  vertical: number;
+  /**
+   * Is the cell valid horizontally
+   */
+  validH: boolean;
+  /**
+   * Is the cell valid vertically
+   */
+  validV: boolean;
+  /**
+   * x coord of the cell
+   */
+  x: number;
+  /**
+   * y coord of the cell
+   */
+  y: number;
+};
+
 export const DPI_TO_PIXEL = 25.4;
