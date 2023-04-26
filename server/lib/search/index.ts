@@ -1,4 +1,5 @@
-import { Grid, Cell, Direction, Vec } from "../../../grid/src";
+import { Bounds } from "grid";
+import { Grid, Direction, Vec } from "../../../grid/src";
 import dico from "./dico";
 import {
   Lemme,
@@ -160,6 +161,43 @@ export class Search {
   }
 
   /**
+   * Returns all the words that fit within the bounds, matching letters within thoose bounds
+   * @param words: All the words from the dictionnary
+   * @param bounds: The bounds of the word
+   * @param grid: The grid
+   * @returns a list of words that fit
+   */
+  getWordsSimple({
+    grid,
+    bounds,
+    words,
+  }: {
+    grid: Grid;
+    bounds: Bounds;
+    words: string[];
+  }): string[] {
+    const { length, cells } = bounds;
+    let str = "";
+    for (let i = 0; i < length; i++) {
+      const current = cells[i];
+      const letter = grid.cells[current.y][current.x].text;
+      str += letter.length ? letter.toLowerCase() : "*";
+      cells.push(current);
+    }
+    if (cells.length < 2) return [];
+    // transform str into regexp:
+    const reg = strToReg(str);
+
+    // get all the words that fit
+    return words.reduce((acc, word, i) => {
+      if (word.length === length && word.match(reg)) {
+        acc.push(word);
+      }
+      return acc;
+    }, [] as string[]);
+  }
+
+  /**
    * Given a position and a direction, get all the lemmes
    * Usefull for search algo
    * @param grid The grid
@@ -273,31 +311,8 @@ export class Search {
     dir: Direction;
     method: "simple" | "fastest";
   }): Promise<SearchResult> {
-    const vec = Grid.getDirVec(dir);
-    const { start, length } = grid.getBounds(coord, dir);
-    let str = "";
-    const cells: Point[] = [];
-    for (let i = 0; i < length; i++) {
-      const current = {
-        x: start.x + vec.x * i,
-        y: start.y + vec.y * i,
-      };
-      const letter = grid.cells[current.y][current.x].text;
-      str += letter.length ? letter.toLowerCase() : "*";
-      cells.push(current);
-    }
-    if (cells.length < 2)
-      return Promise.resolve({
-        words: [] as string[],
-        impossible: [] as string[],
-        cells: [] as Cell[],
-        query: "",
-      });
-    // transform str into regexp:
-    const reg = strToReg(str);
-
-    const regString = reg.toString();
-    // console.log('Reg', regString, regString.replaceAll('/', ''));
+    const bounds = grid.getBounds(coord, dir);
+    const { start, length, cells } = bounds;
     const lemmes = Search.getLemmes({
       grid,
       coord: start,
@@ -307,20 +322,18 @@ export class Search {
     return dico
       .getWords()
       .then((words) => {
-        // get all the words that fit
-        const matches = words.reduce((acc, word, i) => {
-          if (word.length === length && word.match(reg)) {
-            acc.push(word);
-          }
-          return acc;
-        }, [] as string[]);
+        const wordsSimple = this.getWordsSimple({
+          grid,
+          bounds,
+          words,
+        });
         // if method is fastest, race between `getBestWords` and a timeout
         // if the timeout is reached, return the simple matches
         // else return the best words
         if (method === "fastest") {
           return Promise.race([
             this.getBestWords({
-              words: matches,
+              words: wordsSimple,
               lemmes,
               grid,
               start,
@@ -329,17 +342,17 @@ export class Search {
             }),
             new Promise((resolve) =>
               setTimeout(
-                () => resolve({ words: matches, impossible: [] }),
+                () => resolve({ words: wordsSimple, impossible: [] }),
                 3000
               )
             ),
           ]);
         }
         if (method === "simple") {
-          return { words: matches, impossible: [] };
+          return { words: wordsSimple, impossible: [] };
         }
         return this.getBestWords({
-          words: matches,
+          words: wordsSimple,
           lemmes,
           grid,
           start,
@@ -352,7 +365,6 @@ export class Search {
           words,
           impossible,
           cells,
-          query: regString.replace(/\/i?|\^|\$/g, "").replace(/\\w\?/g, "*"),
         } as SearchResult;
       });
   }

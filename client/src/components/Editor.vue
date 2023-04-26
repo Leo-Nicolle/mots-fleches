@@ -13,7 +13,9 @@
         />
       </span>
       <span>
-        <n-button @click="onCheck"> Check </n-button>
+        <n-button @click="onCheck">
+          {{ $t(`modes.${highlightMode}`) }}
+        </n-button>
       </span>
       <Suggestion
         v-if="!focus.definition"
@@ -86,6 +88,7 @@
           :cell="hoveredCell"
           :validity="validity"
           :zoom="zoom"
+          :mode="highlightMode"
           :offset="offset"
           :dir="dir"
           @update="
@@ -125,7 +128,7 @@ import SVGGrid from "./svg-renderer/Grid.vue";
 import GridInput from "./svg-renderer/GridInput.vue";
 import { defaultExportOptions } from "../types";
 import ModalOptions from "./forms/ModalOptions.vue";
-import GridHighlight from "./svg-renderer/GridHighlight.vue";
+import GridHighlight, { Mode } from "./svg-renderer/GridHighlight.vue";
 import Suggestion from "./Suggestion.vue";
 import { getUrl } from "../js/utils";
 import axios from "axios";
@@ -164,8 +167,8 @@ const method = ref<"simple" | "fastest">("fastest");
 const ordering = ref<number>(1);
 const zoom = ref(1);
 const highlights = ref(new Map());
-const highlightModes = ["", "invalids"];
-const highlightMode = ref(highlightModes[0]);
+const highlightModes = ["normal", "check", "heatmap"] as Mode[];
+const highlightMode = ref<Mode>(highlightModes[0]);
 
 function refresh() {
   version.value++;
@@ -241,7 +244,7 @@ function onKeyUp(evt: KeyboardEvent) {
 }
 watchEffect(async () => {
   if (!props.grid || !dir.value || !version.value) return;
-  if (highlightMode.value === "invalids") {
+  if (highlightMode.value === "check") {
     const gridValidity = await axios
       .post(getUrl(`word-check`), {
         grid: props.grid.serialize(),

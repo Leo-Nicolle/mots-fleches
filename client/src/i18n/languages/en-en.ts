@@ -74,7 +74,11 @@ export const lang = {
     logout: {
         waiting: "Waiting for logout...",
         success: "Logout successful",
+    },
+    modes: {
+        normal: "Libre",
+        check: "Verification",
+        heatmap: "Probabilidad",
     }
-
     // el: enLocale.el
 };

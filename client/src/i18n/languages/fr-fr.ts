@@ -74,5 +74,11 @@ export const lang = {
     logout: {
         waiting: "Déconnexion en cours...",
         success: "Déconnexion réussie.",
+    },
+    modes: {
+        normal: "Libre",
+        check: "Verification",
+        heatmap: "Probabilités",
     }
+
 };

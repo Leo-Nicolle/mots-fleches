@@ -75,5 +75,10 @@ export const lang = {
     logout: {
         wating: "Esperando a que el servidor se desconecte...",
         success: "Desconexión correcta",
+    },
+    modes: {
+        normal: "Free",
+        check: "Check",
+        heatmap: "Heatmap",
     }
 };
