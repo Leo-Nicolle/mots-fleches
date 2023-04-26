@@ -213,7 +213,7 @@ function onClick(value: string) {
   const cells = props.grid.getBounds(focus.value, dir.value).cells;
   if (!cells || !cells.length) return;
   props.grid.setWord(value, cells[0], dir.value);
-  emit("update");
+  onGridUpdate();
 }
 function onKeyUp(evt: KeyboardEvent) {
   if (!evt.ctrlKey) return;

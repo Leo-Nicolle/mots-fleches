@@ -96,10 +96,20 @@ export default function wordController({
     res.send(grid.check(words));
   });
 
+  let busyHeatmap = false;
   app.post("/heatmap", async (req, res) => {
+    if (busyHeatmap) return res.sendStatus(202);
     const words = await dico.getWords();
     const grid = Grid.unserialize(req.body.grid);
     if (!grid) return res.sendStatus(400);
-    res.send(heatmap(grid, words));
+    busyHeatmap = true;
+    try {
+      const result = heatmap(grid, words);
+      busyHeatmap = false;
+      res.send(result);
+    } catch (e) {
+      busyHeatmap = false;
+      throw e;
+    }
   });
 }

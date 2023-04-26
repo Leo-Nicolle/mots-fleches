@@ -77,8 +77,8 @@ export const lang = {
         success: "Desconexión correcta",
     },
     modes: {
-        normal: "Free",
-        check: "Check",
-        heatmap: "Heatmap",
+        normal: "Libre",
+        check: "Verification",
+        heatmap: "Probabilidad",
     }
 };

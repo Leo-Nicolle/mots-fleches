@@ -76,9 +76,10 @@ export const lang = {
         success: "Logout successful",
     },
     modes: {
-        normal: "Libre",
-        check: "Verification",
-        heatmap: "Probabilidad",
+        normal: "Free",
+        check: "Check",
+        heatmap: "Heatmap",
+
     }
     // el: enLocale.el
 };

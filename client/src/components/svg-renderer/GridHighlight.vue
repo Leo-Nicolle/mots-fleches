@@ -59,6 +59,7 @@ import {
 } from "grid";
 import { getUrl } from "../../js/utils";
 import axios from "axios";
+import throttle from "lodash.throttle";
 import {
   cellAndBorderSize,
   cellSize,
@@ -106,6 +107,7 @@ const height = ref<string | number>(0);
 const visible = computed(() => {
   return !Grid.equal(props.cell, nullCell) && !props.cell.definition;
 });
+const cellWidth = ref(0);
 const tooltip = ref<string>("");
 watchEffect(() => {
   if (hovered.value) return;
@@ -114,6 +116,8 @@ watchEffect(() => {
     height.value = cellAndBorderSize(props, 1);
     word.value = "";
     transform.value = useTransform(props, props.cell);
+    heatmapTransform.value = useTransform(props, props.grid.cells[0][0]);
+    cellWidth.value = Number(cellAndBorderSize(props, 1).slice(0, -2));
     tooltip.value = "heatmap";
     return;
   }
@@ -170,16 +174,24 @@ function getHeat(cell: Cell, heatmapLetters: CellProba[][]) {
 }
 
 const colorScale = chroma.scale(["red", "#22C", "#014"]).mode("lab");
-watchEffect(async () => {
-  if (props.mode !== "heatmap" || !props.grid || !props.gridVersion) {
+async function refreshHeatmap() {
+  if (props.mode !== "heatmap" || !props.grid) {
     heatmapLetters.value = [[]];
   }
-  const { data: cellMap } = (await axios.post(getUrl("heatmap"), {
-    grid: props.grid.serialize(),
-  })) as { data: CellProba[][] };
+  let cellMap: CellProba[][] = [];
+  try {
+    const { data, status } = (await axios.post(getUrl("heatmap"), {
+      grid: props.grid.serialize(),
+    })) as { data: CellProba[][]; status: number };
+    if (status !== 200) return;
+    cellMap = data;
+  } catch (e) {
+    heatmapLetters.value = [[]];
+  }
   heatmapLetters.value = cellMap;
+  console.log("heatmap");
   const { maxH, maxV } = cellMap.reduce(
-    ({  maxV, maxH }, row) => ({
+    ({ maxV, maxH }, row) => ({
       maxH: Math.max(maxH, ...row.map(({ horizontal }) => horizontal)),
       maxV: Math.max(maxV, ...row.map(({ vertical }) => vertical)),
     }),
@@ -213,8 +225,8 @@ watchEffect(async () => {
       })
   );
   const canvas = heatmapref.value;
-  if (canvas) {
-    const width = Number(cellAndBorderSize(props, 1).slice(0, -2));
+  const width = cellWidth.value;
+  if (canvas && width) {
     canvas.width = width * props.grid.cols;
     canvas.height = width * props.grid.rows;
     canvas.style.width = `${width * props.grid.cols}px`;
@@ -231,8 +243,14 @@ watchEffect(async () => {
       });
     });
   }
-  heatmapTransform.value = useTransform(props, props.grid.cells[0][0]);
-});
+}
+const throttledRefreshHeatmap = throttle(refreshHeatmap, 1000);
+watch(
+  () => [props.grid, props.mode, props.gridVersion],
+  async () => {
+    throttledRefreshHeatmap();
+  }
+);
 
 watchEffect(() => {
   hotLetters.value = getLetters(props.cell, heatmapLetters.value);
