@@ -1,6 +1,9 @@
 import { DicoIndex, OccurenceMap } from "./types";
 import { readFile, readdir } from "fs/promises";
 import { resolve } from "../utils";
+
+const ACode = "A".charCodeAt(0);
+
 /**
  * Dico is a sigleton class that contains the dictionnary
  * It is used to search for words in the grid
@@ -25,6 +28,9 @@ export class Dico {
    */
   public occurencies: OccurenceMap[];
 
+  public maxLength: number;
+  public sorted: number[];
+
   /**
    * The locale dictionary folder
    */
@@ -32,6 +38,8 @@ export class Dico {
 
   constructor() {
     this.words = [];
+    this.maxLength = 0;
+    this.sorted = [];
     this.wordsMap = new Map();
     this.occurencies = [{}, {}];
     this.locale = "fr-fr";
@@ -121,8 +129,108 @@ export class Dico {
         responses.forEach((response) => {
           this.addWordsToDictionnary(response as any as string);
         });
+      })
+      .then(() => {
+        this.sorted = new Array(this.words.length)
+          .fill(0)
+          .map((e, i) => i)
+          .sort((a, b) => {
+            const d = this.words[a].length - this.words[b].length;
+            if (d !== 0) return d;
+            return this.words[a].localeCompare(this.words[b]);
+          });
       });
     return this.loadingPromise;
+  }
+
+  findStartIdx(codeQuery: number, index: number, start: number, end: number) {
+    while (start <= end) {
+      const middle = (start + end) >>> 1;
+      const word = this.words[this.sorted[middle]];
+      if (!word) break;
+      const code = word.charCodeAt(index);
+      if (isNaN(code) || code < codeQuery) start = middle + 1;
+      else end = middle - 1;
+    }
+    return start;
+  }
+  findEndIdx(codeQuery: number, index: number, start: number, end: number) {
+    while (start <= end) {
+      const middle = (start + end) >>> 1;
+      const word = this.words[this.sorted[middle]];
+      if (!word) break;
+      const code = word.charCodeAt(index);
+      if (isNaN(code) || code > codeQuery) end = middle - 1;
+      else start = middle + 1;
+    }
+    return end;
+  }
+
+  byLengthStart(length: number, start: number, end: number) {
+    while (start <= end) {
+      const middle = (start + end) >>> 1;
+      const word = this.words[this.sorted[middle]];
+      if (!word) break;
+      if (word.length < length) start = middle + 1;
+      else end = middle - 1;
+    }
+    return start;
+  }
+  byLengthEnd(length: number, start: number, end: number) {
+    while (start <= end) {
+      const middle = (start + end) >>> 1;
+      const word = this.words[this.sorted[middle]];
+      if (!word) break;
+      if (word.length > length) end = middle - 1;
+      else start = middle + 1;
+    }
+    return end;
+  }
+
+  findInterval(query: string) {
+    const startL = this.byLengthStart(query.length, 0, this.words.length - 1);
+    const endL = this.byLengthEnd(query.length, startL, this.words.length - 1);
+
+    let stack = [[startL, endL]];
+    let newStack: number[][] = [];
+    for (let i = 0; i < query.length; i++) {
+      newStack = [];
+      while (stack.length) {
+        const [start, end] = stack.pop()!;
+        const code = query.charCodeAt(i);
+        if (query.charAt(i) === "*") {
+          for (let j = 0; j < 26; j++) {
+            const newStart = this.findStartIdx(ACode + j, i, start, end);
+            const newEnd = this.findEndIdx(ACode + j, i, newStart, end);
+            if (newStart > newEnd) continue;
+            newStack.push([newStart, newEnd]);
+          }
+          continue;
+        }
+        const newStart = this.findStartIdx(code, i, start, end);
+        const newEnd = this.findEndIdx(code, i, newStart, end);
+        newStack.push([newStart, newEnd]);
+      }
+      stack = newStack;
+    }
+
+    // return [start, this.trimEnd(query, start, end)];
+    return newStack;
+  }
+
+  queryBinary(query: string) {
+    const intervals = this.findInterval(query);
+    return intervals.reduce((acc, [start, end]) => {
+      if (start === end) {
+        acc.push(this.words[this.sorted[Math.min(start, end)]]);
+        return acc;
+      } else {
+        acc.push(
+          ...this.sorted.slice(start, end).map((index) => this.words[index])
+        );
+      }
+      return acc;
+    }, [] as string[]);
   }
   /**
    * Add a word or a list of words to the dictionnary
@@ -150,6 +258,7 @@ export class Dico {
         const dicoIndex = this.words.length;
         wordsMap.set(word, dicoIndex);
         this.words.push(word);
+        this.maxLength = Math.max(this.maxLength, word.length);
         this.countOccurences({
           word,
           index: dicoIndex,
@@ -246,6 +355,8 @@ export class Dico {
     this.loadingPromise = undefined;
     this.words = [];
     this.wordsMap = new Map();
+    this.trees = new Map();
+    this.maxLength = 0;
     this.occurencies = [{}, {}];
     return this.loadDictionary();
   }
