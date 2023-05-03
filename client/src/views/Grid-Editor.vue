@@ -27,6 +27,7 @@ const options = ref<GridOptions>();
 const saveTimeout = ref(0);
 const route = useRoute();
 function fetch() {
+  console.log('fetch')
   return axios
     .get(getUrl(`grid/${route.params.id}`))
     .then(({ data }) => {

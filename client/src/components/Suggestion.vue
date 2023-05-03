@@ -65,7 +65,7 @@ import {
 } from "@vicons/ionicons5";
 
 import axios from "axios";
-import { Direction, Vec } from "grid";
+import { CellProba, Direction, Vec } from "grid";
 import { getUrl } from "../js/utils";
 /**
  * Component to display words suggestions
@@ -87,6 +87,8 @@ const props = defineProps<{
    * The grid id
    */
   gridId: string;
+
+  cellProbas: CellProba[][];
   /**
    * The coords of the current cell
    */
@@ -126,7 +128,7 @@ const emit = defineEmits<{
    */
   (event: "orderswitch"): void;
 }>();
-function getSuggestions(
+function getSimpleSuggestions(
   point: Vec,
   dir: Direction,
   ordering: number,
@@ -175,6 +177,37 @@ function getSuggestions(
     });
 
   return queryPromise;
+}
+
+function getSuggestions( point: Vec,
+  dir: Direction,
+  ordering: number,
+  method: string,
+  gridId: string){
+  if (props.method === 'simple' || !props.cellProbas || !props.cellProbas.length){
+    return getSimpleSuggestions(point, dir, ordering, method, gridId);
+  }
+  console.log(props.cellProbas);
+  return  axios.post(getUrl("search-proba"), {
+        gridId: props.gridId,
+        coord: point,
+        dir: dir,
+        cellProbas: props.cellProbas,
+        ordering: ordering,
+        method: method,
+        max: 100,
+      })
+      .then(({data}) =>{
+        const {nbResults, words} = data;
+        console.log(data);
+        totalResults.value = nbResults;
+        results.value = words.map((word) => ({
+          word,
+          link: `https://google.com/search?q=${word}+definition`,
+        }));
+      });
+
+
 }
 
 // send request everytime props change

@@ -35,11 +35,11 @@ function ping(retry = 0): Promise<any> {
     });
 }
 onMounted(async () => {
-  const i = setInterval(() => {
-    ping().catch(() => {
-      alert.value = {type: 'error', id: "disconnected"};
-    });
-  }, 500);
+  // const i = setInterval(() => {
+  //   ping().catch(() => {
+  //     alert.value = {type: 'error', id: "disconnected"};
+  //   });
+  // }, 500);
 });
 </script>
 <style>

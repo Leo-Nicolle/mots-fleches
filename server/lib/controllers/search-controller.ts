@@ -1,6 +1,6 @@
 import { Express } from "express";
 import { Database } from "../database";
-import { search, dico } from "../search";
+import { search, dico, getBestWords } from "../search";
 
 let isBusy = false;
 
@@ -80,5 +80,21 @@ export default function wordController({
         dico.addWordsToDictionnary(words);
       })
       .then(() => res.sendStatus(200));
+  });
+
+  app.post("/search-proba", async (req, res) => {
+    const { gridId, cellProbas, coord, dir, max } = req.body;
+    const grid = await db.getGrid(gridId);
+    if (!grid) {
+      return res.sendStatus(203);
+    }
+    if (!cellProbas || cellProbas.length !== grid.rows) {
+      return res.sendStatus(203);
+    }
+    await dico.loadDictionary();
+    console.time("bestWords");
+    const bestWords = getBestWords(grid, cellProbas, coord, dir);
+    console.timeEnd("bestWords");
+    res.send({ nbResults: bestWords.length, words: bestWords.slice(0, max) });
   });
 }

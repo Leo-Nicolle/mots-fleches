@@ -79,6 +79,7 @@ const props = defineProps<{
    * The grid to edit
    */
   cell: Cell;
+  cellProbas: CellProba[][];
   mode: Mode;
   grid: Grid;
   gridVersion: number;
@@ -98,7 +99,6 @@ const word = ref("");
 const heatmapref = ref<HTMLCanvasElement>(null);
 const heatmapTransform = ref("");
 const transform = ref("");
-const heatmapLetters = ref<CellProba[][]>([[]]);
 const hovered = ref(false);
 const hotLetters = ref("");
 const cellHeat = ref("");
@@ -175,22 +175,7 @@ function getHeat(cell: Cell, heatmapLetters: CellProba[][]) {
 
 const colorScale = chroma.scale(["red", "#22C", "#014"]).mode("lab");
 async function refreshHeatmap() {
-  if (props.mode !== "heatmap" || !props.grid) {
-    heatmapLetters.value = [[]];
-  }
-  let cellMap: CellProba[][] = [];
-  try {
-    const { data, status } = (await axios.post(getUrl("heatmap"), {
-      grid: props.grid.serialize(),
-    })) as { data: CellProba[][]; status: number };
-    if (status !== 200) return;
-    cellMap = data;
-  } catch (e) {
-    heatmapLetters.value = [[]];
-  }
-  heatmapLetters.value = cellMap;
-  console.log("heatmap");
-  const { maxH, maxV } = cellMap.reduce(
+  const { maxH, maxV } = props.cellProbas.reduce(
     ({ maxV, maxH }, row) => ({
       maxH: Math.max(maxH, ...row.map(({ horizontal }) => horizontal)),
       maxV: Math.max(maxV, ...row.map(({ vertical }) => vertical)),
@@ -198,7 +183,7 @@ async function refreshHeatmap() {
     { maxV: 0, maxH: 0 }
   );
   const norm = Math.log(Math.max(maxH, maxV));
-  const colors = cellMap.map((row, i) =>
+  const colors = props.cellProbas.map((row, i) =>
     row
       .map(({ inter, empty, horizontal, vertical, validH, validV }) => {
         if (!empty) return null;
@@ -235,7 +220,7 @@ async function refreshHeatmap() {
     if (!ctx) return;
     colors.forEach((row, i) => {
       row.forEach((color, j) => {
-        if (!cellMap[i][j].empty || !color) return;
+        if (!props.cellProbas[i][j].empty || !color) return;
         const [r, g, b, a] = color;
         ctx.fillStyle = `rgba(${r},${g},${b},${a})`;
 
@@ -244,17 +229,18 @@ async function refreshHeatmap() {
     });
   }
 }
-const throttledRefreshHeatmap = throttle(refreshHeatmap, 1000);
-watch(
-  () => [props.grid, props.mode, props.gridVersion],
-  async () => {
-    throttledRefreshHeatmap();
-  }
-);
+// const throttledRefreshHeatmap = throttle(refreshHeatmap, 1000);
+// watch(
+//   () => [props.grid, props.mode, props.gridVersion],
+//   async () => {
+//     throttledRefreshHeatmap();
+//   }
+// );
 
 watchEffect(() => {
-  hotLetters.value = getLetters(props.cell, heatmapLetters.value);
-  cellHeat.value = getHeat(props.cell, heatmapLetters.value);
+  hotLetters.value = getLetters(props.cell, props.cellProbas);
+  cellHeat.value = getHeat(props.cell, props.cellProbas);
+  refreshHeatmap();
 });
 function onMouseMove(evt: MouseEvent) {}
 function add() {

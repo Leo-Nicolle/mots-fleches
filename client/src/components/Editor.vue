@@ -25,6 +25,7 @@
         :grid-id="grid.id"
         :method="method"
         :ordering="ordering"
+        :cellProbas="cellProbas"
         @hover="onHover"
         @click="onClick"
         @dir="(d) => (dir = d)"
@@ -84,6 +85,7 @@
           :options="options"
           :cell="hoveredCell"
           :validity="validity"
+          :cellProbas="cellProbas"
           :zoom="zoom"
           :mode="highlightMode"
           :gridVersion="gridVersion"
@@ -110,6 +112,7 @@ import {
   RemoveCircleOutline,
   SwapVertical,
 } from "@vicons/ionicons5";
+import throttle from "lodash.throttle";
 import {
   Grid,
   Cell,
@@ -117,6 +120,7 @@ import {
   nullCell,
   GridOptions,
   GridValidity,
+  CellProba,
 } from "grid";
 import Layout from "../layouts/Main.vue";
 import SVGGrid from "./svg-renderer/Grid.vue";
@@ -125,6 +129,7 @@ import { defaultExportOptions } from "../types";
 import ModalOptions from "./forms/ModalOptions.vue";
 import GridHighlight, { Mode } from "./svg-renderer/GridHighlight.vue";
 import Suggestion from "./Suggestion.vue";
+
 import { getUrl } from "../js/utils";
 import axios from "axios";
 import { Bounds } from "grid";
@@ -164,10 +169,12 @@ const zoom = ref(1);
 const highlights = ref(new Map());
 const highlightModes = ["normal", "check", "heatmap"] as Mode[];
 const highlightMode = ref<Mode>(highlightModes[2]);
+const cellProbas = ref<CellProba[][]>([]);
 
 function onGridUpdate() {
   //refresh the children components that need it.
   gridVersion.value = gridVersion.value + 1;
+  throttledRefresCellProba();
   emit("update");
 }
 function computeOffset(e) {
@@ -256,6 +263,31 @@ watchEffect(async () => {
     validity.value = { horizontal: {}, vertical: {} };
   }
 });
+
+watchEffect(async () => {
+  if (!props.grid) return;
+  await refreshCellProba();
+});
+async function refreshCellProba() {
+  try {
+    const { data, status } = (await axios.post(getUrl("heatmap"), {
+      grid: props.grid.serialize(),
+    })) as { data: CellProba[][]; status: number };
+    if (status !== 200) return;
+    console.log("refresh proba");
+    cellProbas.value = data;
+  } catch (e) {
+    // cellProbas.value = [[]];
+  }
+}
+const throttledRefresCellProba = throttle(refreshCellProba, 1000);
+
+// watch(
+//   () => [props.grid, props.mode, props.gridVersion],
+//   async () => {
+//     throttledRefreshHeatmap();
+//   }
+// );
 </script>
 
 <style>

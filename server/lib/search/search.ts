@@ -185,16 +185,8 @@ export class Search {
       cells.push(current);
     }
     if (cells.length < 2) return [];
-    // transform str into regexp:
-    const reg = strToReg(str);
 
-    // get all the words that fit
-    return words.reduce((acc, word, i) => {
-      if (word.length === length && word.match(reg)) {
-        acc.push(word);
-      }
-      return acc;
-    }, [] as string[]);
+    return dico.queryBinary(str.toUpperCase());
   }
 
   /**

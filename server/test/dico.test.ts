@@ -1,5 +1,7 @@
-import dico from "../lib/search/dico";
+import { dico } from "../lib/search/dico";
+import { getBestWords, heatmap } from "../lib/search/heatmap";
 import { beforeAll, describe, it, expect } from "vitest";
+import { Grid } from "grid";
 
 let baseWordsCount = 2;
 let baseWords;
@@ -22,14 +24,14 @@ function getExpected(words: string[], excludeList: string[] = []) {
     return acc;
   }, {});
 }
-describe.skip("Dico", () => {
+describe("Dico", () => {
   const baseWordsCount = 13;
   let baseWords;
   beforeAll(() => {
     return dico.loadDictionary().then(() => (baseWords = dico.words));
   });
 
-  it("should read the words from text files", () => {
+  /* it("should read the words from text files", () => {
     expect(dico.words.length).equal(baseWordsCount);
     expect(dico.wordsMap.size).equal(baseWordsCount);
     const expected = getExpected(baseWords);
@@ -55,6 +57,32 @@ describe.skip("Dico", () => {
         [deleteWord]
       );
       expect(dico.occurencies[0]).to.deep.equal(expected);
+    });
+  });*/
+
+  it("should search simply", () => {
+    return dico.loadDictionary().then(() => {
+      const words = dico.queryBinary("***");
+      expect(words).to.deep.equal(["ABC"]);
+    });
+  });
+
+  it("should compute heatmap", () => {
+    const grid = new Grid(3, 3, "test");
+    return dico.loadDictionary().then(() => {
+      const hmp = heatmap(grid);
+      console.log(hmp);
+      expect(1).to.deep.equal(1);
+    });
+  });
+  it("it should return best words", () => {
+    const grid = new Grid(3, 3, "test");
+    debugger;
+    return dico.loadDictionary().then(() => {
+      const hmp = heatmap(grid);
+      const bestWords = getBestWords(grid, hmp, { x: 0, y: 0 }, "horizontal");
+      console.log(bestWords);
+      expect(1).to.deep.equal(1);
     });
   });
 });

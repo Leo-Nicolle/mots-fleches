@@ -1,8 +1,9 @@
 import { DicoIndex, OccurenceMap } from "./types";
 import { readFile, readdir } from "fs/promises";
 import { resolve } from "../utils";
+import { StringBS } from "./string-bs";
 
-const ACode = "A".charCodeAt(0);
+export const ACode = "A".charCodeAt(0);
 
 /**
  * Dico is a sigleton class that contains the dictionnary
@@ -30,6 +31,7 @@ export class Dico {
 
   public maxLength: number;
   public sorted: number[];
+  public stringBS: StringBS;
 
   /**
    * The locale dictionary folder
@@ -40,6 +42,7 @@ export class Dico {
     this.words = [];
     this.maxLength = 0;
     this.sorted = [];
+    this.stringBS = new StringBS(this.words, this.sorted);
     this.wordsMap = new Map();
     this.occurencies = [{}, {}];
     this.locale = "fr-fr";
@@ -139,57 +142,22 @@ export class Dico {
             if (d !== 0) return d;
             return this.words[a].localeCompare(this.words[b]);
           });
+        this.stringBS = new StringBS(this.words, this.sorted);
       });
     return this.loadingPromise;
   }
 
-  findStartIdx(codeQuery: number, index: number, start: number, end: number) {
-    while (start <= end) {
-      const middle = (start + end) >>> 1;
-      const word = this.words[this.sorted[middle]];
-      if (!word) break;
-      const code = word.charCodeAt(index);
-      if (isNaN(code) || code < codeQuery) start = middle + 1;
-      else end = middle - 1;
-    }
-    return start;
-  }
-  findEndIdx(codeQuery: number, index: number, start: number, end: number) {
-    while (start <= end) {
-      const middle = (start + end) >>> 1;
-      const word = this.words[this.sorted[middle]];
-      if (!word) break;
-      const code = word.charCodeAt(index);
-      if (isNaN(code) || code > codeQuery) end = middle - 1;
-      else start = middle + 1;
-    }
-    return end;
-  }
-
-  byLengthStart(length: number, start: number, end: number) {
-    while (start <= end) {
-      const middle = (start + end) >>> 1;
-      const word = this.words[this.sorted[middle]];
-      if (!word) break;
-      if (word.length < length) start = middle + 1;
-      else end = middle - 1;
-    }
-    return start;
-  }
-  byLengthEnd(length: number, start: number, end: number) {
-    while (start <= end) {
-      const middle = (start + end) >>> 1;
-      const word = this.words[this.sorted[middle]];
-      if (!word) break;
-      if (word.length > length) end = middle - 1;
-      else start = middle + 1;
-    }
-    return end;
-  }
-
   findInterval(query: string) {
-    const startL = this.byLengthStart(query.length, 0, this.words.length - 1);
-    const endL = this.byLengthEnd(query.length, startL, this.words.length - 1);
+    const startL = this.stringBS.byLengthStart(
+      query.length,
+      0,
+      this.words.length - 1
+    );
+    const endL = this.stringBS.byLengthEnd(
+      query.length,
+      startL,
+      this.words.length - 1
+    );
 
     let stack = [[startL, endL]];
     let newStack: number[][] = [];
@@ -199,22 +167,35 @@ export class Dico {
         const [start, end] = stack.pop()!;
         const code = query.charCodeAt(i);
         if (query.charAt(i) === "*") {
+          if (i === query.length - 1 || query.charAt(i + 1) === "*") {
+            newStack.push([start, end]);
+            continue;
+          }
           for (let j = 0; j < 26; j++) {
-            const newStart = this.findStartIdx(ACode + j, i, start, end);
-            const newEnd = this.findEndIdx(ACode + j, i, newStart, end);
+            const newStart = this.stringBS.findStartIdx(
+              ACode + j,
+              i,
+              start,
+              end
+            );
+            const newEnd = this.stringBS.findEndIdx(
+              ACode + j,
+              i,
+              newStart,
+              end
+            );
             if (newStart > newEnd) continue;
             newStack.push([newStart, newEnd]);
           }
           continue;
         }
-        const newStart = this.findStartIdx(code, i, start, end);
-        const newEnd = this.findEndIdx(code, i, newStart, end);
+        const newStart = this.stringBS.findStartIdx(code, i, start, end);
+        const newEnd = this.stringBS.findEndIdx(code, i, newStart, end);
         newStack.push([newStart, newEnd]);
       }
       stack = newStack;
     }
 
-    // return [start, this.trimEnd(query, start, end)];
     return newStack;
   }
 
@@ -250,6 +231,7 @@ export class Dico {
           .trim()
           .normalize("NFD")
           .replace(/[\u0300-\u036f]/g, "")
+          .replace(/ ?\'?-?/g, "")
           .toUpperCase()
       )
       // .sort((a, b) => Math.abs(b.length - 10) - Math.abs(a.length - 10))
@@ -355,9 +337,9 @@ export class Dico {
     this.loadingPromise = undefined;
     this.words = [];
     this.wordsMap = new Map();
-    this.trees = new Map();
     this.maxLength = 0;
     this.occurencies = [{}, {}];
+    this.stringBS = new StringBS();
     return this.loadDictionary();
   }
 }
