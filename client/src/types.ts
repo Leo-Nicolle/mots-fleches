@@ -39,3 +39,4 @@ export type Handle = {
   index: number;
   dirs: ArrowDir[];
 }
+export type Ordering = 'best' | 'alpha' | 'inverse-alpha' | 'random';

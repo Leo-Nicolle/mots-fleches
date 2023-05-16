@@ -26,12 +26,19 @@
         :method="method"
         :ordering="ordering"
         :cellProbas="cellProbas"
+        :searchResult="searchResult"
         @hover="onHover"
         @click="onClick"
         @dir="(d) => (dir = d)"
         @mouseout="onMouseOut"
         @methodswitch="method = method === 'simple' ? 'fastest' : 'simple'"
-        @orderswitch="ordering = ordering === 1 ? -1 : 1"
+        @orderswitch="
+          ordering =
+            orderings[
+              (orderings.findIndex((o) => o === ordering) + 1) %
+                orderings.length
+            ]
+        "
       >
       </Suggestion>
     </template>
@@ -125,14 +132,17 @@ import {
 import Layout from "../layouts/Main.vue";
 import SVGGrid from "./svg-renderer/Grid.vue";
 import GridInput from "./svg-renderer/GridInput.vue";
-import { defaultExportOptions } from "../types";
+import { defaultExportOptions, Ordering } from "../types";
 import ModalOptions from "./forms/ModalOptions.vue";
 import GridHighlight, { Mode } from "./svg-renderer/GridHighlight.vue";
 import Suggestion from "./Suggestion.vue";
 
 import { getUrl } from "../js/utils";
 import axios from "axios";
-import { Bounds } from "grid";
+import SearchWorker from "../search-worker/index";
+const runWorker = new SearchWorker();
+const searchWorker = new SearchWorker();
+
 /**
  * Component to edit a grid
  */
@@ -164,12 +174,22 @@ const gridVersion = ref(1);
 const container = ref(null as unknown as HTMLDivElement);
 const offset = ref<[number, number]>([-10, 0]);
 const method = ref<"simple" | "fastest">("fastest");
-const ordering = ref<number>(1);
+const ordering = ref<Ordering>("best");
+const orderings: Ordering[] = ["best", "alpha", "inverse-alpha", "random"];
 const zoom = ref(1);
 const highlights = ref(new Map());
 const highlightModes = ["normal", "check", "heatmap"] as Mode[];
 const highlightMode = ref<Mode>(highlightModes[2]);
 const cellProbas = ref<CellProba[][]>([]);
+const searchResult = ref<number[]>([]);
+function refreshCellProba() {
+  runWorker.run(props.grid);
+}
+function refreshSimpleSearch() {
+  searchWorker.search(props.grid, focus.value, dir.value);
+}
+const throttledRefresCellProba = throttle(refreshCellProba, 200);
+const throttledRefresSimpleSearch = throttle(refreshSimpleSearch, 60);
 
 function onGridUpdate() {
   //refresh the children components that need it.
@@ -234,7 +254,7 @@ function onKeyUp(evt: KeyboardEvent) {
     consumed = true;
   }
   if (evt.key === ">" || evt.key === "<") {
-    ordering.value = ordering.value * -1;
+    // ordering.value = ordering.value * -1;
     consumed = true;
   }
   if (evt.code === "Space") {
@@ -268,26 +288,21 @@ watchEffect(async () => {
   if (!props.grid) return;
   await refreshCellProba();
 });
-async function refreshCellProba() {
-  try {
-    const { data, status } = (await axios.post(getUrl("heatmap"), {
-      grid: props.grid.serialize(),
-    })) as { data: CellProba[][]; status: number };
-    if (status !== 200) return;
-    console.log("refresh proba");
-    cellProbas.value = data;
-  } catch (e) {
-    // cellProbas.value = [[]];
-  }
-}
-const throttledRefresCellProba = throttle(refreshCellProba, 1000);
+runWorker.on("run-result", (data) => {
+  cellProbas.value = data;
+});
+runWorker.on("bail-result", () => {
+  cellProbas.value = [];
+  console.log("bail");
+});
+searchWorker.on("search-result", (data) => {
+  searchResult.value = data;
+});
 
-// watch(
-//   () => [props.grid, props.mode, props.gridVersion],
-//   async () => {
-//     throttledRefreshHeatmap();
-//   }
-// );
+watchEffect(() => {
+  if (!props.grid || !focus.value || !dir.value) return;
+  throttledRefresSimpleSearch();
+});
 </script>
 
 <style>

@@ -368,4 +368,32 @@ export type CellProba = {
   y: number;
 };
 
+
+export type CellBest = {
+  /**
+   * Is the cell valid horizontally
+   */
+  validH: boolean;
+  /**
+   * Is the cell valid vertically
+   */
+  validV: boolean;
+  /**
+      * x coord of the cell
+      */
+  x: number;
+  /**
+   * y coord of the cell
+   */
+  y: number;
+  empty: boolean;
+
+  /**
+   * indexes in dico
+   */
+  bestWordsV: number[];
+  bestWordsH: number[];
+  inter: Record<string, number>;
+};
+
 export const DPI_TO_PIXEL = 25.4;

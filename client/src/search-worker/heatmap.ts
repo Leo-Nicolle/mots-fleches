@@ -1,9 +1,11 @@
 import { Direction, Grid, CellProba, Vec, CellBest, Bounds } from "grid";
-import { dico, ACode } from "./test-dico";
-import { c } from "naive-ui";
-window.dico = dico;
+import { dico, ACode } from "./dico";
+// window ? window.dico = dico: undefined;
+
 type Interval = [number, number];
-function initCellMap(grid: Grid) {
+export type BailOptions =
+  { sharedArray: Uint8Array };
+export function initCellMap(grid: Grid) {
   return grid.cells.reduce((acc, row, y) => {
     acc.push(
       row.map(({ definition, text }, x) => {
@@ -24,52 +26,6 @@ function initCellMap(grid: Grid) {
     );
     return acc;
   }, [] as CellProba[][]);
-}
-function initCellBest(grid: Grid, cellProba: CellProba[][]) {
-  return grid.cells.reduce((acc, row, y) => {
-    acc.push(
-      row.map((_, x) => {
-        const { validH, validV, empty } = cellProba[y][x];
-        return {
-          validH,
-          validV,
-          empty,
-          bestWordsV: [] as number[],
-          bestWordsH: [] as number[],
-          inter: {},
-          x,
-          y,
-        };
-      })
-    );
-    return acc;
-  }, [] as CellBest[][]);
-}
-//TODO make more tests abou this one
-function subtractIntervals(a: [number, number][], b: [number, number][]) {
-  // a.sort((a1, b1) => a1[0] - b1[0]);
-  // b.sort((a1, b1) => a1[0] - b1[0]);
-  while (b.length) {
-    const [b1, b2] = b.pop()!;
-    for (let i = 0; i < a.length; i++) {
-      const [a1, a2] = a[i];
-      if (a2 < b1) continue;
-      if (a1 > b2) break;
-      const lBefore = a.length;
-      a.splice(
-        i,
-        1,
-        ...([
-          [a1, b1 - 1],
-          [b2 + 1, a2],
-        ].filter(([a1, a2]) => a1 <= a2) as [number, number][])
-      );
-      if (lBefore > a.length) {
-        i--;
-      }
-    }
-  }
-  return a;
 }
 
 function intersection(cellMap: CellProba[][], cellBest?: CellBest[][]) {
@@ -108,8 +64,9 @@ function intersection(cellMap: CellProba[][], cellBest?: CellBest[][]) {
  * @param grid The grid to compute proba on
  * @returns an array of "local" proba for each cell
  */
-export function getCellProbas(grid: Grid) {
+export function getCellProbasFast(grid: Grid, options?: BailOptions) {
   const cellMap = initCellMap(grid);
+  let hasBailed = false;
   (["horizontal", "vertical"] as Direction[]).forEach((dir) => {
     grid
       .getWords(dir)
@@ -128,6 +85,10 @@ export function getCellProbas(grid: Grid) {
         let stack = intervals;
         let newStack: number[][] = [];
         bounds.cells.forEach(({ x, y }, i) => {
+          if (options && options.sharedArray[0]) {
+            hasBailed = true;
+            return;
+          }
           const cell = cellMap[y][x];
           if (!cell.empty) {
             return;
@@ -163,158 +124,13 @@ export function getCellProbas(grid: Grid) {
       });
   });
   intersection(cellMap);
-  return cellMap;
+  return {
+    hasBailed,
+    cellProbas: cellMap,
+  };
 }
 
-export function getBestWords(
-  grid: Grid,
-  cellMap: CellProba[][],
-  coord: Vec,
-  dir: Direction
-) {
-  const bounds = grid.getBounds(coord, dir);
-  const intervals = dico.findInterval(
-    bounds.cells.map((c) => (c.text.length ? c.text : "*")).join("")
-  );
-  let stack = intervals.slice();
-  let newStack: number[][] = [];
-  const scores: Record<number, number> = {};
-  bounds.cells.forEach(({ x, y }, i) => {
-    const { empty, inter } = cellMap[y][x];
-    if (!empty) {
-      return;
-    }
-    newStack = [];
-    const total = Object.values(inter).reduce((total, n) => total + n, 0);
-    while (stack.length) {
-      const [start, end] = stack.pop()!;
-      if (start === end) {
-        const word = dico.words[dico.sorted[start]];
-        if (!inter[word[i]]) {
-          scores[start] = -1;
-        } else {
-          scores[start] = inter[word[i]] / total;
-          newStack.push([start, end]);
-        }
-        continue;
-      }
-      for (let j = 0; j < 26; j++) {
-        const newStart = dico.stringBS.findStartIdx(ACode + j, i, start, end);
-        const newEnd = dico.stringBS.findEndIdx(ACode + j, i, newStart, end);
-        if (newStart > newEnd) continue;
-        const letter = String.fromCharCode(ACode + j);
-        if (!inter[letter]) {
-          for (let k = newStart; k <= newEnd; k++) {
-            scores[k] = -1;
-          }
-          if (newEnd === end) {
-            break;
-          }
-          continue;
-        }
-        for (let k = newStart; k <= newEnd; k++) {
-          const oldScore = scores[k] || 0;
-          scores[k] =
-            oldScore < 0 ? oldScore : oldScore + inter[letter] / total;
-        }
-        newStack.push([newStart, newEnd]);
-        if (newEnd === end) break;
-      }
-    }
-    stack = newStack;
-  });
-  const indexes = stack
-    .reduce((acc, [start, end]) => {
-      acc.push(...new Array(end - start + 1).fill(start).map((e, i) => e + i));
-      return acc;
-    }, [])
-    .filter((e) => scores[e] > 0);
-
-  return { intervals: stack, scores, indexes };
-  // .sort((a, b) => (scores[b] || 0) - (scores[a] || 0))
-  // .map((w) => dico.words[dico.sorted[w]]);
-}
-
-export function getCellBest(grid: Grid, cellMap: CellProba[][]) {
-  const newCellMap = initCellMap(grid);
-  const res = initCellBest(grid, cellMap);
-
-  (["horizontal", "vertical"] as Direction[]).forEach((dir) => {
-    const reccordKey = `${dir}L`;
-    const bestWordKey = `bestWords${dir === "horizontal" ? "H" : "V"}`;
-    grid
-      .getWords(dir)
-      .filter(({ length }) => length > 1)
-      .forEach((bounds) => {
-        // const validKey = `valid${dir[0].toUpperCase()}`;
-        if (bounds.length < 2) return;
-        // we have to filter out the words with score < 0,
-        // so we have to take all the valid words, sort them and then count on thoose words
-        // We should do it only if the number of valid words is under a certain threshold
-        const { intervals, scores } = getBestWords(
-          grid,
-          cellMap,
-          bounds.cells[0],
-          dir
-        );
-        const { x, y } = bounds.cells[0];
-        res[y][x][bestWordKey] = intervals
-          .reduce((acc, [start, end]) => {
-            acc.push(
-              ...new Array(end - start + 1).fill(start).map((e, i) => e + i)
-              // .filter((e) => scores[e] > 0)
-            );
-            return acc;
-          }, [])
-          .sort((a, b) => (scores[b] || 0) - (scores[a] || 0))
-          .slice(0, 100);
-        console.log({ x, y, bestWordKey, res: res[y][x][bestWordKey] });
-        // let newStack: number[][] = [];
-
-        bounds.cells.forEach(({ x, y }, i) => {
-          const { empty } = newCellMap[y][x];
-          const occurences = newCellMap[y][x][reccordKey];
-          if (!empty) {
-            return;
-          }
-          // newStack = [];
-          const stack = intervals.slice();
-          while (stack.length) {
-            const [start, end] = stack.pop()!;
-            if (start === end) {
-              const letter = dico.words[dico.sorted[start]][i];
-              occurences[letter] = (occurences[letter] || 0) + 1;
-              continue;
-            }
-            for (let j = 0; j < 26; j++) {
-              const newStart = dico.stringBS.findStartIdx(
-                ACode + j,
-                i,
-                start,
-                end
-              );
-              const newEnd = dico.stringBS.findEndIdx(
-                ACode + j,
-                i,
-                newStart,
-                end
-              );
-              if (newStart > newEnd) continue;
-              const letter = String.fromCharCode(ACode + j);
-              occurences[letter] = (occurences[letter] || 0) + 1;
-              if (newEnd === end) break;
-            }
-          }
-          // stack = newStack;
-        });
-      });
-  });
-
-  intersection(newCellMap, res);
-  return res;
-}
-
-export function getCellProbas2(grid: Grid) {
+export function getCellProbasAccurate(grid: Grid, options?: BailOptions) {
   const cellMap = initCellMap(grid);
   const cellToWordIndexH: Record<string, number> = {};
   const cellToWordIndexV: Record<string, number> = {};
@@ -324,7 +140,7 @@ export function getCellProbas2(grid: Grid) {
   const intervalsV: Interval[][] = [];
   const cellToIntervalsH: Record<string, number> = {};
   const cellToIntervalsV: Record<string, number> = {};
-
+  let hasBailed = false;
   (["horizontal", "vertical"] as Direction[]).forEach((dir) => {
     const cellToWordIndex =
       dir === "horizontal" ? cellToWordIndexH : cellToWordIndexV;
@@ -337,11 +153,20 @@ export function getCellProbas2(grid: Grid) {
       .getWords(dir)
       .filter(({ length }) => length > 1)
       .forEach((bounds) => {
+        if (options && options.sharedArray[0]) {
+          hasBailed = true;
+          return;
+        }
         intervals.push(dico.findInterval(
           bounds.cells.map((c) => (c.text.length ? c.text : "*")).join("")
         ) as Interval[]);
 
+
         bounds.cells.forEach(({ x, y }, i) => {
+          if (options && options.sharedArray[0]) {
+            hasBailed = true;
+            return;
+          }
           const cell = cellMap[y][x];
           if (!cell.empty) {
             return;
@@ -473,7 +298,7 @@ export function getCellProbas2(grid: Grid) {
         total += inter[letter];
       }
     } else {
-      inter = stackV ? occurencesV : occurencesH
+      inter = stackV ? occurencesV : occurencesH;
       total = Object.entries(inter).reduce((total, [_, value]) => total + value, 0);
     }
     cellMap[y][x].inter = inter;
@@ -517,24 +342,80 @@ export function getCellProbas2(grid: Grid) {
 
   });
 
-  return grid.cells.reduce((acc, row, y) => {
-    acc.push(
-      row.map((_, x) => {
-        const { validH, validV, empty, inter } = cellMap[y][x];
-        const key = `${y}-${x}`;
-        return {
-          validH,
-          validV,
-          empty,
-          bestWordsV: bestWordsV[key] || [],
-          bestWordsH: bestWordsH[key] || [],
-          inter,
-          x,
-          y,
-        };
-      })
-    );
-    return acc;
-  }, [] as CellBest[][]);
+  return {
+    cellProbas: grid.cells.reduce((acc, row, y) => {
+      acc.push(
+        row.map((_, x) => {
+          const { validH, validV, empty, inter } = cellMap[y][x];
+          const key = `${y}-${x}`;
+          return {
+            validH,
+            validV,
+            empty,
+            bestWordsV: bestWordsV[key] || [],
+            bestWordsH: bestWordsH[key] || [],
+            inter,
+            x,
+            y,
+          };
+        })
+      );
+      return acc;
+    }, [] as CellBest[][]),
+    hasBailed
+  };
+
+}
+
+
+export function getCellProbas(grid: Grid, options: BailOptions) {
+  const cellMap = initCellMap(grid);
+  const cellToWordIndexH: Record<string, number> = {};
+  const cellToWordIndexV: Record<string, number> = {};
+  const cellToBoundsH: Record<string, Bounds> = {};
+  const cellToBoundsV: Record<string, Bounds> = {};
+  const intervalsH: Interval[][] = [];
+  const intervalsV: Interval[][] = [];
+  const cellToIntervalsH: Record<string, number> = {};
+  const cellToIntervalsV: Record<string, number> = {};
+  (["horizontal", "vertical"] as Direction[]).forEach((dir) => {
+    const cellToWordIndex =
+      dir === "horizontal" ? cellToWordIndexH : cellToWordIndexV;
+    const validKey = `valid${dir[0].toUpperCase()}` as 'validH' | 'validV';
+    const cellToBounds = dir === "horizontal" ? cellToBoundsH : cellToBoundsV;
+    const cellToIntervals = dir === "horizontal" ? cellToIntervalsH : cellToIntervalsV;
+    const intervals = dir === "horizontal" ? intervalsH : intervalsV;
+    grid
+      .getWords(dir)
+      .filter(({ length }) => length > 1)
+      .forEach((bounds) => {
+        intervals.push(dico.findInterval(
+          bounds.cells.map((c) => (c.text.length ? c.text : "*")).join("")
+        ) as Interval[]);
+
+        bounds.cells.forEach(({ x, y }, i) => {
+          const cell = cellMap[y][x];
+          if (!cell.empty) {
+            return;
+          }
+          const key = `${y}-${x}`;
+          cell[validKey] = true;
+          cellToWordIndex[key] = i;
+          cellToBounds[key] = bounds;
+          cellToIntervals[key] = intervals.length - 1;
+        });
+      });
+  });
+  const total = [intervalsH, intervalsV].reduce((total, is) => total + is
+    .reduce((acc, intervals) => acc + intervals
+      .reduce((acc, [start, end]) => acc + (end - start + 1), 0)
+      , 0)
+    , 0);
+  // from tests, takes like 1sec to test 60k words.
+  // TODO reuse computation above
+  if (total > 60000) {
+    // return getCellProbasFast(grid, options);
+  }
+  return getCellProbasAccurate(grid, options);
 
 }

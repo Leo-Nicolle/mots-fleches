@@ -93,8 +93,10 @@ export default function wordController({
     }
     await dico.loadDictionary();
     console.time("bestWords");
-    const bestWords = getBestWords(grid, cellProbas, coord, dir);
+    // const bestWords = getBestWords(grid, cellProbas, coord, dir);
     console.timeEnd("bestWords");
-    res.send({ nbResults: bestWords.length, words: bestWords.slice(0, max) });
+    // res.send({ nbResults: bestWords.length
+    // , words: bestWords.slice(0, max) });
+    res.send({ nbResults: 0, words: [] });
   });
 }

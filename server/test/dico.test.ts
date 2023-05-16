@@ -1,5 +1,10 @@
 import { dico } from "../lib/search/dico";
-import { getBestWords, heatmap } from "../lib/search/heatmap";
+import {
+  getBestWords,
+  getCellBest,
+  getCellProbas,
+  getCellProbas2,
+} from "../lib/search/heatmap";
 import { beforeAll, describe, it, expect } from "vitest";
 import { Grid } from "grid";
 
@@ -70,19 +75,34 @@ describe("Dico", () => {
   it("should compute heatmap", () => {
     const grid = new Grid(3, 3, "test");
     return dico.loadDictionary().then(() => {
-      const hmp = heatmap(grid);
+      const hmp = getCellProbas(grid);
       console.log(hmp);
       expect(1).to.deep.equal(1);
     });
   });
   it("it should return best words", () => {
     const grid = new Grid(3, 3, "test");
-    debugger;
     return dico.loadDictionary().then(() => {
-      const hmp = heatmap(grid);
+      const hmp = getCellProbas(grid);
       const bestWords = getBestWords(grid, hmp, { x: 0, y: 0 }, "horizontal");
       console.log(bestWords);
       expect(1).to.deep.equal(1);
     });
+  });
+
+  it.only("it should return cell best", () => {
+    const grid = new Grid(3, 3, "test");
+    debugger;
+    return dico
+      .loadDictionary()
+      .then(() => dico.addWordsToDictionnary(["AOC", "ATO"]))
+      .then(() => dico.sort())
+      .then(() => {
+        const hmp = getCellProbas(grid);
+        const cellBest = getCellBest(grid, hmp);
+        const cellProba2 = getCellProbas2(grid);
+        console.log(cellProba2);
+        expect(1).to.deep.equal(1);
+      });
   });
 });

@@ -2,12 +2,7 @@
   <div ref="suggestion" class="suggestion" :version="version">
     <span class="buttons">
       <n-button icon-placement="right" @click="emit('orderswitch')">
-        <template #icon>
-          <n-icon>
-            <ArrowDown v-if="ordering === 1" />
-            <ArrowUp v-else />
-          </n-icon>
-        </template>
+        {{ orderingText() }}
       </n-button>
       <n-button icon-placement="right" @click="emit('methodswitch')">
         <template #icon>
@@ -67,6 +62,8 @@ import {
 import axios from "axios";
 import { CellProba, Direction, Vec } from "grid";
 import { getUrl } from "../js/utils";
+import { dico } from "../search-worker/dico";
+import { Ordering } from "../types";
 /**
  * Component to display words suggestions
  */
@@ -89,6 +86,8 @@ const props = defineProps<{
   gridId: string;
 
   cellProbas: CellProba[][];
+  searchResult: number[];
+
   /**
    * The coords of the current cell
    */
@@ -104,7 +103,7 @@ const props = defineProps<{
   /**
    * ordering asc/desc(-1|1)
    */
-  ordering: number;
+  ordering: Ordering;
 }>();
 const emit = defineEmits<{
   /**
@@ -181,35 +180,52 @@ function getSimpleSuggestions(
 
 function getSuggestions( point: Vec,
   dir: Direction,
-  ordering: number,
-  method: string,
-  gridId: string){
-  if (props.method === 'simple' || !props.cellProbas || !props.cellProbas.length){
-    return getSimpleSuggestions(point, dir, ordering, method, gridId);
+  ordering: Ordering,
+  method: string){
+    let indexes = [];
+  if (method === 'simple'){
+    indexes = props.searchResult;
   }
-  console.log(props.cellProbas);
-  return  axios.post(getUrl("search-proba"), {
-        gridId: props.gridId,
-        coord: point,
-        dir: dir,
-        cellProbas: props.cellProbas,
-        ordering: ordering,
-        method: method,
-        max: 100,
-      })
-      .then(({data}) =>{
-        const {nbResults, words} = data;
-        console.log(data);
-        totalResults.value = nbResults;
-        results.value = words.map((word) => ({
+  else if (!props.cellProbas.length
+  || !props.cellProbas[point.y]
+  || !props.cellProbas[point.y][point.x]) {
+    indexes = [];
+  }
+  else {
+    const {bestWordsH, bestWordsV} = props.cellProbas[point.y][point.x];
+    indexes = (
+      (dir === "horizontal" ? bestWordsH : bestWordsV) || []
+    );
+  }
+  const bestWords = indexes
+    .reduce((acc, index) => {
+      const word = dico.words[dico.sorted[index]]; 
+      acc.push(
+        {
           word,
           link: `https://google.com/search?q=${word}+definition`,
-        }));
-      });
-
-
+        }
+      );
+      return acc;
+    }, []);
+  if (ordering === 'alpha'){
+    bestWords.sort((a, b) => a.word.localeCompare(b.word));
+  } else if (ordering === 'inverse-alpha'){
+    bestWords.sort((a, b) => b.word.localeCompare(a.word));
+  } else if (ordering === 'random'){
+    bestWords.sort(() => Math.random() - 0.5);
+  }
+  results.value = bestWords;
 }
 
+function orderingText(){
+  switch (props.ordering){
+    case 'alpha': return 'A-Z';
+    case 'inverse-alpha': return 'Z-A';
+    case 'best': return 'Score';
+    case 'random': return 'Random';
+  }
+}
 // send request everytime props change
 watchEffect(() => {
   getSuggestions(

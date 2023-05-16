@@ -2,7 +2,7 @@ import { body, validationResult } from "express-validator";
 import { Express } from "express";
 import { Database } from "../database";
 import { Grid } from "grid";
-import { heatmap, dico } from "../search";
+import { getCellProbas, dico, getCellBest, getCellProbas2 } from "../search";
 
 /**
  * Controller for CRUD operations on words
@@ -96,13 +96,30 @@ export default function wordController({
     res.send(grid.check(words));
   });
 
+  // app.post("/heatmap", async (req, res) => {
+  //   await dico.getWords();
+  //   const grid = Grid.unserialize(req.body.grid);
+  //   if (!grid) return res.sendStatus(400);
+  //   console.time("getCellProbas");
+  //   const ht = getCellProbas(grid);
+  //   console.timeEnd("getCellProbas");
+  //   res.send(ht);
+  // });
+
   app.post("/heatmap", async (req, res) => {
     await dico.getWords();
     const grid = Grid.unserialize(req.body.grid);
     if (!grid) return res.sendStatus(400);
-    console.time("heatmap");
-    const ht = heatmap(grid);
-    console.timeEnd("heatmap");
-    res.send(ht);
+    console.time("getCellProbas");
+    const ht = getCellProbas(grid);
+    console.timeEnd("getCellProbas");
+    console.time("getCellBest");
+    const cellBest = getCellBest(grid, ht);
+    console.timeEnd("getCellBest");
+    console.time("getCellProbas2");
+    const ht2 = getCellProbas2(grid);
+    console.timeEnd("getCellProbas2");
+
+    res.send(cellBest);
   });
 }

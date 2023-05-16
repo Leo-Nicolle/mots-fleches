@@ -12,7 +12,7 @@
       "args": ["--config", "vitest.config.ts", "run", "${relativeFile}", "-u"],
       "smartStep": true,
       "console": "integratedTerminal"
-    }
+    },
     {
       "type": "node",
       "request": "launch",

@@ -1,9 +1,8 @@
 <template>
-  <div>
+  <div> 
     <span class="heatmap" v-if="mode === 'heatmap'">
       <canvas ref="heatmapref" />
     </span>
-
     <span class="gridhighlight" v-if="visible">
       <span class="highlight"> </span>
       <span
@@ -68,6 +67,7 @@ import {
 } from "./utils";
 // import HeatMap from "jsheatmap";
 import chroma from "chroma-js";
+import { dico } from "../../search-worker/dico";
 
 export type Mode = "normal" | "check" | "heatmap";
 
@@ -155,6 +155,7 @@ function getLetters(cell: Cell, heatmapLetters: CellProba[][]) {
   );
   return letters
     .slice(0, 5)
+    .filter(([_, proba]) => proba > 0.01)
     .map(([l, proba]) => `${l}: ${proba}`)
     .join(", ");
 }
@@ -165,44 +166,54 @@ function getHeat(cell: Cell, heatmapLetters: CellProba[][]) {
   if (!row) return "";
   const cellHeatmap = row[cell.x];
   if (!cellHeatmap) return "";
-  const { horizontal, vertical, validH, validV, empty } = cellHeatmap;
+  const {
+    horizontal,
+    vertical,
+    validH,
+    validV,
+    empty,
+    bestWordsH,
+    bestWordsV,
+  } = cellHeatmap;
+  const bestWords = (
+    (props.dir === "horizontal" ? bestWordsH : bestWordsV) || []
+  )
+    .slice(0, 5)
+    .reduce((acc, index) => {
+      acc.push(dico.words[dico.sorted[index]]);
+      return acc;
+    }, []);
   if ((!validH && !validV) || !empty) return "";
-  if (validH && validV)
-    return `Horizontal: ${horizontal}, Vertical: ${vertical}`;
-  if (!validV) return `Horizontal: ${horizontal}`;
-  if (!validH) return `Vertical: ${vertical}`;
+  return bestWords.join(", ");
+  // if (validH && validV)
+  //   return `Horizontal: ${horizontal}, Vertical: ${vertical}`;
+  // if (!validV) return `Horizontal: ${horizontal}`;
+  // if (!validH) return `Vertical: ${vertical}`;
 }
 
 const colorScale = chroma.scale(["red", "#22C", "#014"]).mode("lab");
 async function refreshHeatmap() {
-  const { maxH, maxV } = props.cellProbas.reduce(
+  const inters = props.cellProbas.map((row) =>
+    row.map(({ inter }) => Object.values(inter).reduce((acc, v) => acc + v, 0))
+  );
+  const { maxH, maxV } = inters.reduce(
     ({ maxV, maxH }, row) => ({
-      maxH: Math.max(maxH, ...row.map(({ horizontal }) => horizontal)),
-      maxV: Math.max(maxV, ...row.map(({ vertical }) => vertical)),
+      maxH: Math.max(maxH, ...row.map((inter) => inter)),
+      maxV: Math.max(maxV, ...row.map((inter) => inter)),
     }),
     { maxV: 0, maxH: 0 }
   );
   const norm = Math.log(Math.max(maxH, maxV));
-  const colors = props.cellProbas.map((row, i) =>
+  const colors = inters.map((row, y) =>
     row
-      .map(({ inter, empty, horizontal, vertical, validH, validV }) => {
-        if (!empty) return null;
-        if (validH && validV) {
-          return Math.min(horizontal, vertical);
-        }
-        if (!validV) {
-          return horizontal;
-        }
-        if (!validH) {
-          return vertical;
-        }
-        return 0;
+      .map((inter, x) => {
+        if (!props.cellProbas[y][x].empty) return null;
+        return inter;
       })
       .map((v) => {
         if (v === null) {
           return null;
         }
-
         if (v === 0) {
           return [0, 0, 0, 0.7];
         }
@@ -229,13 +240,6 @@ async function refreshHeatmap() {
     });
   }
 }
-// const throttledRefreshHeatmap = throttle(refreshHeatmap, 1000);
-// watch(
-//   () => [props.grid, props.mode, props.gridVersion],
-//   async () => {
-//     throttledRefreshHeatmap();
-//   }
-// );
 
 watchEffect(() => {
   hotLetters.value = getLetters(props.cell, props.cellProbas);
