@@ -119,6 +119,7 @@ import {
   watchEffect,
   onMounted,
   computed,
+  onBeforeUnmount,
   watch,
 } from "vue";
 import {
@@ -240,6 +241,11 @@ onMounted(() => {
   computeOffset(null);
   throttledRefresCellProba();
 });
+
+onBeforeUnmount(() => {
+  searchWorker.destroy();
+  runWorker.destroy();
+});
 function onZoomIn() {
   zoom.value = zoom.value + 0.1;
 }
@@ -324,7 +330,7 @@ searchWorker.on("search-result", (data) => {
 });
 
 watchEffect(() => {
-  // if (!focus.value || !dir.value) return;
+  if (!focus.value || !dir.value) return;
   throttledRefresSimpleSearch();
 });
 </script>

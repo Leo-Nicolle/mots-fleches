@@ -8,7 +8,7 @@ export type Events = {
 }
 
 export default class SearchWorker extends EventEmitter<Events> {
-  public worker?: Worker;
+  public worker: Worker;
   private busy: boolean = false;
   private queue: { type: string, data: string }[] = [];
   private sharedBuffer: SharedArrayBuffer;
@@ -30,7 +30,7 @@ export default class SearchWorker extends EventEmitter<Events> {
 
     this.worker = new Worker(new URL('./search-worker', import.meta.url), { type: 'module' });
     this.worker.postMessage(this.sharedBuffer);
-    this.worker?.addEventListener('message', (evt) => this.onMessage(evt));
+    this.worker.addEventListener('message', (evt) => this.onMessage(evt));
   }
 
   search(grid: Grid, coords: Vec, dir: Direction) {
@@ -54,7 +54,7 @@ export default class SearchWorker extends EventEmitter<Events> {
     }
     this.busy = true;
     this.sharedArray[0] = 0;
-    this.worker?.postMessage({ type, data });
+    this.worker.postMessage({ type, data });
   }
 
   onMessage(event: MessageEvent) {
@@ -82,5 +82,10 @@ export default class SearchWorker extends EventEmitter<Events> {
   bail() {
     if (!this.busy) return;
     this.sharedArray[0] = 1;
+  }
+
+  destroy() {
+    this.worker.terminate();
+    this.removeAllListeners();
   }
 }
