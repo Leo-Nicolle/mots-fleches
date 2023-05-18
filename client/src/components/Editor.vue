@@ -204,7 +204,7 @@ const throttledRefresSimpleSearch = throttle(refreshSimpleSearch, 60);
 function onGridUpdate() {
   //refresh the children components that need it.
   gridVersion.value = gridVersion.value + 1;
-  // throttledRefresCellProba();
+  throttledRefresCellProba();
   emit("update");
 }
 function computeOffset(e) {
@@ -238,6 +238,7 @@ watch(method, () => {
 });
 onMounted(() => {
   computeOffset(null);
+  throttledRefresCellProba();
 });
 function onZoomIn() {
   zoom.value = zoom.value + 0.1;
@@ -309,8 +310,6 @@ watchEffect(async () => {
 });
 
 watchEffect(async () => {
-  if (!props.grid) return;
-  await refreshCellProba();
 });
 runWorker.on("run-result", (data) => {
   cellProbas.value = data;

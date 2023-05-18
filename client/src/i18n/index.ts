@@ -13,15 +13,14 @@ export function loadLanguages() {
 
     return languages;
 }
-const locale = localStorage.getItem('locale') || 'fr';
+const locale = localStorage.getItem('locale') || 'fr-fr';
 export const i18n = createI18n({
     // globalInjection: true,
     // legacy: false,
     locale: locale,
-    fallbackLocale: 'fr',
+    fallbackLocale: 'fr-fr',
     messages: loadLanguages()
 });
-
 export const i18nt = i18n.global.t;
 export function setLanguage(locale: string) {
     i18n.global.locale = locale;

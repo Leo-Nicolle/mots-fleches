@@ -33,6 +33,8 @@ export class Dico {
   // public stringBS: Record<number, StringBS>;
   public sorted: number[];
   public stringBS: StringBS;
+  public dicoHash: number;
+
 
   /**
    * The locale dictionary folder
@@ -47,6 +49,7 @@ export class Dico {
     this.wordsMap = new Map();
     this.locale = "fr-fr";
     this.loadingPromise = this.loadDictionary();
+    this.dicoHash = 0;
   }
 
   /**
@@ -55,15 +58,24 @@ export class Dico {
    * @returns The promise that will resolve when the dictionnary is loaded
    */
   loadDictionary() {
-    if (this.loadingPromise) return this.loadingPromise;
-    this.loadingPromise = axios.get(getUrl('dico'))
+    const loadingPromise = axios.get(getUrl("word/hash"))
       .then(({ data }) => {
-        this.addWordsToDictionnary(data);
-      })
-      .then(() => {
-        this.sort();
+        const { uuid, locale } = data;
+        if (uuid === this.dicoHash && locale === this.locale) return Promise.resolve();
+        if (locale !== this.locale) {
+          console.log('set locale', locale, 'old: ', this.locale);
+
+          this.setLocale(locale);
+        }
+        this.dicoHash = data.uuid;
+        return axios.get(getUrl('dico'))
+        .then(({ data }) => {
+          console.log('refresh dico');
+          this.addWordsToDictionnary(data);
+          this.sort();
+        });
       });
-    // this.loadingPromise = Promise.resolve(); //fetch(getUrl("dico"));
+    this.loadingPromise = loadingPromise;
     return this.loadingPromise;
   }
 
@@ -87,10 +99,6 @@ export class Dico {
         const [start, end] = stack.pop()!;
         const code = query.charCodeAt(i);
         if (query.charAt(i) === "*") {
-          // if (i === query.length - 1){// || query.charAt(i + 1) === "*") {
-          //   newStack.push([start, end]);
-          //   continue;
-          // }
           for (let j = 0; j < 26; j++) {
             const newStart = this.stringBS.findStartIdx(
               ACode + j,
@@ -191,27 +199,6 @@ export class Dico {
         .forEach((word) => {
           const dicoIndex = wordsMap.get(word);
           if (!dicoIndex) return;
-          // do not remove it from the array of words,
-          // it would be unneficcient to reassign all the indexes.
-          // Just unference it from the occurence map and from the wordsMap
-          // const occs2: OccurenceMap = {};
-          // const occs3: OccurenceMap = {};
-          // count occurences of the word to remove
-          // and then use it to cleanup
-          // this.countOccurences({
-          //   word,
-          //   index: dicoIndex,
-          //   length: 2,
-          //   occs: occs2,
-          // });
-          // this.countOccurences({
-          //   word,
-          //   index: dicoIndex,
-          //   length: 3,
-          //   occs: occs3,
-          // });
-          // this.removeOccurence(occs2, this.occurencies[0], dicoIndex);
-          // this.removeOccurence(occs3, this.occurencies[1], dicoIndex);
           wordsMap.delete(word);
         });
     });
@@ -230,29 +217,6 @@ export class Dico {
   }
 
   sortWords() {
-    //Just an idea on how faster it would be if I had many sorted arrays,
-    // one per letter in the words. Could be usefull for the heatmap, not sure.
-    // this.sorted[0] = new Array(this.words.length)
-    //   .fill(0)
-    //   .map((e, i) => i)
-    //   .sort((a, b) => {
-    //     const d = this.words[a].length - this.words[b].length;
-    //     if (d !== 0) return d;
-    //     return this.words[a].localeCompare(this.words[b]);
-    //   });
-    // this.stringBS[0] = new StringBS(this.words, this.sorted[0]);
-    // for (let i = 2; i <= this.maxLength; i++) {
-    //   this.sorted[i] = new Array(this.words.length)
-    //     .fill(0)
-    //     .map((e, i) => i)
-    //     .sort((a, b) => {
-    //       const d = this.words[a].length - this.words[b].length;
-    //       if (d !== 0) return d;
-    //       if (this.words[a].length < i) return 0;
-    //       return this.words[a].charCodeAt(i) - this.words[b].charCodeAt(i);
-    //     });
-    //   this.stringBS[i] = new StringBS(this.words, this.sorted[i]);
-    // }
   }
 
   /**
@@ -287,9 +251,7 @@ export class Dico {
     this.words = [];
     this.wordsMap = new Map();
     this.maxLength = 0;
-    // this.occurencies = [{}, {}];
     this.stringBS = new StringBS();
-    return this.loadDictionary();
   }
 }
 

@@ -28,8 +28,6 @@
           v-if="tooltip === 'heatmap' && (hotLetters.length || cellHeat.length)"
         >
           {{ hotLetters }}
-          <br />
-          {{ cellHeat }}
         </span>
       </span>
     </span>
@@ -243,7 +241,7 @@ async function refreshHeatmap() {
 
 watchEffect(() => {
   hotLetters.value = getLetters(props.cell, props.cellProbas);
-  cellHeat.value = getHeat(props.cell, props.cellProbas);
+  // cellHeat.value = getHeat(props.cell, props.cellProbas);
   refreshHeatmap();
 });
 function onMouseMove(evt: MouseEvent) {}

@@ -65,22 +65,6 @@ export default function wordController({
     }
   });
 
-  /**
-   * Set locale
-   */
-  app.post("/set-locale", async (req, res) => {
-    const { locale } = req.body;
-    if (locale === dico.locale) return res.sendStatus(200);
-    if (["fr-fr", "en-en", "es-es"].indexOf(locale) === -1)
-      return res.sendStatus(400);
-    dico
-      .setLocale(locale)
-      .then(() => db.getWords())
-      .then((words) => {
-        dico.addWordsToDictionnary(words);
-      })
-      .then(() => res.sendStatus(200));
-  });
 
   app.post("/search-proba", async (req, res) => {
     const { gridId, cellProbas, coord, dir, max } = req.body;
