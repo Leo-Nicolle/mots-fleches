@@ -14,12 +14,18 @@ import { Grid, GridOptions } from "grid";
 import { getUrl, mergeRouteWithDefault } from "../js/utils";
 import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
-import { defaultExportOptions } from "../components/svg-renderer/types";
-
+import { defaultExportOptions } from "../types";
+/**
+ * View to print a grid
+ * Uses route params to know which grid to print
+ */
 const route = useRoute();
 const grid = ref<Grid>();
 const options = ref<GridOptions>();
-const exportOptions = computed(() => mergeRouteWithDefault(route, defaultExportOptions));
+const exportOptions = computed(() =>
+  mergeRouteWithDefault(route, defaultExportOptions)
+);
+console.log("exportOptions", exportOptions.value);
 function fetch() {
   return axios
     .get(getUrl(`grid/${route.params.id}`))

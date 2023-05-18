@@ -18,9 +18,21 @@
 <script setup lang="ts">
 import { defineProps, computed } from "vue";
 import { ArrowDir } from "grid";
-import {getD, getTransform} from "../../js/paths";
+import { getD, getTransform } from "../../js/paths";
+/**
+ * Component to display arrows within SVG grid
+ */
 
-const props = defineProps<{ dir: ArrowDir; strokeColor: string; center: boolean }>();
+const props = defineProps<{
+  /**
+   * Direction of the arrow
+   */
+  dir: ArrowDir;
+  /**
+   * Color of the arrow
+   */
+  strokeColor: string;
+}>();
 let transform = computed<string>(() => getTransform(props.dir));
 </script>
 

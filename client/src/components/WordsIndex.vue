@@ -32,31 +32,26 @@ import { defineProps, ref } from "vue";
 import Paper from "./Paper.vue";
 import { Grid, GridOptions, getAllWords, SolutionOptions } from "grid";
 import { computed } from "vue";
-import { ExportOptions } from "../components/svg-renderer/types";
+import { ExportOptions } from "../types";
+/**
+ * Component to render the list of words used in an array of grids
+ */
 type WordMap = { [key: number]: string[] };
 const ruler = ref(null);
 const props = defineProps<{
+  /**
+   * The gridss to get words from
+   */
   grids: Grid[];
+  /**
+   * What to render (margins)
+   */
   exportOptions: ExportOptions;
+  /**
+   * The styles to render list
+   */
   solutionOptions: SolutionOptions;
 }>();
-
-function makeid(length) {
-  let result = "";
-  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  const charactersLength = characters.length;
-  let counter = 0;
-  while (counter < length) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    counter += 1;
-  }
-  return result;
-}
-
-// new Array(1000).fill(0).forEach((_, i) => {
-//   const length = 2 + Math.floor(Math.random() * 7);
-//   words.push(makeid(length));
-// });
 const wordFont = computed(
   () =>
     `${props.solutionOptions.words.size} ${props.solutionOptions.words.font}`
@@ -71,9 +66,9 @@ const tolerance = 2;
 const layout = computed(() => {
   if (!props.grids || !ruler.value || !ruler.value)
     return { wordsPerPage: [], heights: [] };
-  const words = Array.from(getAllWords(props.grids)).sort(
-    (a, b) => a.length - b.length
-  ).filter(w => w.length > 1);
+  const words = Array.from(getAllWords(props.grids))
+    .sort((a, b) => a.length - b.length)
+    .filter((w) => w.length > 1);
   const r = ruler.value as HTMLDivElement;
   let bb = r.getBoundingClientRect();
   const maxX = bb.x + bb.width;
@@ -89,6 +84,7 @@ const layout = computed(() => {
 
   let wordsOnCurrentPage: (string | number)[] = [];
   const heights: string[] = [];
+  // cut the list into multiple pages using the ruler. When a word overflows the ruler => pagebreak
   const res = Object.entries(wordsMap).reduce(
     (wordsPerPage, [size, words], i, arr) => {
       [+size, ...words.sort((a, b) => a.localeCompare(b))].forEach(
@@ -115,6 +111,9 @@ const layout = computed(() => {
   );
   res.push(wordsOnCurrentPage);
   bb = r.getBoundingClientRect();
+  // TODO: this is not working properly
+  // attempt to make the page take the less height possible
+  // see https://stackoverflow.com/questions/75994487/css-how-to-make-flex-column-layout-grow-on-x-axis-first?noredirect=1#comment134032653_75994487
   const { x, y, width, height } = r.lastChild
     ? r.lastChild.getBoundingClientRect()
     : { x: 0, y: 0, width: 0, height: 0 };
@@ -131,7 +130,7 @@ const layout = computed(() => {
 
 <style lang="less">
 @media print {
-  .ruler{
+  .ruler {
     display: none;
   }
 }

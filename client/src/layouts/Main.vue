@@ -11,9 +11,21 @@
           :collapsed-icon-size="22"
           :options="menuOptions"
         />
+        <!-- @slot Slot for element in the left of the header  -->
         <slot name="header"> </slot>
       </span>
       <span class="right">
+        <n-popselect v-model:value="locale" :options="localeOptions">
+          <n-button :type="switchingLocale ? 'warning' : ''">
+            <template #icon>
+              <n-icon>
+                <LoaderIcon v-if="switchingLocale"/>
+                <LanguageOutline v-else/>
+              </n-icon>
+            </template>
+            {{ selected?.label }}
+          </n-button>
+        </n-popselect>
         <n-button
           strong
           secondary
@@ -22,7 +34,7 @@
           icon-placement="right"
           @click="exit"
         >
-          ciao
+          {{ $t("buttons.exit") }}
           <template #icon>
             <n-icon>
               <LogOutOutline />
@@ -35,10 +47,12 @@
     <div class="body">
       <div class="left-panel">
         <n-scrollbar x-scrollable>
+          <!-- @slot Slot for element in the left panel  -->
           <slot name="left-panel"> </slot>
         </n-scrollbar>
       </div>
       <n-scrollbar x-scrollable :on-scroll="onScroll" class="scroll">
+        <!-- @slot Slot for element in the main panel  -->
         <slot name="body"></slot>
       </n-scrollbar>
     </div>
@@ -47,58 +61,127 @@
 
 <script setup lang="ts">
 import { MenuOutline } from "@vicons/ionicons5";
+import LoaderIcon from "../components/LoaderIcon.vue";
 import type { MenuOption } from "naive-ui";
-import { defineProps, h, ref, defineEmits, computed } from "vue";
+import {
+  defineProps,
+  h,
+  ref,
+  defineEmits,
+  computed,
+  watchEffect,
+  onMounted,
+} from "vue";
 import { RouterLink, useRouter } from "vue-router";
-import { renderIcon } from "../js/utils";
-import { LogOutOutline } from "@vicons/ionicons5";
+import { getUrl, renderIcon } from "../js/utils";
+import { LogOutOutline, LanguageOutline } from "@vicons/ionicons5";
+import { i18n, setLanguage } from "../i18n";
+import axios from "axios";
 
+const locale = ref(i18n.global.locale);
+const nav = ref<MenuOption[]>([]);
 const router = useRouter();
-const emit = defineEmits<{ (event: "scroll"): void }>();
 const collapsed = ref(true);
+const switchingLocale = ref(false);
+const emit = defineEmits<{
+  /**
+   * Scroll within main panel
+   */
+  (event: "scroll"): void;
+}>();
+// use this to try to make sure we dont watch the whole global object
+function getNavChildren() {
+  return [
+    {
+      label: () =>
+        h(
+          RouterLink,
+          {
+            to: "/grids",
+          },
+          { default: () => i18n.global.t("nav.grids") }
+        ),
+      key: "go-back-home",
+    },
+    {
+      label: () =>
+        h(
+          RouterLink,
+          {
+            to: "/options",
+          },
+          { default: () => i18n.global.t("nav.options") }
+        ),
+      key: "go-to-options",
+    },
+    {
+      label: () =>
+        h(
+          RouterLink,
+          {
+            to: "/solutions",
+          },
+          { default: () => i18n.global.t("nav.solutions") }
+        ),
+      key: "go-to-solutions",
+    },
+    {
+      label: () =>
+        h(
+          RouterLink,
+          {
+            to: "/words",
+          },
+          { default: () => i18n.global.t("nav.words") }
+        ),
+      key: "go-to-words",
+    },
+  ];
+}
 
-const menuOptions = ref<MenuOption[]>([
+const menuOptions = computed<MenuOption[]>(() => [
   {
     label: "",
     key: "",
     icon: renderIcon(MenuOutline),
-    children: [
-      {
-        label: () =>
-          h(
-            RouterLink,
-            {
-              to: "/grids",
-            },
-            { default: () => "Grilles" }
-          ),
-        key: "go-back-home",
-      },
-      {
-        label: () =>
-          h(
-            RouterLink,
-            {
-              to: "/options",
-            },
-            { default: () => "Options" }
-          ),
-        key: "go-to-options",
-      },
-      {
-        label: () =>
-          h(
-            RouterLink,
-            {
-              to: "/solutions",
-            },
-            { default: () => "Solutions" }
-          ),
-        key: "go-to-solutions",
-      },
-    ],
+    children: nav.value,
   },
 ]);
+
+const localeOptions = ref([
+  {
+    label: "Français",
+    value: "fr-fr",
+  },
+  {
+    label: "English",
+    value: "en-en",
+  },
+  {
+    label: "Español",
+    value: "es-es",
+  },
+]);
+const selected = computed(() => {
+  return localeOptions.value.find((option) => option.value === locale.value);
+});
+function setServerLocale() {
+  switchingLocale.value = true;
+  axios.post(getUrl('set-locale'), { locale: locale.value })
+  .finally(() => {
+    switchingLocale.value = false;
+  });
+}
+watchEffect(() => {
+  localStorage.setItem("locale", locale.value);
+  setLanguage(locale.value);
+  nav.value = getNavChildren();
+  setServerLocale();
+});
+onMounted(() => {
+  nav.value = getNavChildren();
+  setServerLocale();
+});
 
 function onScroll(e: Event) {
   emit("scroll", e);
@@ -184,6 +267,7 @@ nav {
   justify-content: space-evenly;
   align-items: center;
   align-content: space-around;
+  gap: 4px;
 }
 .scroll {
   max-height: 100%;

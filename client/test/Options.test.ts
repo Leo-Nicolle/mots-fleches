@@ -11,11 +11,11 @@ import { expect } from '@playwright/test';
 
 const tests = [
   {selector: '[role=name] input', path: 'name', value: 'my-name'},
-  {selector: '[role=cell-size] input', path: 'grid.cellSize', type: '30', value: '30px'},
-  {selector: '[role=border-size] input', path: 'grid.borderSize', type: '2',value: '2px'}, 
+  {selector: '[role=cell-size] input', path: 'grid.cellSize', type: '30', value: '30'},
+  {selector: '[role=border-size] input', path: 'grid.borderSize', type: '2',value: '2'}, 
   {selector: '[role=definition-font] input', path: 'definition.font', value: 'Roboto'}, 
-  {selector: '[role=definition-size] input', path: 'definition.size', type: '8',value: '8px'}, 
-  {selector: '[role=arrow-size] input', path: 'arrow.size', type: '8',value: '8px'}, 
+  {selector: '[role=definition-size] input', path: 'definition.size', type: '8',value: '8'}, 
+  {selector: '[role=arrow-size] input', path: 'arrow.size', type: '8',value: '8'}, 
   {selector: '[role=format-width] input', path: 'paper.width', value: '10'},
   {selector: '[role=format-height] input', path: 'paper.height', value: '10'}, 
   {selector: '[role=format-margin-top] input', path: 'paper.margin.top', value: '2'},

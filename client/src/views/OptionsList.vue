@@ -8,11 +8,11 @@
     @select="(s) => (selected = s)"
   >
     <template v-slot:left-panel>
-      <h3>Options</h3>
+      <h3>{{ $t('nav.options') }}</h3>
     </template>
     <template v-slot:card-title="{ elt }">
       <span>
-        {{ elt.name ? elt.name : `Nouveau Style` }}
+        {{ elt.name ? elt.name : $t('buttons.newStyle') }}
       </span>
     </template>
     <template #card-body="{ elt }">
@@ -33,6 +33,9 @@ import "highlight.js/styles/monokai.css";
 import Layout from "../layouts/GridLayout.vue";
 import { getUrl } from "../js/utils";
 import { Grid, GridOptions } from "grid";
+/**
+ * View to display all options in a grid layout
+ */
 const router = useRouter();
 const optionsList = ref<GridOptions[]>([]);
 const selected = ref<GridOptions[]>([]);

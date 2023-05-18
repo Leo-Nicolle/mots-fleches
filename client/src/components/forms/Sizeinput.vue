@@ -7,8 +7,20 @@
 
 <script setup lang="ts">
 import { ref, defineProps, defineEmits, computed } from "vue";
-const props = defineProps<{ modelValue: string }>();
+/**
+ * Form edit a string value like "10px" or "10mm"
+ * Has a unit picker and a number input
+ */
+const props = defineProps<{ 
+  /**
+   * The value to edit
+   */
+  modelValue: string }>();
 const emit = defineEmits<{
+  /**
+   * v-model event
+   * @param value The new value
+   */
   (event: "update:modelValue", value: string): void;
 }>();
 const units = ["cm", "mm", "px", "pt", "em"];
@@ -40,7 +52,6 @@ const unit = computed<string>({
   set: (unit) => emit("update:modelValue", `${value.value}${unit}`),
 });
 
-// const value = useModel(props, emit);
 </script>
 
 <style>

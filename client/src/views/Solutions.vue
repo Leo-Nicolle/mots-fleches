@@ -20,7 +20,10 @@ import {
   defaultExportOptions,
   ExportOptions,
   
-} from "../components/svg-renderer/types";
+} from "../types";
+/**
+ * View to print solutions 
+ */
 const router = useRouter();
 const grids = ref<Grid[]>([]);
 const options = ref<SolutionOptions>();

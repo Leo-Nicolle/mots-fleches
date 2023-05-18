@@ -16,11 +16,22 @@ import { defineProps } from "vue";
 import SVGGrid from "./svg-renderer/Grid.vue";
 import Paper from "./Paper.vue";
 import { Grid, GridOptions, nullCell } from "grid";
-import { ExportOptions } from "../components/svg-renderer/types";
-
+import { ExportOptions } from "../types";
+/**
+ * Component to render a grid (for printing)
+ */
 const props = defineProps<{
+  /**
+   * The grid to render
+   */
   grid: Grid;
+  /**
+   * The styles to render the grid
+   */
   options: GridOptions;
+  /**
+   * What to export
+   */
   exportOptions: ExportOptions;
 }>();
 </script>

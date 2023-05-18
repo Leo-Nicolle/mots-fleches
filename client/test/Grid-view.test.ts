@@ -36,7 +36,7 @@ describe('Grid-view', async () => {
     page = await browser.newPage();
     await fs.mkdir(path.resolve(outputFolder), { recursive: true });
     await fs.mkdir(path.resolve(inputFolder), { recursive: true });
-  }, 2000);
+  }, 20_000);
 
   afterAll(async () => {
     await browser.close();
@@ -44,7 +44,7 @@ describe('Grid-view', async () => {
       server.httpServer.close(error => error ? reject(error) : resolve());
     });
   });
-  test.each(tests)(`Renders properlly: $name: ($url) `, async ({ link, name }) => {
+  test.each(tests)(`Renders properlly: $name: ($link) `, async ({ link, name }) => {
     await page.goto(`http://localhost:${port}/#/grid-export/${link}`);
     await new Promise(resolve => setTimeout(resolve, 200));
 

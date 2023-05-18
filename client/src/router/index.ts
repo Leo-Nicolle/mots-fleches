@@ -56,6 +56,11 @@ const routes: Array<RouteRecordRaw> = [
     name: 'logout',
     component: () => import('../views/Logout.vue')
   },
+  {
+    path: '/words',
+    name: 'words',
+    component: () => import('../views/Words.vue')
+  },
 ];
 
 const router = createRouter({

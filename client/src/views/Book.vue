@@ -15,10 +15,13 @@ import axios from "axios";
 
 import { getUrl } from "../js/utils";
 import { Grid, GridOptions, SolutionOptions } from "grid";
-import { ExportOptions } from "../components/svg-renderer/types";
+import { ExportOptions } from "../types";
 import Book from "../components/Book.vue";
+/**
+ * View to print a book of grids (with solutions and index)
+ * it uses route querry to know which grids to print
+ */
 const route = useRoute();
-
 const grids = ref<Grid[]>([]);
 const options = ref<GridOptions>();
 const solutionOptions = ref<SolutionOptions>();

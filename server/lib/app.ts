@@ -1,0 +1,53 @@
+import express from "express";
+import cors from "cors";
+import open from "open";
+import bodyParser from "body-parser";
+import { existsSync } from "fs";
+import { AddressInfo } from "net";
+import { resolve } from "./utils";
+import db from "./database";
+import wordController from "./controllers/wordController";
+import gridController from "./controllers/gridController";
+import optionsController from "./controllers/optionsController";
+import searchController from "./controllers/search-controller";
+import exitController from "./controllers/exitController";
+
+import dbController from "./controllers/db-controller";
+
+import { dico } from "./search";
+
+export function createApp() {
+  const app = express();
+  app.use(cors());
+  app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(bodyParser.json());
+  if (existsSync(resolve(__dirname, "public"))) {
+    console.log("public folder", resolve(__dirname, "public"));
+    app.use(express.static(resolve(__dirname, "public")));
+  }
+  db.getWords()
+    .then((words) => {
+      console.time("addWords to Dico");
+      dico.addWordsToDictionnary(words);
+      return dico.loadDictionary();
+    })
+    .then(() => {
+      console.timeEnd("addWords to Dico");
+    });
+  wordController({ app, db });
+  gridController({ app, db });
+  searchController({ app, db });
+  optionsController({ app, db });
+  dbController({ app, db });
+
+  const server = app.listen(+APP_CROSSWORDS_PORT || 3011, () => {
+    exitController({ app, server });
+    const url = `http://localhost:${(server.address() as AddressInfo).port}`;
+    console.log(`server running at port ${url}`);
+    if (+APP_OPEN_BROWSER) {
+      open(url);
+    }
+  });
+
+  return { app, server };
+}

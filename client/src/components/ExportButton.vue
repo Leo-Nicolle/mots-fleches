@@ -1,6 +1,6 @@
 <template>
   <div ref="exporter" class="exporter">
-    <n-button @click="print" round>Imprimer</n-button>
+    <n-button @click="print" round>{{$t('buttons.print')}}</n-button>
     <iframe class="print" :src="iframeUrl"></iframe>
   </div>
 </template>
@@ -8,15 +8,28 @@
 <script setup lang="ts">
 import { defineProps, computed } from "vue";
 import router from "../router";
-
-const props = defineProps<{ route: string, params: any }>();
+/**
+ * Component to print. It uses an iframe to print the page.
+ *
+ */
+const props = defineProps<{
+  /**
+   * The route of the page to print
+   */
+  route: string;
+  /**
+   * The params of the route
+   */
+  params: any;
+}>();
 
 function print() {
-  const iframe = document.querySelector(".print");
+  const iframe = document.querySelector("iframe.print") as HTMLIFrameElement;
+  if (!iframe || !iframe.contentWindow) return;
   iframe.contentWindow.print();
 }
 const iframeUrl = computed(() => {
-  const url =  `${window.location.origin}${
+  const url = `${window.location.origin}${
     router.resolve({
       name: props.route,
       params: props.params,

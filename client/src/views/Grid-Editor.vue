@@ -17,13 +17,17 @@ import { Grid, GridOptions } from "grid";
 import { getUrl, save } from "../js/utils";
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
-
+/**
+ * Route to edit a grid
+ * Uses the route query to get the grid id
+ */
 const grid = ref<Grid>();
 const options = ref<GridOptions>();
 
 const saveTimeout = ref(0);
 const route = useRoute();
 function fetch() {
+  console.log('fetch')
   return axios
     .get(getUrl(`grid/${route.params.id}`))
     .then(({ data }) => {
@@ -46,10 +50,10 @@ function onUpdate() {
 }
 
 function onSizeUpdate() {
+  grid.value.resize(grid.value.rows, grid.value.cols);
   clearTimeout(saveTimeout.value);
   saveTimeout.value = setTimeout(() => {
-    if (!grid.value ) return;
-    grid.value.resize(grid.value.rows, grid.value.cols);
+    if (!grid.value) return;
     save(grid.value);
   }, 50);
 }

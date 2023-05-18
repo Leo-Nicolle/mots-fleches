@@ -1,5 +1,4 @@
-# Mots Fléchés - Crosswords <img src="scripts/assets/icon.png"  width="24" height="28">
-![]()
+# Mots Fléchés - Crosswords
 
 Generateur de mots fléchés. Crosswords generator. Generator de Crucigramas.
 
@@ -16,10 +15,8 @@ Sous windows et mac il va vous falloir [nodejs](https://nodejs.org/en/download),
 ```bash
 node server.js
 ```
-
 ### Linux
 Vous pouvez soit directement lancer le serveur dans un terminal, soit installer le `.deb` [téléchargeable ici](https://github.com/octo-org/octo-repo/releases/latest)
-
 
 ## Fonctionalités
 
@@ -29,7 +26,6 @@ https://user-images.githubusercontent.com/7451806/226173711-224940ab-17fe-4495-a
 
  - Mode suggestion simple: (icone eclair). Propose tous les mots qui rentrent
  - Mode suggestion avancé (icone marteau). Ne propse que des mots qui ne bloqueront pas,( si il n'y a pas de mots avec ZZ dans le dictoinnaire, il proposera pas un mot qui une fois dans la grille donnera ZZ) 
-
 
 ### Définitions
 
@@ -46,7 +42,7 @@ https://user-images.githubusercontent.com/7451806/226175011-0e5de156-70da-4955-9
  - Format du papier (A4, A5, ou tout autre format)
  - Marges
  - Taille des cases
- - Taille/coleur/police des textes
+ - Taille/couleur/police des textes
 
 ### Export
 

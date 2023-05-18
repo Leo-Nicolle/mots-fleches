@@ -1,4 +1,5 @@
 import fs from "fs-extra";
+import { resolve } from "path";
 
 const globals = {
   APP_CROSSWORDS_WORDS_PATH: "./dist/test/db/words.txt",
@@ -10,8 +11,9 @@ const globals = {
   APP_CROSSWORDS_PORT: 3011,
 };
 Object.entries(globals).forEach(([key, value]) => {
+  value = key.endsWith("_PATH") ? resolve(value as string) : value;
   process.env[key] = value as string;
   global[key] = value as string;
 });
 
-fs.copy("test/dico/", globals.APP_CROSSWORDS_DICO_PATH);
+fs.copy(resolve("test/dico/"), resolve(globals.APP_CROSSWORDS_DICO_PATH));

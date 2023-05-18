@@ -7,7 +7,7 @@
     </n-button>
     <n-modal
       preset="dialog"
-      title="Options"
+      :title="$t('forms.options')"
       :showIcon="false"
       v-model:show="visible"
     >
@@ -16,7 +16,7 @@
       </template>
       <template #action>
         <n-form :label-width="80" :model="value">
-          <n-form-item label="Titre" path="title">
+          <n-form-item :label="$t('forms.title')" path="title">
             <n-input
               role="title"
               type="text"
@@ -24,7 +24,11 @@
               v-model:value="value.title"
             />
           </n-form-item>
-          <n-form-item label="Options" path="optionsId" v-if="opts.length">
+          <n-form-item
+            :label="$t('forms.options')"
+            path="optionsId"
+            v-if="opts.length"
+          >
             <n-select
               role="options"
               :options="opts"
@@ -33,11 +37,11 @@
               def
             />
           </n-form-item>
-          <n-form-item label="Commentaire" path="description">
+          <n-form-item :label="$t('forms.comment')" path="description">
             <n-input
               role="comment"
               type="textarea"
-              placeholder="Commentaire..."
+              :placeholder="`${$t('forms.comment')}...`"
               v-model:value="value.comment"
               :autosize="{
                 minRows: 3,
@@ -45,14 +49,23 @@
             />
           </n-form-item>
           <span class="rowcols">
-            <n-form-item label="Lignes" path="rows">
+            <n-form-item :label="$t('forms.rows')" path="rows">
               <n-input-number
                 role="rows"
                 v-model:value="value.rows"
                 :on-update:value="(v) => onUpdate('rows', v)"
               />
             </n-form-item>
-            <n-form-item label="Colones" path="grid.cols">
+            <n-form-item path="randomize">
+              <n-button
+                role="randomize"
+                @click="randomConfirmVisible = true"
+                type="warning"
+              >
+                {{ $t("forms.randomize") }}
+              </n-button>
+            </n-form-item>
+            <n-form-item :label="$t('forms.cols')" path="grid.cols">
               <n-input-number
                 role="cols"
                 v-model:value="value.cols"
@@ -61,6 +74,21 @@
             </n-form-item>
           </span>
         </n-form>
+      </template>
+    </n-modal>
+    <n-modal
+      preset="dialog"
+      :title="`${$t('forms.randomize')} ?`"
+      :showIcon="false"
+      v-model:show="randomConfirmVisible"
+    >
+      <template #action>
+        <n-button @click="randomConfirmVisible = false">{{
+          $t("buttons.no")
+        }}</n-button>
+        <n-button @click="onRandomize()" type="warning">{{
+          $t("buttons.yes")
+        }}</n-button>
       </template>
     </n-modal>
   </span>
@@ -75,22 +103,41 @@ import {
   onMounted,
   ref,
   watch,
+  watchEffect,
 } from "vue";
 import { CogOutline as CogIcon } from "@vicons/ionicons5";
 import { Grid } from "grid";
 import { getUrl } from "../../js/utils";
 import axios from "axios";
 import { useModel } from "../../js/useModel";
+import generate from "../../js/maze-generator";
+
+/**
+ * Form to edit grid metadata: rows, cols. title, comment and options
+ */
 const props = defineProps<{
+  /**
+   * The grid to edit
+   */
   modelValue: Grid;
 }>();
 const opts = ref<{ label: string; value: string }[]>([]);
+const randomConfirmVisible = ref(false);
 const visible = ref(false);
 const emit = defineEmits<{
+  /**
+   * v-model event
+   * @param value The new grid
+   */
   (event: "update:modelValue", value: Grid): void;
+  /**
+   * Grid size changed
+   */
   (event: "update-size", value: Grid): void;
-  (event: "close", value: boolean): void;
-  (event: "update"): void;
+  /**
+   * Modal open
+   */
+  (event: "open"): void;
 }>();
 const value = useModel(props, emit);
 function onUpdate(path: string, newvalue: string | number) {
@@ -99,7 +146,17 @@ function onUpdate(path: string, newvalue: string | number) {
     emit("update-size", value.value);
   });
 }
-
+function onRandomize() {
+  axios.get(getUrl("word/distribution")).then(({ data }) => {
+    generate({ grid: value.value, distribution: data });
+    emit("update-size", value.value);
+    randomConfirmVisible.value = false;
+  });
+}
+watchEffect(() => {
+  if (!visible.value) return;
+  emit("open");
+});
 watch(value.value, () => {
   if (!visible.value) return;
   emit("update:modelValue", value.value);

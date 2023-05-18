@@ -6,9 +6,11 @@
       grid,
       options
     )} ${gridTotalHeight(grid, options)}`"
-    :width="`${gridTotalWidth(grid, options)}px`"
-    :height="`${gridTotalHeight(grid, options)}px`"
+    :width="`${gridTotalWidth(grid, options) / (zoom || 1)}px`"
+    :height="`${gridTotalHeight(grid, options) / (zoom || 1)}px`"
     @click="onClick"
+    @mousemove="onMouseMove"
+    @mouseout="onMouseLeave"
     xmlns="http://www.w3.org/2000/svg"
   >
     <defs></defs>
@@ -30,7 +32,12 @@
             :y="cellAndBorderWidth(options) * cell.y"
             :width="cellWidth(options)"
             :height="cellWidth(options)"
-            :fill="cell.definition ? defBackgroundColor : 'none'"
+            :fill="
+              exportOptions.fills && cell.definition
+                ? defBackgroundColor
+                : 'none'
+            "
+            :class="highlights ? highlights.get(`${cell.y}-${cell.x}`) : ''"
           />
           <text
             :x="xText(cell)"
@@ -153,16 +160,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  defineEmits,
-  ref,
-  defineProps,
-  withDefaults,
-  computed,
-  onUpdated,
-  watchEffect,
-  onMounted,
-} from "vue";
+import { defineEmits, ref, defineProps, computed, nextTick } from "vue";
 import { getD } from "../../js/paths";
 import {
   Grid,
@@ -174,37 +172,55 @@ import {
   cellAndBorderWidth,
   borderWidth,
   cellWidth,
-  parse,
   Cell,
   nullCell,
   isSplited,
   splitIndex,
-  Direction,
   getLines,
   arrowPositions,
   ArrowDir,
 } from "grid";
-import { defaultExportOptions, ExportOptions } from "./types";
+import { ExportOptions } from "../../types";
 import { getCellClass } from "../../js/utils";
+/**
+ * Component to render a grid as an SVG
+ */
 const container = ref<SVGSVGElement>(null as unknown as SVGSVGElement);
-const props = withDefaults(
-  defineProps<{
-    grid: Grid;
-    dir: Direction;
-    options: GridOptions;
-    focus: Cell;
-    exportOptions: Partial<ExportOptions>;
-  }>(),
-  {
-    dir: "horizontal",
-    focus: nullCell,
-    highlight: false,
-    exportOptions: () => defaultExportOptions,
-  }
-);
+const props = defineProps<{
+  /**
+   * The grid to render
+   */
+  grid: Grid;
+  /**
+   * The style of the grid
+   */
+  options: GridOptions;
+  /**
+   * The focused cell (can be nullCell)
+   */
+  focus: Cell;
+  /**
+   * What to display or not (arrows, definitions, etc.)
+   */
+  exportOptions: Partial<ExportOptions>;
+  /**
+   * Highlighted cells
+   */
+  highlights?: Map<string, string>;
+  /**
+   * The zoom level
+   */
+  zoom?: number;
+}>();
 const emit = defineEmits<{
-  (event: "type", value: number): void;
+  /**
+   * Emitted when a cell is clicked
+   */
   (event: "focus", value: Cell): void;
+  /**
+   * Emitted when mousemove on a cell
+   */
+  (event: "hover", value: Cell): void;
 }>();
 const rows = computed(() =>
   new Array(props.grid.rows).fill(0).map((e, i) => i)
@@ -227,6 +243,9 @@ const defBackgroundColor = computed(
 );
 const defColor = computed(() => props.options.definition.color);
 
+/**
+ * The arrows to display
+ */
 const arrows = computed(
   () =>
     props.grid.cells
@@ -258,6 +277,9 @@ const arrows = computed(
       transform: string;
     }[]
 );
+/**
+ * The splits to display
+ */
 const splits = computed(() =>
   props.grid.cells
     .flat()
@@ -274,8 +296,8 @@ const splits = computed(() =>
             : 3 / 4
           : lines === 3
           ? split === 1
-            ? 2 / 3
-            : 1 / 3
+            ? 1 / 3
+            : 2 / 3
           : lines === 2
           ? split === 1
             ? 0.5
@@ -293,7 +315,9 @@ const splits = computed(() =>
       };
     })
 );
-
+/**
+ * The spaces to display
+ */
 const spaces = computed(() => {
   return props.grid.cells
     .flat()
@@ -330,6 +354,10 @@ function xText(cell: Cell) {
 function yText(cell: Cell) {
   return cell.y * cellAndBorderWidth(props.options);
 }
+/**
+ * For a definition cell,
+ * computes the lines to display
+ */
 function lines(cell: Cell) {
   if (!cell.definition) {
     return [
@@ -371,32 +399,40 @@ function lines(cell: Cell) {
   return res;
 }
 
-function onClick(evt: MouseEvent) {
+function getCell(evt: MouseEvent) {
   const x = evt.offsetX - outerLineStroke.value;
   const y = evt.offsetY - outerLineStroke.value;
-  const maxX = gridTotalWidth(props.grid, props.options);
-  const maxY = gridTotalHeight(props.grid, props.options);
+  const maxX = gridTotalWidth(props.grid, props.options) / (props.zoom || 1);
+  const maxY = gridTotalHeight(props.grid, props.options) / (props.zoom || 1);
   const cWidth =
     container.value && container.value.getBoundingClientRect()
       ? container.value.getBoundingClientRect().width
       : gridTotalWidth(props.grid, props.options);
   const ratio = cWidth / gridTotalWidth(props.grid, props.options);
-  if (x < 0 || y < 0 || x > maxX || y > maxY) return emit("focus", nullCell);
+  if (x < 0 || y < 0 || x > maxX || y > maxY) {
+    return nullCell;
+  }
   const cY = Math.floor(y / cellAndBorderWidth(props.options) / ratio);
   const cX = Math.floor(x / cellAndBorderWidth(props.options) / ratio);
-  const cell = props.grid.cells[cY][cX];
+  return props.grid.cells[cY][cX];
+}
+function onClick(evt: MouseEvent) {
+  const cell = getCell(evt);
+  if (!cell) return;
   emit("focus", cell);
+}
+
+function onMouseMove(evt: MouseEvent) {
+  const cell = getCell(evt);
+  if (!cell) return;
+  emit("hover", cell);
+}
+function onMouseLeave(evt: MouseEvent) {
+  const cell = getCell(evt);
+  if (!cell) return;
+  emit("hover", cell);
 }
 </script>
 
-<style scoped>
-.text.highlighted {
-  fill: #000;
-}
-.text.suggested {
-  fill: #777;
-}
-.text.highlighted > rect {
-  fill: #def;
-}
+<style>
 </style>

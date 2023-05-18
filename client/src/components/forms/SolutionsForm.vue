@@ -1,17 +1,17 @@
 <template>
-  <h3>Solutions</h3>
-  <n-form-item label="Lignes" path="rows">
+  <h3>{{ $t("forms.solutions") }}</h3>
+  <n-form-item :label="$t('forms.rows')" path="rows">
     <n-input-number role="rows" v-model:value="value.grids.rows" />
   </n-form-item>
-  <n-form-item label="Colonnes" path="cols">
+  <n-form-item :label="$t('forms.cols')" path="cols">
     <n-input-number role="cols" v-model:value="value.grids.cols" />
   </n-form-item>
-  <h3>Num grille</h3>
-  <TextStyle v-model="value.grids.gridN" />
-  <h3>Index</h3>
-  <TextStyle v-model="value.words" />
-  <h3>Taille</h3>
-  <TextStyle v-model="value.size" />
+  <h3>{{ $t("forms.gridNum") }}</h3>
+  <TextStyle v-model="value.grids.gridN" role-prefix="gridN"/>
+  <h3>{{ $t("forms.wordIndex") }}</h3>
+  <TextStyle v-model="value.words" role-prefix="wordIndex"/>
+  <h3>{{ $t("forms.wordLength") }}</h3>
+  <TextStyle v-model="value.size" role-prefix="wordLength"/>
 </template>
 
 <script setup lang="ts">
@@ -19,11 +19,20 @@ import { defineProps, defineEmits, watch } from "vue";
 import TextStyle from "./TextStyle.vue";
 import { useModel } from "../../js/useModel";
 import { SolutionOptions } from "grid";
-
+/**
+ * Form to modify SolutionOptions.
+ */
 const props = defineProps<{
+  /**
+   * The SolutionOptions to edit
+   */
   modelValue: SolutionOptions;
 }>();
 const emit = defineEmits<{
+  /**
+   * v-model event
+   * @param value The new SolutionOptions
+   */
   (event: "update:modelValue", value: SolutionOptions): void;
 }>();
 const value = useModel(props, emit);

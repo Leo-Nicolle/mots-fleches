@@ -3,7 +3,7 @@ import fs from "fs-extra";
 import path from "path";
 import axios from "axios";
 import rimraf from "rimraf";
-const words = ["aa", "bb", "cc"];
+const words = ["AA", "BB", "CC"];
 
 const grid = {
   id: "b5ee8aa3323f399c48c99e1dfe8d9216",
