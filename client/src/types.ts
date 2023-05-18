@@ -40,3 +40,4 @@ export type Handle = {
   dirs: ArrowDir[];
 }
 export type Ordering = 'best' | 'alpha' | 'inverse-alpha' | 'random';
+export type Method = 'simple' | 'accurate';

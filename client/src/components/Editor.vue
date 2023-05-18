@@ -13,7 +13,7 @@
         />
       </span>
       <span>
-        <n-button @click="onCheck">
+        <n-button @click="onModeClick">
           {{ $t(`modes.${highlightMode}`) }}
         </n-button>
       </span>
@@ -27,11 +27,17 @@
         :ordering="ordering"
         :cellProbas="cellProbas"
         :searchResult="searchResult"
+        :loading="method==='accurate' && refreshingRun"
         @hover="onHover"
         @click="onClick"
         @dir="(d) => (dir = d)"
         @mouseout="onMouseOut"
-        @methodswitch="method = method === 'simple' ? 'fastest' : 'simple'"
+        @methodswitch="
+          method =
+            methods[
+              (methods.findIndex((o) => o === method) + 1) % methods.length
+            ]
+        "
         @orderswitch="
           ordering =
             orderings[
@@ -113,6 +119,7 @@ import {
   watchEffect,
   onMounted,
   computed,
+  watch,
 } from "vue";
 import {
   AddCircleOutline,
@@ -132,11 +139,10 @@ import {
 import Layout from "../layouts/Main.vue";
 import SVGGrid from "./svg-renderer/Grid.vue";
 import GridInput from "./svg-renderer/GridInput.vue";
-import { defaultExportOptions, Ordering } from "../types";
+import { defaultExportOptions, Method, Ordering } from "../types";
 import ModalOptions from "./forms/ModalOptions.vue";
 import GridHighlight, { Mode } from "./svg-renderer/GridHighlight.vue";
 import Suggestion from "./Suggestion.vue";
-
 import { getUrl } from "../js/utils";
 import axios from "axios";
 import SearchWorker from "../search-worker/index";
@@ -173,16 +179,20 @@ const validity = ref<GridValidity>();
 const gridVersion = ref(1);
 const container = ref(null as unknown as HTMLDivElement);
 const offset = ref<[number, number]>([-10, 0]);
-const method = ref<"simple" | "fastest">("fastest");
+const method = ref<Method>("accurate");
+const methods = ref<Method[]>(["accurate", "simple"]);
 const ordering = ref<Ordering>("best");
-const orderings: Ordering[] = ["best", "alpha", "inverse-alpha", "random"];
+const orderings= ref<Ordering[]>(["best", "alpha", "inverse-alpha", "random"]);
 const zoom = ref(1);
 const highlights = ref(new Map());
 const highlightModes = ["normal", "check", "heatmap"] as Mode[];
 const highlightMode = ref<Mode>(highlightModes[2]);
 const cellProbas = ref<CellProba[][]>([]);
 const searchResult = ref<number[]>([]);
+const refreshingRun = ref(false);
+
 function refreshCellProba() {
+  refreshingRun.value = true;
   runWorker.run(props.grid);
 }
 function refreshSimpleSearch() {
@@ -194,7 +204,7 @@ const throttledRefresSimpleSearch = throttle(refreshSimpleSearch, 60);
 function onGridUpdate() {
   //refresh the children components that need it.
   gridVersion.value = gridVersion.value + 1;
-  throttledRefresCellProba();
+  // throttledRefresCellProba();
   emit("update");
 }
 function computeOffset(e) {
@@ -212,6 +222,20 @@ function onScroll(e) {
 watchEffect(() => {
   props.grid.highlight(props.grid.getBounds(focus.value, dir.value).cells);
 });
+watch(method, () => {
+  if (method.value === "accurate") {
+    if (ordering.value !== "best") {
+      ordering.value = "best";
+    }
+    orderings.value = ["best", "alpha", "inverse-alpha", "random"];
+    return throttledRefresCellProba();
+  }
+  if (ordering.value === "best") {
+    ordering.value = "alpha";
+  }
+  orderings.value = ["alpha", "inverse-alpha", "random"];
+  throttledRefresSimpleSearch();
+});
 onMounted(() => {
   computeOffset(null);
 });
@@ -221,7 +245,7 @@ function onZoomIn() {
 function onZoomOut() {
   zoom.value = Math.max(1, zoom.value - 0.1);
 }
-function onCheck() {
+function onModeClick() {
   const newIndex =
     (highlightModes.findIndex((m) => m === highlightMode.value) + 1) %
     highlightModes.length;
@@ -290,17 +314,18 @@ watchEffect(async () => {
 });
 runWorker.on("run-result", (data) => {
   cellProbas.value = data;
+  refreshingRun.value = false;
 });
 runWorker.on("bail-result", () => {
   cellProbas.value = [];
-  console.log("bail");
+  refreshingRun.value = false;
 });
 searchWorker.on("search-result", (data) => {
   searchResult.value = data;
 });
 
 watchEffect(() => {
-  if (!props.grid || !focus.value || !dir.value) return;
+  // if (!focus.value || !dir.value) return;
   throttledRefresSimpleSearch();
 });
 </script>
