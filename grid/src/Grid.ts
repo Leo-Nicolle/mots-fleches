@@ -410,6 +410,7 @@ export class Grid {
   getWords(direction: Direction) {
     const words: Bounds[] = [];
     const visited = new Set<string>();
+    const vec = Grid.getDirVec(direction);
     for (let i = 0; i < this.rows; i++) {
       for (let j = 0; j < this.cols; j++) {
         const id = `${i}-${j}`;
@@ -417,7 +418,7 @@ export class Grid {
         const bounds = this.getBounds({ x: j, y: i }, direction);
         if (bounds.length < 1) continue;
         for (let k = 0; k < bounds.length; k++) {
-          visited.add(`${bounds.start.y + k}-${bounds.start.x + k}`);
+          visited.add(`${bounds.start.y + k * vec.y}-${bounds.start.x + k * vec.x}`);
         }
         words.push(bounds);
       }
@@ -491,4 +492,5 @@ export class Grid {
     //   }, {} as Record<string, ProblemBound>)
     return { horizontal, vertical };
   }
+
 }

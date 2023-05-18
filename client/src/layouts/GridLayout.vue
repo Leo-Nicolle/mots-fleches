@@ -79,6 +79,7 @@ import {
 } from "vue";
 import { AddCircleOutline as AddIcon } from "@vicons/ionicons5";
 import Layout from "./Main.vue";
+
 /**
  * Component used to display a list of elements in a grid layout.
  * And to create, delete and select elements.

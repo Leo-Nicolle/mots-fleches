@@ -2,17 +2,12 @@
   <div ref="suggestion" class="suggestion" :version="version">
     <span class="buttons">
       <n-button icon-placement="right" @click="emit('orderswitch')">
-        <template #icon>
-          <n-icon>
-            <ArrowDown v-if="ordering === 1" />
-            <ArrowUp v-else />
-          </n-icon>
-        </template>
+        {{ orderingText() }}
       </n-button>
       <n-button icon-placement="right" @click="emit('methodswitch')">
         <template #icon>
           <n-icon>
-            <Hammer v-if="method === 'fastest'" />
+            <Hammer v-if="method === 'accurate'" />
             <Flash v-else />
           </n-icon>
         </template>
@@ -65,28 +60,22 @@ import {
 } from "@vicons/ionicons5";
 
 import axios from "axios";
-import { Direction, Vec } from "grid";
+import { CellProba, Direction, Vec } from "grid";
 import { getUrl } from "../js/utils";
+import { dico } from "../search-worker/dico";
+import { Method, Ordering } from "../types";
 /**
  * Component to display words suggestions
  */
 const results = ref([]);
 const totalResults = ref(0);
 const suggestion = ref(null);
-const loading = ref(false);
 const version = ref(0);
 let hovered = "";
-let queryPromise: CPromise<void> = CPromise.resolve();
 
 const props = defineProps<{
-  /**
-   * The letters in the current line
-   */
-  query: string;
-  /**
-   * The grid id
-   */
-  gridId: string;
+  cellProbas: CellProba[][];
+  searchResult: number[];
   /**
    * The coords of the current cell
    */
@@ -98,11 +87,15 @@ const props = defineProps<{
   /**
    * search method
    */
-  method: string;
+  method: Method;
   /**
-   * ordering asc/desc(-1|1)
+   * ordering
    */
-  ordering: number;
+  ordering: Ordering;
+  /**
+   * loading
+   */
+  loading: boolean;
 }>();
 const emit = defineEmits<{
   /**
@@ -126,66 +119,60 @@ const emit = defineEmits<{
    */
   (event: "orderswitch"): void;
 }>();
+
 function getSuggestions(
   point: Vec,
   dir: Direction,
-  ordering: number,
-  method: string,
-  gridId: string
+  ordering: Ordering,
+  method: string
 ) {
-  loading.value = false;
-  queryPromise.cancel();
-  if (!props.point) {
-    return CPromise.resolve();
+  let indexes = [];
+  if (method === "simple") {
+    indexes = props.searchResult;
+  } else if (
+    !props.cellProbas.length ||
+    !props.cellProbas[point.y] ||
+    !props.cellProbas[point.y][point.x]
+  ) {
+    indexes = [];
+  } else {
+    const { bestWordsH, bestWordsV } = props.cellProbas[point.y][point.x];
+    indexes = (dir === "horizontal" ? bestWordsH : bestWordsV) || [];
   }
-  loading.value = true;
-  queryPromise = new CPromise((resolve) => setTimeout(() => resolve(null), 200))
-    .then(() =>
-      axios.post(getUrl("search"), {
-        gridId: gridId,
-        coord: point,
-        dir: dir,
-        ordering: ordering,
-        query: "",
-        method: method,
-        max: 100,
-      })
-    )
-    .then((response) => response.data)
-    .then(({ words, cells, impossible, nbResults }) => {
-      if (!words) return;
-      loading.value = false;
-      totalResults.value = nbResults;
-      results.value = words.map((word) => ({
-        word,
-        link: `https://google.com/search?q=${word}+definition`,
-      }));
-      // this.impossibleLetters = impossible;
-      // this.selectedCells = cells;
-      // this.statusSearch = "ok";
-    })
-    .catch((e) => {
-      console.error(e);
-      // this.statusSearch = "error";
-      // this.resultLength = 0;
-      // this.selectedCells = [];
-      // this.suggestions = [];
-      // this.impossibleLetters = [];
-      loading.value = false;
+  const bestWords = indexes.reduce((acc, index) => {
+    const word = dico.words[dico.sorted[index]];
+    acc.push({
+      word,
+      link: `https://google.com/search?q=${word}+definition`,
     });
-
-  return queryPromise;
+    return acc;
+  }, []);
+  if (ordering === "alpha") {
+    bestWords.sort((a, b) => a.word.localeCompare(b.word));
+  } else if (ordering === "inverse-alpha") {
+    bestWords.sort((a, b) => b.word.localeCompare(a.word));
+  } else if (ordering === "random") {
+    bestWords.sort(() => Math.random() - 0.5);
+  }
+  totalResults.value = bestWords.length;
+  results.value = bestWords;
 }
 
+function orderingText() {
+  switch (props.ordering) {
+    case "alpha":
+      return "A-Z";
+    case "inverse-alpha":
+      return "Z-A";
+    case "best":
+      return "Score";
+    case "random":
+      return "Random";
+  }
+}
 // send request everytime props change
 watchEffect(() => {
-  getSuggestions(
-    props.point,
-    props.dir,
-    props.ordering,
-    props.method,
-    props.gridId
-  );
+  getSuggestions(props.point, props.dir, props.ordering, props.method);
 });
 
 function onMouseEvt(evt: MouseEvent, click = false) {
@@ -210,6 +197,7 @@ function onMouseEvt(evt: MouseEvent, click = false) {
 }
 .suggestion > .loading {
   flex: 1;
+  padding: 150px 0;
 }
 .buttons {
   display: flex;

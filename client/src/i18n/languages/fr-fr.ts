@@ -58,6 +58,7 @@ export const lang = {
         myWords: "Mes mots",
         grid: "Grille",
         wordLength: "Longueur des mots",
+        randomize: "Regénérer",
     },
     tooltips: {
         incomplete: "est incomplet",
@@ -74,5 +75,11 @@ export const lang = {
     logout: {
         waiting: "Déconnexion en cours...",
         success: "Déconnexion réussie.",
+    },
+    modes: {
+        normal: "Libre",
+        check: "Verification",
+        heatmap: "Probabilités",
     }
+
 };

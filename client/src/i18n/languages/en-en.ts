@@ -58,6 +58,7 @@ export const lang = {
         myWords: "My words",
         grid: "Grid",
         wordLength: "Words Length",
+        randomize: "Randomize",
     },
     tooltips: {
         incomplete: "is incomplete",
@@ -74,7 +75,12 @@ export const lang = {
     logout: {
         waiting: "Waiting for logout...",
         success: "Logout successful",
-    }
+    },
+    modes: {
+        normal: "Free",
+        check: "Check",
+        heatmap: "Heatmap",
 
+    }
     // el: enLocale.el
 };

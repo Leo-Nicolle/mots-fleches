@@ -45,10 +45,6 @@ export type SearchResult = {
    * Letters that make it impossible to find words
    */
   impossible?: string[];
-  /**
-   * The query that was used to find the words
-   */
-  query: string;
 };
 
 /**

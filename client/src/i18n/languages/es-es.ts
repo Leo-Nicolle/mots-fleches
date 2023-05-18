@@ -58,7 +58,7 @@ export const lang = {
         myWords: "Mis palabras",
         grid: "Cuadrícula",
         wordLength: "Longitud de las palabras",
-
+        randomize: "Randomizar",
     },
     tooltips: {
         incomplete: "esta incompleto",
@@ -75,5 +75,10 @@ export const lang = {
     logout: {
         wating: "Esperando a que el servidor se desconecte...",
         success: "Desconexión correcta",
+    },
+    modes: {
+        normal: "Libre",
+        check: "Verification",
+        heatmap: "Probabilidad",
     }
 };

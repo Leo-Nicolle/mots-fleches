@@ -14,7 +14,7 @@ import exitController from "./controllers/exitController";
 
 import dbController from "./controllers/db-controller";
 
-import dico from "./search/dico";
+import { dico } from "./search";
 
 export function createApp() {
   const app = express();
@@ -25,9 +25,15 @@ export function createApp() {
     console.log("public folder", resolve(__dirname, "public"));
     app.use(express.static(resolve(__dirname, "public")));
   }
-  db.getWords().then((words) => {
-    dico.addWordsToDictionnary(words);
-  });
+  db.getWords()
+    .then((words) => {
+      console.time("addWords to Dico");
+      dico.addWordsToDictionnary(words);
+      return dico.loadDictionary();
+    })
+    .then(() => {
+      console.timeEnd("addWords to Dico");
+    });
   wordController({ app, db });
   gridController({ app, db });
   searchController({ app, db });

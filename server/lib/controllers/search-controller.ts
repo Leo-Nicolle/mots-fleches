@@ -1,7 +1,6 @@
 import { Express } from "express";
 import { Database } from "../database";
-import search from "../search";
-import dico from "../search/dico";
+import { search, dico, getBestWords } from "../search";
 
 let isBusy = false;
 
@@ -66,20 +65,22 @@ export default function wordController({
     }
   });
 
-  /**
-   * Set locale
-   */
-  app.post("/set-locale", async (req, res) => {
-    const { locale } = req.body;
-    if (locale === dico.locale) return res.sendStatus(200);
-    if (["fr-fr", "en-en", "es-es"].indexOf(locale) === -1)
-      return res.sendStatus(400);
-    dico
-      .setLocale(locale)
-      .then(() => db.getWords())
-      .then((words) => {
-        dico.addWordsToDictionnary(words);
-      })
-      .then(() => res.sendStatus(200));
+
+  app.post("/search-proba", async (req, res) => {
+    const { gridId, cellProbas, coord, dir, max } = req.body;
+    const grid = await db.getGrid(gridId);
+    if (!grid) {
+      return res.sendStatus(203);
+    }
+    if (!cellProbas || cellProbas.length !== grid.rows) {
+      return res.sendStatus(203);
+    }
+    await dico.loadDictionary();
+    console.time("bestWords");
+    // const bestWords = getBestWords(grid, cellProbas, coord, dir);
+    console.timeEnd("bestWords");
+    // res.send({ nbResults: bestWords.length
+    // , words: bestWords.slice(0, max) });
+    res.send({ nbResults: 0, words: [] });
   });
 }
