@@ -58,6 +58,7 @@ export const lang = {
         myWords: "Mes mots",
         grid: "Grille",
         wordLength: "Longueur des mots",
+        randomize: "Regénérer",
     },
     tooltips: {
         incomplete: "est incomplet",

@@ -56,6 +56,15 @@
                 :on-update:value="(v) => onUpdate('rows', v)"
               />
             </n-form-item>
+            <n-form-item path="randomize">
+              <n-button
+                role="randomize"
+                @click="randomConfirmVisible = true"
+                type="warning"
+              >
+                {{ $t("forms.randomize") }}
+              </n-button>
+            </n-form-item>
             <n-form-item :label="$t('forms.cols')" path="grid.cols">
               <n-input-number
                 role="cols"
@@ -65,6 +74,21 @@
             </n-form-item>
           </span>
         </n-form>
+      </template>
+    </n-modal>
+    <n-modal
+      preset="dialog"
+      :title="`${$t('forms.randomize')} ?`"
+      :showIcon="false"
+      v-model:show="randomConfirmVisible"
+    >
+      <template #action>
+        <n-button @click="randomConfirmVisible = false">{{
+          $t("buttons.no")
+        }}</n-button>
+        <n-button @click="onRandomize()" type="warning">{{
+          $t("buttons.yes")
+        }}</n-button>
       </template>
     </n-modal>
   </span>
@@ -86,6 +110,8 @@ import { Grid } from "grid";
 import { getUrl } from "../../js/utils";
 import axios from "axios";
 import { useModel } from "../../js/useModel";
+import generate from "../../js/maze-generator";
+
 /**
  * Form to edit grid metadata: rows, cols. title, comment and options
  */
@@ -96,6 +122,7 @@ const props = defineProps<{
   modelValue: Grid;
 }>();
 const opts = ref<{ label: string; value: string }[]>([]);
+const randomConfirmVisible = ref(false);
 const visible = ref(false);
 const emit = defineEmits<{
   /**
@@ -117,6 +144,13 @@ function onUpdate(path: string, newvalue: string | number) {
   value.value[path] = newvalue;
   nextTick(() => {
     emit("update-size", value.value);
+  });
+}
+function onRandomize() {
+  axios.get(getUrl("word/distribution")).then(({ data }) => {
+    generate({ grid: value.value, distribution: data });
+    emit("update-size", value.value);
+    randomConfirmVisible.value = false;
   });
 }
 watchEffect(() => {

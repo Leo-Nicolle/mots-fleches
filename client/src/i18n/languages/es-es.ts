@@ -58,7 +58,7 @@ export const lang = {
         myWords: "Mis palabras",
         grid: "Cuadrícula",
         wordLength: "Longitud de las palabras",
-
+        randomize: "Randomizar",
     },
     tooltips: {
         incomplete: "esta incompleto",
