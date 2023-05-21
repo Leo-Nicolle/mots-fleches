@@ -31,4 +31,4 @@ class API {
   }
 }
 
-export const api = new API();
+export const api = new API('idb');
