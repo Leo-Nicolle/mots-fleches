@@ -1,5 +1,5 @@
 import { Express } from "express";
-import { Database } from "../database";
+import { FSDatabase } from "database";
 import { search, dico, getBestWords } from "../search";
 
 let isBusy = false;
@@ -13,7 +13,7 @@ export default function wordController({
   db,
 }: {
   app: Express;
-  db: Database;
+  db: FSDatabase;
 }) {
   /**
    * Get all words

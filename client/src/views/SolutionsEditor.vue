@@ -25,18 +25,15 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
-import axios from "axios";
 import Layout from "../layouts/Main.vue";
 import ExportButton from "../components/ExportButton.vue";
 import OptionsForm from "../components/forms/Options.vue";
 import SolutionsPaper from "../components/Solutions.vue";
 import WordsIndex from "../components/WordsIndex.vue";
-
 import SolutionsForm from "../components/forms/SolutionsForm.vue";
-
-import { getUrl, save } from "../js/utils";
 import { Grid, SolutionOptions } from "grid";
 import { defaultExportOptions, ExportOptions } from "../types";
+import { api } from "../api";
 /**
  * View to edit solutions options
  */
@@ -56,17 +53,17 @@ function fetch() {
     ? Promise.all(
         (route.query.ids as string)
           .split(",")
-          .map((id) => axios.get(getUrl(`grid/${id}`)).then(({ data }) => data))
-      ).then((data) => {
-        grids.value = data.map((g) => Grid.unserialize(JSON.stringify(g)));
+          .map((id) => api.getGrid(id))
+      ).then((gs) => {
+        grids.value = gs;
       })
-    : axios.get(getUrl("grid")).then(({ data }) => {
-        grids.value = data.map((g) => Grid.unserialize(JSON.stringify(g)));
+    : api.getGrids().then(gs => {
+        grids.value = gs;
       });
   return promise
-    .then(() => axios.get(getUrl(`options/solution`)))
-    .then(({ data }) => {
-      options.value = data;
+    .then(() => api.db.getOption("solution"))
+    .then((opts) => {
+      options.value = opts as SolutionOptions;
     })
     .catch((e) => {
       console.error("E", e);

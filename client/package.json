@@ -20,6 +20,7 @@
     "chroma-js": "^2.4.2",
     "core-js": "^3.8.3",
     "crypto": "^1.0.1",
+    "database": "file:../database",
     "grid": "file:../grid",
     "lodash.throttle": "^4.1.1",
     "naive-ui": "^2.34.3",

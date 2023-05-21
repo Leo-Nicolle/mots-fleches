@@ -1,5 +1,5 @@
 import { Express } from "express";
-import { Database } from "../database";
+import { FSDatabase } from "database";
 
 /**
  * Controler for database operations
@@ -9,7 +9,7 @@ export default function dbController({
   db,
 }: {
   app: Express;
-  db: Database;
+  db: FSDatabase;
 }) {
   /**
    * Reload the database

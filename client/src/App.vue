@@ -18,6 +18,7 @@
 import { onMounted, ref } from "vue";
 import { getUrl } from "./js/utils";
 import axios from "axios";
+import './api';
 /**
  * Main Component: handles the alert toaster for server disconnection
  */

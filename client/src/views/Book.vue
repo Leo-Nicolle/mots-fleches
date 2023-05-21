@@ -11,12 +11,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
-import axios from "axios";
-
-import { getUrl } from "../js/utils";
 import { Grid, GridOptions, SolutionOptions } from "grid";
 import { ExportOptions } from "../types";
 import Book from "../components/Book.vue";
+import { api } from "../api";
 /**
  * View to print a book of grids (with solutions and index)
  * it uses route querry to know which grids to print
@@ -35,21 +33,21 @@ function fetch() {
     ? Promise.all(
         (route.query.ids as string)
           .split(",")
-          .map((id) => axios.get(getUrl(`grid/${id}`)).then(({ data }) => data))
-      ).then((data) => {
-        grids.value = data.map((g) => Grid.unserialize(JSON.stringify(g)));
+          .map((id) => api.getGrid(id))
+      ).then((gs) => {
+        grids.value = gs;
       })
-    : axios.get(getUrl("grid")).then(({ data }) => {
-        grids.value = data.map((g) => Grid.unserialize(JSON.stringify(g)));
+    : api.getGrids().then((gs) => {
+        grids.value = gs;
       });
   return promise
-    .then(() => axios.get(getUrl(`options/solution`)))
-    .then(({ data }) => {
-      solutionOptions.value = data;
+    .then(() => api.db.getOption("solution"))
+    .then((solutions) => {
+      solutionOptions.value = solutions as SolutionOptions;
     })
-    .then(() => axios.get(getUrl(`options/default`)))
-    .then(({ data }) => {
-      options.value = data;
+    .then(() => api.db.getOption("default"))
+    .then((opts) => {
+      options.value = opts as GridOptions;
     })
     .catch((e) => {
       console.error("E", e);

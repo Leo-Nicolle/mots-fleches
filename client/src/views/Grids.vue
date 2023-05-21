@@ -46,6 +46,7 @@ import { defaultExportOptions } from "../types";
 import { getUrl } from "../js/utils";
 import { Grid, GridOptions, nullCell } from "grid";
 import generate from "../js/maze-generator";
+import { api } from "../api";
 /**
  * View to display all grids in a grid layout
  */
@@ -58,20 +59,16 @@ const params = computed(() => {
   return { ids: selected.value.map((s) => s.id).join(",") };
 });
 function fetch() {
-  return axios
-    .get(getUrl("grid"))
-    .then(({ data }) => {
-      grids.value = data.map((g) => Grid.unserialize(JSON.stringify(g)));
+  return api
+    .getGrids()
+    .then((gs) => {
+      grids.value = gs;
     })
     .then(() =>
-      Promise.all(
-        grids.value.map((grid) =>
-          axios.get(getUrl(`options/${grid.optionsId}`))
-        )
-      )
+      Promise.all(grids.value.map((grid) => api.db.getOption(grid.optionsId)))
     )
-    .then((responses) => {
-      options.value = responses.map((r) => r.data);
+    .then((opts) => {
+      options.value = opts as GridOptions[];
     })
     .catch((e) => {
       console.error("E", e);
@@ -85,9 +82,9 @@ function onExportClick() {
   });
 }
 function onDelete() {
-  Promise.all(
-    selected.value.map((grid) => axios.delete(getUrl(`grid/${grid.id}`)))
-  ).then(() => fetch());
+  Promise.all(selected.value.map((grid) => api.db.deleteGrid(grid.id))).then(
+    () => fetch()
+  );
 }
 
 function createGrid() {
@@ -98,7 +95,7 @@ function createGrid() {
     .then(({ data }) => {
       generate({ grid: newGrid, distribution: data });
     })
-    .then(() => axios.post(getUrl("grid"), { grid: newGrid.serialize() }))
+    .then(() => api.db.pushGrid(newGrid))
     .then(() => fetch());
 }
 

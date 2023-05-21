@@ -8,11 +8,11 @@
     @select="(s) => (selected = s)"
   >
     <template v-slot:left-panel>
-      <h3>{{ $t('nav.options') }}</h3>
+      <h3>{{ $t("nav.options") }}</h3>
     </template>
     <template v-slot:card-title="{ elt }">
       <span>
-        {{ elt.name ? elt.name : $t('buttons.newStyle') }}
+        {{ elt.name ? elt.name : $t("buttons.newStyle") }}
       </span>
     </template>
     <template #card-body="{ elt }">
@@ -26,13 +26,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import axios from "axios";
 import { newOptions } from "grid";
 import VueHighlightJS from "vue3-highlightjs";
 import "highlight.js/styles/monokai.css";
 import Layout from "../layouts/GridLayout.vue";
-import { getUrl } from "../js/utils";
 import { Grid, GridOptions } from "grid";
+import { api } from "../api";
 /**
  * View to display all options in a grid layout
  */
@@ -41,9 +40,9 @@ const optionsList = ref<GridOptions[]>([]);
 const selected = ref<GridOptions[]>([]);
 
 function fetch() {
-  return axios
-    .get(getUrl("options"))
-    .then(({ data }) => {
+  return api.db
+    .getOptions()
+    .then((data) => {
       optionsList.value = data;
     })
     .catch((e) => {
@@ -52,16 +51,12 @@ function fetch() {
 }
 function onDelete() {
   Promise.all(
-    selected.value.map((option, i) =>
-      axios.delete(getUrl(`options/${option.id}`))
-    )
+    selected.value.map((option, i) => api.db.deleteOption(option.id))
   ).then(() => fetch());
 }
 
 function createOptions() {
-  return axios
-    .post(getUrl("options"), { options: newOptions() })
-    .then(() => fetch());
+  return api.db.pushOption(newOptions()).then(() => fetch());
 }
 
 onMounted(() => {

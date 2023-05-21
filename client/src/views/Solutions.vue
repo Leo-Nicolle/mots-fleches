@@ -11,18 +11,12 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import axios from "axios";
 import SolutionsPaper from "../components/Solutions.vue";
-
-import { getUrl } from "../js/utils";
-import {  Grid, GridOptions,SolutionOptions } from "grid";
-import {
-  defaultExportOptions,
-  ExportOptions,
-  
-} from "../types";
+import { Grid, GridOptions, SolutionOptions } from "grid";
+import { defaultExportOptions, ExportOptions } from "../types";
+import { api } from "../api";
 /**
- * View to print solutions 
+ * View to print solutions
  */
 const router = useRouter();
 const grids = ref<Grid[]>([]);
@@ -35,14 +29,14 @@ const exportOptions = ref<ExportOptions>({
 });
 
 function fetch() {
-  return axios
-    .get(getUrl("grid"))
-    .then(({ data }) => {
-      grids.value = data.map((g) => Grid.unserialize(JSON.stringify(g)));
+  return api
+    .getGrids()
+    .then((gs) => {
+      grids.value = gs as Grid[];
     })
-    .then(() => axios.get(getUrl(`options/solution`)))
-    .then(({ data }) => {
-      options.value = data;
+    .then(() => api.db.getOption("solution"))
+    .then((opts) => {
+      options.value = opts as SolutionOptions;
     })
     .catch((e) => {
       console.error("E", e);
@@ -54,6 +48,5 @@ onMounted(() => {
 </script>
 
 <style scoped>
-
 </style>
 

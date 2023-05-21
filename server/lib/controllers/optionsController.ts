@@ -1,6 +1,6 @@
 import { body, validationResult } from "express-validator";
 import { Express } from "express";
-import { Database } from "../database";
+import { FSDatabase } from "database";
 
 /**
  * Controller for CRUD operations on options
@@ -10,7 +10,7 @@ export default function gridController({
   db,
 }: {
   app: Express;
-  db: Database;
+  db: FSDatabase;
 }) {
   /**
    * Get all options

@@ -8,13 +8,13 @@
 </template>
 
 <script setup lang="ts">
-import axios from "axios";
 import GridPaper from "../components/GridPaper.vue";
 import { Grid, GridOptions } from "grid";
-import { getUrl, mergeRouteWithDefault } from "../js/utils";
+import { mergeRouteWithDefault } from "../js/utils";
 import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 import { defaultExportOptions } from "../types";
+import { api } from "../api";
 /**
  * View to print a grid
  * Uses route params to know which grid to print
@@ -27,14 +27,14 @@ const exportOptions = computed(() =>
 );
 console.log("exportOptions", exportOptions.value);
 function fetch() {
-  return axios
-    .get(getUrl(`grid/${route.params.id}`))
-    .then(({ data }) => {
-      grid.value = Grid.unserialize(JSON.stringify(data));
-      return axios.get(getUrl(`options/${grid.value.optionsId}`));
+  return api
+    .getGrid(route.params.id as string)
+    .then((g) => {
+      grid.value = g as Grid;
+      return api.db.getOption(grid.value.optionsId);
     })
-    .then(({ data }) => {
-      options.value = data;
+    .then((opts) => {
+      options.value = opts;
     })
     .catch((e) => {
       console.error("E", e);

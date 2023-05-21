@@ -34,7 +34,6 @@
 </template>
 
 <script setup lang="ts">
-import axios from "axios";
 import GridPaper from "../components/GridPaper.vue";
 import ExportButton from "../components/ExportButton.vue";
 import ExportSVGButton from "../components/ExportSVG.vue";
@@ -43,9 +42,9 @@ import GridForm from "../components/forms/GridForm.vue";
 import Layout from "../layouts/Main.vue";
 import { defaultExportOptions } from "../types";
 import { Grid, GridOptions } from "grid";
-import { getUrl } from "../js/utils";
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
+import { api } from "../api";
 /**
  * View to edit a grid style
  */
@@ -55,11 +54,11 @@ const saveTimeout = ref(0);
 const route = useRoute();
 function fetch() {
   return Promise.all([
-    axios.get(getUrl(`grid`)),
-    axios.get(getUrl(`options/${route.params.id}`)),
+    api.getGrids(),
+    api.db.getOption(route.params.id as string),
   ])
-    .then(([{ data: grids }, { data: opts }]) => {
-      grid.value = Grid.unserialize(JSON.stringify(grids[0]));
+    .then(([grids, opts]) => {
+      grid.value = grids[0];
       options.value = opts;
     })
     .catch((e) => {
@@ -71,9 +70,7 @@ function onUpdate() {
   clearTimeout(saveTimeout.value);
   saveTimeout.value = setTimeout(() => {
     if (!options.value) return;
-    axios.post(getUrl(`options`), {
-      options: options.value,
-    });
+    api.db.pushOption(options.value);
   }, 100);
 }
 

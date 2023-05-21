@@ -1,6 +1,6 @@
 import { body, validationResult } from "express-validator";
 import { Express } from "express";
-import { Database } from "../database";
+import { FSDatabase } from "database";
 import { Grid } from "grid";
 import { getCellProbas, dico, getCellBest, getCellProbas2 } from "../search";
 /**
@@ -11,7 +11,7 @@ export default function wordController({
   db,
 }: {
   app: Express;
-  db: Database;
+  db: FSDatabase;
 }) {
   let uuid = 1;
   let currLocale = "fr-fr";

@@ -10,15 +10,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
-import axios from "axios";
 import WordsIndex from "../components/WordsIndex.vue";
-
-import { getUrl } from "../js/utils";
 import { Grid, GridOptions, SolutionOptions } from "grid";
-import {
-  defaultExportOptions,
-  ExportOptions,
-} from "../types";
+import { defaultExportOptions, ExportOptions } from "../types";
+import { api } from "../api";
 const grids = ref<Grid[]>([]);
 const options = ref<SolutionOptions>();
 const exportOptions = ref<ExportOptions>({
@@ -28,14 +23,14 @@ const exportOptions = ref<ExportOptions>({
 });
 
 function fetch() {
-  return axios
-    .get(getUrl("grid"))
-    .then(({ data }) => {
-      grids.value = data.map((g) => Grid.unserialize(JSON.stringify(g)));
+  return api
+    .getGrids()
+    .then((gs) => {
+      grids.value = gs;
     })
-    .then(() => axios.get(getUrl(`options/solution`)))
-    .then(({ data }) => {
-      options.value = data;
+    .then(() => api.db.getOption("solution"))
+    .then((opts) => {
+      options.value = opts as SolutionOptions;
     })
     .catch((e) => {
       console.error("E", e);

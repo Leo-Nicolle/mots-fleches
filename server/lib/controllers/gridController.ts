@@ -1,6 +1,7 @@
 import { body, validationResult } from "express-validator";
 import { Express } from "express";
-import { Database } from "../database";
+import { FSDatabase } from "database";
+import { Grid } from "grid";
 
 /**
  * Controller for CRUD operations on grids
@@ -10,7 +11,7 @@ export default function gridController({
   db,
 }: {
   app: Express;
-  db: Database;
+  db: FSDatabase;
 }) {
   /**
    * Get all grids
@@ -39,7 +40,7 @@ export default function gridController({
     }
     let id;
     try {
-      id = await db.updateGrid(req.body.grid);
+      id = await db.updateGrid(Grid.unserialize(req.body.grid));
     } catch (e) {
       console.log("error", e);
       return res.status(500).send(e.message);

@@ -1,0 +1,30 @@
+{
+  "name": "database",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "dist/fsdb.js",
+  "types": "dist/types/index.d.ts",
+  "browser": "./dist/clientdb.js",
+  "scripts": {
+    "dev": "vite",
+    "prebuild": "rm -rf dist",
+    "build:server": "vite build -c vite.config-server.js",
+    "build": "vite build -c vite.config-client.js && vite build -c vite.config-server.js",
+    "postbuild": "npm run types",
+    "types": "tsc --d -emitDeclarationOnly --outDir dist/types",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.4.0",
+    "grid": "file:../grid",
+    "idb": "^7.1.1"
+  },
+  "devDependencies": {
+    "rollup-plugin-node": "^0.2.1",
+    "typescript": "^5.0.4",
+    "vite": "^4.3.8"
+  }
+}

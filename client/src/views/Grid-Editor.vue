@@ -11,12 +11,11 @@
 </template>
 
 <script setup lang="ts">
-import axios from "axios";
 import Editor from "../components/Editor.vue";
 import { Grid, GridOptions } from "grid";
-import { getUrl, save } from "../js/utils";
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
+import { api } from "../api";
 /**
  * Route to edit a grid
  * Uses the route query to get the grid id
@@ -27,15 +26,14 @@ const options = ref<GridOptions>();
 const saveTimeout = ref(0);
 const route = useRoute();
 function fetch() {
-  console.log('fetch')
-  return axios
-    .get(getUrl(`grid/${route.params.id}`))
-    .then(({ data }) => {
-      grid.value = Grid.unserialize(JSON.stringify(data));
-      return axios.get(getUrl(`options/${grid.value.optionsId}`));
+  console.log('fetch');
+  return api.getGrid(route.params.id as string)
+  .then((g) => {
+      grid.value = g as Grid;
+      return api.db.getOption(grid.value.optionsId);
     })
-    .then(({ data }) => {
-      options.value = data;
+    .then((opts) => {
+      options.value = opts;
     })
     .catch((e) => {
       console.error("E", e);
@@ -45,7 +43,7 @@ function onUpdate() {
   clearTimeout(saveTimeout.value);
   saveTimeout.value = setTimeout(() => {
     if (!grid.value) return;
-    save(grid.value);
+    api.db.pushGrid(grid.value);
   }, 50);
 }
 
@@ -54,7 +52,7 @@ function onSizeUpdate() {
   clearTimeout(saveTimeout.value);
   saveTimeout.value = setTimeout(() => {
     if (!grid.value) return;
-    save(grid.value);
+    api.db.pushGrid(grid.value);
   }, 50);
 }
 onMounted(() => {
