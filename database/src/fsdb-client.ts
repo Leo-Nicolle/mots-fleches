@@ -80,4 +80,8 @@ export class FsdbClient extends Database {
       .then(({ data }) => data as void);
   }
 
+  async isSignedIn() {
+    return Promise.resolve(true);
+  }
+
 }

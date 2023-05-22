@@ -10,7 +10,7 @@
     "dev": "vite",
     "prebuild": "rm -rf dist",
     "build:server": "vite build -c vite.config-server.js",
-    "build:client": "vite build -c vite.config-cient.js",
+    "build:client": "vite build -c vite.config-client.js",
     "dev:server": "vite build -c vite.config-server.js -w",
     "dev:client": "vite build -c vite.config-client.js -w",
     "build": "npm run build:client && npm run build:server",
@@ -21,6 +21,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@supabase/supabase-js": "^2.22.0",
     "axios": "^1.4.0",
     "grid": "file:../grid",
     "idb": "^7.1.1"

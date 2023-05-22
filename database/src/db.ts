@@ -15,4 +15,6 @@ export abstract class Database {
   abstract getWord(wordId: string) : Promise<string | undefined>;
   abstract pushWord(word: any) : Promise<string>;
   abstract deleteWord(wordId: string) : Promise<void>;
+  abstract isSignedIn() : Promise<boolean>;
+
 }

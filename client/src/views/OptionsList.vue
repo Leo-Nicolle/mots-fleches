@@ -56,7 +56,8 @@ function onDelete() {
 }
 
 function createOptions() {
-  return api.db.pushOption(newOptions()).then(() => fetch());
+  return api.supadb.pushOption(newOptions()).then(() => fetch());
+  // return api.db.pushOption(newOptions()).then(() => fetch());
 }
 
 onMounted(() => {

@@ -279,4 +279,9 @@ export class FSDatabase extends Database {
       })
       .then(() => this.saveGrids());
   }
+
+  async isSignedIn() {
+    return Promise.resolve(true);
+  }
+
 }

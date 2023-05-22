@@ -72,7 +72,6 @@ export class Idatabase extends Database {
     return await this.loadingPromise.then((db) =>
       db.getAllFromIndex('grids', 'by-id')
     ).then((grid) => {
-      console.log(grid);
       return grid;
     });
 
@@ -149,5 +148,8 @@ export class Idatabase extends Database {
     return await this.loadingPromise.then((db) =>
       db.delete('words', wordId)
     );
+  }
+  async isSignedIn() {
+    return Promise.resolve(true);
   }
 }
