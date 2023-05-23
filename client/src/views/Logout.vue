@@ -14,33 +14,32 @@ import { ref, onMounted } from "vue";
 import axios from "axios";
 import LoaderIcon from "../components/LoaderIcon.vue";
 import { getUrl } from "../js/utils";
+import { api } from "../api";
+import { useRouter } from "vue-router";
 /**
  * View to logout and close the server
  */
+const router = useRouter();
 const closed = ref(false);
 const message = ref<string>("waiting");
-function ping(): Promise<any> {
-  return axios.get(getUrl("ping"));
-}
 function exit() {
-  return axios.get(getUrl("kill"));
+  if (api.mode === 'supadb'){
+    return api.supadb.supabase.auth.signOut();
+  } 
+  return Promise.resolve(); 
+  
 }
 
 onMounted(() => {
   setTimeout(() => {
-    exit();
+    exit()
+    .then(() => {
+      message.value = "success";
+      closed.value = true;
+      router.push('/login');
+    });
   }, 500);
-  const interval = setInterval(() => {
-    ping()
-      .then(() => {
-        message.value = "waiting";
-      })
-      .catch(() => {
-        closed.value = true;
-        message.value = "success";
-        clearInterval(interval);
-      });
-  }, 1000);
+
 });
 </script>
 

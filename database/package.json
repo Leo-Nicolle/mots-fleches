@@ -7,7 +7,6 @@
   "types": "dist/types/index.d.ts",
   "browser": "./dist/clientdb.js",
   "scripts": {
-    "dev": "vite",
     "prebuild": "rm -rf dist",
     "build:server": "vite build -c vite.config-server.js",
     "build:client": "vite build -c vite.config-client.js",

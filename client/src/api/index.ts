@@ -6,12 +6,12 @@ class API {
   public idb: Idatabase;
   public fsdb: FsdbClient;
   public supadb: SupaDB;
-  public mode: string = 'fsdb';
+  public _mode: string = 'fsdb';
   constructor(mode: string = 'fsdb') {
     this.idb = new Idatabase();
     this.fsdb = new FsdbClient(getUrl('').slice(0, -1));
     this.supadb = new SupaDB('https://tnvxmrqhkdlynhtdzmpw.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRudnhtcnFoa2RseW5odGR6bXB3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODIyNTM0MTEsImV4cCI6MTk5NzgyOTQxMX0.4PczPPAxbkwBvig7NTHNbR8JumuwPPqfyS_kGnkxP5I');
-    this.mode = mode;
+    this._mode = mode;
   }
 
   get db() {
@@ -22,6 +22,14 @@ class API {
     } else {
       return this.idb;
     }
+  }
+
+  set mode(mode: string) {
+    localStorage.setItem('db-mode', mode);
+    this._mode = mode;
+  }
+  get mode() {
+    return this._mode;
   }
 
   getGrids() {
@@ -39,4 +47,4 @@ class API {
   }
 }
 
-export const api = new API('supadb');
+export const api = new API(localStorage.getItem('db-mode') || 'fsdb');

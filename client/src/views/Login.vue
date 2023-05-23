@@ -30,10 +30,14 @@
           <n-button class="login-btn" type="info" @click="createAccount"
             >Create an account</n-button
           >
+          <n-button class="login-btn" type="primary" @click="localMode"
+            >Local Mode</n-button
+          >
         </div>
       </template>
 
       <template #action>
+        Login via github:
         <div class="third-parties">
           <n-button circle @click="() => login('github')">
             <n-icon size="2em">
@@ -83,7 +87,15 @@ async function login(method: string) {
   const { data, error } = api.supadb.supabase.auth.signInWithOAuth({
     provider: method,
   });
-  console.log(data, error);
+  if (error){
+    alert.value = { type: "error", id: "wrongpassword" };
+    setTimeout(() => {
+      alert.value = false;
+    }, 3000);
+  } else {
+    api.mode = 'supadb';
+    router.push("/grids");
+  }
 }
 async function emailLogin() {
   const { data, error } = await api.supadb.supabase.auth.signInWithPassword({
@@ -95,12 +107,17 @@ async function emailLogin() {
     setTimeout(() => {
       alert.value = false;
     }, 3000);
-    console.log(error);
   } else {
+    api.mode = 'supadb';
     router.push("/grids");
-    console.log(data);
   }
 }
+
+async function localMode() {
+  api.mode = 'idb';
+  router.push('/grids');
+}
+
 </script>
 
 <style scoped>
@@ -110,6 +127,7 @@ async function emailLogin() {
   align-items: center;
   justify-content: center;
   height: 100vh;
+  width: 100vw;
 }
 .login {
   max-width: 400px;

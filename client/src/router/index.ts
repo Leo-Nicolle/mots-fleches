@@ -1,4 +1,5 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
+import {api} from '../api';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -71,6 +72,16 @@ const routes: Array<RouteRecordRaw> = [
 const router = createRouter({
   history: createWebHashHistory(),
   routes
+});
+
+router.beforeEach(async (to, from) => {
+  const isSignedin = await api.isSignedIn();
+  if (
+    !isSignedin &&
+    to.name !== 'login'
+  ) {
+    return { name: 'login' };
+  }
 });
 
 export default router;
