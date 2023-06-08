@@ -5,18 +5,21 @@ import { api } from "../api";
 
 export type Events = {
   'run-result': CellProba[][];
-  'search-result': number[];
+  'search-result': string[];
   'bail-result': undefined;
 }
 
-export default class SearchWorker extends EventEmitter<Events> {
-  public worker: Worker;
-  private busy: boolean = false;
-  private queue: { type: string, data: string }[] = [];
+class WorkerController extends EventEmitter<Events> {
+  public searchWorker: Worker;
+  public probaWorker: Worker;
+  private busy: boolean[] = [false, false];
+  private queues: { type: string, data: string }[][] = [[], []];
   private flagsBuffer: SharedArrayBuffer;
-  private flagsArray: Int8Array;
+  private flagsArray: Uint8Array;
   private wordsBuffer: SharedArrayBuffer;
   private wordsArray: Uint8Array;
+  private searchWorkerId = 0;
+  private probaWorkerId = 1;
 
   /* setting data */
   /* sending the buffer (copy) to worker */
@@ -27,20 +30,21 @@ export default class SearchWorker extends EventEmitter<Events> {
     }
     if (crossOriginIsolated) {
       this.flagsBuffer = new SharedArrayBuffer(1);
-      this.flagsArray = new Int8Array(this.flagsBuffer);
+      this.flagsArray = new Uint8Array(this.flagsBuffer);
       this.flagsArray[0] = 0;
-      this.wordsBuffer = new SharedArrayBuffer(0);
+      this.wordsBuffer = new SharedArrayBuffer(1);
       this.wordsArray = new Uint8Array(this.wordsBuffer);
       this.wordsArray[0] = 0;
     } else {
       throw new Error('SharedArrayBuffer is not supported');
     }
+    this.searchWorker = new Worker(new URL('./worker', import.meta.url), { type: 'module' });
+    this.probaWorker = new Worker(new URL('./worker', import.meta.url), { type: 'module' });
 
-    this.worker = new Worker(new URL('./search-worker', import.meta.url), { type: 'module' });
     // this.worker.postMessage(this.sharedBuffer);
-    this.worker.addEventListener('message', (evt) => this.onMessage(evt));
+    this.searchWorker.addEventListener('message', (evt) => this.onMessage(this.searchWorkerId, evt));
+    this.probaWorker.addEventListener('message', (evt) => this.onMessage(this.probaWorkerId, evt));
     this.loadWords('fr-fr');
-
   }
 
   search(grid: Grid, coords: Vec, dir: Direction) {
@@ -48,29 +52,28 @@ export default class SearchWorker extends EventEmitter<Events> {
       JSON.stringify({
         grid: grid.serialize(),
         coords, dir
-      }));
-
+      }), this.searchWorkerId);
   }
 
   run(grid: Grid) {
-    this._postMessage('run', grid.serialize());
+    this._postMessage('run', grid.serialize(), this.probaWorkerId);
   }
 
-  _postMessage(type: string, data: string) {
-    if (this.busy) {
-      this.queue.push({ type, data });
+  _postMessage(type: string, data: string, workerId: number) {
+    if (this.busy[workerId]) {
+      this.queues[workerId].push({ type, data });
       this.flagsArray[0] = 1;
       return;
     }
-    this.busy = true;
+    this.busy[workerId] = true;
     this.flagsArray[0] = 0;
-    this.worker.postMessage({ type, data });
+    const ww = workerId === this.probaWorkerId ? this.probaWorker : this.searchWorker;
+    ww.postMessage({ type, data });
   }
 
-  onMessage(event: MessageEvent) {
+  onMessage(workerId: number, event: MessageEvent) {
     const { type, data } = event.data;
-    console.log('message', type);
-    this.busy = false;
+    this.busy[workerId] = false;
     if (type === 'search-result') {
       this.emit('search-result', data);
     }
@@ -80,22 +83,22 @@ export default class SearchWorker extends EventEmitter<Events> {
     if (type === 'bail-result') {
       this.emit('bail-result');
     }
-
-    if (this.queue.length > 0) {
-      const { type, data } = this.queue[this.queue.length - 1];
+    const queue = this.queues[workerId];
+    if (queue.length > 0) {
+      const { type, data } = queue[queue.length - 1];
       // give up all the other works
-      this.queue = [];
-      // this._postMessage(type, data);
+      this.queues[workerId] = [];
     }
   }
 
   bail() {
-    if (!this.busy) return;
+    if (!this.busy[this.probaWorkerId]) return;
     this.flagsArray[0] = 1;
   }
 
   destroy() {
-    this.worker.terminate();
+    this.probaWorker.terminate();
+    this.searchWorker.terminate();
     this.removeAllListeners();
   }
 
@@ -112,7 +115,7 @@ export default class SearchWorker extends EventEmitter<Events> {
             const localName = path.split('/')[1];
             if (!value.length || !localName.length) return acc;
             if (!acc[localName]) { acc[localName] = []; }
-            acc[localName].push(new TextDecoder().decode(value));
+            acc[localName].push(new TextDecoder().decode(value).trim());
             return acc;
           }, {} as Record<string, string[]>);
         resolve(locales);
@@ -126,12 +129,11 @@ export default class SearchWorker extends EventEmitter<Events> {
       api.db.getWords() as Promise<string[]>
     ])
     .then(([locales, words]) => {
-      words.push('COUCOU');
-      words.push('CACAHOUETE');
       locales[locale]
       .forEach(locale => {
-        for (let i =0; i< locale.length; i++){
-          words.push(locale[i]);
+        const wordsInLocale = locale.split(',');
+        for (let i =0; i< wordsInLocale.length; i++){
+          words.push(wordsInLocale[i]);
         }
       });
       const encoded = new TextEncoder().encode(words.join(','));
@@ -140,9 +142,10 @@ export default class SearchWorker extends EventEmitter<Events> {
       for (let i = 0; i < encoded.byteLength; i++){
         this.wordsArray[i] = encoded[i];
       }
-      // this.wordsArray.set(encoded);
-      console.log(this.wordsArray);
-      this.worker.postMessage({flags: this.flagsBuffer, words: this.wordsBuffer});
+      this.searchWorker.postMessage({flags: this.flagsBuffer, words: this.wordsBuffer});
+      this.probaWorker.postMessage({flags: this.flagsBuffer, words: this.wordsBuffer});
     });
   }
 }
+
+export const workerController = new WorkerController();

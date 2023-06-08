@@ -1,20 +1,11 @@
 
 import { dico } from './dico';
 import { getCellProbas } from './heatmap';
-import { Direction, Grid } from 'grid';
+import { Grid } from 'grid';
 import { getWordsSimple } from './search';
 
 let options = { sharedArray: new Int8Array(1) };
-export function run(grid: Grid) {
-  return getCellProbas(grid, options);
-}
-
-export function search(grid: Grid, coords: {x: number, y: number}, dir: Direction) {
-  return getWordsSimple({grid, coords, dir});
-
-}
 onmessage = function (e) {
-
   const { type, data } = e.data;
   if (e.data.words && e.data.flags){
     const {words, flags} = e.data as {words: ArrayBuffer, flags: ArrayBuffer};
@@ -26,7 +17,7 @@ onmessage = function (e) {
   }
   if (type === 'run') {
     const grid = Grid.unserialize(data);
-    const {cellProbas, hasBailed} = run(grid);
+    const {cellProbas, hasBailed} = getCellProbas(grid, options);
     if (hasBailed){
       return postMessage({ type: 'bail-result'});
     }
@@ -35,7 +26,7 @@ onmessage = function (e) {
   if (type === 'search') {
     const {grid: gridJson,coords, dir} = JSON.parse(data);
     const grid = Grid.unserialize(gridJson);
-    const wordIndexes =  search(grid, coords, dir);
+    const wordIndexes =  getWordsSimple({grid, coords, dir});
     postMessage({ type: 'search-result', data: wordIndexes });
   }
 

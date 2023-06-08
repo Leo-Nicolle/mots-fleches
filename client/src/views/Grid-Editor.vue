@@ -40,6 +40,7 @@ function fetch() {
     });
 }
 function onUpdate() {
+  console.log('onupdate')
   clearTimeout(saveTimeout.value);
   saveTimeout.value = setTimeout(() => {
     if (!grid.value) return;

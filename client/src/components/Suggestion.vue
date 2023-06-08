@@ -48,7 +48,6 @@
 </template>
 
 <script setup lang="ts">
-import { CancelablePromise as CPromise } from "cancelable-promise";
 import { defineProps, defineEmits, ref, watchEffect, computed } from "vue";
 import {
   ArrowDown,
@@ -59,15 +58,12 @@ import {
   ReturnUpBackOutline,
 } from "@vicons/ionicons5";
 
-import axios from "axios";
 import { CellProba, Direction, Vec } from "grid";
-import { getUrl } from "../js/utils";
-import { dico } from "../search-worker/dico";
 import { Method, Ordering } from "../types";
 /**
  * Component to display words suggestions
  */
-const results = ref([]);
+const results = ref<{word:string}[]>([]);
 const totalResults = ref(0);
 const suggestion = ref(null);
 const version = ref(0);
@@ -75,7 +71,7 @@ let hovered = "";
 
 const props = defineProps<{
   cellProbas: CellProba[][];
-  searchResult: number[];
+  searchResult: string[];
   /**
    * The coords of the current cell
    */
@@ -126,36 +122,28 @@ function getSuggestions(
   ordering: Ordering,
   method: string
 ) {
-  let indexes = [];
+  let words = [];
   if (method === "simple") {
-    indexes = props.searchResult;
+    words = props.searchResult;
   } else if (
     !props.cellProbas.length ||
     !props.cellProbas[point.y] ||
     !props.cellProbas[point.y][point.x]
   ) {
-    indexes = [];
+    words = [];
   } else {
     const { bestWordsH, bestWordsV } = props.cellProbas[point.y][point.x];
-    indexes = (dir === "horizontal" ? bestWordsH : bestWordsV) || [];
+    words = (dir === "horizontal" ? bestWordsH : bestWordsV) || [];
   }
-  const bestWords = indexes.reduce((acc, index) => {
-    const word = dico.words[dico.sorted[index]];
-    acc.push({
-      word,
-      link: `https://google.com/search?q=${word}+definition`,
-    });
-    return acc;
-  }, []);
   if (ordering === "alpha") {
-    bestWords.sort((a, b) => a.word.localeCompare(b.word));
+    words.sort((a, b) => a.localeCompare(b));
   } else if (ordering === "inverse-alpha") {
-    bestWords.sort((a, b) => b.word.localeCompare(a.word));
+    words.sort((a, b) => b.localeCompare(a));
   } else if (ordering === "random") {
-    bestWords.sort(() => Math.random() - 0.5);
+    words.sort(() => Math.random() - 0.5);
   }
-  totalResults.value = bestWords.length;
-  results.value = bestWords;
+  totalResults.value = words.length;
+  results.value = words.map((word) => ({word}));
 }
 
 function orderingText() {
