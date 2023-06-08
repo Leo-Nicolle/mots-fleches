@@ -95,8 +95,7 @@ function createGrid() {
     .then(({ data }) => {
       generate({ grid: newGrid, distribution: data });
     })
-    .then(() => api.supadb.pushGrid(newGrid))
-    // .then(() => api.db.pushGrid(newGrid))
+    .then(() => api.db.pushGrid(newGrid))
     .then(() => fetch());
 }
 
