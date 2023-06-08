@@ -3,8 +3,7 @@ import { dico, ACode } from "./dico";
 // window ? window.dico = dico: undefined;
 
 type Interval = [number, number];
-export type BailOptions =
-  { sharedArray: Uint8Array };
+export type BailOptions = { sharedArray: Uint8Array };
 export function initCellMap(grid: Grid) {
   return grid.cells.reduce((acc, row, y) => {
     acc.push(
