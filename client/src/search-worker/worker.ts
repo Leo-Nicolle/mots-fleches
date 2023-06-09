@@ -13,14 +13,17 @@ onmessage = function (e) {
     const encoded = new Uint8Array(words.byteLength);
     encoded.set(new Uint8Array(e.data.words));
     dico.load(new TextDecoder().decode(encoded).split(','));
-    return;
+    return this.postMessage({ type: 'loaded' });
   }
   if (type === 'run') {
+    console.log('run', dico.words.length);
     const grid = Grid.unserialize(data);
     const {cellProbas, hasBailed} = getCellProbas(grid, options);
     if (hasBailed){
+      console.log('bail')
       return postMessage({ type: 'bail-result'});
     }
+    console.log('run end', cellProbas[2][2].bestWordsH)
     postMessage({ type: 'run-result', data: cellProbas });
   }
   if (type === 'search') {

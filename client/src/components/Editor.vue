@@ -147,7 +147,6 @@ import Suggestion from "./Suggestion.vue";
 import { getUrl } from "../js/utils";
 import axios from "axios";
 import { workerController } from "../search-worker/index";
-
 /**
  * Component to edit a grid
  */
@@ -205,7 +204,6 @@ const throttledRefresSimpleSearch = throttle(refreshSimpleSearch, 60);
 function onGridUpdate() {
   //refresh the children components that need it.
   gridVersion.value = gridVersion.value + 1;
-  workerController.bail();
   throttledRefresCellProba();
   emit("update");
 }
@@ -313,10 +311,8 @@ watchEffect(async () => {
   }
 });
 
-watchEffect(async () => {});
 workerController.on("run-result", (data) => {
   cellProbas.value = data;
-  console.log("run-result", data);
   refreshingRun.value = false;
 });
 workerController.on("bail-result", () => {
@@ -327,8 +323,16 @@ workerController.on("search-result", (data) => {
   refreshingSearch.value = false;
   searchResult.value = data;
 });
+workerController.on("locale-changed", () => {
+  throttledRefresCellProba();
+  throttledRefresSimpleSearch();
+});
+workerController.on("start-locale-change", () => {
+  refreshingRun.value = true;
+  refreshingSearch.value = true;
+});
 
-watch([focus], () => {
+watch([focus, dir], () => {
   throttledRefresSimpleSearch();
 });
 

@@ -7,6 +7,8 @@ export type Events = {
   'run-result': CellProba[][];
   'search-result': string[];
   'bail-result': undefined;
+  'locale-changed': undefined;
+  'start-locale-change': undefined;
 }
 
 class WorkerController extends EventEmitter<Events> {
@@ -20,11 +22,14 @@ class WorkerController extends EventEmitter<Events> {
   private wordsArray: Uint8Array;
   private searchWorkerId = 0;
   private probaWorkerId = 1;
+  private locale = '';
+  private loadingPromise;
 
   /* setting data */
   /* sending the buffer (copy) to worker */
-  constructor() {
+  constructor(locale = 'fr-fr') {
     super();
+    this.loadingPromise = new Promise(resolve => setTimeout(resolve, 1000));
     if (!window.isSecureContext) {
       throw new Error('Not in a secure context');
     }
@@ -41,10 +46,9 @@ class WorkerController extends EventEmitter<Events> {
     this.searchWorker = new Worker(new URL('./worker', import.meta.url), { type: 'module' });
     this.probaWorker = new Worker(new URL('./worker', import.meta.url), { type: 'module' });
 
-    // this.worker.postMessage(this.sharedBuffer);
     this.searchWorker.addEventListener('message', (evt) => this.onMessage(this.searchWorkerId, evt));
     this.probaWorker.addEventListener('message', (evt) => this.onMessage(this.probaWorkerId, evt));
-    this.loadWords('fr-fr');
+    this.setLocale(locale);
   }
 
   search(grid: Grid, coords: Vec, dir: Direction) {
@@ -68,12 +72,18 @@ class WorkerController extends EventEmitter<Events> {
     this.busy[workerId] = true;
     this.flagsArray[0] = 0;
     const ww = workerId === this.probaWorkerId ? this.probaWorker : this.searchWorker;
-    ww.postMessage({ type, data });
+    this.loadingPromise.then(() => {
+      ww.postMessage({ type, data });
+    });
+
   }
 
   onMessage(workerId: number, event: MessageEvent) {
     const { type, data } = event.data;
     this.busy[workerId] = false;
+    if (type === 'loaded') {
+      this.emit('locale-changed');
+    }
     if (type === 'search-result') {
       this.emit('search-result', data);
     }
@@ -82,18 +92,11 @@ class WorkerController extends EventEmitter<Events> {
     }
     if (type === 'bail-result') {
       this.emit('bail-result');
+      const queue = this.queues[workerId];
+      const job = queue.shift();
+      if(!job) return;
+      this._postMessage(job.type, job.data, workerId);
     }
-    const queue = this.queues[workerId];
-    if (queue.length > 0) {
-      const { type, data } = queue[queue.length - 1];
-      // give up all the other works
-      this.queues[workerId] = [];
-    }
-  }
-
-  bail() {
-    if (!this.busy[this.probaWorkerId]) return;
-    this.flagsArray[0] = 1;
   }
 
   destroy() {
@@ -102,50 +105,72 @@ class WorkerController extends EventEmitter<Events> {
     this.removeAllListeners();
   }
 
-  _fetchLocales(){
+  private _fetchLocales() {
     return fetch('/dico.zip')
-    .then((response) => response.arrayBuffer())
-    .then((data) => new Promise<Record<string, string[]>>((resolve, reject) => {
-      fflate.unzip(new Uint8Array(data), (err, decompressed) => {
-        if (err) {
-          return reject(err);
-        }
-        const locales = Object.entries(decompressed)
-          .reduce((acc, [path, value]) => {
-            const localName = path.split('/')[1];
-            if (!value.length || !localName.length) return acc;
-            if (!acc[localName]) { acc[localName] = []; }
-            acc[localName].push(new TextDecoder().decode(value).trim());
-            return acc;
-          }, {} as Record<string, string[]>);
-        resolve(locales);
-      });
-    }));
+      .then((response) => response.arrayBuffer())
+      .then((data) => new Promise<Record<string, string[]>>((resolve, reject) => {
+        fflate.unzip(new Uint8Array(data), (err, decompressed) => {
+          if (err) {
+            return reject(err);
+          }
+          const locales = Object.entries(decompressed)
+            .reduce((acc, [path, value]) => {
+              const localName = path.split('/')[1];
+              if (!value.length || !localName.length) return acc;
+              if (!acc[localName]) { acc[localName] = []; }
+              acc[localName].push(new TextDecoder().decode(value).trim());
+              return acc;
+            }, {} as Record<string, string[]>);
+          resolve(locales);
+        });
+      }));
   }
 
-  loadWords(locale: string){
-    return Promise.all([
+
+  setLocale(locale: string) {
+    if (this.locale === locale) return this.loadingPromise;
+    this.locale = locale;
+    this.emit('start-locale-change');
+    console.log('start locale change')
+
+    this.loadingPromise = Promise.all([
       this._fetchLocales(),
       api.db.getWords() as Promise<string[]>
     ])
-    .then(([locales, words]) => {
-      locales[locale]
-      .forEach(locale => {
-        const wordsInLocale = locale.split(',');
-        for (let i =0; i< wordsInLocale.length; i++){
-          words.push(wordsInLocale[i]);
+      .then(([locales, words]) => {
+        locales[locale]
+          .forEach(locale => {
+            const wordsInLocale = locale.split(',');
+            for (let i = 0; i < wordsInLocale.length; i++) {
+              words.push(wordsInLocale[i]);
+            }
+          });
+        const encoded = new TextEncoder().encode(words.join(','));
+        this.wordsBuffer = new SharedArrayBuffer(encoded.byteLength);
+        this.wordsArray = new Uint8Array(this.wordsBuffer);
+        for (let i = 0; i < encoded.byteLength; i++) {
+          this.wordsArray[i] = encoded[i];
         }
+        return Promise.all(
+          [this.searchWorker, this.probaWorker]
+            .map(worker => new Promise<void>((resolve) => {
+              worker.postMessage({ flags: this.flagsBuffer, words: this.wordsBuffer });
+              const listenner = (evt: MessageEvent) => {
+                console.log('loaded', evt.data.type)
+                if (evt.data.type === 'loaded') {
+                  worker.removeEventListener('message', listenner);
+                  resolve();
+                }
+              };
+              worker.addEventListener('message', listenner);
+            }))
+        );
+      }).then(() => {
+        console.log('end locale change')
+        this.emit('locale-changed');
       });
-      const encoded = new TextEncoder().encode(words.join(','));
-      this.wordsBuffer = new SharedArrayBuffer(encoded.byteLength);
-      this.wordsArray = new Uint8Array(this.wordsBuffer);
-      for (let i = 0; i < encoded.byteLength; i++){
-        this.wordsArray[i] = encoded[i];
-      }
-      this.searchWorker.postMessage({flags: this.flagsBuffer, words: this.wordsBuffer});
-      this.probaWorker.postMessage({flags: this.flagsBuffer, words: this.wordsBuffer});
-    });
+    return this.loadingPromise;
   }
 }
 
-export const workerController = new WorkerController();
+export const workerController = new WorkerController(localStorage.getItem('locale') || 'fr-fr');

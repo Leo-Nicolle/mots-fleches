@@ -71,18 +71,22 @@ import {
   computed,
   watchEffect,
   onMounted,
+  provide,
 } from "vue";
 import { RouterLink, useRouter } from "vue-router";
 import { getUrl, renderIcon } from "../js/utils";
 import { LogOutOutline, LanguageOutline } from "@vicons/ionicons5";
 import { i18n, setLanguage } from "../i18n";
 import axios from "axios";
+import { workerController } from "../search-worker";
 
 const locale = ref(i18n.global.locale);
 const nav = ref<MenuOption[]>([]);
 const router = useRouter();
 const collapsed = ref(true);
 const switchingLocale = ref(false);
+provide("locale", locale);
+console.log("locale-main", locale.value);
 const emit = defineEmits<{
   /**
    * Scroll within main panel
@@ -177,6 +181,7 @@ watchEffect(() => {
   setLanguage(locale.value);
   nav.value = getNavChildren();
   setServerLocale();
+  workerController.setLocale(locale.value);
 });
 onMounted(() => {
   nav.value = getNavChildren();

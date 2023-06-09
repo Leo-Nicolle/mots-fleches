@@ -34,7 +34,6 @@ export class Dico {
   load(rawWords: string[]) {
     this.words = [];
     this.wordsMap = new Map();
-    this.stringBS = new StringBS();
     rawWords
       .map((w) =>
         w
