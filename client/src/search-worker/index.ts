@@ -1,4 +1,4 @@
-import { CellProba, Direction, Grid, Vec } from "grid";
+import { CellProba, Direction, Grid, GridValidity, Vec } from "grid";
 import EventEmitter from "eventemitter3";
 import * as fflate from 'fflate';
 import { api } from "../api";
@@ -9,6 +9,7 @@ export type Events = {
   'bail-result': undefined;
   'locale-changed': undefined;
   'start-locale-change': undefined;
+  'check-result': GridValidity;
 }
 
 class WorkerController extends EventEmitter<Events> {
@@ -18,6 +19,7 @@ class WorkerController extends EventEmitter<Events> {
   private queues: { type: string, data: string }[][] = [[], []];
   private flagsBuffer: SharedArrayBuffer;
   private flagsArray: Uint8Array;
+  private distribution: [number, number][];
   private wordsBuffer: SharedArrayBuffer;
   private wordsArray: Uint8Array;
   private searchWorkerId = 0;
@@ -43,6 +45,7 @@ class WorkerController extends EventEmitter<Events> {
     } else {
       throw new Error('SharedArrayBuffer is not supported');
     }
+    this.distribution = [];
     this.searchWorker = new Worker(new URL('./worker', import.meta.url), { type: 'module' });
     this.probaWorker = new Worker(new URL('./worker', import.meta.url), { type: 'module' });
 
@@ -57,6 +60,14 @@ class WorkerController extends EventEmitter<Events> {
         grid: grid.serialize(),
         coords, dir
       }), this.searchWorkerId);
+  }
+
+  getDistribution() {
+    return this.loadingPromise.then(() => this.distribution);
+  }
+
+  checkGrid(grid: Grid) {
+    this._postMessage('check', grid.serialize(), this.searchWorkerId);
   }
 
   run(grid: Grid) {
@@ -87,16 +98,21 @@ class WorkerController extends EventEmitter<Events> {
     if (type === 'search-result') {
       this.emit('search-result', data);
     }
+    if (type === 'check-result') {
+      this.emit('check-result', data);
+    }
     if (type === 'run-result') {
       this.emit('run-result', data);
     }
     if (type === 'bail-result') {
       this.emit('bail-result');
-      const queue = this.queues[workerId];
-      const job = queue.shift();
-      if(!job) return;
-      this._postMessage(job.type, job.data, workerId);
     }
+    const queue = this.queues[workerId];
+    const job = queue.shift();
+    if (!job) return;
+    // remove all jobs of the same type
+    this.queues[workerId] = queue.filter(q => q.type !== job.type);
+    this._postMessage(job.type, job.data, workerId);
   }
 
   destroy() {
@@ -126,13 +142,24 @@ class WorkerController extends EventEmitter<Events> {
       }));
   }
 
+  private promisifiedCall<T>(data: any, workerId: number, event: string) {
+    const worker = workerId === this.probaWorkerId ? this.probaWorker : this.searchWorker;
+    return new Promise<T>((resolve) => {
+      const listenner = (evt: MessageEvent) => {
+        if (evt.data.type === event) {
+          worker.removeEventListener('message', listenner);
+          resolve(evt.data.data);
+        }
+      };
+      worker.addEventListener('message', listenner);
+      worker.postMessage(data);
+    });
+  }
 
   setLocale(locale: string) {
     if (this.locale === locale) return this.loadingPromise;
     this.locale = locale;
     this.emit('start-locale-change');
-    console.log('start locale change')
-
     this.loadingPromise = Promise.all([
       this._fetchLocales(),
       api.db.getWords() as Promise<string[]>
@@ -153,24 +180,28 @@ class WorkerController extends EventEmitter<Events> {
         }
         return Promise.all(
           [this.searchWorker, this.probaWorker]
-            .map(worker => new Promise<void>((resolve) => {
-              worker.postMessage({ flags: this.flagsBuffer, words: this.wordsBuffer });
-              const listenner = (evt: MessageEvent) => {
-                console.log('loaded', evt.data.type)
-                if (evt.data.type === 'loaded') {
-                  worker.removeEventListener('message', listenner);
-                  resolve();
-                }
-              };
-              worker.addEventListener('message', listenner);
-            }))
+            .map(worker => {
+              this.promisifiedCall(
+                { flags: this.flagsBuffer, words: this.wordsBuffer },
+                worker === this.probaWorker ? this.probaWorkerId : this.searchWorkerId,
+                'loaded'
+              );
+            })
         );
-      }).then(() => {
-        console.log('end locale change')
+      })
+      .then(() => this.promisifiedCall<[number, number][]>({
+        type: 'distribution'
+      },
+        this.searchWorkerId,
+        'distrib-result'
+      ))
+      .then((distribution) => {
+        this.distribution = distribution;
         this.emit('locale-changed');
       });
     return this.loadingPromise;
   }
+  
 }
 
 export const workerController = new WorkerController(localStorage.getItem('locale') || 'fr-fr');

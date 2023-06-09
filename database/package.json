@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "type": "module",
-  "main": "dist/fsdb.js",
-  "types": "dist/types/index.d.ts",
+  "main": "dist/clientdb.js",
+  "types": "dist/types/index-client.d.ts",
   "browser": "./dist/clientdb.js",
   "scripts": {
     "prebuild": "rm -rf dist",

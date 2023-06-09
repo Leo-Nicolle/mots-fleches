@@ -144,8 +144,6 @@ import { defaultExportOptions, Method, Ordering } from "../types";
 import ModalOptions from "./forms/ModalOptions.vue";
 import GridHighlight, { Mode } from "./svg-renderer/GridHighlight.vue";
 import Suggestion from "./Suggestion.vue";
-import { getUrl } from "../js/utils";
-import axios from "axios";
 import { workerController } from "../search-worker/index";
 /**
  * Component to edit a grid
@@ -198,13 +196,17 @@ function refreshSimpleSearch() {
   refreshingSearch.value = true;
   workerController.search(props.grid, focus.value, dir.value);
 }
+function refreshValidity() {
+  workerController.checkGrid(props.grid);
+}
 const throttledRefresCellProba = throttle(refreshCellProba, 200);
 const throttledRefresSimpleSearch = throttle(refreshSimpleSearch, 60);
-
+const throttledRefresValidity = throttle(refreshValidity, 60);
 function onGridUpdate() {
   //refresh the children components that need it.
   gridVersion.value = gridVersion.value + 1;
   throttledRefresCellProba();
+  throttledRefresValidity();
   emit("update");
 }
 function computeOffset(e) {
@@ -238,7 +240,9 @@ watch(method, () => {
 });
 onMounted(() => {
   computeOffset(null);
+  workerController.checkGrid(props.grid);
   throttledRefresCellProba();
+  throttledRefresValidity();
 });
 
 onBeforeUnmount(() => {});
@@ -291,26 +295,20 @@ function onKeyUp(evt: KeyboardEvent) {
   // @ts-ignore
   evt.canceled = consumed;
 }
-watchEffect(async () => {
-  if (!props.grid || !dir.value) return;
-  if (highlightMode.value === "check") {
-    const gridValidity = await axios
-      .post(getUrl(`word-check`), {
-        grid: props.grid.serialize(),
-      })
-      .then(({ data }) => data as GridValidity);
-    validity.value = gridValidity;
+watch([dir, validity, highlightMode], () => {
+  if (highlightMode.value === "check" && validity.value) {
     const newMap = new Map();
-    Object.values(gridValidity[dir.value]).forEach(({ cells, problem }) => {
+    Object.values(validity.value[dir.value]).forEach(({ cells, problem }) => {
       cells.forEach(({ x, y }) => newMap.set(`${y}-${x}`, problem));
     });
     highlights.value = newMap;
   } else {
     highlights.value = new Map();
-    validity.value = { horizontal: {}, vertical: {} };
   }
 });
-
+workerController.on("check-result", (data) => {
+  validity.value = data;
+});
 workerController.on("run-result", (data) => {
   cellProbas.value = data;
   refreshingRun.value = false;
@@ -323,6 +321,7 @@ workerController.on("search-result", (data) => {
   refreshingSearch.value = false;
   searchResult.value = data;
 });
+
 workerController.on("locale-changed", () => {
   throttledRefresCellProba();
   throttledRefresSimpleSearch();

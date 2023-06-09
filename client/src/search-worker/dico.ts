@@ -51,7 +51,7 @@ export class Dico {
         this.words.push(word);
       });
 
-      this.sorted = new Array(this.words.length)
+    this.sorted = new Array(this.words.length)
       .fill(0)
       .map((e, i) => i)
       .sort((a, b) => {
@@ -126,13 +126,25 @@ export class Dico {
       return acc;
     }, [] as number[]);
   }
- 
+
   /**
    * Get the list of words in the dictionnary
    * @returns All the words in the dictionnary
    */
   getWords() {
     return this.words;
+  }
+
+  getDistribution() {
+    const distribution = new Map();
+    this.words.forEach(word => {
+      const length = word.length;
+      if (!distribution.has(length)) {
+        distribution.set(length, 0);
+      }
+      distribution.set(length, distribution.get(length) + 1);
+    });
+    return [...distribution.entries()];
   }
 
 }

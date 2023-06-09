@@ -11,9 +11,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import axios from "axios";
 import LoaderIcon from "../components/LoaderIcon.vue";
-import { getUrl } from "../js/utils";
 import { api } from "../api";
 import { useRouter } from "vue-router";
 /**

@@ -171,20 +171,19 @@ function placeDefinition({ scaledDistib, grid, minWord, maxWord }: {
 }
 
 export default function generate({ grid, distribution }: {
-  distribution: Record<string, number>
+  distribution: [number, number][];
   grid: Grid
 }) {
   const minWord = 2;
-  const maxWord = Math.max(...Object.keys(distribution).map(l => +l));
+  const maxWord = Math.max(...distribution.map(([l]) => l));
 
   const { rows, cols } = grid;
   // Sum of all the probabilities of each length
-  const total = Object.values(distribution)
+  const total = distribution
     .slice(minWord, Math.max(rows, cols) + 1)
-    .reduce((acc, e) => acc + e, 0);
+    .reduce((acc, [_, e]) => acc + e, 0);
   // scale it to [0;1]  
-  const scaledDistib = Object
-    .entries(distribution)
+  const scaledDistib = distribution
     .slice(minWord, Math.max(rows, cols) + 1)
     .reduce((acc, [key, value]) => {
       acc[key] = value / total;

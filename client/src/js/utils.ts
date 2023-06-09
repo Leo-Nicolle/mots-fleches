@@ -1,18 +1,12 @@
-import axios from "axios";
-import { Cell, Format, Grid } from "grid";
+import { Cell, Format } from "grid";
 import { NIcon } from "naive-ui";
-import { h, Component, Ref, ref } from "vue";
+import { h, Component } from "vue";
 import { RouteLocationNormalizedLoaded } from "vue-router";
-import { api } from "./api";
 
-export function getUrl(param: string) {
-  return `http://localhost:${import.meta.env.VITE_APIPORT}/${param}`;
-}
 
 export function renderIcon(icon: Component) {
   return () => h(NIcon, null, { default: () => h(icon) });
 }
-
 
 export function getCellClass(cell: Cell, focus: Cell) {
   const classes = [cell.definition ? "definition" : "text"];

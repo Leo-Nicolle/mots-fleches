@@ -16,31 +16,13 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
-import { getUrl } from "./js/utils";
-import axios from "axios";
 import './api';
 /**
  * Main Component: handles the alert toaster for server disconnection
  */
 const alert = ref<false | { type: string; id: string }>(false);
 
-function ping(retry = 0): Promise<any> {
-  return axios
-    .get(getUrl("ping"))
-    .then(() => (alert.value = false))
-    .catch((e) => {
-      if (retry < 5) {
-        return ping(retry + 1);
-      }
-      throw e;
-    });
-}
 onMounted(async () => {
-  // const i = setInterval(() => {
-  //   ping().catch(() => {
-  //     alert.value = {type: 'error', id: "disconnected"};
-  //   });
-  // }, 500);
 });
 </script>
 <style>

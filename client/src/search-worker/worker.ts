@@ -20,10 +20,8 @@ onmessage = function (e) {
     const grid = Grid.unserialize(data);
     const {cellProbas, hasBailed} = getCellProbas(grid, options);
     if (hasBailed){
-      console.log('bail')
       return postMessage({ type: 'bail-result'});
     }
-    console.log('run end', cellProbas[2][2].bestWordsH)
     postMessage({ type: 'run-result', data: cellProbas });
   }
   if (type === 'search') {
@@ -32,5 +30,16 @@ onmessage = function (e) {
     const wordIndexes =  getWordsSimple({grid, coords, dir});
     postMessage({ type: 'search-result', data: wordIndexes });
   }
+  if (type === 'distribution') {
+    const distribution = dico.getDistribution();
+    postMessage({ type: 'distrib-result', data: distribution });
+  }
+
+  if (type === 'check') {
+    const grid = Grid.unserialize(data);
+    const check = grid.check(dico.wordsMap);
+    postMessage({ type: 'check-result', data: check });
+  }
+
 
 };

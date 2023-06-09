@@ -38,15 +38,14 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
-import axios from "axios";
 import SVGGrid from "../components/svg-renderer/Grid.vue";
 import ExportButton from "../components/ExportButton.vue";
 import Layout from "../layouts/GridLayout.vue";
 import { defaultExportOptions } from "../types";
-import { getUrl } from "../js/utils";
 import { Grid, GridOptions, nullCell } from "grid";
 import generate from "../js/maze-generator";
 import { api } from "../api";
+import { workerController } from "../search-worker";
 /**
  * View to display all grids in a grid layout
  */
@@ -90,10 +89,10 @@ function onDelete() {
 function createGrid() {
   const newGrid = new Grid(10, 10);
   newGrid.title = "Nouvelle Grille";
-  return axios
-    .get(getUrl("word/distribution"))
-    .then(({ data }) => {
-      generate({ grid: newGrid, distribution: data });
+  workerController
+    .getDistribution()
+    .then((distribution) => {
+      generate({ grid: newGrid, distribution });
     })
     .then(() => api.db.pushGrid(newGrid))
     .then(() => fetch());

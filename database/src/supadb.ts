@@ -29,7 +29,7 @@ export class SupaDB extends Database {
         this.userid = data.session?.user.id || '';
       })
 
-    this.supabase.auth.onAuthStateChange(async (event, session) => {
+    this.supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!session?.user) {
         this.userid = '';
         return;
@@ -53,7 +53,7 @@ export class SupaDB extends Database {
 
   async pushGrid(g: Grid) {
     const grid = JSON.parse(g.serialize()) as GridState;
-    const { data, error } = await this.supabase.from('Grids').upsert({
+    await this.supabase.from('Grids').upsert({
       id: grid.id,
       created: new Date(grid.created).toISOString(),
       data: grid,
@@ -97,7 +97,7 @@ export class SupaDB extends Database {
   }
 
   async pushOption(options: GridOptions) {
-    const { data } = await this.supabase.from('Options').upsert({
+    await this.supabase.from('Options').upsert({
       id: options.id,
       created: new Date(Date.now()).toISOString(),
       data: options,

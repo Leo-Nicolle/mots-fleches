@@ -22,8 +22,7 @@ import { defineProps, watchEffect, ref } from "vue";
 import SVGGrid from "./svg-renderer/Grid.vue";
 import { Grid, GridOptions, nullCell } from "grid";
 import { defaultExportOptions } from "../types";
-import { getUrl } from "../js/utils";
-import axios from "axios";
+import { api } from "../api";
 /**
  * Button to export a grid as SVG
  */
@@ -37,9 +36,9 @@ const options = ref<GridOptions>();
 const exporter = ref<HTMLDivElement>();
 
 watchEffect(() => {
-  axios
-    .get(getUrl(`options/${props.grid.optionsId}`))
-    .then(({ data }) => (options.value = data));
+  api.db.getOption(props.grid.optionsId).then(opts => {
+    options.value = opts;
+  });
 });
 
 function print() {

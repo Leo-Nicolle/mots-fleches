@@ -68,8 +68,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { api } from "../api";
-import axios from "axios";
-import { getUrl } from "../js/utils";
 import {
   LogoGithub,
   LogoGoogle,

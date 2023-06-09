@@ -11,9 +11,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
-import axios from "axios";
-
-import { getUrl } from "../js/utils";
 import { Grid, GridOptions, SolutionOptions } from "grid";
 import { ExportOptions } from "../types";
 import Book from "../components/Book.vue";

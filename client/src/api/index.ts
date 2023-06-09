@@ -1,6 +1,5 @@
 import { Grid } from 'grid';
 import { Idatabase, FsdbClient, SupaDB } from 'database';
-import { getUrl } from '../js/utils';
 
 class API {
   public idb: Idatabase;
@@ -9,7 +8,7 @@ class API {
   public _mode: string = 'fsdb';
   constructor(mode: string = 'fsdb') {
     this.idb = new Idatabase();
-    this.fsdb = new FsdbClient(getUrl('').slice(0, -1));
+    this.fsdb = new FsdbClient(`http://localhost:${import.meta.env.VITE_APIPORT}`);
     this.supadb = new SupaDB('https://tnvxmrqhkdlynhtdzmpw.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRudnhtcnFoa2RseW5odGR6bXB3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODIyNTM0MTEsImV4cCI6MTk5NzgyOTQxMX0.4PczPPAxbkwBvig7NTHNbR8JumuwPPqfyS_kGnkxP5I');
     this._mode = mode;
   }
