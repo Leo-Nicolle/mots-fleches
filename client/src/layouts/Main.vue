@@ -3,6 +3,7 @@
     <div class="header">
       <span class="left">
         <n-menu
+          v-if="isLoggedIn"
           class="burger"
           :accordion="true"
           :mode="'horizontal'"
@@ -19,14 +20,15 @@
           <n-button :type="switchingLocale ? 'warning' : ''">
             <template #icon>
               <n-icon>
-                <LoaderIcon v-if="switchingLocale"/>
-                <LanguageOutline v-else/>
+                <LoaderIcon v-if="switchingLocale" />
+                <LanguageOutline v-else />
               </n-icon>
             </template>
             {{ selected?.label }}
           </n-button>
         </n-popselect>
         <n-button
+          v-if="isLoggedIn"
           strong
           secondary
           type="warning"
@@ -70,6 +72,7 @@ import {
   defineEmits,
   computed,
   watchEffect,
+  withDefaults,
   onMounted,
 } from "vue";
 import { RouterLink, useRouter } from "vue-router";
@@ -83,6 +86,9 @@ const nav = ref<MenuOption[]>([]);
 const router = useRouter();
 const collapsed = ref(true);
 const switchingLocale = ref(false);
+const props = withDefaults(defineProps<{ isLoggedIn: boolean }>(), {
+  isLoggedIn: true,
+});
 const emit = defineEmits<{
   /**
    * Scroll within main panel
@@ -165,9 +171,9 @@ const localeOptions = ref([
 const selected = computed(() => {
   return localeOptions.value.find((option) => option.value === locale.value);
 });
-workerController.on('locale-changed', () => {
+workerController.on("locale-changed", () => {
   switchingLocale.value = false;
-})
+});
 watchEffect(() => {
   switchingLocale.value = true;
   localStorage.setItem("locale", locale.value);
@@ -220,6 +226,7 @@ function exit() {
   gap: 10px;
   align-items: center;
   justify-content: flex-end;
+  margin-right: 4px;
 }
 
 nav {

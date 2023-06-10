@@ -6,10 +6,12 @@
     :onDelete="onDelete"
     :onClick="(grid) => $router.push(`/grid/${grid.id}`)"
     @select="(s) => (selected = s)"
+    :has-create-button="true"
+    :has-delete-button="true"
   >
     <template v-slot:left-panel>
       <h3>{{ $t("nav.grids") }}</h3>
-      <ExportButton route="book-export" :params="params" />
+      <ExportButton route="book-export" :query="exportQuery" />
     </template>
     <template #card-title="{ elt }">
       <span>
@@ -54,7 +56,7 @@ const grids = ref<Grid[]>([]);
 const options = ref<GridOptions[]>([]);
 const selected = ref<Grid[]>([]);
 
-const params = computed(() => {
+const exportQuery = computed(() => {
   return { ids: selected.value.map((s) => s.id).join(",") };
 });
 function fetch() {

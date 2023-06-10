@@ -13,7 +13,7 @@ export interface MotsFlexDB extends DBSchema {
     indexes: { 'by-id': number };
   };
   words: {
-    value: string;
+    value: { id: string };
     key: string;
     indexes: { 'by-word': string };
   };
@@ -25,7 +25,7 @@ export interface MotsFlexDB extends DBSchema {
 }
 
 async function create() {
-  const db = await openDB<MotsFlexDB>('mots-flex-db', 2, {
+  const db = await openDB<MotsFlexDB>('mots-flex-db', 3, {
     upgrade(db) {
       if (!db.objectStoreNames.contains('grids')) {
         const gridStore = db.createObjectStore('grids', {
@@ -47,7 +47,7 @@ async function create() {
       }
     },
   });
-
+  
   return db;
 
 }
@@ -132,16 +132,18 @@ export class Idatabase extends Database {
   async getWords() {
     return await this.loadingPromise.then((db) =>
       db.getAllFromIndex('words', 'by-word')
+    ).then((words) =>
+      words.map(({ id }) => id)
     );
   }
   async getWord(wordId: string) {
     return await this.loadingPromise.then((db) =>
       db.get('words', wordId)
-    );
+    ).then((word) => word ? word.id : undefined);
   }
-  async pushWord(word: any) {
+  async pushWord(word: string) {
     return await this.loadingPromise.then((db) =>
-      db.put('words', word)
+      db.put('words', { id: word })
     );
   }
   async deleteWord(wordId: string) {

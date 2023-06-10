@@ -16,7 +16,6 @@ onmessage = function (e) {
     return this.postMessage({ type: 'loaded' });
   }
   if (type === 'run') {
-    console.log('run', dico.words.length);
     const grid = Grid.unserialize(data);
     const {cellProbas, hasBailed} = getCellProbas(grid, options);
     if (hasBailed){

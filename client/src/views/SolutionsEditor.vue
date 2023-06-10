@@ -6,17 +6,17 @@
       </OptionsForm>
     </template>
     <template #body>
-      <SolutionsPaper
-        :grids="grids"
-        :solutionOptions="options"
-        class="paper"
-        :export-options="exportOptions"
-      />
       <WordsIndex
         :grids="grids"
         class="paper"
         :export-options="exportOptions"
         :solutionOptions="options"
+      />
+      <SolutionsPaper
+        :grids="grids"
+        :solutionOptions="options"
+        class="paper"
+        :export-options="exportOptions"
       />
     </template>
   </Layout>
@@ -26,7 +26,6 @@
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import Layout from "../layouts/Main.vue";
-import ExportButton from "../components/ExportButton.vue";
 import OptionsForm from "../components/forms/Options.vue";
 import SolutionsPaper from "../components/Solutions.vue";
 import WordsIndex from "../components/WordsIndex.vue";

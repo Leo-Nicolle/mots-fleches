@@ -4,6 +4,8 @@
     :eltList="optionsList"
     :onCreate="createOptions"
     :onDelete="onDelete"
+    :has-create-button="false"
+    :has-delete-button="false"
     :onClick="(options) => $router.push(`/options/${options.id}`)"
     @select="(s) => (selected = s)"
   >

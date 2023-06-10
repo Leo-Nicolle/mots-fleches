@@ -18,9 +18,9 @@ const props = defineProps<{
    */
   route: string;
   /**
-   * The params of the route
+   * The query of the route
    */
-  params: any;
+  query: any;
 }>();
 
 function print() {
@@ -32,7 +32,7 @@ const iframeUrl = computed(() => {
   const url = `${window.location.origin}${
     router.resolve({
       name: props.route,
-      params: props.params,
+      query: props.query,
     }).href
   }`;
   return url;

@@ -1,4 +1,4 @@
-import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
+import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 import {api} from '../api';
 
 const routes: Array<RouteRecordRaw> = [
@@ -55,12 +55,27 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/logout',
     name: 'logout',
-    component: () => import('../views/Logout.vue')
+    component: () => import('../views/auth/Logout.vue')
   },
   {
     path: '/login',
     name: 'login',
-    component: () => import('../views/Login.vue')
+    component: () => import('../views/auth/Login.vue')
+  },
+  {
+    path: '/register',
+    name: 'register',
+    component: () => import('../views/auth/Register.vue')
+  },
+  {
+    path: '/sentemail/:hash',
+    name: 'sentemail',
+    component: () => import('../views/auth/Sentemail.vue')
+  },
+  {
+    path: '/passwordreset/:access_token(\\d+)?',
+    name: 'passwordreset',
+    component: () => import('../views/auth/PasswordReset.vue')
   },
   {
     path: '/words',
@@ -70,7 +85,7 @@ const routes: Array<RouteRecordRaw> = [
 ];
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(),
   routes
 });
 

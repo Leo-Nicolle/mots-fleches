@@ -46,4 +46,4 @@ class API {
   }
 }
 
-export const api = new API(localStorage.getItem('db-mode') || 'fsdb');
+export const api = new API(localStorage.getItem('db-mode') || 'idb');

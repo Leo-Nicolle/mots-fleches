@@ -11,8 +11,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import LoaderIcon from "../components/LoaderIcon.vue";
-import { api } from "../api";
+import LoaderIcon from "../../components/LoaderIcon.vue";
+import { api } from "../../api";
 import { useRouter } from "vue-router";
 /**
  * View to logout and close the server
@@ -21,6 +21,7 @@ const router = useRouter();
 const closed = ref(false);
 const message = ref<string>("waiting");
 function exit() {
+  console.log(api.mode)
   if (api.mode === 'supadb'){
     return api.supadb.supabase.auth.signOut();
   } 

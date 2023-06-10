@@ -28,7 +28,7 @@ const exportOptions = computed(() =>
 console.log("exportOptions", exportOptions.value);
 function fetch() {
   return api
-    .getGrid(route.params.id as string)
+    .getGrid(route.query.id as string)
     .then((g) => {
       grid.value = g as Grid;
       return api.db.getOption(grid.value.optionsId);

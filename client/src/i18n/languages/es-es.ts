@@ -72,6 +72,25 @@ export const lang = {
             message: "Se ha perdido la conexión con el servidor",
         }
     },
+    login: {
+        title: "Iniciar sesión",
+        email: "Correo electrónico",
+        password: "Contraseña",
+        wrongPassword: "Contraseña o Correo incorrecta",
+        login: "Iniciar sesión",
+        register: "Registrarse",
+        forgotPassword: "¿Olvidaste tu contraseña?",
+        localMode: "Seguir sin autenticar",
+        githubLogin: "Iniciar sesión con GitHub",
+    },
+    register: {
+        title: "Registrarse",
+        email: "Correo electrónico",
+        password: "Contraseña",
+        passwordConfirm: "Confirmar contraseña",
+        wrongPassword: "Contraseña o Correo incorrecta",
+        
+    },
     logout: {
         wating: "Esperando a que el servidor se desconecte...",
         success: "Desconexión correcta",

@@ -72,6 +72,34 @@ export const lang = {
             message: "You have been disconnected from the server",
         }
     },
+    login: {
+        title: "Login",
+        emal: "Email",
+        password: "Password",
+        wrongPassword: "Wrong email/password combination",
+        forgotPassword: "Forgot password?",
+        login: "Login",
+        register: "Register",
+        localMode: "Continue without account",
+        githubLogin: "Login with Github",
+    },
+    register: {
+        title: "Register",
+        email: "Email",
+        password: "Password",
+        confirmPassword: "Confirm password",
+        wrongPassword: "Wrong email/password combination",
+        send: "Register",
+        cancel: "Cancel",
+    },
+    sentemail: {
+        title: "Email sent",
+        message: "An email has been sent to {email}. Please follow the instructions in the email to complete the registration process.",
+        redirect: 'Go to login page',
+    },
+    passwordreset: {
+        title: "Reset password",
+    },
     logout: {
         waiting: "Waiting for logout...",
         success: "Logout successful",

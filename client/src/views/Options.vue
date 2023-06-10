@@ -1,7 +1,7 @@
 <template>
   <Layout>
     <template v-slot:header v-if="grid">
-      <ExportButton route="grid-export" :params="{ id: grid.id }" />
+      <ExportButton route="grid-export" :query="{ id: grid.id }" />
       <ExportSVGButton :grid="grid" />
     </template>
     <template v-slot:left-panel v-if="options && grid">

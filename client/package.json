@@ -19,6 +19,7 @@
     "chroma-js": "^2.4.2",
     "core-js": "^3.8.3",
     "crypto": "^1.0.1",
+    "crypto-js": "^4.1.1",
     "database": "file:../database",
     "fflate": "^0.8.0",
     "grid": "file:../grid",

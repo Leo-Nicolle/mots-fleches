@@ -157,7 +157,10 @@ class WorkerController extends EventEmitter<Events> {
   }
 
   setLocale(locale: string) {
-    if (this.locale === locale) return this.loadingPromise;
+    if (this.locale === locale) return this.loadingPromise
+    .then(() => {
+      this.emit('locale-changed');
+    });
     this.locale = locale;
     this.emit('start-locale-change');
     this.loadingPromise = Promise.all([

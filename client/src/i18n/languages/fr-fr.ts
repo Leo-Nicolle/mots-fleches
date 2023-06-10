@@ -72,6 +72,17 @@ export const lang = {
             message: "Vous avez été déconnecté du serveur.",
         }
     },
+    login: {
+        title: "Connexion",
+        email: "Email",
+        password: "Mot de passe",
+        wrongPassword: "Mot de passe ou email incorrect.",
+        forgotPassword: "Mot de passe oublié ?",
+        login: "Connexion",
+        register: "Inscription",
+        localMode: "Continuer sans connexion",
+        githubLogin: "Se connecter avec Github",
+    },
     logout: {
         waiting: "Déconnexion en cours...",
         success: "Déconnexion réussie.",
