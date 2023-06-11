@@ -8,7 +8,7 @@
           </template>
           <template #footer>
             <n-collapse-transition :show="alert">
-              <span class="alert"> {{ alert }}</span>
+              <span class="alert"> {{  $t(`alert.${alert && alert.id}`) }}</span>
             </n-collapse-transition>
             <div class="footer">
               <slot name="footer" />
@@ -28,7 +28,7 @@ import { defineProps } from "vue";
 import Layout from "./Main.vue";
 
 const props = defineProps<{
-  alert: string | false;
+  alert: { type: string; id: string } | false;
   title: string;
 }>();
 </script>

@@ -67,21 +67,35 @@ export const lang = {
         add: "Ajouter {word} au dictionnaire",
     },
     alert: {
-        disconnected: {
-            title: "Déconnecté",
-            message: "Vous avez été déconnecté du serveur.",
-        }
+        wrongpassword: "Mot de passe ou email incorrect.",
+        passwordsdontmatch: "Les mots de passe ne correspondent pas.",
+        passwordtooshort: "Le mot de passe est trop court. Minimum 8 caractères.",
     },
     login: {
         title: "Connexion",
         email: "Email",
         password: "Mot de passe",
-        wrongPassword: "Mot de passe ou email incorrect.",
         forgotPassword: "Mot de passe oublié ?",
         login: "Connexion",
         register: "Inscription",
         localMode: "Continuer sans connexion",
         githubLogin: "Se connecter avec Github",
+    },
+    register: {
+        title: "Inscription",
+        email: "Email",
+        password: "Mot de passe",
+        confirmPassword: "Confirmer le mot de passe",
+        send: "Envoyer",
+        cancel: "Annuler",
+    },
+    sentemail: {
+        title: "Email envoyé",
+        message: "Un email vous a été envoyé à {email}. Veuillez cliquer sur le lien pour confirmer votre adresse email.",
+        redirect: "Retour vers la page de connexion.",
+    },
+    passwordreset: {
+        title: "Réinitialisation du mot de passe",
     },
     logout: {
         waiting: "Déconnexion en cours...",

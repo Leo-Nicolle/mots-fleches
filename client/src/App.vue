@@ -1,15 +1,5 @@
 <template>
   <div>
-    <n-alert
-      v-if="alert"
-      class="alert-toaster"
-      :title="$t(`alert.${alert.id}.title`)"
-      :type="alert.type"
-      bordered
-      closable
-    >
-      {{ $t(`alert.${alert.id}.content`) }}
-    </n-alert>
     <router-view />
   </div>
 </template>
@@ -17,18 +7,11 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import './api';
-/**
- * Main Component: handles the alert toaster for server disconnection
- */
-const alert = ref<false | { type: string; id: string }>(false);
 
 onMounted(async () => {
 });
 </script>
 <style>
-.alert-toaster {
-  width: 100vw;
-}
 .scroll::-webkit-scrollbar {
   width: 5px;
 }

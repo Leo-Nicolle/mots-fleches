@@ -33,7 +33,7 @@ function fetch() {
     ? Promise.all(
         (route.query.ids as string).split(",").map((id) => api.getGrid(id))
       ).then((gs) => {
-        grids.value = gs;
+        grids.value = gs.filter((e) => e) as Grid[];
       })
     : api.getGrids().then((gs) => {
         grids.value = gs;

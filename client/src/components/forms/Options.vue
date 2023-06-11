@@ -36,7 +36,7 @@
             v-model:value="value.grid.outerBorderSize"
           />
         </n-form-item>
-        <n-form-item :label="$t('forms.borderColor')" path="grid.outerBorderColor">
+        <n-form-item :label="$t('forms.outBorderColor')" path="grid.outerBorderColor">
           <n-color-picker
             role="outerBorder-color"
             v-model:value="value.grid.outerBorderColor"

@@ -86,7 +86,7 @@ const nav = ref<MenuOption[]>([]);
 const router = useRouter();
 const collapsed = ref(true);
 const switchingLocale = ref(false);
-const props = withDefaults(defineProps<{ isLoggedIn: boolean }>(), {
+const props = withDefaults(defineProps<{ isLoggedIn?: boolean }>(), {
   isLoggedIn: true,
 });
 const emit = defineEmits<{

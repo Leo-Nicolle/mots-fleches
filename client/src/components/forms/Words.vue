@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, toRaw } from "vue";
 import { api } from "../../api";
 /**
  * Component to add and delete words
@@ -52,13 +52,13 @@ function getWords() {
 }
 function onAddKeyup(evt: KeyboardEvent) {
   if (evt.code !== "Enter") return;
-  api.db.pushWord(value.value).then(() => {
+  api.db.pushWord(toRaw(value.value)).then(() => {
     getWords();
   });
 }
 function onDeleteKeyup(evt: KeyboardEvent) {
   if (evt.code !== "Enter") return;
-  api.db.deleteWord(value.value).then(() => {
+  api.db.deleteWord(toRaw(value.value)).then(() => {
     getWords();
   });
 }

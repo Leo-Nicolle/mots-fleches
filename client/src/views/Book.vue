@@ -9,12 +9,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { useRoute } from "vue-router";
 import { Grid, GridOptions, SolutionOptions } from "grid";
 import { ExportOptions } from "../types";
 import Book from "../components/Book.vue";
 import { api } from "../api";
+import { usePrintMessage, cleanupPrintMessage } from '../js/usePrintMessage';
 /**
  * View to print a book of grids (with solutions and index)
  * it uses route querry to know which grids to print
@@ -31,11 +32,9 @@ const exportOptions = ref<Partial<ExportOptions>>({
 function fetch() {
   const promise = route.query.ids
     ? Promise.all(
-        (route.query.ids as string)
-          .split(",")
-          .map((id) => api.getGrid(id))
+        (route.query.ids as string).split(",").map((id) => api.getGrid(id))
       ).then((gs) => {
-        grids.value = gs;
+        grids.value = gs.filter((g) => g) as Grid[];
       })
     : api.getGrids().then((gs) => {
         grids.value = gs;
@@ -55,7 +54,10 @@ function fetch() {
 }
 
 onMounted(() => {
-  fetch();
+  fetch().then(() => usePrintMessage());
+});
+onUnmounted(() => {
+  cleanupPrintMessage();
 });
 </script>
 

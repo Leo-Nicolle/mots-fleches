@@ -315,7 +315,6 @@ workerController.on("run-result", (data) => {
 });
 workerController.on("bail-result", () => {
   cellProbas.value = [];
-  refreshingRun.value = false;
 });
 workerController.on("search-result", (data) => {
   refreshingSearch.value = false;

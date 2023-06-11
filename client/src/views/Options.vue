@@ -42,7 +42,7 @@ import GridForm from "../components/forms/GridForm.vue";
 import Layout from "../layouts/Main.vue";
 import { defaultExportOptions } from "../types";
 import { Grid, GridOptions } from "grid";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, unref, toRaw } from "vue";
 import { useRoute } from "vue-router";
 import { api } from "../api";
 /**
@@ -70,7 +70,7 @@ function onUpdate() {
   clearTimeout(saveTimeout.value);
   saveTimeout.value = setTimeout(() => {
     if (!options.value) return;
-    api.db.pushOption(options.value);
+    api.db.pushOption(toRaw(options.value) as unknown as GridOptions);
   }, 100);
 }
 

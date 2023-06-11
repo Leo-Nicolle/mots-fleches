@@ -148,7 +148,7 @@ function onUpdate(path: string, newvalue: string | number) {
 }
 function onRandomize() {
   workerController.getDistribution().then((distribution) => {
-    generate({ grid: value.value, distribution: props.distribution });
+    generate({ grid: value.value, distribution });
     emit("update-size", value.value);
     randomConfirmVisible.value = false;
   });

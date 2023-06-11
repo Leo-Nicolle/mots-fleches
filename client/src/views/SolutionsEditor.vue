@@ -50,13 +50,11 @@ const exportOptions = ref<ExportOptions>({
 function fetch() {
   const promise = route.query.ids
     ? Promise.all(
-        (route.query.ids as string)
-          .split(",")
-          .map((id) => api.getGrid(id))
+        (route.query.ids as string).split(",").map((id) => api.getGrid(id))
       ).then((gs) => {
-        grids.value = gs;
+        grids.value = gs.filter((e) => e) as Grid[];
       })
-    : api.getGrids().then(gs => {
+    : api.getGrids().then((gs) => {
         grids.value = gs;
       });
   return promise

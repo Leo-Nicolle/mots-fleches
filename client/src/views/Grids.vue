@@ -76,12 +76,6 @@ function fetch() {
     });
 }
 
-function onExportClick() {
-  router.push({
-    path: "solutions",
-    query: { ids: selected.value.map(({ id }) => id).join(",") },
-  });
-}
 function onDelete() {
   Promise.all(selected.value.map((grid) => api.db.deleteGrid(grid.id))).then(
     () => fetch()

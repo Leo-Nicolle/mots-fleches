@@ -13,7 +13,7 @@
 <script setup lang="ts">
 import Editor from "../components/Editor.vue";
 import { Grid, GridOptions } from "grid";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, toRaw } from "vue";
 import { useRoute } from "vue-router";
 import { api } from "../api";
 /**
@@ -26,9 +26,9 @@ const options = ref<GridOptions>();
 const saveTimeout = ref(0);
 const route = useRoute();
 function fetch() {
-  console.log('fetch');
-  return api.getGrid(route.params.id as string)
-  .then((g) => {
+  return api
+    .getGrid(route.params.id as string)
+    .then((g) => {
       grid.value = g as Grid;
       return api.db.getOption(grid.value.optionsId);
     })
@@ -43,7 +43,7 @@ function onUpdate() {
   clearTimeout(saveTimeout.value);
   saveTimeout.value = setTimeout(() => {
     if (!grid.value) return;
-    api.db.pushGrid(grid.value);
+    api.db.pushGrid(toRaw(grid.value));
   }, 50);
 }
 
@@ -52,7 +52,7 @@ function onSizeUpdate() {
   clearTimeout(saveTimeout.value);
   saveTimeout.value = setTimeout(() => {
     if (!grid.value) return;
-    api.db.pushGrid(grid.value);
+    api.db.pushGrid(toRaw(grid.value));
   }, 50);
 }
 onMounted(() => {

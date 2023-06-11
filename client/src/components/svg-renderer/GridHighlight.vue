@@ -40,6 +40,7 @@ import {
   defineEmits,
   defineProps,
   ref,
+  toRaw,
   watchEffect,
 } from "vue";
 import {
@@ -238,7 +239,7 @@ watchEffect(() => {
 });
 function onMouseMove(evt: MouseEvent) {}
 function add() {
-  api.db.pushWord(word.value).then(() => {
+  api.db.pushWord(toRaw(word.value)).then(() => {
     tooltip.value = "";
     emit("update");
   });

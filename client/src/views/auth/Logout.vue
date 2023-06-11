@@ -21,7 +21,6 @@ const router = useRouter();
 const closed = ref(false);
 const message = ref<string>("waiting");
 function exit() {
-  console.log(api.mode)
   if (api.mode === 'supadb'){
     return api.supadb.supabase.auth.signOut();
   } 

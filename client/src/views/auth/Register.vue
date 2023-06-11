@@ -54,7 +54,6 @@ async function register(method: string) {
     email: email.value,
     password: password.value,
   });
-  console.log(data, error);
   if (error) {
     console.log(
       "Error: ",

@@ -67,10 +67,9 @@ export const lang = {
         add: "Añadir {word} al diccionario",
     },
     alert: {
-        disconnected: {
-            title: "Desconectado",
-            message: "Se ha perdido la conexión con el servidor",
-        }
+        wrongpassword: "Contraseña incorrecta",
+        passwordsdontmatch: "Las contraseñas no coinciden",
+        passwordtooshort: "La contraseña es demasiado corta. Mínimo 6 caracteres",
     },
     login: {
         title: "Iniciar sesión",
@@ -88,8 +87,16 @@ export const lang = {
         email: "Correo electrónico",
         password: "Contraseña",
         passwordConfirm: "Confirmar contraseña",
-        wrongPassword: "Contraseña o Correo incorrecta",
-        
+        send: "Enviar",
+        cancel: "Cancelar",
+    },
+    sentemail: {
+        title: "Correo enviado",
+        message: "Se ha enviado un correo a {email} con las instrucciones para restablecer la contraseña",
+        redirect: "Redirigiendo a la página de inicio de sesión...",
+    },
+    passwordreset: {
+        title: "Restablecer contraseña",
     },
     logout: {
         wating: "Esperando a que el servidor se desconecte...",

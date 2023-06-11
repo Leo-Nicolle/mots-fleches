@@ -29,10 +29,9 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { newOptions } from "grid";
-import VueHighlightJS from "vue3-highlightjs";
 import "highlight.js/styles/monokai.css";
 import Layout from "../layouts/GridLayout.vue";
-import { Grid, GridOptions } from "grid";
+import { GridOptions } from "grid";
 import { api } from "../api";
 /**
  * View to display all options in a grid layout

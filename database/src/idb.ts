@@ -47,7 +47,7 @@ async function create() {
       }
     },
   });
-  
+
   return db;
 
 }
@@ -98,11 +98,7 @@ export class Idatabase extends Database {
   async getGrid(gridId: string) {
     return await this.loadingPromise.then((db) =>
       db.get('grids', gridId)
-    )
-      .then((grid) => {
-        console.log(grid);
-        return grid;
-      });
+    );
   }
 
   async getOptions() {
@@ -115,12 +111,12 @@ export class Idatabase extends Database {
       db.get('options', optionId)
     );
   }
-  async pushOption(option: any) {
+  async pushOption(option: GridOptions) {
     return await this.loadingPromise.then((db) =>
       db.put('options', option)
     );
   }
-  async updateOption(option: any) {
+  async updateOption(option: GridOptions) {
     return await this.pushOption(option);
   }
   async deleteOption(optionId: string) {

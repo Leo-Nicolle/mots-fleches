@@ -11,10 +11,11 @@
 import GridPaper from "../components/GridPaper.vue";
 import { Grid, GridOptions } from "grid";
 import { mergeRouteWithDefault } from "../js/utils";
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, onUnmounted } from "vue";
 import { useRoute } from "vue-router";
 import { defaultExportOptions } from "../types";
 import { api } from "../api";
+import { cleanupPrintMessage, usePrintMessage } from "../js/usePrintMessage";
 /**
  * View to print a grid
  * Uses route params to know which grid to print
@@ -25,7 +26,6 @@ const options = ref<GridOptions>();
 const exportOptions = computed(() =>
   mergeRouteWithDefault(route, defaultExportOptions)
 );
-console.log("exportOptions", exportOptions.value);
 function fetch() {
   return api
     .getGrid(route.query.id as string)
@@ -42,7 +42,11 @@ function fetch() {
 }
 
 onMounted(() => {
-  fetch();
+  fetch()
+  .then(() => usePrintMessage());
+});
+onUnmounted(() => {
+  cleanupPrintMessage();
 });
 </script>
 

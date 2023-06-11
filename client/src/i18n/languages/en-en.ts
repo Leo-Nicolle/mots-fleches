@@ -67,16 +67,14 @@ export const lang = {
         add: "Add {word} to dictionary",
     },
     alert: {
-        disconnected: {
-            title: "Disconnected",
-            message: "You have been disconnected from the server",
-        }
+        wrongpassword: "Wrong password or email",
+        passwordsdontmatch: "Passwords don't match",
+        passwordtooshort: "Password too short, minimum 6 characters",
     },
     login: {
         title: "Login",
         emal: "Email",
         password: "Password",
-        wrongPassword: "Wrong email/password combination",
         forgotPassword: "Forgot password?",
         login: "Login",
         register: "Register",
@@ -88,7 +86,6 @@ export const lang = {
         email: "Email",
         password: "Password",
         confirmPassword: "Confirm password",
-        wrongPassword: "Wrong email/password combination",
         send: "Register",
         cancel: "Cancel",
     },

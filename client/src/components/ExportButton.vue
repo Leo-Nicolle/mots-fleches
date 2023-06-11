@@ -26,7 +26,7 @@ const props = defineProps<{
 function print() {
   const iframe = document.querySelector("iframe.print") as HTMLIFrameElement;
   if (!iframe || !iframe.contentWindow) return;
-  iframe.contentWindow.print();
+  iframe.contentWindow.postMessage('print', '*');
 }
 const iframeUrl = computed(() => {
   const url = `${window.location.origin}${

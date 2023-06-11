@@ -36,9 +36,9 @@ class API {
       .then((grids) => grids.map(grid => Grid.unserialize(JSON.stringify(grid))));
   }
 
-  getGrid(id: string): Promise<Grid> {
+  getGrid(id: string): Promise<Grid | undefined> {
     return this.db.getGrid(id)
-      .then((grid) => Grid.unserialize(JSON.stringify(grid)));
+      .then((grid) => grid ? Grid.unserialize(JSON.stringify(grid)) : undefined);
   }
 
   isSignedIn() {

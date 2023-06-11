@@ -64,7 +64,6 @@ async function register(method: string) {
     )
       ? "passwordtooshort"
       : "wrongpassword";
-    console.log(id);
     alert.value = { type: "error", id };
     setTimeout(() => {
       alert.value = false;
