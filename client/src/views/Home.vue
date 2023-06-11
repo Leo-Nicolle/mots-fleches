@@ -25,10 +25,14 @@
           <n-anchor-link title="How do I resize my grid ?" href="#resize" />
         </n-anchor-link>
         <n-anchor-link
+          title="Custom words"
+          href="#customwords"
+        />
+
+        <n-anchor-link
           title="Languages"
           href="#languages"
-        >
-        </n-anchor-link>
+        />
       </n-anchor>
     </template>
     <template #body>
@@ -179,6 +183,13 @@
             </li>
           </ul>
         </section>
+         <section id="customwords">
+          <h3>How can I add custom words ?</h3>
+          <p>
+            Just got to the <em>Words</em> page, and add your words. You can also delete them from there.
+            You cannot modify the base dictionnary though.
+          </p>
+        </section>
         <section id="languages">
           <h3>What languages are supported ?</h3>
           <p>
@@ -205,7 +216,7 @@ article.main {
   flex-direction: column;
   align-items: flex-start;
   max-width: 740px;
-  margin-bottom: 50px;
+  margin-bottom: 500px;
 }
 .left-menu {
   margin-top: 20px;

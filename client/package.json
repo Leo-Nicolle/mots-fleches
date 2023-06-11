@@ -23,6 +23,7 @@
     "database": "file:../database",
     "fflate": "^0.8.0",
     "grid": "file:../grid",
+    "keyboard-css": "^1.2.4",
     "lodash.throttle": "^4.1.1",
     "naive-ui": "^2.34.3",
     "uuid": "^9.0.0",
