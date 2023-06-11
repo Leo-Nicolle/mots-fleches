@@ -22,7 +22,7 @@ const closed = ref(false);
 const message = ref<string>("waiting");
 function exit() {
   if (api.mode === 'supadb'){
-    return api.supadb.supabase.auth.signOut();
+    return api.signout();
   } 
   return Promise.resolve(); 
   

@@ -1,25 +1,23 @@
 import { Grid } from 'grid';
-import { Idatabase, FsdbClient, SupaDB } from 'database';
+import { Idatabase, SupaDB } from 'database';
 
 class API {
   public idb: Idatabase;
-  public fsdb: FsdbClient;
   public supadb: SupaDB;
-  public _mode: string = 'fsdb';
-  constructor(mode: string = 'fsdb') {
+  public _mode: string;
+  constructor(mode: string = 'unknown') {
     this.idb = new Idatabase();
-    this.fsdb = new FsdbClient(`http://localhost:${import.meta.env.VITE_APIPORT}`);
     this.supadb = new SupaDB('https://tnvxmrqhkdlynhtdzmpw.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRudnhtcnFoa2RseW5odGR6bXB3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODIyNTM0MTEsImV4cCI6MTk5NzgyOTQxMX0.4PczPPAxbkwBvig7NTHNbR8JumuwPPqfyS_kGnkxP5I');
     this._mode = mode;
   }
 
   get db() {
-    if (this.mode === 'fsdb') {
-      return this.fsdb;
+    if (this.mode === 'idb') {
+      return this.idb;
     } else if (this.mode === 'supadb') {
       return this.supadb;
     } else {
-      return this.idb;
+      throw new Error('Unknown database mode');
     }
   }
 
@@ -42,7 +40,14 @@ class API {
   }
 
   isSignedIn() {
-    return this.db.isSignedIn();
+    return localStorage.getItem('db-mode') && this.db.isSignedIn();
+  }
+  signout() {
+    localStorage.removeItem('db-mode');
+    if (this.mode === 'supadb') {
+      return this.supadb.supabase.auth.signOut();
+    }
+    return Promise.resolve();
   }
 }
 

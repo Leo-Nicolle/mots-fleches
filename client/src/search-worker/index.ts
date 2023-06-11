@@ -200,7 +200,10 @@ class WorkerController extends EventEmitter<Events> {
       ))
       .then((distribution) => {
         this.distribution = distribution;
-        this.emit('locale-changed');
+        return this.emit('locale-changed');
+      })
+      .catch((err) => {
+        console.error(err);
       });
     return this.loadingPromise;
   }
