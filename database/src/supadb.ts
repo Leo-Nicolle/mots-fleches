@@ -25,15 +25,12 @@ export class SupaDB extends Database {
     })
     this.supabase.auth.getSession()
       .then(({ data,error }) => {
-        console.log('get session', data, error);
         if (!data) return;
         this.userid = data.session?.user.id || '';
-        console.log('created supabase client');
       })
       .catch(e => console.error('error getting session', e));
 
     this.supabase.auth.onAuthStateChange(async (_event, session) => {
-      console.log('auth state change', _event, session)
       if (!session?.user) {
         this.userid = '';
         return;
@@ -121,7 +118,6 @@ export class SupaDB extends Database {
 
   async getWords() {
     const { data } = await this.supabase.from('Words').select();
-    console.log('getWords', data)
     return data!.flatMap(({ data }) => data);
   }
 

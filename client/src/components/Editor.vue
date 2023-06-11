@@ -121,6 +121,7 @@ import {
   computed,
   onBeforeUnmount,
   watch,
+  unref,
 } from "vue";
 import {
   AddCircleOutline,
@@ -286,10 +287,13 @@ function onKeyUp(evt: KeyboardEvent) {
   }
   if (evt.key === ">" || evt.key === "<") {
     // ordering.value = ordering.value * -1;
+    const ords = unref(orderings);
+    ordering.value =
+      ords[(ords.findIndex((o) => o === ordering.value) + 1) % ords.length];
     consumed = true;
   }
   if (evt.code === "Space") {
-    method.value = method.value === "simple" ? "fastest" : "simple";
+    method.value = method.value = "simple" ? "accurate" : "simple";
     consumed = true;
   }
   // @ts-ignore

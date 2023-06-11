@@ -9,16 +9,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
-import { useRouter, useRoute } from "vue-router";
-import SolutionsPaper from "../components/Solutions.vue";
-import { Grid, GridOptions, SolutionOptions } from "grid";
-import { defaultExportOptions, ExportOptions } from "../types";
-import { api } from "../api";
+import { ref, onMounted } from "vue";
+import SolutionsPaper from "../../components/Solutions.vue";
+import { Grid, SolutionOptions } from "grid";
+import { defaultExportOptions, ExportOptions } from "../../types";
+import { api } from "../../api";
 /**
  * View to print solutions
  */
-const router = useRouter();
 const grids = ref<Grid[]>([]);
 const options = ref<SolutionOptions>();
 const exportOptions = ref<ExportOptions>({

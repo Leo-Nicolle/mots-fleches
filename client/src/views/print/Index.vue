@@ -9,11 +9,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
-import WordsIndex from "../components/WordsIndex.vue";
-import { Grid, GridOptions, SolutionOptions } from "grid";
-import { defaultExportOptions, ExportOptions } from "../types";
-import { api } from "../api";
+import { ref, onMounted } from "vue";
+import WordsIndex from "../../components/WordsIndex.vue";
+import { Grid, SolutionOptions } from "grid";
+import { defaultExportOptions, ExportOptions } from "../../types";
+import { api } from "../../api";
 const grids = ref<Grid[]>([]);
 const options = ref<SolutionOptions>();
 const exportOptions = ref<ExportOptions>({

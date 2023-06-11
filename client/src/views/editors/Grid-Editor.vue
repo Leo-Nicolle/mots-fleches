@@ -11,11 +11,11 @@
 </template>
 
 <script setup lang="ts">
-import Editor from "../components/Editor.vue";
+import Editor from "../../components/Editor.vue";
 import { Grid, GridOptions } from "grid";
 import { ref, onMounted, toRaw } from "vue";
 import { useRoute } from "vue-router";
-import { api } from "../api";
+import { api } from "../../api";
 /**
  * Route to edit a grid
  * Uses the route query to get the grid id

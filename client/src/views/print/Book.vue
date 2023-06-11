@@ -9,17 +9,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { useRoute } from "vue-router";
 import { Grid, GridOptions, SolutionOptions } from "grid";
-import { ExportOptions } from "../types";
-import Book from "../components/Book.vue";
-import { api } from "../api";
+import { ExportOptions } from "../../types";
+import Book from "../../components/Book.vue";
+import { api } from "../../api";
+import { usePrintMessage, cleanupPrintMessage } from '../../js/usePrintMessage';
 /**
- * TODO, not used yet, and not sure to use
+ * View to print a book of grids (with solutions and index)
+ * it uses route querry to know which grids to print
  */
 const route = useRoute();
-
 const grids = ref<Grid[]>([]);
 const options = ref<GridOptions>();
 const solutionOptions = ref<SolutionOptions>();
@@ -33,7 +34,7 @@ function fetch() {
     ? Promise.all(
         (route.query.ids as string).split(",").map((id) => api.getGrid(id))
       ).then((gs) => {
-        grids.value = gs.filter((e) => e) as Grid[];
+        grids.value = gs.filter((g) => g) as Grid[];
       })
     : api.getGrids().then((gs) => {
         grids.value = gs;
@@ -53,7 +54,10 @@ function fetch() {
 }
 
 onMounted(() => {
-  fetch();
+  fetch().then(() => usePrintMessage());
+});
+onUnmounted(() => {
+  cleanupPrintMessage();
 });
 </script>
 

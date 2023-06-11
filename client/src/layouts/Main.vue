@@ -2,6 +2,10 @@
   <div class="main-layout">
     <div class="header">
       <span class="left">
+        <span class="menutitle" @click="onMenuClick">
+          <img class="menuicon" src="/icon.svg" />
+          <span>Motsflex</span>
+        </span>
         <n-menu
           v-if="isLoggedIn"
           class="burger"
@@ -80,7 +84,7 @@ import { renderIcon } from "../js/utils";
 import { LogOutOutline, LanguageOutline } from "@vicons/ionicons5";
 import { i18n, setLanguage } from "../i18n";
 import { workerController } from "../search-worker";
-
+import "keyboard-css";
 const locale = ref(i18n.global.locale);
 const nav = ref<MenuOption[]>([]);
 const router = useRouter();
@@ -142,6 +146,17 @@ function getNavChildren() {
         ),
       key: "go-to-words",
     },
+    {
+      label: () =>
+        h(
+          RouterLink,
+          {
+            to: "/about",
+          },
+          { default: () => i18n.global.t("nav.about") }
+        ),
+      key: "go-to-about",
+    },
   ];
 }
 
@@ -191,6 +206,9 @@ function onScroll(e: Event) {
 function exit() {
   router.push("/logout");
 }
+function onMenuClick() {
+  router.push("/");
+}
 </script>
 
 <style>
@@ -212,6 +230,11 @@ function exit() {
   justify-content: space-between;
   height: 42px;
   box-shadow: 0px 1px 3px #888;
+  position: fixed;
+  top: 0;
+  z-index: 1000;
+  background: white;
+  padding-top: 1px;
 }
 .header > .left {
   display: flex;
@@ -219,6 +242,7 @@ function exit() {
   gap: 10px;
   align-items: center;
   justify-content: flex-start;
+  margin-left: 4px;
 }
 .header > .right {
   display: flex;
@@ -227,6 +251,17 @@ function exit() {
   align-items: center;
   justify-content: flex-end;
   margin-right: 4px;
+}
+.menutitle {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  cursor: pointer;
+  padding: 2px;
+}
+.menuicon {
+  width: 32px;
 }
 
 nav {
@@ -251,6 +286,7 @@ nav {
   max-width: 100vw;
   width: 100vw;
   overflow: hidden;
+  margin-top: 60px;
 }
 .left-panel {
   display: flex;

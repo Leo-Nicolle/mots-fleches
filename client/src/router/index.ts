@@ -1,11 +1,18 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
-import {api} from '../api';
+import { api } from '../api';
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'home',
-    component: () => import('../views/Grids.vue')
+    component: () => import('../views/Home.vue'),
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/about',
+    name: 'about',
+    component: () => import('../views/Home.vue'),
+    meta: { requiresAuth: false }
   },
   {
     path: '/grids',
@@ -15,12 +22,12 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/grid/:id',
     name: 'grid',
-    component: () => import('../views/Grid-Editor.vue')
+    component: () => import('../views/editors/Grid-Editor.vue')
   },
   {
     path: '/grid-export/:id',
     name: 'grid-export',
-    component: () => import('../views/Grid.vue')
+    component: () => import('../views/print/Grid.vue')
   },
   {
     path: '/options',
@@ -30,52 +37,57 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/options/:id',
     name: 'options',
-    component: () => import('../views/Options.vue')
+    component: () => import('../views/editors/Options.vue')
   },
   {
     path: '/solutions',
     name: 'solutions',
-    component: () => import('../views/SolutionsEditor.vue')
+    component: () => import('../views/editors/SolutionsEditor.vue')
   },
   {
     path: '/solutions-export',
     name: 'solutions-export',
-    component: () => import('../views/Solutions.vue')
+    component: () => import('../views/print/Solutions.vue')
   },
   {
     path: '/index-export',
     name: 'index-export',
-    component: () => import('../views/Index.vue')
+    component: () => import('../views/print/Index.vue')
   },
   {
     path: '/book-export',
     name: 'book-export',
-    component: () => import('../views/Book.vue')
+    component: () => import('../views/print/Book.vue')
   },
   {
     path: '/logout',
     name: 'logout',
-    component: () => import('../views/auth/Logout.vue')
+    component: () => import('../views/auth/Logout.vue'),
+    meta: { requiresAuth: false }
   },
   {
     path: '/login',
     name: 'login',
-    component: () => import('../views/auth/Login.vue')
+    component: () => import('../views/auth/Login.vue'),
+    meta: { requiresAuth: false }
   },
   {
     path: '/register',
     name: 'register',
-    component: () => import('../views/auth/Register.vue')
+    component: () => import('../views/auth/Register.vue'),
+    meta: { requiresAuth: false }
   },
   {
     path: '/sentemail/:hash',
     name: 'sentemail',
-    component: () => import('../views/auth/Sentemail.vue')
+    component: () => import('../views/auth/Sentemail.vue'),
+    meta: { requiresAuth: false }
   },
   {
     path: '/passwordreset/:access_token(\\d+)?',
     name: 'passwordreset',
-    component: () => import('../views/auth/PasswordReset.vue')
+    component: () => import('../views/auth/PasswordReset.vue'),
+    meta: { requiresAuth: false }
   },
   {
     path: '/words',
@@ -93,7 +105,7 @@ router.beforeEach(async (to, from) => {
   const isSignedin = await api.isSignedIn();
   if (
     !isSignedin &&
-    to.name !== 'login'
+    to.meta.requiresAuth !== false
   ) {
     return { name: 'login' };
   }

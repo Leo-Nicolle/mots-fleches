@@ -25,14 +25,14 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
-import Layout from "../layouts/Main.vue";
-import OptionsForm from "../components/forms/Options.vue";
-import SolutionsPaper from "../components/Solutions.vue";
-import WordsIndex from "../components/WordsIndex.vue";
-import SolutionsForm from "../components/forms/SolutionsForm.vue";
+import Layout from "../../layouts/Main.vue";
+import OptionsForm from "../../components/forms/Options.vue";
+import SolutionsPaper from "../../components/Solutions.vue";
+import WordsIndex from "../../components/WordsIndex.vue";
+import SolutionsForm from "../../components/forms/SolutionsForm.vue";
 import { Grid, SolutionOptions } from "grid";
-import { defaultExportOptions, ExportOptions } from "../types";
-import { api } from "../api";
+import { defaultExportOptions, ExportOptions } from "../../types";
+import { api } from "../../api";
 /**
  * View to edit solutions options
  */

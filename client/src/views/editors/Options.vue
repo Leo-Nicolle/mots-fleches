@@ -34,17 +34,17 @@
 </template>
 
 <script setup lang="ts">
-import GridPaper from "../components/GridPaper.vue";
-import ExportButton from "../components/ExportButton.vue";
-import ExportSVGButton from "../components/ExportSVG.vue";
-import OptionsForm from "../components/forms/Options.vue";
-import GridForm from "../components/forms/GridForm.vue";
-import Layout from "../layouts/Main.vue";
-import { defaultExportOptions } from "../types";
+import GridPaper from "../../components/GridPaper.vue";
+import ExportButton from "../../components/ExportButton.vue";
+import ExportSVGButton from "../../components/ExportSVG.vue";
+import OptionsForm from "../../components/forms/Options.vue";
+import GridForm from "../../components/forms/GridForm.vue";
+import Layout from "../../layouts/Main.vue";
+import { defaultExportOptions } from "../../types";
 import { Grid, GridOptions } from "grid";
 import { ref, onMounted, unref, toRaw } from "vue";
 import { useRoute } from "vue-router";
-import { api } from "../api";
+import { api } from "../../api";
 /**
  * View to edit a grid style
  */

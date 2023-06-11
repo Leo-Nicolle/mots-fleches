@@ -8,14 +8,14 @@
 </template>
 
 <script setup lang="ts">
-import GridPaper from "../components/GridPaper.vue";
+import GridPaper from "../../components/GridPaper.vue";
 import { Grid, GridOptions } from "grid";
-import { mergeRouteWithDefault } from "../js/utils";
+import { mergeRouteWithDefault } from "../../js/utils";
 import { ref, onMounted, computed, onUnmounted } from "vue";
 import { useRoute } from "vue-router";
-import { defaultExportOptions } from "../types";
-import { api } from "../api";
-import { cleanupPrintMessage, usePrintMessage } from "../js/usePrintMessage";
+import { defaultExportOptions } from "../../types";
+import { api } from "../../api";
+import { cleanupPrintMessage, usePrintMessage } from "../../js/usePrintMessage";
 /**
  * View to print a grid
  * Uses route params to know which grid to print
