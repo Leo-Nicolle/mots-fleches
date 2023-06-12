@@ -90,8 +90,15 @@ const nav = ref<MenuOption[]>([]);
 const router = useRouter();
 const collapsed = ref(true);
 const switchingLocale = ref(false);
-const props = withDefaults(defineProps<{ isLoggedIn?: boolean }>(), {
-  isLoggedIn: true,
+const props = withDefaults(
+  defineProps<{ isLoggedIn?: boolean; leftPanelWidth?: number }>(),
+  {
+    isLoggedIn: true,
+    leftPanelWidth: 235,
+  }
+);
+const leftWidth = computed(() => {
+  return `${props.leftPanelWidth}px`;
 });
 const emit = defineEmits<{
   /**
@@ -292,8 +299,8 @@ nav {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  width: 235px;
-  min-width: 235px;
+  width: v-bind(leftWidth);
+  min-width: v-bind(leftWidth);
   overflow: hidden;
   align-items: center;
   justify-content: flex-start;
@@ -310,8 +317,8 @@ nav {
 }
 .scroll {
   max-height: 100%;
-  max-width: calc(100vw - 235px);
-  width: calc(100vw - 235px);
+  max-width: calc(100vw - v-bind(leftWidth));
+  width: calc(100vw - v-bind(leftWidth));
 }
 .leftpanel > .n-scrollbar {
   max-height: 100vh;
