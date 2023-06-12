@@ -13,7 +13,7 @@ export const lang = {
         create: "Créer",
         yes: "Oui",
         no: "Non",
-        exit: "Quitter",
+        exit: "Se déconnecter",
         newGrid: "Nouvelle grille",
         newStyle: "Nouveau style",
         print: "Imprimer",
