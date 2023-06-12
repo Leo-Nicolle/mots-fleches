@@ -40,9 +40,14 @@ class API {
   }
 
   isSignedIn() {
-    return localStorage.getItem('db-mode') && this.db.isSignedIn();
+    return localStorage.getItem('db-mode') === 'idb' ?
+      Promise.resolve(true) :
+      localStorage.getItem('db-mode') === 'supadb'
+        ? this.db.isSignedIn()
+        : Promise.resolve(false);
   }
   signout() {
+    console.log('signout')
     localStorage.removeItem('db-mode');
     if (this.mode === 'supadb') {
       return this.supadb.supabase.auth.signOut();

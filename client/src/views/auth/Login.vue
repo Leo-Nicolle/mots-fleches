@@ -66,7 +66,7 @@ async function login(method: string) {
     return setAlert("error", "wrongpassword");
   }
   api.mode = "supadb";
-  router.push("/grids");
+  router.push("/");
 }
 async function emailLogin() {
   const { data, error } = await api.supadb.supabase.auth.signInWithPassword({
@@ -80,7 +80,7 @@ async function emailLogin() {
     }, 3000);
   } else {
     api.mode = "supadb";
-    router.push("/grids");
+    router.push("/");
   }
 }
 async function onForgotPassword() {
@@ -99,7 +99,7 @@ function createAccount() {
 
 async function localMode() {
   api.mode = "idb";
-  router.push("/grids");
+  router.push("/");
 }
 </script>
 

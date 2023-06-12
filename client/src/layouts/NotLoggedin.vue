@@ -1,5 +1,5 @@
 <template>
-  <Layout :is-logged-in="false">
+  <Layout :show-login-button="false" :left-panel-width="0">
     <template v-slot:body>
       <div class="notloggedin">
         <n-card :title="title" class="notloggedincard">

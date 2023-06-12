@@ -70,7 +70,7 @@ async function register(method: string) {
     }, 3000);
   } else {
     api.mode = "supadb";
-    router.push("/grids");
+    router.push("/");
   }
 }
 async function cancel() {

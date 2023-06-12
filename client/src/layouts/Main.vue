@@ -2,12 +2,12 @@
   <div class="main-layout">
     <div class="header">
       <span class="left">
-        <span class="menutitle" @click="onMenuClick">
+        <span class="menutitle" @click="router.push('/')">
           <img class="menuicon" src="/icon.svg" />
           <span>Motsflex</span>
         </span>
         <n-menu
-          v-if="isLoggedIn"
+          v-if="showLoginButton"
           class="burger"
           :accordion="true"
           :mode="'horizontal'"
@@ -32,15 +32,14 @@
           </n-button>
         </n-popselect>
         <n-button
-          v-if="isLoggedIn"
+          v-if="showLoginButton"
           strong
           secondary
-          type="warning"
-          class="exit-button"
+          :type="isSignedIn ? 'warning' : 'primary'"
           icon-placement="right"
-          @click="exit"
+          @click="isSignedIn ? router.push('/logout') : router.push('/login')"
         >
-          {{ $t("buttons.exit") }}
+          {{ $t(isSignedIn ? "buttons.exit" : "buttons.login") }}
           <template #icon>
             <n-icon>
               <LogOutOutline />
@@ -85,18 +84,33 @@ import { LogOutOutline, LanguageOutline } from "@vicons/ionicons5";
 import { i18n, setLanguage } from "../i18n";
 import { workerController } from "../search-worker";
 import "keyboard-css";
+import { api } from "../api";
 const locale = ref(i18n.global.locale);
 const nav = ref<MenuOption[]>([]);
 const router = useRouter();
 const collapsed = ref(true);
 const switchingLocale = ref(false);
 const props = withDefaults(
-  defineProps<{ isLoggedIn?: boolean; leftPanelWidth?: number }>(),
+  defineProps<{ showLoginButton?: boolean; leftPanelWidth?: number }>(),
   {
-    isLoggedIn: true,
+    showLoginButton: true,
     leftPanelWidth: 235,
   }
 );
+const isSignedIn = ref(false);
+function refreshSignedId(){
+  api
+    .isSignedIn()
+    .then((res) => {
+      isSignedIn.value = res;
+      console.log("isSignedIn", res);
+    })
+    .catch(() => {
+      isSignedIn.value = false;
+    });
+
+}
+const interval = setInterval(() => refreshSignedId(), 10_000);
 const leftWidth = computed(() => {
   return `${props.leftPanelWidth}px`;
 });
@@ -205,16 +219,12 @@ watchEffect(() => {
 });
 onMounted(() => {
   nav.value = getNavChildren();
+  refreshSignedId();
 });
+
 
 function onScroll(e: Event) {
   emit("scroll", e);
-}
-function exit() {
-  router.push("/logout");
-}
-function onMenuClick() {
-  router.push("/");
 }
 </script>
 
@@ -281,9 +291,6 @@ nav {
 .burger {
   margin-left: auto;
   margin-right: 25px;
-}
-.exit-button {
-  margin-right: 5px;
 }
 
 .body {

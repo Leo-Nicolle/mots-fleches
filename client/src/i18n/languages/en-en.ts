@@ -15,6 +15,7 @@ export const lang = {
     yes: "Yes",
     no: "No",
     exit: "Log out",
+    login: "Log in",
     newGrid: "New grid",
     newStyle: "New style",
     print: "Print",

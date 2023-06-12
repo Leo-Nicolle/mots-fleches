@@ -15,6 +15,7 @@ export const lang = {
         yes: "Sí",
         no: "No",
         exit: "Cerrar sesión",
+        login: "Iniciar sesión",
         newGrid: "Nueva cuadrícula",
         newStyle: "Nuevo estilo",
         print: "Imprimir",

@@ -25,7 +25,7 @@ const email = ref<string>(
 );
 
 function redirect() {
-  router.push("/login");
+  router.push("/");
 }
 </script>
 

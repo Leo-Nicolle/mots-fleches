@@ -71,7 +71,7 @@ async function register(method: string) {
     return setAlert("error", id);
   } else {
     api.mode = "supadb";
-    router.push("/grids");
+    router.push("/");
   }
 }
 async function cancel() {

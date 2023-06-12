@@ -32,6 +32,7 @@ onMounted(() => {
   setTimeout(() => {
     exit()
     .then(() => {
+      api.signout();
       message.value = "success";
       closed.value = true;
       router.push('/login');

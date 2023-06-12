@@ -24,7 +24,7 @@ export class SupaDB extends Database {
       }
     })
     this.supabase.auth.getSession()
-      .then(({ data,error }) => {
+      .then(({ data }) => {
         if (!data) return;
         this.userid = data.session?.user.id || '';
       })
