@@ -1,0 +1,33 @@
+{
+  "name": "database",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "dist/clientdb.js",
+  "types": "dist/types/index-client.d.ts",
+  "browser": "./dist/clientdb.js",
+  "scripts": {
+    "prebuild": "rm -rf dist",
+    "build:server": "vite build -c vite.config-server.js",
+    "build:client": "vite build -c vite.config-client.js",
+    "dev:server": "vite build -c vite.config-server.js -w",
+    "dev:client": "vite build -c vite.config-client.js -w",
+    "build": "npm run build:client && npm run build:server",
+    "postbuild": "npm run types",
+    "types": "tsc --d -emitDeclarationOnly --outDir dist/types",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.22.0",
+    "axios": "^1.4.0",
+    "grid": "file:../grid",
+    "idb": "^7.1.1"
+  },
+  "devDependencies": {
+    "rollup-plugin-node": "^0.2.1",
+    "typescript": "^5.0.4",
+    "vite": "^4.3.8"
+  }
+}

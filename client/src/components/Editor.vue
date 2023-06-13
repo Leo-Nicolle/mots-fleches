@@ -27,7 +27,7 @@
         :ordering="ordering"
         :cellProbas="cellProbas"
         :searchResult="searchResult"
-        :loading="method==='accurate' && refreshingRun"
+        :loading="isLoadingSuggestions"
         @hover="onHover"
         @click="onClick"
         @dir="(d) => (dir = d)"
@@ -121,6 +121,7 @@ import {
   computed,
   onBeforeUnmount,
   watch,
+  unref,
 } from "vue";
 import {
   AddCircleOutline,
@@ -144,12 +145,7 @@ import { defaultExportOptions, Method, Ordering } from "../types";
 import ModalOptions from "./forms/ModalOptions.vue";
 import GridHighlight, { Mode } from "./svg-renderer/GridHighlight.vue";
 import Suggestion from "./Suggestion.vue";
-import { getUrl } from "../js/utils";
-import axios from "axios";
-import SearchWorker from "../search-worker/index";
-const runWorker = new SearchWorker();
-const searchWorker = new SearchWorker();
-
+import { workerController } from "../search-worker/index";
 /**
  * Component to edit a grid
  */
@@ -183,29 +179,35 @@ const offset = ref<[number, number]>([-10, 0]);
 const method = ref<Method>("accurate");
 const methods = ref<Method[]>(["accurate", "simple"]);
 const ordering = ref<Ordering>("best");
-const orderings= ref<Ordering[]>(["best", "alpha", "inverse-alpha", "random"]);
+const orderings = ref<Ordering[]>(["best", "alpha", "inverse-alpha", "random"]);
 const zoom = ref(1);
 const highlights = ref(new Map());
 const highlightModes = ["normal", "check", "heatmap"] as Mode[];
 const highlightMode = ref<Mode>(highlightModes[2]);
 const cellProbas = ref<CellProba[][]>([]);
-const searchResult = ref<number[]>([]);
+const searchResult = ref<string[]>([]);
 const refreshingRun = ref(false);
+const refreshingSearch = ref(false);
 
 function refreshCellProba() {
   refreshingRun.value = true;
-  runWorker.run(props.grid);
+  workerController.run(props.grid);
 }
 function refreshSimpleSearch() {
-  searchWorker.search(props.grid, focus.value, dir.value);
+  refreshingSearch.value = true;
+  workerController.search(props.grid, focus.value, dir.value);
+}
+function refreshValidity() {
+  workerController.checkGrid(props.grid);
 }
 const throttledRefresCellProba = throttle(refreshCellProba, 200);
 const throttledRefresSimpleSearch = throttle(refreshSimpleSearch, 60);
-
+const throttledRefresValidity = throttle(refreshValidity, 60);
 function onGridUpdate() {
   //refresh the children components that need it.
   gridVersion.value = gridVersion.value + 1;
   throttledRefresCellProba();
+  throttledRefresValidity();
   emit("update");
 }
 function computeOffset(e) {
@@ -239,13 +241,12 @@ watch(method, () => {
 });
 onMounted(() => {
   computeOffset(null);
+  workerController.checkGrid(props.grid);
   throttledRefresCellProba();
+  throttledRefresValidity();
 });
 
-onBeforeUnmount(() => {
-  searchWorker.destroy();
-  runWorker.destroy();
-});
+onBeforeUnmount(() => {});
 function onZoomIn() {
   zoom.value = zoom.value + 0.1;
 }
@@ -286,52 +287,61 @@ function onKeyUp(evt: KeyboardEvent) {
   }
   if (evt.key === ">" || evt.key === "<") {
     // ordering.value = ordering.value * -1;
+    const ords = unref(orderings);
+    ordering.value =
+      ords[(ords.findIndex((o) => o === ordering.value) + 1) % ords.length];
     consumed = true;
   }
   if (evt.code === "Space") {
-    method.value = method.value === "simple" ? "fastest" : "simple";
+    method.value = method.value = "simple" ? "accurate" : "simple";
     consumed = true;
   }
   // @ts-ignore
   evt.canceled = consumed;
 }
-watchEffect(async () => {
-  if (!props.grid || !dir.value) return;
-  if (highlightMode.value === "check") {
-    const gridValidity = await axios
-      .post(getUrl(`word-check`), {
-        grid: props.grid.serialize(),
-      })
-      .then(({ data }) => data as GridValidity);
-    validity.value = gridValidity;
+watch([dir, validity, highlightMode], () => {
+  if (highlightMode.value === "check" && validity.value) {
     const newMap = new Map();
-    Object.values(gridValidity[dir.value]).forEach(({ cells, problem }) => {
+    Object.values(validity.value[dir.value]).forEach(({ cells, problem }) => {
       cells.forEach(({ x, y }) => newMap.set(`${y}-${x}`, problem));
     });
     highlights.value = newMap;
   } else {
     highlights.value = new Map();
-    validity.value = { horizontal: {}, vertical: {} };
   }
 });
-
-watchEffect(async () => {
+workerController.on("check-result", (data) => {
+  validity.value = data;
 });
-runWorker.on("run-result", (data) => {
+workerController.on("run-result", (data) => {
   cellProbas.value = data;
   refreshingRun.value = false;
 });
-runWorker.on("bail-result", () => {
+workerController.on("bail-result", () => {
   cellProbas.value = [];
-  refreshingRun.value = false;
 });
-searchWorker.on("search-result", (data) => {
+workerController.on("search-result", (data) => {
+  refreshingSearch.value = false;
   searchResult.value = data;
 });
 
-watchEffect(() => {
-  if (!focus.value || !dir.value) return;
+workerController.on("locale-changed", () => {
+  throttledRefresCellProba();
   throttledRefresSimpleSearch();
+});
+workerController.on("start-locale-change", () => {
+  refreshingRun.value = true;
+  refreshingSearch.value = true;
+});
+
+watch([focus, dir], () => {
+  throttledRefresSimpleSearch();
+});
+
+const isLoadingSuggestions = computed(() => {
+  return method.value === "accurate"
+    ? refreshingRun.value
+    : refreshingSearch.value;
 });
 </script>
 

@@ -6,10 +6,12 @@
     :onDelete="onDelete"
     :onClick="(grid) => $router.push(`/grid/${grid.id}`)"
     @select="(s) => (selected = s)"
+    :has-create-button="true"
+    :has-delete-button="true"
   >
     <template v-slot:left-panel>
       <h3>{{ $t("nav.grids") }}</h3>
-      <ExportButton route="book-export" :params="params" />
+      <ExportButton route="book-export" :query="exportQuery" />
     </template>
     <template #card-title="{ elt }">
       <span>
@@ -38,14 +40,14 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
-import axios from "axios";
 import SVGGrid from "../components/svg-renderer/Grid.vue";
 import ExportButton from "../components/ExportButton.vue";
 import Layout from "../layouts/GridLayout.vue";
 import { defaultExportOptions } from "../types";
-import { getUrl } from "../js/utils";
 import { Grid, GridOptions, nullCell } from "grid";
 import generate from "../js/maze-generator";
+import { api } from "../api";
+import { workerController } from "../search-worker";
 /**
  * View to display all grids in a grid layout
  */
@@ -54,51 +56,41 @@ const grids = ref<Grid[]>([]);
 const options = ref<GridOptions[]>([]);
 const selected = ref<Grid[]>([]);
 
-const params = computed(() => {
+const exportQuery = computed(() => {
   return { ids: selected.value.map((s) => s.id).join(",") };
 });
 function fetch() {
-  return axios
-    .get(getUrl("grid"))
-    .then(({ data }) => {
-      grids.value = data.map((g) => Grid.unserialize(JSON.stringify(g)));
+  return api
+    .getGrids()
+    .then((gs) => {
+      grids.value = gs;
     })
     .then(() =>
-      Promise.all(
-        grids.value.map((grid) =>
-          axios.get(getUrl(`options/${grid.optionsId}`))
-        )
-      )
+      Promise.all(grids.value.map((grid) => api.db.getOption(grid.optionsId)))
     )
-    .then((responses) => {
-      options.value = responses.map((r) => r.data);
+    .then((opts) => {
+      options.value = opts as GridOptions[];
     })
     .catch((e) => {
       console.error("E", e);
     });
 }
 
-function onExportClick() {
-  router.push({
-    path: "solutions",
-    query: { ids: selected.value.map(({ id }) => id).join(",") },
-  });
-}
 function onDelete() {
-  Promise.all(
-    selected.value.map((grid) => axios.delete(getUrl(`grid/${grid.id}`)))
-  ).then(() => fetch());
+  Promise.all(selected.value.map((grid) => api.db.deleteGrid(grid.id))).then(
+    () => fetch()
+  );
 }
 
 function createGrid() {
   const newGrid = new Grid(10, 10);
   newGrid.title = "Nouvelle Grille";
-  return axios
-    .get(getUrl("word/distribution"))
-    .then(({ data }) => {
-      generate({ grid: newGrid, distribution: data });
+  workerController
+    .getDistribution()
+    .then((distribution) => {
+      generate({ grid: newGrid, distribution });
     })
-    .then(() => axios.post(getUrl("grid"), { grid: newGrid.serialize() }))
+    .then(() => api.db.pushGrid(newGrid))
     .then(() => fetch());
 }
 

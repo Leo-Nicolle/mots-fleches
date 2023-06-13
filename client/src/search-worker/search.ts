@@ -19,5 +19,6 @@ export function getWordsSimple({
     cells.push(current);
   }
   if (cells.length < 2) return [];
-  return dico.queryBinary(str.toUpperCase());
+  return dico.queryBinary(str.toUpperCase())
+  .map(index => dico.words[dico.sorted[index]]);
 }

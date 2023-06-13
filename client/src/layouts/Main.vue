@@ -2,7 +2,12 @@
   <div class="main-layout">
     <div class="header">
       <span class="left">
+        <span class="menutitle" @click="router.push('/')">
+          <img class="menuicon" src="/icon.svg" />
+          <span>Motsflex</span>
+        </span>
         <n-menu
+          v-if="showLoginButton"
           class="burger"
           :accordion="true"
           :mode="'horizontal'"
@@ -19,22 +24,22 @@
           <n-button :type="switchingLocale ? 'warning' : ''">
             <template #icon>
               <n-icon>
-                <LoaderIcon v-if="switchingLocale"/>
-                <LanguageOutline v-else/>
+                <LoaderIcon v-if="switchingLocale" />
+                <LanguageOutline v-else />
               </n-icon>
             </template>
             {{ selected?.label }}
           </n-button>
         </n-popselect>
         <n-button
+          v-if="showLoginButton"
           strong
           secondary
-          type="warning"
-          class="exit-button"
+          :type="isSignedIn ? 'warning' : 'primary'"
           icon-placement="right"
-          @click="exit"
+          @click="isSignedIn ? router.push('/logout') : router.push('/login')"
         >
-          {{ $t("buttons.exit") }}
+          {{ $t(isSignedIn ? "buttons.exit" : "buttons.login") }}
           <template #icon>
             <n-icon>
               <LogOutOutline />
@@ -70,19 +75,45 @@ import {
   defineEmits,
   computed,
   watchEffect,
+  withDefaults,
   onMounted,
 } from "vue";
 import { RouterLink, useRouter } from "vue-router";
-import { getUrl, renderIcon } from "../js/utils";
+import { renderIcon } from "../js/utils";
 import { LogOutOutline, LanguageOutline } from "@vicons/ionicons5";
 import { i18n, setLanguage } from "../i18n";
-import axios from "axios";
-
+import { workerController } from "../search-worker";
+import "keyboard-css";
+import { api } from "../api";
+window.api = api;
 const locale = ref(i18n.global.locale);
 const nav = ref<MenuOption[]>([]);
 const router = useRouter();
 const collapsed = ref(true);
 const switchingLocale = ref(false);
+const props = withDefaults(
+  defineProps<{ showLoginButton?: boolean; leftPanelWidth?: number }>(),
+  {
+    showLoginButton: true,
+    leftPanelWidth: 235,
+  }
+);
+const isSignedIn = ref(false);
+function refreshSignedId(){
+  api
+    .isSignedIn()
+    .then((res) => {
+      isSignedIn.value = res;
+    })
+    .catch(() => {
+      isSignedIn.value = false;
+    });
+
+}
+const interval = setInterval(() => refreshSignedId(), 10_000);
+const leftWidth = computed(() => {
+  return `${props.leftPanelWidth}px`;
+});
 const emit = defineEmits<{
   /**
    * Scroll within main panel
@@ -136,6 +167,17 @@ function getNavChildren() {
         ),
       key: "go-to-words",
     },
+    {
+      label: () =>
+        h(
+          RouterLink,
+          {
+            to: "/about",
+          },
+          { default: () => i18n.global.t("nav.about") }
+        ),
+      key: "go-to-about",
+    },
   ];
 }
 
@@ -165,29 +207,24 @@ const localeOptions = ref([
 const selected = computed(() => {
   return localeOptions.value.find((option) => option.value === locale.value);
 });
-function setServerLocale() {
-  switchingLocale.value = true;
-  axios.post(getUrl('set-locale'), { locale: locale.value })
-  .finally(() => {
-    switchingLocale.value = false;
-  });
-}
+workerController.on("locale-changed", () => {
+  switchingLocale.value = false;
+});
 watchEffect(() => {
+  switchingLocale.value = true;
   localStorage.setItem("locale", locale.value);
   setLanguage(locale.value);
   nav.value = getNavChildren();
-  setServerLocale();
+  workerController.setLocale(locale.value);
 });
 onMounted(() => {
   nav.value = getNavChildren();
-  setServerLocale();
+  refreshSignedId();
 });
+
 
 function onScroll(e: Event) {
   emit("scroll", e);
-}
-function exit() {
-  router.push("/logout");
 }
 </script>
 
@@ -210,6 +247,11 @@ function exit() {
   justify-content: space-between;
   height: 42px;
   box-shadow: 0px 1px 3px #888;
+  position: fixed;
+  top: 0;
+  z-index: 1000;
+  background: white;
+  padding-top: 1px;
 }
 .header > .left {
   display: flex;
@@ -217,6 +259,7 @@ function exit() {
   gap: 10px;
   align-items: center;
   justify-content: flex-start;
+  margin-left: 4px;
 }
 .header > .right {
   display: flex;
@@ -224,6 +267,18 @@ function exit() {
   gap: 10px;
   align-items: center;
   justify-content: flex-end;
+  margin-right: 4px;
+}
+.menutitle {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  cursor: pointer;
+  padding: 2px;
+}
+.menuicon {
+  width: 32px;
 }
 
 nav {
@@ -237,9 +292,6 @@ nav {
   margin-left: auto;
   margin-right: 25px;
 }
-.exit-button {
-  margin-right: 5px;
-}
 
 .body {
   display: flex;
@@ -248,13 +300,14 @@ nav {
   max-width: 100vw;
   width: 100vw;
   overflow: hidden;
+  margin-top: 60px;
 }
 .left-panel {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  width: 235px;
-  min-width: 235px;
+  width: v-bind(leftWidth);
+  min-width: v-bind(leftWidth);
   overflow: hidden;
   align-items: center;
   justify-content: flex-start;
@@ -271,8 +324,8 @@ nav {
 }
 .scroll {
   max-height: 100%;
-  max-width: calc(100vw - 235px);
-  width: calc(100vw - 235px);
+  max-width: calc(100vw - v-bind(leftWidth));
+  width: calc(100vw - v-bind(leftWidth));
 }
 .leftpanel > .n-scrollbar {
   max-height: 100vh;

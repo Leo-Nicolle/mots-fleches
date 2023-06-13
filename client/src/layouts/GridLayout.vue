@@ -4,7 +4,12 @@
       <div class="left-panel">
         <!-- @slot Slot to add elements within left panel  -->
         <slot name="left-panel"></slot>
-        <n-button @click="deleteVisible = true" type="warning" round>
+        <n-button
+          v-if="hasDeleteButton"
+          @click="deleteVisible = true"
+          type="warning"
+          round
+        >
           {{ $t("buttons.delete") }}</n-button
         >
       </div>
@@ -36,7 +41,11 @@
             </div>
           </template>
         </n-card>
-        <n-card @click="onCreate" :title="$t('buttons.create')">
+        <n-card
+          v-if="hasCreateButton"
+          @click="onCreate"
+          :title="$t('buttons.create')"
+        >
           <template #default>
             <div class="card-body">
               <n-button class="add preview" round>
@@ -89,6 +98,14 @@ const props = defineProps<{
    * List of elements to display
    */
   eltList: any[];
+  /**
+   * Whether to display a create button
+   */
+  hasCreateButton: boolean;
+  /**
+   * Whether to display a delete button
+   */
+  hasDeleteButton: boolean;
   /**
    * Callback to create a new element
    */
