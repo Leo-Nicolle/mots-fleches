@@ -4,11 +4,14 @@
   "description": "Generateur de mots fleches",
   "homepage": "https://github.com/Leo-Nicolle/mots-fleches",
   "scripts": {
-    "prepare": "cd client && npm i && cd ../server && npm i",
+    "prepare": "cd grid && npm i && cd ../database && npm i && cd ../client && npm i && cd ../server && npm i",
+    "build:grid": "cd grid && npm run build",
+    "build:database": "cd database && npm run build",
+    
     "build:client": "cd client && npm run build",
     "build:server": "cd server && npm run build",
-    "prebuild": "npm run build:client && npm run build:server",
-    "build": "node scripts/build.mjs",
+    "build": "npm run build:grid && npm run build:database && npm run build:client && npm run build:server",
+    "postbuild": "node scripts/postbuild.mjs",
     "doc:grid": "cd grid && typedoc --plugin typedoc-plugin-markdown --out ../docs/grid src/index.ts",
     "doc:server": "cd server && typedoc --plugin typedoc-plugin-markdown --out ../docs/server lib/**/*.ts",
     "docdev:client": "vue-docgen -c docs/docgen.config.js -w",

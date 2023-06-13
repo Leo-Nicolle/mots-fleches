@@ -147,7 +147,7 @@ export class SupaDB extends Database {
   async isSignedIn() {
     const { data } = await this.supabase.auth.getSession()
     if (!data) return false;
-    return true;
+    return !!data.session && !!data.session.access_token;
   }
 
 

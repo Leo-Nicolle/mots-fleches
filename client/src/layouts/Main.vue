@@ -85,6 +85,7 @@ import { i18n, setLanguage } from "../i18n";
 import { workerController } from "../search-worker";
 import "keyboard-css";
 import { api } from "../api";
+window.api = api;
 const locale = ref(i18n.global.locale);
 const nav = ref<MenuOption[]>([]);
 const router = useRouter();
@@ -103,7 +104,6 @@ function refreshSignedId(){
     .isSignedIn()
     .then((res) => {
       isSignedIn.value = res;
-      console.log("isSignedIn", res);
     })
     .catch(() => {
       isSignedIn.value = false;
