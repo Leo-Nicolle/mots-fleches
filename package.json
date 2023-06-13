@@ -7,7 +7,6 @@
     "prepare": "cd grid && npm i && cd ../database && npm i && cd ../client && npm i && cd ../server && npm i",
     "build:grid": "cd grid && npm run build",
     "build:database": "cd database && npm run build",
-    
     "build:client": "cd client && npm run build",
     "build:server": "cd server && npm run build",
     "build": "npm run build:grid && npm run build:database && npm run build:client && npm run build:server",
