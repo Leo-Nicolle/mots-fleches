@@ -1,4 +1,4 @@
-# MotsFLex
+# MotsFlex
 
 <a href="https://motsflex.com">
   <img alt="Logo" align="center" src="./client/public/icon.svg" width="20%" />
