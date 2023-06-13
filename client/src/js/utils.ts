@@ -1,22 +1,11 @@
-import axios from "axios";
-import { Cell, Format, Grid } from "grid";
+import { Cell, Format } from "grid";
 import { NIcon } from "naive-ui";
-import { h, Component, Ref, ref } from "vue";
+import { h, Component } from "vue";
 import { RouteLocationNormalizedLoaded } from "vue-router";
 
 
-export function getUrl(param: string) {
-  return `http://localhost:${import.meta.env.VITE_APIPORT}/${param}`;
-}
-
 export function renderIcon(icon: Component) {
   return () => h(NIcon, null, { default: () => h(icon) });
-}
-
-export function save(grid: Grid) {
-  return axios.post(getUrl("grid"), {
-    grid: grid.serialize(),
-  });
 }
 
 export function getCellClass(cell: Cell, focus: Cell) {

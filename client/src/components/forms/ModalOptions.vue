@@ -107,10 +107,10 @@ import {
 } from "vue";
 import { CogOutline as CogIcon } from "@vicons/ionicons5";
 import { Grid } from "grid";
-import { getUrl } from "../../js/utils";
-import axios from "axios";
 import { useModel } from "../../js/useModel";
 import generate from "../../js/maze-generator";
+import { api } from "../../api";
+import { workerController } from "../../search-worker";
 
 /**
  * Form to edit grid metadata: rows, cols. title, comment and options
@@ -147,8 +147,8 @@ function onUpdate(path: string, newvalue: string | number) {
   });
 }
 function onRandomize() {
-  axios.get(getUrl("word/distribution")).then(({ data }) => {
-    generate({ grid: value.value, distribution: data });
+  workerController.getDistribution().then((distribution) => {
+    generate({ grid: value.value, distribution });
     emit("update-size", value.value);
     randomConfirmVisible.value = false;
   });
@@ -167,15 +167,12 @@ const defaultSelectOpt = computed(() => {
     ?.label;
 });
 onMounted(() => {
-  axios
-    .get(getUrl("options"))
+  api.db
+    .getOptions()
     .then((res) => {
-      return res.data.map((opt) => {
+      opts.value = res.map((opt) => {
         return { label: opt.name, value: opt.id };
       });
-    })
-    .then((res) => {
-      opts.value = res;
     })
     .catch((err) => {
       console.error(err);

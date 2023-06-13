@@ -4,7 +4,7 @@
     <div :class="`body ${bodyClass} || ''`">
       <slot></slot>
     </div>
-    <div v-if="showMargins">
+    <div class="borders" v-if="showMargins">
       <div class="border left" :style="{ left: 0 }"></div>
       <div class="border right" :style="{ left: pageWidth }"></div>
       <div class="border top" :style="{ top: 0 }"></div>
@@ -80,7 +80,11 @@ watchEffect(() => {
 });
 </script>
 
-<style scoped>
+<style lang="scss">
+body {
+  margin: 0;
+}
+
 @page {
   margin: 0;
   padding: 0;
@@ -97,40 +101,41 @@ watchEffect(() => {
   position: relative;
   break-inside: avoid;
   box-sizing: border-box;
-}
-.body {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-around;
-  height: 100%;
-  width: 100%;
-}
-
-.border {
-  position: absolute;
-  border-right: 1px dashed black;
-  border-bottom: 1px dashed black;
-}
-.margin {
-  position: absolute;
-  border-right: 1px dashed red;
-  border-bottom: 1px dashed red;
-}
-.margin.left,
-.margin.right,
-.border.left,
-.border.right {
-  top: 0;
-  bottom: 0;
-  width: 0;
-}
-.margin.top,
-.margin.bottom,
-.border.top,
-.border.bottom {
-  left: 0;
-  right: 0;
-  height: 0;
+  .body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    height: 100%;
+    width: 100%;
+  }
+  .borders {
+    .border {
+      position: absolute;
+      border-right: 1px dashed black;
+      border-bottom: 1px dashed black;
+    }
+    .margin {
+      position: absolute;
+      border-right: 1px dashed red;
+      border-bottom: 1px dashed red;
+    }
+    .margin.left,
+    .margin.right,
+    .border.left,
+    .border.right {
+      top: 0;
+      bottom: 0;
+      width: 0;
+    }
+    .margin.top,
+    .margin.bottom,
+    .border.top,
+    .border.bottom {
+      left: 0;
+      right: 0;
+      height: 0;
+    }
+  }
 }
 </style>

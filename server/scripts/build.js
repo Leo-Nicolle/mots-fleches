@@ -1,8 +1,5 @@
 const dotenv = require("dotenv");
-const path = require("path");
-const decompress = require("decompress");
 const { copy } = require("fs-extra");
-const rimraf = require("rimraf");
 
 const { parsed } = dotenv.config({
   path:
@@ -17,10 +14,7 @@ if (process.env.MODE === "prod") {
   parsed.APP_CROSSWORDS_MODE = "prod";
 }
 if (process.env.MODE !== "test" && process.env.MODE !== "e2e-test") {
-  decompress(
-    "../scripts/assets/dico.zip",
-    path.resolve("dist", process.env.APP_CROSSWORDS_DICO_PATH)
-  );
+  copy("../client/dist", "dist/public");
 }
 let outfile = "dist/server.js";
 if (process.env.MODE === "e2e-test") {
@@ -35,14 +29,15 @@ const logPlugin = {
     });
   },
 };
-const watch = process.argv.slice(2).some((a) => a === "--watch");
+// TODO restore watch with new esbild version
+// const watch = process.argv.slice(2).some((a) => a === "--watch");
 require("esbuild").build({
   entryPoints: ["lib/index.js"],
   bundle: true,
   format: "cjs",
+  target: "es6",
   outfile,
   platform: "node",
-  watch,
   define: Object.entries(parsed).reduce((acc, [key, value]) => {
     acc[key] = `"${value}"`;
     return acc;

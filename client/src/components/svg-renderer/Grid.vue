@@ -231,7 +231,7 @@ const cols = computed(() =>
 const arrowScale = computed(() => 0.01 * props.options.arrow.size);
 const lineStroke = computed(() => props.options.grid.borderSize);
 const lineColor = computed(() => props.options.grid.borderColor);
-const spaceStroke = computed(() => 4);
+const spaceStroke = computed(() => props.options.grid.spaceSize);
 const outerLineStroke = computed(() => props.options.grid.outerBorderSize);
 const outerLineColor = computed(() => props.options.grid.outerBorderColor);
 const defSize = computed(() => props.options.definition.size);

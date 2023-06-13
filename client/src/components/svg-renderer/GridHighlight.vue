@@ -1,5 +1,5 @@
 <template>
-  <div> 
+  <div>
     <span class="heatmap" v-if="mode === 'heatmap'">
       <canvas ref="heatmapref" />
     </span>
@@ -39,33 +39,26 @@ import {
   computed,
   defineEmits,
   defineProps,
-  nextTick,
   ref,
-  watch,
+  toRaw,
   watchEffect,
 } from "vue";
 import {
   Cell,
   CellProba,
   Direction,
-  getWords,
   Grid,
   GridOptions,
   GridValidity,
   nullCell,
 } from "grid";
-import { getUrl } from "../../js/utils";
-import axios from "axios";
-import throttle from "lodash.throttle";
 import {
   cellAndBorderSize,
-  cellSize,
-  useSvgSizes,
   useTransform,
 } from "./utils";
-// import HeatMap from "jsheatmap";
 import chroma from "chroma-js";
 import { dico } from "../../search-worker/dico";
+import { api } from "../../api";
 
 export type Mode = "normal" | "check" | "heatmap";
 
@@ -246,14 +239,10 @@ watchEffect(() => {
 });
 function onMouseMove(evt: MouseEvent) {}
 function add() {
-  axios
-    .post(getUrl("word"), {
-      word: word.value,
-    })
-    .then(() => {
-      tooltip.value = "";
-      emit("update");
-    });
+  api.db.pushWord(toRaw(word.value)).then(() => {
+    tooltip.value = "";
+    emit("update");
+  });
 }
 </script>
 

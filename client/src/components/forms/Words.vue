@@ -24,7 +24,7 @@
         />
       </n-form-item>
     </n-form>
-    <h3>{{ $t('forms.myWords') }}</h3>
+    <h3>{{ $t("forms.myWords") }}</h3>
     <div class="words">
       <span v-for="word in words" :key="word">
         {{ word }}
@@ -34,9 +34,8 @@
 </template>
 
 <script setup lang="ts">
-import axios from "axios";
-import { computed, onMounted, ref } from "vue";
-import { getUrl } from "../../js/utils";
+import { computed, onMounted, ref, toRaw } from "vue";
+import { api } from "../../api";
 /**
  * Component to add and delete words
  * Also has a list of all the words
@@ -47,19 +46,19 @@ onMounted(() => {
   getWords();
 });
 function getWords() {
-  axios.get(getUrl("word")).then(({ data }) => {
-    words.value = data.sort((a, b) => a.localeCompare(b));
+  api.db.getWords().then((ws) => {
+    words.value = ws.sort((a, b) => a.localeCompare(b));
   });
 }
 function onAddKeyup(evt: KeyboardEvent) {
   if (evt.code !== "Enter") return;
-  axios.post(getUrl("word"), { word: value.value }).then(() => {
+  api.db.pushWord(toRaw(value.value)).then(() => {
     getWords();
   });
 }
 function onDeleteKeyup(evt: KeyboardEvent) {
   if (evt.code !== "Enter") return;
-  axios.delete(getUrl(`word/${value.value}`)).then(() => {
+  api.db.deleteWord(toRaw(value.value)).then(() => {
     getWords();
   });
 }
@@ -80,7 +79,7 @@ const options = computed(() => {
 .input {
   text-transform: uppercase;
 }
-.words{
+.words {
   display: flex;
   flex-wrap: wrap;
   width: 100%;

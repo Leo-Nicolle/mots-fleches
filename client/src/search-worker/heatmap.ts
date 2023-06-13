@@ -3,8 +3,7 @@ import { dico, ACode } from "./dico";
 // window ? window.dico = dico: undefined;
 
 type Interval = [number, number];
-export type BailOptions =
-  { sharedArray: Uint8Array };
+export type BailOptions = { sharedArray: Uint8Array };
 export function initCellMap(grid: Grid) {
   return grid.cells.reduce((acc, row, y) => {
     acc.push(
@@ -352,8 +351,8 @@ export function getCellProbasAccurate(grid: Grid, options?: BailOptions) {
             validH,
             validV,
             empty,
-            bestWordsV: bestWordsV[key] || [],
-            bestWordsH: bestWordsH[key] || [],
+            bestWordsV: (bestWordsV[key] || []).map((index) => dico.words[dico.sorted[index]]),
+            bestWordsH: (bestWordsH[key] || []).map((index) => dico.words[dico.sorted[index]]) ,
             inter,
             x,
             y,
