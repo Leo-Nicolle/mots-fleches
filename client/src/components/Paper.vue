@@ -4,6 +4,11 @@
     <div :class="`body ${bodyClass} || ''`">
       <slot></slot>
     </div>
+    <div v-if="showPagination" class="pageNumber" :style="paginationStyle">
+      <span>
+        {{ pageNumber }}
+      </span>
+    </div>
     <div class="borders" v-if="showMargins">
       <div class="border left" :style="{ left: 0 }"></div>
       <div class="border right" :style="{ left: pageWidth }"></div>
@@ -25,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { Format } from "grid";
+import { Format, PaginationStyle } from "grid";
 import { defineProps, ref, watchEffect } from "vue";
 import { computed } from "vue";
 /**
@@ -45,6 +50,9 @@ const props = defineProps<{
    * Class to add to the body
    */
   bodyClass?: string;
+  pageNumber?: number;
+  showPagination: boolean;
+  pagination?: PaginationStyle;
 }>();
 const margins = computed(() => {
   if (!props.format) return [0, 0, 0, 0];
@@ -55,7 +63,24 @@ const margins = computed(() => {
     `${props.format.margin.left}cm`,
   ];
 });
-
+const paginationFont = computed(() => {
+  if (!props.pagination) return "";
+  return `${props.pagination.size} ${props.pagination.font}`;
+});
+const paginationColor = computed(() => {
+  if (!props.pagination) return "";
+  return `${props.pagination.color}`;
+});
+const paginationJustify = computed(() => {
+  console.log(props.pagination, props.pageNumber);
+  return props.pagination
+    ? props.pagination.align === "center"
+      ? "space-around"
+      : (props.pageNumber || 0) % 2
+      ? "flex-start"
+      : "flex-end"
+    : "";
+});
 const pageWidth = computed(() => {
   if (!props.format) return 0;
   return `${props.format.width}cm`;
@@ -67,6 +92,12 @@ const pageHeight = computed(() => {
 const padding = computed(() => {
   const { top, left, right, bottom } = props.format.margin;
   return [top, right, bottom, left].map((m) => `${m}cm`).join(" ");
+});
+// TODO: Continue from here
+const paginationStyle = computed(() => {
+  return `
+       align-items: ${props.pagination?.align || "center"};
+  `;
 });
 watchEffect(() => {
   if (!page.value || !props.format) return;
@@ -101,6 +132,8 @@ body {
   position: relative;
   break-inside: avoid;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
   .body {
     display: flex;
     flex-direction: column;
@@ -136,6 +169,15 @@ body {
       right: 0;
       height: 0;
     }
+  }
+  .pageNumber {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    margin-top: auto;
+    font: v-bind(paginationFont);
+    color: v-bind(paginationColor);
+    justify-content: v-bind(paginationJustify);
   }
 }
 </style>

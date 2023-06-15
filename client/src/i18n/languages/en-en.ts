@@ -3,7 +3,7 @@
 export const lang = {
   nav: {
     grids: "Grids",
-    options: "Options",
+    options: "Styles",
     solutions: "Solutions",
     words: "Words",
     about: "About",
@@ -20,6 +20,7 @@ export const lang = {
     newStyle: "New style",
     print: "Print",
     export: "Export",
+    support: "Support MotsFlex",
   },
   suggestions: {
     results: "Results",

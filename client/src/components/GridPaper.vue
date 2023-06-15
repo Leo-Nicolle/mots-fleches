@@ -1,5 +1,11 @@
 <template>
-  <Paper :format="options.paper" :showMargins="exportOptions.margins">
+  <Paper
+    :format="options.paper"
+    :showMargins="exportOptions.margins"
+    :showPagination="!!exportOptions.pagination"
+    :pagination="exportOptions.pagination"
+    :pageNumber="page"
+  >
     <SVGGrid
       v-if="grid && options"
       :grid="grid"
@@ -33,6 +39,8 @@ const props = defineProps<{
    * What to export
    */
   exportOptions: ExportOptions;
+
+  page: number;
 }>();
 </script>
 

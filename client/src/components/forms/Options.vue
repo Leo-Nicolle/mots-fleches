@@ -74,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, watchEffect, watch } from "vue";
+import { defineProps, defineEmits, watch } from "vue";
 import { useModel } from "../../js/useModel";
 import { GridOptions } from "grid";
 import FormatPicker from "./FormatPicker.vue";

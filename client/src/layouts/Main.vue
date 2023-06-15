@@ -99,7 +99,7 @@ const props = withDefaults(
   }
 );
 const isSignedIn = ref(false);
-function refreshSignedId(){
+function refreshSignedId() {
   api
     .isSignedIn()
     .then((res) => {
@@ -108,7 +108,6 @@ function refreshSignedId(){
     .catch(() => {
       isSignedIn.value = false;
     });
-
 }
 const interval = setInterval(() => refreshSignedId(), 10_000);
 const leftWidth = computed(() => {
@@ -221,7 +220,6 @@ onMounted(() => {
   nav.value = getNavChildren();
   refreshSignedId();
 });
-
 
 function onScroll(e: Event) {
   emit("scroll", e);

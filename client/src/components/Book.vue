@@ -6,27 +6,30 @@
       :grid="grid"
       :options="options"
       :exportOptions="gridExport"
+      :page="solutionOptions.pagination.startIdx + i"
     />
     <IndexPaper
       :grids="grids"
       :solutionOptions="solutionOptions"
       :exportOptions="solutionExport"
+      :page="solutionOptions.pagination.startIdx + grids.length"
+      @pageCount="evt => indexPages=evt"
     />
     <SolutionPaper
       :grids="grids"
       :solutionOptions="solutionOptions"
       :exportOptions="solutionExport"
+      :page="solutionOptions.pagination.startIdx + grids.length + indexPages"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { defineProps, watch } from "vue";
-import { Grid, GridOptions, SolutionOptions, nullCell } from "grid";
+import { defineProps, ref } from "vue";
+import { Grid, GridOptions, SolutionOptions } from "grid";
 import { computed } from "vue";
 import { defaultExportOptions, ExportOptions } from "../types";
 import GridPaper from "./GridPaper.vue";
-import SVGGrid from "./svg-renderer/Grid.vue";
 import IndexPaper from "./WordsIndex.vue";
 import SolutionPaper from "./Solutions.vue";
 
@@ -51,7 +54,7 @@ const props = defineProps<{
    */
   exportOptions: Partial<ExportOptions>;
 }>();
-
+const indexPages = ref(0);
 
 const gridExport = computed(() => ({
   ...defaultExportOptions,
@@ -75,6 +78,7 @@ const solutionExport = computed(() => ({
   },
   ...props.exportOptions,
 }));
+
 </script>
 
 <style lang="less">

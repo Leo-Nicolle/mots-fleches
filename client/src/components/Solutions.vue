@@ -5,6 +5,9 @@
       :key="i"
       :format="solutionOptions.paper"
       :showMargins="exportOptions.margins"
+      :page-number="page"
+      :showPagination="exportOptions.pagination"
+      :pagination="solutionOptions.pagination"
     >
       <div class="grids">
         <div v-for="(grid, j) in gs" :key="j" class="grid-c">
@@ -23,12 +26,18 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from "vue";
+import { defineProps, defineEmits } from "vue";
 import SVGGrid from "./svg-renderer/Grid.vue";
 import Paper from "./Paper.vue";
 import { Grid, nullCell, SolutionOptions } from "grid";
 import { computed } from "vue";
 import { ExportOptions } from "../types";
+
+const emit = defineEmits<{
+  pageCount: number;
+  (event: "pageCount", value: number): void;
+}>();
+
 /**
  * Component to render solution Grids
  */
@@ -45,6 +54,10 @@ const props = defineProps<{
    * What to export
    */
   exportOptions: ExportOptions;
+  /**
+   * number of the first page
+   */
+  page: number;
 }>();
 const rows = computed(() => {
   if (!props.solutionOptions) return "";
@@ -67,7 +80,7 @@ const gridsPerPage = computed(() => {
   const { rows, cols } = props.solutionOptions.grids;
   const perPage = rows * cols;
   const pages = Math.ceil(props.grids.length / perPage);
-
+  emit("pageCount", pages);
   return new Array(pages)
     .fill(0)
     .map((_, i) => props.grids.slice(i * perPage, (i + 1) * perPage));

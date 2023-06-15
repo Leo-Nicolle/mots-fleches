@@ -6,6 +6,8 @@
   <n-form-item :label="$t('forms.cols')" path="cols">
     <n-input-number role="cols" v-model:value="value.grids.cols" />
   </n-form-item>
+  <h3>{{ $t("forms.pagination") }}</h3>
+  <PaginationStyle v-model="value.pagination" role-prefix="pagination"/>
   <h3>{{ $t("forms.gridNum") }}</h3>
   <TextStyle v-model="value.grids.gridN" role-prefix="gridN"/>
   <h3>{{ $t("forms.wordIndex") }}</h3>
@@ -15,8 +17,9 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, watch } from "vue";
+import { defineProps, defineEmits, watch, ref } from "vue";
 import TextStyle from "./TextStyle.vue";
+import PaginationStyle from "./PaginationStyle.vue";
 import { useModel } from "../../js/useModel";
 import { SolutionOptions } from "grid";
 /**

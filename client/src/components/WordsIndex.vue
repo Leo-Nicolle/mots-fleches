@@ -5,6 +5,9 @@
       :key="i"
       :format="solutionOptions.paper"
       :showMargins="exportOptions.margins"
+      :showPagination="exportOptions.pagination"
+      :pageNumber="page + i"
+      :pagination="solutionOptions.pagination"
       bodyClass="body-index"
     >
       <span class="words" ref="wordsContainer">
@@ -21,6 +24,8 @@
       class="paper ruler"
       :format="solutionOptions.paper"
       :showMargins="false"
+      :showPagination="exportOptions.pagination"
+      :pageNumber="0"
     >
       <span class="words ruler" ref="ruler"> </span>
     </Paper>
@@ -28,9 +33,9 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, ref } from "vue";
+import { defineProps, ref, defineEmits } from "vue";
 import Paper from "./Paper.vue";
-import { Grid, GridOptions, getAllWords, SolutionOptions } from "grid";
+import { Grid, getAllWords, SolutionOptions } from "grid";
 import { computed } from "vue";
 import { ExportOptions } from "../types";
 /**
@@ -51,7 +56,13 @@ const props = defineProps<{
    * The styles to render list
    */
   solutionOptions: SolutionOptions;
+  page: number;
 }>();
+
+const emit = defineEmits<{
+  (event: "pageCount", value: number): void;
+}>();
+
 const wordFont = computed(
   () =>
     `${props.solutionOptions.words.size} ${props.solutionOptions.words.font}`
@@ -123,7 +134,7 @@ const layout = computed(() => {
   const totalArea = bb.width * bb.height;
   const ratio = area / totalArea;
   heights.push(ratio * 100 + "%");
-
+  emit("pageCount", res.length);
   return { wordsPerPage: res.reverse(), heights: heights.reverse() };
 });
 </script>

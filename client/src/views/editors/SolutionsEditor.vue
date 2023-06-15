@@ -11,12 +11,14 @@
         class="paper"
         :export-options="exportOptions"
         :solutionOptions="options"
+        :page="1"
       />
       <SolutionsPaper
         :grids="grids"
-        :solutionOptions="options"
         class="paper"
+        :solutionOptions="options"
         :export-options="exportOptions"
+        :page="2"
       />
     </template>
   </Layout>
