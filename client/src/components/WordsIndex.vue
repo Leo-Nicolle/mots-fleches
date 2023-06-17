@@ -33,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, ref, defineEmits } from "vue";
+import { defineProps, ref, defineEmits, watch } from "vue";
 import Paper from "./Paper.vue";
 import { Grid, getAllWords, SolutionOptions } from "grid";
 import { computed } from "vue";
@@ -72,15 +72,21 @@ const sizeFont = computed(
   () => `${props.solutionOptions.size.size} ${props.solutionOptions.size.font}`
 );
 const sizeColor = computed(() => props.solutionOptions.size.color);
-
+const layout = ref<{ wordsPerPage: (number | string)[][]; heights: string[] }>({
+  wordsPerPage: [],
+  heights: [],
+});
 const tolerance = 2;
-const layout = computed(() => {
-  if (!props.grids || !ruler.value || !ruler.value)
-    return { wordsPerPage: [], heights: [] };
+watch([props.grids, ruler, wordFont, sizeFont, props], () => {
+  if (!props.grids || !ruler.value) {
+    layout.value = { wordsPerPage: [], heights: [] };
+    return;
+  }
   const words = Array.from(getAllWords(props.grids))
     .sort((a, b) => a.length - b.length)
     .filter((w) => w.length > 1);
   const r = ruler.value as HTMLDivElement;
+  r.innerHTML = "";
   let bb = r.getBoundingClientRect();
   const maxX = bb.x + bb.width;
 
@@ -135,7 +141,8 @@ const layout = computed(() => {
   const ratio = area / totalArea;
   heights.push(ratio * 100 + "%");
   emit("pageCount", res.length);
-  return { wordsPerPage: res.reverse(), heights: heights.reverse() };
+  layout.value = { wordsPerPage: res, heights: heights };
+  return;
 });
 </script>
 
@@ -158,6 +165,7 @@ const layout = computed(() => {
   align-items: center;
   page-break-inside: auto;
   gap: 10px;
+  flex: 2;
 }
 .words > span {
   page-break-after: auto;

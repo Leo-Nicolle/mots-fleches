@@ -11,7 +11,7 @@
     >
       <div class="grids">
         <div v-for="(grid, j) in gs" :key="j" class="grid-c">
-          <span class="gridN">{{ j + 1 }}</span>
+          <span class="gridN">{{ j + solutionOptions.pagination.startIdx }}</span>
           <SVGGrid
             :grid="grid"
             :focus="nullCell"

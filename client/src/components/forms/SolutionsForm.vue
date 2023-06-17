@@ -1,19 +1,19 @@
 <template>
-  <h3>{{ $t("forms.solutions") }}</h3>
+  <h3>{{ $t("forms.wordIndex") }}</h3>
+  <TextStyle v-model="value.words" role-prefix="wordIndex"/>
+  <h3>{{ $t("forms.wordLength") }}</h3>
+  <TextStyle v-model="value.size" role-prefix="wordLength"/>
+  <h3>{{ $t("forms.pagination") }}</h3>
+  <PaginationStyle v-model="value.pagination" role-prefix="pagination"/>
+  <h3>{{ $t("forms.gridNum") }}</h3>
+  <TextStyle v-model="value.grids.gridN" role-prefix="gridN"/>
+  <h3>{{ $t("forms.solutionsGrid") }}</h3>
   <n-form-item :label="$t('forms.rows')" path="rows">
     <n-input-number role="rows" v-model:value="value.grids.rows" />
   </n-form-item>
   <n-form-item :label="$t('forms.cols')" path="cols">
     <n-input-number role="cols" v-model:value="value.grids.cols" />
   </n-form-item>
-  <h3>{{ $t("forms.pagination") }}</h3>
-  <PaginationStyle v-model="value.pagination" role-prefix="pagination"/>
-  <h3>{{ $t("forms.gridNum") }}</h3>
-  <TextStyle v-model="value.grids.gridN" role-prefix="gridN"/>
-  <h3>{{ $t("forms.wordIndex") }}</h3>
-  <TextStyle v-model="value.words" role-prefix="wordIndex"/>
-  <h3>{{ $t("forms.wordLength") }}</h3>
-  <TextStyle v-model="value.size" role-prefix="wordLength"/>
 </template>
 
 <script setup lang="ts">

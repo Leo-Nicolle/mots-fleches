@@ -1,6 +1,6 @@
 <template>
   <n-form :label-width="80" :model="value">
-    <h3>{{ $t("forms.grid") }}</h3>
+    <h3>{{ $t("forms.gridSize") }}</h3>
     <n-form-item :label="$t('forms.rows')" path="rows">
       <n-input-number v-model:value="value.rows" />
     </n-form-item>

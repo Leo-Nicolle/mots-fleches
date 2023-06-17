@@ -11,11 +11,12 @@ import { ref, defineProps, defineEmits, computed } from "vue";
  * Form edit a string value like "10px" or "10mm"
  * Has a unit picker and a number input
  */
-const props = defineProps<{ 
+const props = defineProps<{
   /**
    * The value to edit
    */
-  modelValue: string }>();
+  modelValue: string;
+}>();
 const emit = defineEmits<{
   /**
    * v-model event
@@ -23,14 +24,13 @@ const emit = defineEmits<{
    */
   (event: "update:modelValue", value: string): void;
 }>();
-const units = ["cm", "mm", "px", "pt", "em"];
+const units = ["cm", "mm", "px", "pt", "em", "rem"];
 const unitSet = new Set(units);
 
-const options = ref([
-  units.map((u) => {
+const options = ref(units.map((u) => {
     return { label: u, value: u };
-  }),
-]);
+}));
+console.log(options.value);
 
 const value = computed<number>({
   get: () => {
@@ -51,7 +51,6 @@ const unit = computed<string>({
   },
   set: (unit) => emit("update:modelValue", `${value.value}${unit}`),
 });
-
 </script>
 
 <style>

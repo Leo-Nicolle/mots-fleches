@@ -1,13 +1,16 @@
 <template>
   <div class="page" ref="page">
-    <div class="styleContainer"></div>
-    <div :class="`body ${bodyClass} || ''`">
-      <slot></slot>
-    </div>
-    <div v-if="showPagination" class="pageNumber" :style="paginationStyle">
-      <span>
-        {{ pageNumber }}
-      </span>
+    <div class="content">
+      <div :class="`body ${bodyClass} || ''`">
+        <slot></slot>
+      </div>
+      <div class="footer">
+        <div v-if="showPagination" class="pagination">
+          <span>
+            {{ pageNumber }}
+          </span>
+        </div>
+      </div>
     </div>
     <div class="borders" v-if="showMargins">
       <div class="border left" :style="{ left: 0 }"></div>
@@ -25,7 +28,6 @@
         :style="{ top: `calc(${pageHeight} - ${margins[2]})` }"
       ></div>
     </div>
-    <div class="footer"></div>
   </div>
 </template>
 
@@ -72,7 +74,6 @@ const paginationColor = computed(() => {
   return `${props.pagination.color}`;
 });
 const paginationJustify = computed(() => {
-  console.log(props.pagination, props.pageNumber);
   return props.pagination
     ? props.pagination.align === "center"
       ? "space-around"
@@ -93,21 +94,9 @@ const padding = computed(() => {
   const { top, left, right, bottom } = props.format.margin;
   return [top, right, bottom, left].map((m) => `${m}cm`).join(" ");
 });
-// TODO: Continue from here
-const paginationStyle = computed(() => {
-  return `
-       align-items: ${props.pagination?.align || "center"};
-  `;
-});
-watchEffect(() => {
-  if (!page.value || !props.format) return;
-  const format = `${props.format.width}cm ${props.format.height}cm`;
-  page.value.querySelector(".styleContainer").innerHTML = `
-   	<style>
-    	@page{
-      	size: ${format};
-      }
-		</style>`;
+const formatStyle = computed(() => {
+  if (!props.format) return "";
+  return `${props.format.width}cm ${props.format.height}cm`;
 });
 </script>
 
@@ -119,6 +108,7 @@ body {
 @page {
   margin: 0;
   padding: 0;
+  size: v-bind(formatStyle);
 }
 @media print {
   button {
@@ -132,15 +122,30 @@ body {
   position: relative;
   break-inside: avoid;
   box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  .body {
+  .content {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: space-around;
     height: 100%;
-    width: 100%;
+    justify-content: space-between;
+    .body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-around;
+      height: 100%;
+      width: 100%;
+    }
+    .footer {
+      .pagination {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        // margin-top: auto;
+        font: v-bind(paginationFont);
+        color: v-bind(paginationColor);
+        justify-content: v-bind(paginationJustify);
+      }
+    }
   }
   .borders {
     .border {
@@ -169,15 +174,6 @@ body {
       right: 0;
       height: 0;
     }
-  }
-  .pageNumber {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    margin-top: auto;
-    font: v-bind(paginationFont);
-    color: v-bind(paginationColor);
-    justify-content: v-bind(paginationJustify);
   }
 }
 </style>

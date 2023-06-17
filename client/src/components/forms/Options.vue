@@ -5,11 +5,8 @@
       <slot></slot>
       <div v-if="grid">
         <h3>
-          {{ $t("forms.options") }}
+          {{ $t("forms.grid") }}
         </h3>
-        <n-form-item :label="$t('forms.name')" path="name">
-          <n-input role="name" v-model:value="value.name" />
-        </n-form-item>
         <n-form-item :label="$t('forms.cellSize')" path="grid.cellSize">
           <n-input-number
             role="cell-size"
@@ -51,6 +48,14 @@
       <div v-if="definition">
         <h3>{{$t('forms.definitions')}}</h3>
         <TextStyle v-model="value.definition" rolePrefix="definition" />
+        <n-form-item :label="$t('forms.backgroundColor')" path="definition.backgroundColor">
+          <n-color-picker
+            role="definition-background-color"
+            v-model:value="value.definition.backgroundColor"
+            :show-alpha="false"
+            size="small"
+          />
+        </n-form-item>
       </div>
       <div v-if="arrows">
         <h3>{{ $t('forms.arrows') }}</h3>
