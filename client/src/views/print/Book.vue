@@ -1,9 +1,9 @@
 <template>
   <Book
-    v-if="grids && options && solutionOptions"
+    v-if="grids && style && solutionStyle"
     :grids="grids"
-    :options="options"
-    :solutionOptions="solutionOptions"
+    :style="style"
+    :solutionStyle="solutionStyle"
     :exportOptions="exportOptions"
   />
 </template>
@@ -11,7 +11,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
 import { useRoute } from "vue-router";
-import { Grid, GridOptions, SolutionOptions } from "grid";
+import { Grid, GridStyle, SolutionStyle } from "grid";
 import { ExportOptions } from "../../types";
 import Book from "../../components/Book.vue";
 import { api } from "../../api";
@@ -22,8 +22,8 @@ import { usePrintMessage, cleanupPrintMessage } from '../../js/usePrintMessage';
  */
 const route = useRoute();
 const grids = ref<Grid[]>([]);
-const options = ref<GridOptions>();
-const solutionOptions = ref<SolutionOptions>();
+const style = ref<GridStyle>();
+const solutionStyle = ref<SolutionStyle>();
 
 const exportOptions = ref<Partial<ExportOptions>>({
   margins: false,
@@ -40,13 +40,13 @@ function fetch() {
         grids.value = gs;
       });
   return promise
-    .then(() => api.db.getOption("solution"))
+    .then(() => api.db.getStyle("solution"))
     .then((solutions) => {
-      solutionOptions.value = solutions as SolutionOptions;
+      solutionStyle.value = solutions as SolutionStyle;
     })
-    .then(() => api.db.getOption("default"))
-    .then((opts) => {
-      options.value = opts as GridOptions;
+    .then(() => api.db.getStyle("default"))
+    .then((s) => {
+      style.value = s as GridStyle;
     })
     .catch((e) => {
       console.error("E", e);

@@ -10,6 +10,7 @@ export type DeepPartial<T> = T extends object ? {
 */
 export type ArrowDir = 'right' | 'down' | 'rightdown' | 'downright' | 'none';
 
+
 /**
 * Arrow 
 */
@@ -78,6 +79,14 @@ export type Cell = {
    */
   spaceH: boolean;
 }
+
+export type Margins<T> = {
+  top: T;
+  bottom: T;
+  left: T;
+  right: T;
+};
+
 /**
  * Format for printing
  */
@@ -101,19 +110,14 @@ export type Format = {
   /**
    * Margin of the paper (cm)
    */
-  margin: {
-    top: number;
-    bottom: number;
-    left: number;
-    right: number;
-  }
+  margin: Margins<number>;
 }
 
 /**
- * Grid options
+ * Grid style
  * defines the style of the grid
  */
-export type GridOptions = {
+export type GridStyle = {
   /**
    * Id of the Options(db)
    */
@@ -147,7 +151,7 @@ export type GridOptions = {
      */
     outerBorderColor: string;
     /**
-     * width of the line showind spaceV and spaceH
+     * width of the line showing spaceV and spaceH
      */
     spaceSize: number;
   };
@@ -192,8 +196,34 @@ export type Bounds = {
 }
 export type Direction = 'horizontal' | 'vertical';
 
+export interface PaginationStyle extends TextSyle {
+  startIdx: number;
+  align: 'center' | 'left';
+  margin: Pick<Margins<string>, 'top' | 'bottom' | 'left'>;
+}
+export interface GridNumberStyle extends TextSyle {
+  margin: Pick<Margins<string>, 'bottom' >;
+}
 
-export const defaultOptions: GridOptions = {
+
+export const defaultTextStyle: TextSyle = {
+  font: "sans-serif",
+  size: "1em",
+  color: "black",
+}
+export const defaultPaginationStyle: PaginationStyle = {
+  ...defaultTextStyle,
+  size: '1.5em',
+  startIdx: 1,
+  align: 'left',
+  margin: {
+    top: '1rem',
+    bottom: '1rem',
+    left: '1rem',
+  }
+};
+
+export const defaultStyles: GridStyle = {
   id: 'default',
   name: 'Default',
   grid: {
@@ -205,9 +235,8 @@ export const defaultOptions: GridOptions = {
     spaceSize: 4,
   },
   definition: {
-    font: "sans-serif",
+    ...defaultTextStyle,
     size: 12,
-    color: "black",
     backgroundColor: "#ccc",
   },
   arrow: {
@@ -227,13 +256,12 @@ export const defaultOptions: GridOptions = {
     }
   }
 };
-
 /**
  * Options for the solution
  */
-export type SolutionOptions = GridOptions & {
+export type SolutionStyle = GridStyle & {
   /**
-   * Wether the options are for the solution or not
+   * Wether the style are for the solution or not
    */
   isSolution: true;
   grids: {
@@ -248,7 +276,7 @@ export type SolutionOptions = GridOptions & {
     /**
      * Style of the grid number
      */
-    gridN: TextSyle;
+    gridN: GridNumberStyle;
   };
   /**
    * Style of the words index
@@ -256,10 +284,14 @@ export type SolutionOptions = GridOptions & {
   words: TextSyle & {
     tolerance: number;
   };
+  pagination: PaginationStyle
+  /**
+   * Size of the words in word index
+   */
   size: TextSyle;
 };
 
-const expOptions: DeepPartial<SolutionOptions> = {
+const expOptions: DeepPartial<SolutionStyle> = {
   id: 'solution',
   name: 'solution',
   grid: {
@@ -269,26 +301,25 @@ const expOptions: DeepPartial<SolutionOptions> = {
     rows: 2,
     cols: 2,
     gridN: {
-      font: "sans-serif",
-      size: "1em",
-      color: "black",
+      ...defaultTextStyle,
+      margin: {
+        bottom: '0.5rem',
+      }
     },
   },
   words: {
-    font: "sans-serif",
-    size: "1em",
-    color: "black",
+    ...defaultTextStyle,
     tolerance: 2
   },
   size: {
-    font: "sans-serif",
-    size: "1.5em",
-    color: "black",
+    ...defaultTextStyle,
+    size: '1.5em'
   },
+  pagination: { ...defaultPaginationStyle },
   isSolution: true
 }
-export const defaultSolutionOptions: SolutionOptions = merge.recursive(
-  JSON.parse(JSON.stringify(defaultOptions)),
+export const defaultSolutionStyle: SolutionStyle = merge.recursive(
+  JSON.parse(JSON.stringify(defaultStyles)),
   expOptions,
 );
 /**
@@ -301,7 +332,7 @@ export type GridState = {
   id: string;
   created: number;
   comment: string;
-  optionsId: string;
+  styleId: string;
   title: string;
   cells: Cell[][];
 };

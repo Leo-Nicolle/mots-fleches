@@ -1,23 +1,23 @@
 <template>
-  <div v-if="grids && solutionOptions">
+  <div v-if="grids && solutionStyle">
     <Paper
       v-for="(gs, i) in gridsPerPage"
       :key="i"
-      :format="solutionOptions.paper"
+      :format="solutionStyle.paper"
       :showMargins="exportOptions.margins"
       :page-number="page"
       :showPagination="exportOptions.pagination"
-      :pagination="solutionOptions.pagination"
+      :pagination="solutionStyle.pagination"
     >
       <div class="grids">
         <div v-for="(grid, j) in gs" :key="j" class="grid-c">
-          <span class="gridN">{{ j + solutionOptions.pagination.startIdx }}</span>
+          <span class="gridN">{{ j + solutionStyle.pagination.startIdx }}</span>
           <SVGGrid
             :grid="grid"
             :focus="nullCell"
             dir="horizontal"
-            :options="solutionOptions"
-            :export-options="exportOptions"
+            :style="solutionStyle"
+            :export-style="exportOptions"
           />
         </div>
       </div>
@@ -29,7 +29,7 @@
 import { defineProps, defineEmits } from "vue";
 import SVGGrid from "./svg-renderer/Grid.vue";
 import Paper from "./Paper.vue";
-import { Grid, nullCell, SolutionOptions } from "grid";
+import { Grid, nullCell, SolutionStyle } from "grid";
 import { computed } from "vue";
 import { ExportOptions } from "../types";
 
@@ -49,7 +49,7 @@ const props = defineProps<{
   /**
    * The styles to render the grids
    */
-  solutionOptions: SolutionOptions;
+  solutionStyle: SolutionStyle;
   /**
    * What to export
    */
@@ -60,24 +60,24 @@ const props = defineProps<{
   page: number;
 }>();
 const rows = computed(() => {
-  if (!props.solutionOptions) return "";
-  return `repeat(${props.solutionOptions.grids.rows},0)`;
+  if (!props.solutionStyle) return "";
+  return `repeat(${props.solutionStyle.grids.rows},0)`;
 });
 const cols = computed(() => {
-  if (!props.solutionOptions) return "";
-  return `repeat(${props.solutionOptions.grids.cols},0)`;
+  if (!props.solutionStyle) return "";
+  return `repeat(${props.solutionStyle.grids.cols},0)`;
 });
 const gridNFont = computed(() => {
-  if (!props.solutionOptions) return "";
-  return `${props.solutionOptions.grids.gridN.size} ${props.solutionOptions.grids.gridN.font}`;
+  if (!props.solutionStyle) return "";
+  return `${props.solutionStyle.grids.gridN.size} ${props.solutionStyle.grids.gridN.font}`;
 });
 const gridNColor = computed(() => {
-  if (!props.solutionOptions) return "";
-  return props.solutionOptions.grids.gridN.color;
+  if (!props.solutionStyle) return "";
+  return props.solutionStyle.grids.gridN.color;
 });
 const gridsPerPage = computed(() => {
-  if (!props.solutionOptions) return [props.grids];
-  const { rows, cols } = props.solutionOptions.grids;
+  if (!props.solutionStyle) return [props.grids];
+  const { rows, cols } = props.solutionStyle.grids;
   const perPage = rows * cols;
   const pages = Math.ceil(props.grids.length / perPage);
   emit("pageCount", pages);

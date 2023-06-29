@@ -1,16 +1,16 @@
 <template>
   <Layout
-    v-if="optionsList.length"
-    :eltList="optionsList"
-    :onCreate="createOptions"
+    v-if="styles.length"
+    :eltList="styles"
+    :onCreate="createStyle"
     :onDelete="onDelete"
     :has-create-button="false"
     :has-delete-button="false"
-    :onClick="(options) => $router.push(`/options/${options.id}`)"
+    :onClick="(style) => $router.push(`/styles/${style.id}`)"
     @select="(s) => (selected = s)"
   >
     <template v-slot:left-panel>
-      <h3>{{ $t("nav.options") }}</h3>
+      <h3>{{ $t("nav.styles") }}</h3>
     </template>
     <template v-slot:card-title="{ elt }">
       <span>
@@ -27,24 +27,22 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { useRouter } from "vue-router";
-import { newOptions } from "grid";
+import { newStyle } from "grid";
 import "highlight.js/styles/monokai.css";
 import Layout from "../layouts/GridLayout.vue";
-import { GridOptions } from "grid";
+import { GridStyle } from "grid";
 import { api } from "../api";
 /**
- * View to display all options in a grid layout
+ * View to display all styles in a grid layout
  */
-const router = useRouter();
-const optionsList = ref<GridOptions[]>([]);
-const selected = ref<GridOptions[]>([]);
+const styles = ref<GridStyle[]>([]);
+const selected = ref<GridStyle[]>([]);
 
 function fetch() {
   return api.db
-    .getOptions()
+    .getStyles()
     .then((data) => {
-      optionsList.value = data;
+      styles.value = data;
     })
     .catch((e) => {
       console.error("E", e);
@@ -52,12 +50,12 @@ function fetch() {
 }
 function onDelete() {
   Promise.all(
-    selected.value.map((option, i) => api.db.deleteOption(option.id))
+    selected.value.map((style, i) => api.db.deleteStyle(style.id))
   ).then(() => fetch());
 }
 
-function createOptions() {
-  return api.db.pushOption(newOptions()).then(() => fetch());
+function createStyle() {
+  return api.db.pushStyle(newStyle()).then(() => fetch());
 }
 
 onMounted(() => {

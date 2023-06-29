@@ -3,7 +3,7 @@
 export const lang = {
   nav: {
     grids: "Grids",
-    options: "Styles",
+    styles: "Styles",
     solutions: "Solutions",
     words: "Words",
     about: "About",

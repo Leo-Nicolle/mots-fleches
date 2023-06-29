@@ -138,11 +138,11 @@ function getNavChildren() {
         h(
           RouterLink,
           {
-            to: "/options",
+            to: "/styles",
           },
-          { default: () => i18n.global.t("nav.options") }
+          { default: () => i18n.global.t("nav.styles") }
         ),
-      key: "go-to-options",
+      key: "go-to-styles",
     },
     {
       label: () =>

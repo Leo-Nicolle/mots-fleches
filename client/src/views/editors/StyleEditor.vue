@@ -4,11 +4,11 @@
       <ExportButton route="grid-export" :query="{ id: grid.id }" />
       <ExportSVGButton :grid="grid" />
     </template>
-    <template v-slot:left-panel v-if="options && grid">
+    <template v-slot:left-panel v-if="style && grid">
       <n-scrollbar y-scrollable style="max-height: calc(100vh - 100px)">
         <GridForm :model-value="grid" />
         <OptionsForm
-          v-model="options"
+          v-model="style"
           @update:modelValue="onUpdate"
           grid
           definition
@@ -19,7 +19,7 @@
     </template>
     <template v-slot:body>
       <GridPaper
-        v-if="grid && options"
+        v-if="grid && style"
         class="paper"
         :grid="grid"
         :export-options="{
@@ -27,7 +27,7 @@
           texts: true,
           highlight: true,
         }"
-        :options="options"
+        :style="style"
       />
     </template>
   </Layout>
@@ -37,11 +37,11 @@
 import GridPaper from "../../components/GridPaper.vue";
 import ExportButton from "../../components/ExportButton.vue";
 import ExportSVGButton from "../../components/ExportSVG.vue";
-import OptionsForm from "../../components/forms/Options.vue";
+import OptionsForm from "../../components/forms/GridStyleForm.vue";
 import GridForm from "../../components/forms/GridForm.vue";
 import Layout from "../../layouts/Main.vue";
 import { defaultExportOptions } from "../../types";
-import { Grid, GridOptions } from "grid";
+import { Grid, GridStyle } from "grid";
 import { ref, onMounted, unref, toRaw } from "vue";
 import { useRoute } from "vue-router";
 import { api } from "../../api";
@@ -49,17 +49,17 @@ import { api } from "../../api";
  * View to edit a grid style
  */
 const grid = ref<Grid>();
-const options = ref<GridOptions>();
+const style = ref<GridStyle>();
 const saveTimeout = ref(0);
 const route = useRoute();
 function fetch() {
   return Promise.all([
     api.getGrids(),
-    api.db.getOption(route.params.id as string),
+    api.db.getStyle(route.params.id as string),
   ])
     .then(([grids, opts]) => {
       grid.value = grids[0];
-      options.value = opts;
+      style.value = opts;
     })
     .catch((e) => {
       console.error("E", e);
@@ -69,8 +69,8 @@ function fetch() {
 function onUpdate() {
   clearTimeout(saveTimeout.value);
   saveTimeout.value = setTimeout(() => {
-    if (!options.value) return;
-    api.db.pushOption(toRaw(options.value) as unknown as GridOptions);
+    if (!style.value) return;
+    api.db.pushStyle(toRaw(style.value) as unknown as GridStyle);
   }, 100);
 }
 
@@ -80,12 +80,4 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.options {
-  display: flex;
-  flex-direction: row;
-  height: 100%;
-}
-.paper {
-  margin: 20px;
-}
 </style>

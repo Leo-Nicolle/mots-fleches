@@ -1,6 +1,6 @@
 <template>
   <Layout
-    v-if="options.length === grids.length"
+    v-if="styles.length === grids.length"
     :eltList="grids"
     :onCreate="createGrid"
     :onDelete="onDelete"
@@ -23,7 +23,7 @@
         <SVGGrid
           :grid="elt"
           :focus="nullCell"
-          :options="options[i]"
+          :style="styles[i]"
           dir="horizontal"
           :export-options="{
             ...defaultExportOptions,
@@ -44,7 +44,7 @@ import SVGGrid from "../components/svg-renderer/Grid.vue";
 import ExportButton from "../components/ExportButton.vue";
 import Layout from "../layouts/GridLayout.vue";
 import { defaultExportOptions } from "../types";
-import { Grid, GridOptions, nullCell } from "grid";
+import { Grid, GridStyle, nullCell } from "grid";
 import generate from "../js/maze-generator";
 import { api } from "../api";
 import { workerController } from "../search-worker";
@@ -53,7 +53,7 @@ import { workerController } from "../search-worker";
  */
 const router = useRouter();
 const grids = ref<Grid[]>([]);
-const options = ref<GridOptions[]>([]);
+const styles = ref<GridStyle[]>([]);
 const selected = ref<Grid[]>([]);
 
 const exportQuery = computed(() => {
@@ -66,10 +66,10 @@ function fetch() {
       grids.value = gs;
     })
     .then(() =>
-      Promise.all(grids.value.map((grid) => api.db.getOption(grid.optionsId)))
+      Promise.all(grids.value.map((grid) => api.db.getStyle(grid.styleId)))
     )
     .then((opts) => {
-      options.value = opts as GridOptions[];
+      styles.value = opts as GridStyle[];
     })
     .catch((e) => {
       console.error("E", e);

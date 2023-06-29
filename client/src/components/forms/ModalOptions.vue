@@ -25,15 +25,15 @@
             />
           </n-form-item>
           <n-form-item
-            :label="$t('forms.options')"
-            path="optionsId"
+            :label="$t('forms.styles')"
+            path="stylesId"
             v-if="opts.length"
           >
             <n-select
-              role="options"
+              role="styles"
               :options="opts"
               :default-value="defaultSelectOpt"
-              v-model:value="value.optionsId"
+              v-model:value="value.styleId"
               def
             />
           </n-form-item>
@@ -163,12 +163,12 @@ watch(value.value, () => {
 });
 const defaultSelectOpt = computed(() => {
   if (!props.modelValue) return "default";
-  return opts.value.find((opt) => opt.value === props.modelValue.optionsId)
+  return opts.value.find((opt) => opt.value === props.modelValue.styleId)
     ?.label;
 });
 onMounted(() => {
   api.db
-    .getOptions()
+    .getStyles()
     .then((res) => {
       opts.value = res.map((opt) => {
         return { label: opt.name, value: opt.id };

@@ -1,10 +1,11 @@
 import { openDB, DBSchema } from 'idb';
-import { Grid, GridOptions, GridState } from 'grid';
+import { Grid, GridStyle, GridState } from 'grid';
 import {
-  defaultOptions,
-  defaultSolutionOptions,
+  defaultStyles,
+  defaultSolutionStyle,
 } from 'grid';
 import { Database } from './db';
+import { mergeOptionsWithDefaults } from './utils';
 
 export interface MotsFlexDB extends DBSchema {
   grids: {
@@ -17,16 +18,24 @@ export interface MotsFlexDB extends DBSchema {
     key: string;
     indexes: { 'by-word': string };
   };
-  options: {
-    value: GridOptions;
+  styles: {
+    value: GridStyle;
     key: string;
     indexes: { 'by-id': string };
   }
 }
 
 async function create() {
-  const db = await openDB<MotsFlexDB>('mots-flex-db', 3, {
-    upgrade(db) {
+  let promise = Promise.resolve();
+  const db = await openDB<MotsFlexDB>('mots-flex-db', 20, {
+      upgrade(db, old, newV, transaction) {
+      console.log('upgrading db', old, newV, transaction);
+      debugger;
+      // @ts-ignore
+      if(db.objectStoreNames.contains('style')){
+      // @ts-ignore
+        db.deleteObjectStore('style');
+      }
       if (!db.objectStoreNames.contains('grids')) {
         const gridStore = db.createObjectStore('grids', {
           keyPath: 'id',
@@ -39,16 +48,47 @@ async function create() {
         });
         wordStore.createIndex('by-word', 'id');
       }
-      if (!db.objectStoreNames.contains('options')) {
-        const optionStore = db.createObjectStore('options', {
+      if (!db.objectStoreNames.contains('styles')) {
+        const optionStore = db.createObjectStore('styles', {
           keyPath: 'id',
         });
         optionStore.createIndex('by-id', 'id');
       }
+
+      // @ts-ignore
+      if(db.objectStoreNames.contains('options')){
+        // @ts-ignore
+        const store = transaction.objectStore('options');
+        // @ts-ignore
+        promise = promise.then(() => db.getAllFromIndex('options', 'by-id'))
+        .then(styles => {
+          styles.forEach(style => {
+            store.put(mergeOptionsWithDefaults(style as GridStyle));
+          })
+        })
+        // @ts-ignore
+        db.deleteObjectStore('options');
+      }
+
+      if(old <= 100){
+        const gridStore = transaction.objectStore('grids');
+        promise = promise
+        .then(() => gridStore.getAll())
+        .then(grids => {
+          grids.forEach(grid => {
+            const updatedGrid = grid as GridState;
+            // @ts-ignore
+            updatedGrid.styleId = grid.optionsId;
+            // @ts-ignore
+            delete updatedGrid.optionsId;
+            gridStore.put(updatedGrid as GridState);
+          });
+        });
+      }
     },
   });
 
-  return db;
+  return promise.then(() => db);
 
 }
 
@@ -58,12 +98,12 @@ export class Idatabase extends Database {
     super();
     this.loadingPromise = create()
       .then((db) => {
-        return db.get('options', defaultOptions.id)
-          .then((options) => options ? Promise.resolve('')
-            : db.put('options', defaultOptions))
-          .then(() => db.get('options', defaultSolutionOptions.id))
-          .then((options) => options ? Promise.resolve('') :
-            db.put('options', defaultSolutionOptions))
+        return db.get('styles', defaultStyles.id)
+          .then((style) => style ? Promise.resolve('')
+            : db.put('styles', defaultStyles))
+          .then(() => db.get('styles', defaultSolutionStyle.id))
+          .then((style) => style ? Promise.resolve('') :
+            db.put('styles', defaultSolutionStyle))
           .then(() => db);
       });
   }
@@ -98,30 +138,31 @@ export class Idatabase extends Database {
   async getGrid(gridId: string) {
     return await this.loadingPromise.then((db) =>
       db.get('grids', gridId)
-    );
+    )
   }
 
-  async getOptions() {
+  async getStyles() {
     return await this.loadingPromise.then((db) =>
-      db.getAllFromIndex('options', 'by-id')
+      db.getAllFromIndex('styles', 'by-id')
+    )
+    .then((style) => style.map((style) => mergeOptionsWithDefaults(style)));
+  }
+  async getStyle(styleId: string) {
+    return await this.loadingPromise.then((db) =>
+      db.get('styles', styleId)
+    ).then((style) => style ? mergeOptionsWithDefaults(style) : undefined);
+  }
+  async pushStyle(style: GridStyle) {
+    return await this.loadingPromise.then((db) =>
+      db.put('styles', style)
     );
   }
-  async getOption(optionId: string) {
-    return await this.loadingPromise.then((db) =>
-      db.get('options', optionId)
-    );
+  async updateOption(style: GridStyle) {
+    return await this.pushStyle(style);
   }
-  async pushOption(option: GridOptions) {
+  async deleteStyle(styleId: string) {
     return await this.loadingPromise.then((db) =>
-      db.put('options', option)
-    );
-  }
-  async updateOption(option: GridOptions) {
-    return await this.pushOption(option);
-  }
-  async deleteOption(optionId: string) {
-    return await this.loadingPromise.then((db) =>
-      db.delete('options', optionId)
+      db.delete('styles', styleId)
     );
   }
 

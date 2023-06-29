@@ -3,7 +3,7 @@
 export const lang = {
     nav: {
         grids: "Cuadrículas",
-        options: "Estilos",
+        styles: "Estilos",
         solutions: "Soluciones",
         words: "Palabras",
         about: "Acerca de",

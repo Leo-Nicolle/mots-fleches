@@ -30,8 +30,6 @@ const unitSet = new Set(units);
 const options = ref(units.map((u) => {
     return { label: u, value: u };
 }));
-console.log(options.value);
-
 const value = computed<number>({
   get: () => {
     const res = +props.modelValue.slice(0, -2);
@@ -43,7 +41,6 @@ const value = computed<number>({
       value ? `${value}${unit.value}` : `0${unit.value}`
     ),
 });
-
 const unit = computed<string>({
   get: () => {
     const res = props.modelValue.slice(-2);

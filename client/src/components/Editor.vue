@@ -71,7 +71,7 @@
           :grid="grid"
           :focus="focus"
           :dir="dir"
-          :options="options"
+          :style="style"
           :zoom="1 / zoom"
           :highlights="highlights"
           class="svg-grid"
@@ -84,7 +84,7 @@
         <GridInput
           :grid="grid"
           :dir="dir"
-          :options="options"
+          :style="style"
           :cell="focus"
           :offset="offset"
           :zoom="zoom"
@@ -95,7 +95,7 @@
         </GridInput>
         <GridHighlight
           :grid="grid"
-          :options="options"
+          :style="style"
           :cell="hoveredCell"
           :validity="validity"
           :cellProbas="cellProbas"
@@ -134,7 +134,7 @@ import {
   Cell,
   Direction,
   nullCell,
-  GridOptions,
+  GridStyle,
   GridValidity,
   CellProba,
 } from "grid";
@@ -155,9 +155,9 @@ const props = defineProps<{
    */
   grid: Grid;
   /**
-   * The grid options
+   * The grid style
    */
-  options: GridOptions;
+  style: GridStyle;
 }>();
 const emit = defineEmits<{
   /**

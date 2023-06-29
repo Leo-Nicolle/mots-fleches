@@ -1,21 +1,21 @@
 <template>
   <WordsIndex
-    v-if="grids && options"
+    v-if="grids && style"
     :grids="grids"
     class="paper"
     :export-options="exportOptions"
-    :solutionOptions="options"
+    :solutionStyle="style"
   />
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import WordsIndex from "../../components/WordsIndex.vue";
-import { Grid, SolutionOptions } from "grid";
+import { Grid, SolutionStyle } from "grid";
 import { defaultExportOptions, ExportOptions } from "../../types";
 import { api } from "../../api";
 const grids = ref<Grid[]>([]);
-const options = ref<SolutionOptions>();
+const style = ref<SolutionStyle>();
 const exportOptions = ref<ExportOptions>({
   ...defaultExportOptions,
   arrows: false,
@@ -28,9 +28,9 @@ function fetch() {
     .then((gs) => {
       grids.value = gs;
     })
-    .then(() => api.db.getOption("solution"))
-    .then((opts) => {
-      options.value = opts as SolutionOptions;
+    .then(() => api.db.getStyle("solution"))
+    .then((s) => {
+      style.value = s as SolutionStyle;
     })
     .catch((e) => {
       console.error("E", e);

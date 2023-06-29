@@ -1,18 +1,18 @@
 <template>
   <div id="Grid">
     <Editor
-      v-if="grid && options"
+      v-if="grid && style"
       :grid="grid"
       @update="onUpdate"
       @size-update="onSizeUpdate"
-      :options="options"
+      :style="style"
     ></Editor>
   </div>
 </template>
 
 <script setup lang="ts">
 import Editor from "../../components/Editor.vue";
-import { Grid, GridOptions } from "grid";
+import { Grid, GridStyle } from "grid";
 import { ref, onMounted, toRaw } from "vue";
 import { useRoute } from "vue-router";
 import { api } from "../../api";
@@ -21,7 +21,7 @@ import { api } from "../../api";
  * Uses the route query to get the grid id
  */
 const grid = ref<Grid>();
-const options = ref<GridOptions>();
+const style = ref<GridStyle>();
 
 const saveTimeout = ref(0);
 const route = useRoute();
@@ -30,10 +30,10 @@ function fetch() {
     .getGrid(route.params.id as string)
     .then((g) => {
       grid.value = g as Grid;
-      return api.db.getOption(grid.value.optionsId);
+      return api.db.getStyle(grid.value.styleId);
     })
     .then((opts) => {
-      options.value = opts;
+      style.value = opts;
     })
     .catch((e) => {
       console.error("E", e);

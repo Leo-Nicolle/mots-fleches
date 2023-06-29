@@ -48,7 +48,7 @@ import {
   CellProba,
   Direction,
   Grid,
-  GridOptions,
+  GridStyle,
   GridValidity,
   nullCell,
 } from "grid";
@@ -74,7 +74,7 @@ const props = defineProps<{
   mode: Mode;
   grid: Grid;
   gridVersion: number;
-  options: GridOptions;
+  style: GridStyle;
   zoom: number;
   offset: [number, number];
   dir: Direction;

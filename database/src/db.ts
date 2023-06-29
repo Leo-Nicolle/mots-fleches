@@ -1,4 +1,4 @@
-import { Grid, GridOptions, GridState } from "grid";
+import { Grid, GridStyle, GridState, SolutionStyle } from "grid";
 
 export abstract class Database {
   abstract getGrids(): Promise<GridState[]>;
@@ -6,11 +6,11 @@ export abstract class Database {
   abstract updateGrid(grid: Grid): Promise<string>;
   abstract deleteGrid(gridId: string) : Promise<void>;
   abstract getGrid(gridId: string): Promise<GridState | undefined>;
-  abstract getOptions() : Promise<GridOptions[]>;
-  abstract getOption(optionId: string) : Promise<GridOptions | undefined>;
-  abstract pushOption(option: any) : Promise<string>;
+  abstract getStyles() : Promise<(GridStyle | SolutionStyle)[]>;
+  abstract getStyle(optionId: string) : Promise<GridStyle | SolutionStyle| undefined>;
+  abstract pushStyle(option: any) : Promise<string>;
   abstract updateOption(option: any) : Promise<string>;
-  abstract deleteOption(optionId: string) : Promise<void>;
+  abstract deleteStyle(optionId: string) : Promise<void>;
   abstract getWords() : Promise<string[]>;
   abstract getWord(wordId: string) : Promise<string | undefined>;
   abstract pushWord(word: any) : Promise<string>;

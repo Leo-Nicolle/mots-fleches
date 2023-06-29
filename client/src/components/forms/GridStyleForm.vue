@@ -1,5 +1,5 @@
 <template>
-  <div class="options">
+  <div class="styles-form">
     <n-form ref="formRef" :label-width="80" :model="value">
       <!-- @slot Slot to add additional inputs  -->
       <slot></slot>
@@ -81,17 +81,17 @@
 <script setup lang="ts">
 import { defineProps, defineEmits, watch } from "vue";
 import { useModel } from "../../js/useModel";
-import { GridOptions } from "grid";
+import { GridStyle } from "grid";
 import FormatPicker from "./FormatPicker.vue";
 import TextStyle from "./TextStyle.vue";
 /**
- * Form to modify GridOptions.
+ * Form to modify GridStyle.
  */
 const props = defineProps<{
   /**
    * The grid to edit
    */
-  modelValue: GridOptions;
+  modelValue: GridStyle;
   /**
    * Show the grid inputs
    */
@@ -114,7 +114,7 @@ const emit = defineEmits<{
    * v-model event
    * @param value The new grid
    */
-  (event: "update:modelValue", value: GridOptions): void;
+  (event: "update:modelValue", value: GridStyle): void;
 }>();
 const value = useModel(props, emit);
 

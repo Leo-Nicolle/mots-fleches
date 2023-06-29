@@ -1,15 +1,15 @@
 <template>
   <GridPaper
-    v-if="options && grid"
+    v-if="style && grid"
     :grid="grid"
-    :options="options"
+    :style="style"
     :export-options="exportOptions"
   />
 </template>
 
 <script setup lang="ts">
 import GridPaper from "../../components/GridPaper.vue";
-import { Grid, GridOptions } from "grid";
+import { Grid, GridStyle } from "grid";
 import { mergeRouteWithDefault } from "../../js/utils";
 import { ref, onMounted, computed, onUnmounted } from "vue";
 import { useRoute } from "vue-router";
@@ -22,7 +22,7 @@ import { cleanupPrintMessage, usePrintMessage } from "../../js/usePrintMessage";
  */
 const route = useRoute();
 const grid = ref<Grid>();
-const options = ref<GridOptions>();
+const style = ref<GridStyle>();
 const exportOptions = computed(() =>
   mergeRouteWithDefault(route, defaultExportOptions)
 );
@@ -31,10 +31,10 @@ function fetch() {
     .getGrid(route.query.id as string)
     .then((g) => {
       grid.value = g as Grid;
-      return api.db.getOption(grid.value.optionsId);
+      return api.db.getStyle(grid.value.styleId);
     })
-    .then((opts) => {
-      options.value = opts;
+    .then((s) => {
+      style.value = s;
     })
     .catch((e) => {
       console.error("E", e);

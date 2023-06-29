@@ -4,10 +4,10 @@
     class="grid"
     :viewBox="`${-outerLineStroke} ${-outerLineStroke} ${gridTotalWidth(
       grid,
-      options
-    )} ${gridTotalHeight(grid, options)}`"
-    :width="`${gridTotalWidth(grid, options) / (zoom || 1)}px`"
-    :height="`${gridTotalHeight(grid, options) / (zoom || 1)}px`"
+      style
+    )} ${gridTotalHeight(grid, style)}`"
+    :width="`${gridTotalWidth(grid, style) / (zoom || 1)}px`"
+    :height="`${gridTotalHeight(grid, style) / (zoom || 1)}px`"
     @click="onClick"
     @mousemove="onMouseMove"
     @mouseout="onMouseLeave"
@@ -28,10 +28,10 @@
           :class="getCellClass(cell, focus)"
         >
           <rect
-            :x="cellAndBorderWidth(options) * cell.x"
-            :y="cellAndBorderWidth(options) * cell.y"
-            :width="cellWidth(options)"
-            :height="cellWidth(options)"
+            :x="cellAndBorderWidth(style) * cell.x"
+            :y="cellAndBorderWidth(style) * cell.y"
+            :width="cellWidth(style)"
+            :height="cellWidth(style)"
             :fill="
               exportOptions.fills && cell.definition
                 ? defBackgroundColor
@@ -58,7 +58,7 @@
           </text>
           <text
             :x="xText(cell)"
-            :y="yText(cell) + (6 * cellWidth(options)) / 7"
+            :y="yText(cell) + (6 * cellWidth(style)) / 7"
             :font-family="textFont"
             :font-size="textSize"
             dominant-baseline="alphabetic"
@@ -73,8 +73,8 @@
       v-if="exportOptions.outerBorders"
       :x="-outerLineStroke / 2"
       :y="-outerLineStroke / 2"
-      :width="gridTotalWidth(grid, options) - outerLineStroke"
-      :height="gridTotalHeight(grid, options) - outerLineStroke"
+      :width="gridTotalWidth(grid, style) - outerLineStroke"
+      :height="gridTotalHeight(grid, style) - outerLineStroke"
       :stroke-width="outerLineStroke"
       :stroke="outerLineColor"
       fill="none"
@@ -86,9 +86,9 @@
         v-for="i in rows.length - 1"
         :key="i"
         :x1="0"
-        :y1="i * cellWidth(options) + (i - 0.5) * borderWidth(options)"
-        :x2="gridWidth(grid, options)"
-        :y2="i * cellWidth(options) + (i - 0.5) * borderWidth(options)"
+        :y1="i * cellWidth(style) + (i - 0.5) * borderWidth(style)"
+        :x2="gridWidth(grid, style)"
+        :y2="i * cellWidth(style) + (i - 0.5) * borderWidth(style)"
         fill="none"
         :stroke-width="lineStroke"
         stroke-miterlimit="10"
@@ -97,10 +97,10 @@
       <line
         v-for="i in cols.length - 1"
         :key="i"
-        :x1="i * cellWidth(options) + (i - 0.5) * borderWidth(options)"
+        :x1="i * cellWidth(style) + (i - 0.5) * borderWidth(style)"
         :y1="0"
-        :x2="i * cellWidth(options) + (i - 0.5) * borderWidth(options)"
-        :y2="gridHeight(grid, options)"
+        :x2="i * cellWidth(style) + (i - 0.5) * borderWidth(style)"
+        :y2="gridHeight(grid, style)"
         fill="none"
         :stroke-width="lineStroke"
         stroke-miterlimit="10"
@@ -112,7 +112,7 @@
       stroke-linecap="round"
       stroke-width="10"
       fill="none"
-      :stroke="options.arrow.color"
+      :stroke="style.arrow.color"
       v-if="exportOptions.arrows"
     >
       <g
@@ -164,7 +164,7 @@ import { defineEmits, ref, defineProps, computed, nextTick } from "vue";
 import { getD } from "../../js/paths";
 import {
   Grid,
-  GridOptions,
+  GridStyle,
   gridWidth,
   gridHeight,
   gridTotalWidth,
@@ -194,7 +194,7 @@ const props = defineProps<{
   /**
    * The style of the grid
    */
-  options: GridOptions;
+  style: GridStyle;
   /**
    * The focused cell (can be nullCell)
    */
@@ -228,20 +228,20 @@ const rows = computed(() =>
 const cols = computed(() =>
   new Array(props.grid.cols).fill(0).map((e, i) => i)
 );
-const arrowScale = computed(() => 0.01 * props.options.arrow.size);
-const lineStroke = computed(() => props.options.grid.borderSize);
-const lineColor = computed(() => props.options.grid.borderColor);
-const spaceStroke = computed(() => props.options.grid.spaceSize);
-const outerLineStroke = computed(() => props.options.grid.outerBorderSize);
-const outerLineColor = computed(() => props.options.grid.outerBorderColor);
-const defSize = computed(() => props.options.definition.size);
-const textSize = computed(() => props.options.grid.cellSize);
+const arrowScale = computed(() => 0.01 * props.style.arrow.size);
+const lineStroke = computed(() => props.style.grid.borderSize);
+const lineColor = computed(() => props.style.grid.borderColor);
+const spaceStroke = computed(() => props.style.grid.spaceSize);
+const outerLineStroke = computed(() => props.style.grid.outerBorderSize);
+const outerLineColor = computed(() => props.style.grid.outerBorderColor);
+const defSize = computed(() => props.style.definition.size);
+const textSize = computed(() => props.style.grid.cellSize);
 const textFont = computed(() => `roboto`);
-const defFont = computed(() => `${props.options.definition.font}`);
+const defFont = computed(() => `${props.style.definition.font}`);
 const defBackgroundColor = computed(
-  () => props.options.definition.backgroundColor
+  () => props.style.definition.backgroundColor
 );
-const defColor = computed(() => props.options.definition.color);
+const defColor = computed(() => props.style.definition.color);
 
 /**
  * The arrows to display
@@ -258,11 +258,11 @@ const arrows = computed(
             : {
                 dir: cell.arrows[i],
                 x:
-                  cellAndBorderWidth(props.options) * cell.x +
-                  cellAndBorderWidth(props.options) * x,
+                  cellAndBorderWidth(props.style) * cell.x +
+                  cellAndBorderWidth(props.style) * x,
                 y:
-                  cellAndBorderWidth(props.options) * cell.y +
-                  cellAndBorderWidth(props.options) * y,
+                  cellAndBorderWidth(props.style) * cell.y +
+                  cellAndBorderWidth(props.style) * y,
                 transform: cell.arrows[i].startsWith("right")
                   ? "rotate(180)scale(-1, -1)"
                   : "scale(-1, 1)rotate(90)",
@@ -304,12 +304,12 @@ const splits = computed(() =>
             : 0
           : 0;
       const y =
-        cell.y * cellAndBorderWidth(props.options) +
-        ratio * cellWidth(props.options);
+        cell.y * cellAndBorderWidth(props.style) +
+        ratio * cellWidth(props.style);
       return {
-        x1: cell.x * cellAndBorderWidth(props.options),
+        x1: cell.x * cellAndBorderWidth(props.style),
         x2:
-          cell.x * cellAndBorderWidth(props.options) + cellWidth(props.options),
+          cell.x * cellAndBorderWidth(props.style) + cellWidth(props.style),
         y1: y,
         y2: y,
       };
@@ -323,9 +323,9 @@ const spaces = computed(() => {
     .flat()
     .filter((c) => !c.definition && (c.spaceH || c.spaceV))
     .reduce((spaces, cell) => {
-      const xTop = cell.x * cellAndBorderWidth(props.options);
-      const yTop = cell.y * cellAndBorderWidth(props.options);
-      const width = cellWidth(props.options);
+      const xTop = cell.x * cellAndBorderWidth(props.style);
+      const yTop = cell.y * cellAndBorderWidth(props.style);
+      const width = cellWidth(props.style);
       if (cell.spaceH) {
         spaces.push({
           x1: xTop + width,
@@ -348,11 +348,11 @@ const spaces = computed(() => {
 
 function xText(cell: Cell) {
   return (
-    cell.x * cellAndBorderWidth(props.options) + cellWidth(props.options) / 2
+    cell.x * cellAndBorderWidth(props.style) + cellWidth(props.style) / 2
   );
 }
 function yText(cell: Cell) {
-  return cell.y * cellAndBorderWidth(props.options);
+  return cell.y * cellAndBorderWidth(props.style);
 }
 /**
  * For a definition cell,
@@ -369,11 +369,11 @@ function lines(cell: Cell) {
       },
     ];
   }
-  const cellHeight = cellWidth(props.options);
+  const cellHeight = cellWidth(props.style);
   const splited = isSplited(cell);
   const split = splitIndex(cell);
   const lines = getLines(cell);
-  const borderSize = props.options.grid.borderSize;
+  const borderSize = props.style.grid.borderSize;
   const freeHeight =
     cellHeight - +splited * borderSize - lines.length * defSize.value;
 
@@ -402,18 +402,18 @@ function lines(cell: Cell) {
 function getCell(evt: MouseEvent) {
   const x = evt.offsetX - outerLineStroke.value;
   const y = evt.offsetY - outerLineStroke.value;
-  const maxX = gridTotalWidth(props.grid, props.options) / (props.zoom || 1);
-  const maxY = gridTotalHeight(props.grid, props.options) / (props.zoom || 1);
+  const maxX = gridTotalWidth(props.grid, props.style) / (props.zoom || 1);
+  const maxY = gridTotalHeight(props.grid, props.style) / (props.zoom || 1);
   const cWidth =
     container.value && container.value.getBoundingClientRect()
       ? container.value.getBoundingClientRect().width
-      : gridTotalWidth(props.grid, props.options);
-  const ratio = cWidth / gridTotalWidth(props.grid, props.options);
+      : gridTotalWidth(props.grid, props.style);
+  const ratio = cWidth / gridTotalWidth(props.grid, props.style);
   if (x < 0 || y < 0 || x > maxX || y > maxY) {
     return nullCell;
   }
-  const cY = Math.floor(y / cellAndBorderWidth(props.options) / ratio);
-  const cX = Math.floor(x / cellAndBorderWidth(props.options) / ratio);
+  const cY = Math.floor(y / cellAndBorderWidth(props.style) / ratio);
+  const cX = Math.floor(x / cellAndBorderWidth(props.style) / ratio);
   return props.grid.cells[cY][cX];
 }
 function onClick(evt: MouseEvent) {

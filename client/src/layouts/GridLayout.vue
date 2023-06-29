@@ -158,12 +158,6 @@ watch(selectedElements, () => {
 .card-title > div {
   margin-left: auto;
 }
-.options > div {
-  /* width: 100vw; */
-  /* height: calc(100vh - 55px); */
-  display: grid;
-  grid-template-columns: 300px auto;
-}
 .wrapper {
   justify-content: center;
   gap: 8px 12px;

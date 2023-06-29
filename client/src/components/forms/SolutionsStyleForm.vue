@@ -21,22 +21,22 @@ import { defineProps, defineEmits, watch, ref } from "vue";
 import TextStyle from "./TextStyle.vue";
 import PaginationStyle from "./PaginationStyle.vue";
 import { useModel } from "../../js/useModel";
-import { SolutionOptions } from "grid";
+import { SolutionStyle } from "grid";
 /**
- * Form to modify SolutionOptions.
+ * Form to modify SolutionStyle.
  */
 const props = defineProps<{
   /**
-   * The SolutionOptions to edit
+   * The SolutionStyle to edit
    */
-  modelValue: SolutionOptions;
+  modelValue: SolutionStyle;
 }>();
 const emit = defineEmits<{
   /**
    * v-model event
-   * @param value The new SolutionOptions
+   * @param value The new SolutionStyle
    */
-  (event: "update:modelValue", value: SolutionOptions): void;
+  (event: "update:modelValue", value: SolutionStyle): void;
 }>();
 const value = useModel(props, emit);
 

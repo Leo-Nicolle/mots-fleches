@@ -57,7 +57,7 @@ import {
   cellAndBorderWidth,
   cellWidth,
   Direction,
-  GridOptions,
+  GridStyle,
   nullCell,
   isSplited,
   parse,
@@ -99,7 +99,7 @@ const props = defineProps<{
   /**
    * The style of the grid
    */
-  options: GridOptions;
+  style: GridStyle;
   /**
    * Typing direction
    */
@@ -230,7 +230,7 @@ const handleW = 4;
  * Computes the position of the dots to add arrows
  */
 const handles = computed<Handle[]>(() => {
-  const w = cellAndBorderWidth(props.options) * props.zoom;
+  const w = cellAndBorderWidth(props.style) * props.zoom;
   return arrowPositions(props.cell).map(({ x, y }, i) => {
     return {
       top: `${y * w - handleW}px`,

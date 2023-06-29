@@ -1,5 +1,5 @@
 import { Grid, isSplited } from "./Grid";
-import { Cell, defaultOptions, Direction, GridOptions, WordAndPosition, } from "./types";
+import { Cell, defaultStyles, Direction, GridStyle, WordAndPosition, } from "./types";
 import { v4 as uuid } from "uuid";
 
 /**
@@ -23,64 +23,64 @@ export function format(num: number, unit: string): string {
   return `${num}${unit}`;
 }
 
-export function cellWidth(options: GridOptions) {
-  const { cellSize } = options.grid;
+export function cellWidth(style: GridStyle) {
+  const { cellSize } = style.grid;
   return cellSize;
 }
-export function borderWidth(options: GridOptions) {
-  return options.grid.borderSize;
+export function borderWidth(style: GridStyle) {
+  return style.grid.borderSize;
 }
-export function outerBorderWidth(options: GridOptions) {
-  return options.grid.outerBorderSize;
+export function outerBorderWidth(style: GridStyle) {
+  return style.grid.outerBorderSize;
 }
 /**
  * Returns the width of a cell and its border
- * @param options 
+ * @param style 
  * @returns 
  */
-export function cellAndBorderWidth(options: GridOptions) {
-  return cellWidth(options) + borderWidth(options);
+export function cellAndBorderWidth(style: GridStyle) {
+  return cellWidth(style) + borderWidth(style);
 }
 /**
  * Returns the width of the grid (without outer border)
  * @param grid 
- * @param options 
+ * @param style 
  * @returns 
  */
-export function gridWidth(grid: Grid, options: GridOptions) {
-  const { cellSize, borderSize } = options.grid;
+export function gridWidth(grid: Grid, style: GridStyle) {
+  const { cellSize, borderSize } = style.grid;
   const { cols } = grid;
   return cols * cellSize + (cols - 1) * borderSize;
 }
 /**
  * Returns the height of the grid (without outer border)
  * @param grid 
- * @param options 
+ * @param style 
  * @returns 
  */
-export function gridHeight(grid: Grid, options: GridOptions) {
-  const { cellSize, borderSize } = options.grid;
+export function gridHeight(grid: Grid, style: GridStyle) {
+  const { cellSize, borderSize } = style.grid;
   const { rows } = grid;
   return rows * cellSize + (rows - 1) * borderSize;
 }
 /**
  * Returns the total width of the grid (with outer border)
  * @param grid 
- * @param options 
+ * @param style 
  * @returns 
  */
-export function gridTotalWidth(grid: Grid, options: GridOptions) {
-  const a = gridWidth(grid, options) + 2 * outerBorderWidth(options);
+export function gridTotalWidth(grid: Grid, style: GridStyle) {
+  const a = gridWidth(grid, style) + 2 * outerBorderWidth(style);
   return a;
 }
 /**
  * Returns the total height of the grid (with outer border)
  * @param grid 
- * @param options 
+ * @param style 
  * @returns 
  */
-export function gridTotalHeight(grid: Grid, options: GridOptions) {
-  return gridHeight(grid, options) + 2 * outerBorderWidth(options);
+export function gridTotalHeight(grid: Grid, style: GridStyle) {
+  return gridHeight(grid, style) + 2 * outerBorderWidth(style);
 }
 /**
  * From a definition cell, returns the lines of text
@@ -131,15 +131,15 @@ export function arrowPositions(cell: Cell) {
 
 export const arrowDirs = [['right', 'rightdown'], ['right', 'rightdown'], ['down', 'downright']];
 
-export function duplicate(options: GridOptions) {
+export function duplicate(style: GridStyle) {
   return {
-    ...options,
+    ...style,
     id: uuid(),
   }
 }
 
-export function newOptions() {
-  return duplicate(defaultOptions);
+export function newStyle() {
+  return duplicate(defaultStyles);
 }
 
 /**

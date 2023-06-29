@@ -61,11 +61,11 @@ export class Grid {
    */
   public created: number;
   /**
-   * Id of the options(db)
-   * @see GridOptions
+   * Id of the style(db)
+   * @see GridStyle
    * Might be removed soon with books
    */
-  public optionsId: string;
+  public styleId: string;
 
   /**
    * Grid constructor
@@ -78,7 +78,7 @@ export class Grid {
     this.rows = rows;
     this.comment = '';
     this.title = '';
-    this.optionsId = 'default';
+    this.styleId = 'default';
     this.id = id || uuid();
     this.created = Date.now();
     this.cells = new Array(rows)
@@ -362,7 +362,7 @@ export class Grid {
       comment: this.comment,
       created: this.created,
       title: this.title,
-      optionsId: this.optionsId
+      styleId: this.styleId
     };
     return JSON.stringify(gridState);
   }
@@ -372,7 +372,7 @@ export class Grid {
    * @returns A new grid
    */
   static unserialize(s: string) {
-    const { rows, cols, comment, title, id, cells, created, optionsId } = JSON.parse(s) as GridState
+    const { rows, cols, comment, title, id, cells, created, styleId } = JSON.parse(s) as GridState
     const res = new Grid(rows, cols, id);
     cells.forEach((row, i) => {
       row.forEach((cell, j) => {
@@ -384,7 +384,7 @@ export class Grid {
     res.title = title;
     res.comment = comment;
     res.created = created;
-    res.optionsId = optionsId;
+    res.styleId = styleId;
     return res;
   }
   /**

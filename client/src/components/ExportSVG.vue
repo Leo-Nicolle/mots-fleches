@@ -3,7 +3,7 @@
     <n-button @click="print" round>{{ $t("buttons.export") }}</n-button>
     <SVGGrid
       ref="grid"
-      v-if="grid && options"
+      v-if="grid && styles"
       :grid="grid"
       dir="horizontal"
       :export-options="{
@@ -12,7 +12,7 @@
         highlight: true,
       }"
       :focus="nullCell"
-      :options="options"
+      :style="style"
     />
   </div>
 </template>
@@ -20,7 +20,7 @@
 <script setup lang="ts">
 import { defineProps, watchEffect, ref } from "vue";
 import SVGGrid from "./svg-renderer/Grid.vue";
-import { Grid, GridOptions, nullCell } from "grid";
+import { Grid, GridStyle, nullCell } from "grid";
 import { defaultExportOptions } from "../types";
 import { api } from "../api";
 /**
@@ -32,12 +32,12 @@ const props = defineProps<{
    */
   grid: Grid;
 }>();
-const options = ref<GridOptions>();
+const style = ref<GridStyle>();
 const exporter = ref<HTMLDivElement>();
 
 watchEffect(() => {
-  api.db.getOption(props.grid.optionsId).then(opts => {
-    options.value = opts;
+  api.db.getStyle(props.grid.styleId).then(opts => {
+    style.value = opts;
   });
 });
 

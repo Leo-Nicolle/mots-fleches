@@ -1,4 +1,4 @@
-import { GridOptions, GridState } from "grid"
+import { GridStyle, GridState } from "grid"
 
 export type Json =
   | string
@@ -34,19 +34,19 @@ export interface SBSchema {
       Options: {
         Row: {
           created: string
-          data: GridOptions
+          data: GridStyle
           id: string
           userid: string
         }
         Insert: {
           created?: string
-          data?: GridOptions
+          data?: GridStyle
           id: string
           userid?: string
         }
         Update: {
           created?: string
-          data?: GridOptions
+          data?: GridStyle
           id?: string
           userid?: string
         }

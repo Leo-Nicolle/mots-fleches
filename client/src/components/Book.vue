@@ -1,32 +1,32 @@
 <template>
-  <div class="book" v-if="grids && options && solutionOptions">
+  <div class="book" v-if="grids && style && solutionStyle">
     <GridPaper
       v-for="(grid, i) in grids"
       :key="grid.id"
       :grid="grid"
-      :options="options"
+      :style="style"
       :exportOptions="gridExport"
-      :page="solutionOptions.pagination.startIdx + i"
+      :page="solutionStyle.pagination.startIdx + i"
     />
     <IndexPaper
       :grids="grids"
-      :solutionOptions="solutionOptions"
+      :solutionStyle="solutionStyle"
       :exportOptions="solutionExport"
-      :page="solutionOptions.pagination.startIdx + grids.length"
+      :page="solutionStyle.pagination.startIdx + grids.length"
       @pageCount="evt => indexPages=evt"
     />
     <SolutionPaper
       :grids="grids"
-      :solutionOptions="solutionOptions"
+      :solutionStyle="solutionStyle"
       :exportOptions="solutionExport"
-      :page="solutionOptions.pagination.startIdx + grids.length + indexPages"
+      :page="solutionStyle.pagination.startIdx + grids.length + indexPages"
     />
   </div>
 </template>
 
 <script setup lang="ts">
 import { defineProps, ref } from "vue";
-import { Grid, GridOptions, SolutionOptions } from "grid";
+import { Grid, GridStyle, SolutionStyle } from "grid";
 import { computed } from "vue";
 import { defaultExportOptions, ExportOptions } from "../types";
 import GridPaper from "./GridPaper.vue";
@@ -42,15 +42,15 @@ const props = defineProps<{
    */
   grids: Grid[];
   /**
-   * The options to render the grids
+   * The style to render the grids
    */
-  options: GridOptions;
+  style: GridStyle;
   /**
-   * The options to render the solutions
+   * The style to render the solutions
    */
-  solutionOptions: SolutionOptions;
+  solutionStyle: SolutionStyle;
   /**
-   * Extra options to override the options and solutionOptions
+   * Extra options to override the options and solutionStyle
    */
   exportOptions: Partial<ExportOptions>;
 }>();

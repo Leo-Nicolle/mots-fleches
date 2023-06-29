@@ -1,8 +1,8 @@
 <template>
-  <Layout v-if="grids.length && options">
+  <Layout v-if="grids.length && style">
     <template #left-panel>
-      <OptionsForm v-model="options" @update:modelValue="save" grid format>
-        <SolutionsForm v-model="options" @update:modelValue="save" />
+      <OptionsForm v-model="style" @update:modelValue="save" grid format>
+        <SolutionsForm v-model="style" @update:modelValue="save" />
       </OptionsForm>
     </template>
     <template #body>
@@ -11,13 +11,13 @@
         class="paper"
         @page-count="solutionFirstPage = $event + indexFirstPage"
         :export-options="exportOptions"
-        :solutionOptions="options"
+        :solutionStyle="style"
         :page="indexFirstPage"
       />
       <SolutionsPaper
         :grids="grids"
         class="paper"
-        :solutionOptions="options"
+        :solutionStyle="style"
         :export-options="exportOptions"
         :page="solutionFirstPage"
       />
@@ -29,11 +29,11 @@
 import { ref, onMounted, toRaw } from "vue";
 import { useRoute } from "vue-router";
 import Layout from "../../layouts/Main.vue";
-import OptionsForm from "../../components/forms/Options.vue";
+import OptionsForm from "../../components/forms/GridStyleForm.vue";
 import SolutionsPaper from "../../components/Solutions.vue";
 import WordsIndex from "../../components/WordsIndex.vue";
-import SolutionsForm from "../../components/forms/SolutionsForm.vue";
-import { Grid, SolutionOptions } from "grid";
+import SolutionsForm from "../../components/forms/SolutionsStyleForm.vue";
+import { Grid, SolutionStyle } from "grid";
 import { defaultExportOptions, ExportOptions } from "../../types";
 import { api } from "../../api";
 /**
@@ -42,7 +42,7 @@ import { api } from "../../api";
 
 const route = useRoute();
 const grids = ref<Grid[]>([]);
-const options = ref<SolutionOptions>();
+const style = ref<SolutionStyle>();
 const exportOptions = ref<ExportOptions>({
   ...defaultExportOptions,
   arrows: false,
@@ -64,12 +64,11 @@ function fetch() {
         grids.value = gs;
       });
   return promise
-    .then(() => api.db.getOption("solution"))
-    .then((opts) => {
-      console.log(opts);
-      options.value = opts as SolutionOptions;
+    .then(() => api.db.getStyle("solution"))
+    .then((s) => {
+      style.value = s as SolutionStyle;
       indexFirstPage.value =
-        grids.value.length + +options.value.pagination.startIdx;
+        grids.value.length + +style.value.pagination.startIdx;
     })
     .catch((e) => {
       console.error("E", e);
@@ -79,8 +78,8 @@ function fetch() {
 function save() {
   clearTimeout(saveTimeout.value);
   saveTimeout.value = +setTimeout(() => {
-    if (!options.value) return;
-    api.db.pushOption(toRaw(options.value) as unknown as SolutionOptions);
+    if (!style.value) return;
+    api.db.pushStyle(toRaw(style.value) as unknown as SolutionStyle);
   }, 100);
 }
 

@@ -38,7 +38,7 @@ describe('Options', async () => {
     console.log(server.httpServer.address());
     browser = await chromium.launch({ headless: true, devtools: false });
     page = await browser.newPage();
-    await page.goto(`http://localhost:${3017}/#options/default`);
+    await page.goto(`http://localhost:${3017}/#style/default`);
     await new Promise(resolve => setTimeout(resolve, 100));
   }, 60_000);
 
@@ -52,8 +52,8 @@ describe('Options', async () => {
     await page.waitForTimeout(100);
     await page.locator(selector).fill('');
     await page.locator(selector).type(type || value, {delay: 100});
-    const {data: options} = await axios.get(`http://localhost:3015/options/default`);
+    const {data: style} = await axios.get(`http://localhost:3015/styles/default`);
     await new Promise(resolve => setTimeout(resolve, 250));
-    expect(`${getFromPath(options, path)}`).toBe(`${value}`);
+    expect(`${getFromPath(style, path)}`).toBe(`${value}`);
   });
 });

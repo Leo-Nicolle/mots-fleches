@@ -1,13 +1,13 @@
 <template>
-  <div v-if="grids && solutionOptions">
+  <div v-if="grids && solutionStyle">
     <Paper
       v-for="(words, i) in layout.wordsPerPage"
       :key="i"
-      :format="solutionOptions.paper"
+      :format="solutionStyle.paper"
       :showMargins="exportOptions.margins"
       :showPagination="exportOptions.pagination"
       :pageNumber="page + i"
-      :pagination="solutionOptions.pagination"
+      :pagination="solutionStyle.pagination"
       bodyClass="body-index"
     >
       <span class="words" ref="wordsContainer">
@@ -22,7 +22,7 @@
     </Paper>
     <Paper
       class="paper ruler"
-      :format="solutionOptions.paper"
+      :format="solutionStyle.paper"
       :showMargins="false"
       :showPagination="exportOptions.pagination"
       :pageNumber="0"
@@ -35,7 +35,7 @@
 <script setup lang="ts">
 import { defineProps, ref, defineEmits, watch } from "vue";
 import Paper from "./Paper.vue";
-import { Grid, getAllWords, SolutionOptions } from "grid";
+import { Grid, getAllWords, SolutionStyle } from "grid";
 import { computed } from "vue";
 import { ExportOptions } from "../types";
 /**
@@ -55,7 +55,7 @@ const props = defineProps<{
   /**
    * The styles to render list
    */
-  solutionOptions: SolutionOptions;
+  solutionStyle: SolutionStyle;
   page: number;
 }>();
 
@@ -65,13 +65,13 @@ const emit = defineEmits<{
 
 const wordFont = computed(
   () =>
-    `${props.solutionOptions.words.size} ${props.solutionOptions.words.font}`
+    `${props.solutionStyle.words.size} ${props.solutionStyle.words.font}`
 );
-const wordsColor = computed(() => props.solutionOptions.words.color);
+const wordsColor = computed(() => props.solutionStyle.words.color);
 const sizeFont = computed(
-  () => `${props.solutionOptions.size.size} ${props.solutionOptions.size.font}`
+  () => `${props.solutionStyle.size.size} ${props.solutionStyle.size.font}`
 );
-const sizeColor = computed(() => props.solutionOptions.size.color);
+const sizeColor = computed(() => props.solutionStyle.size.color);
 const layout = ref<{ wordsPerPage: (number | string)[][]; heights: string[] }>({
   wordsPerPage: [],
   heights: [],
