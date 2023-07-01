@@ -2,7 +2,6 @@ import { Grid, GridStyle, GridState, defaultStyles, defaultSolutionStyle } from 
 import { Database } from "./db";
 import { SupabaseClient, createClient } from '@supabase/supabase-js'
 import { SBSchema } from "./types";
-import { mergeOptionsWithDefaults } from "./utils";
 
 
 export class SupaDB extends Database {
@@ -88,8 +87,7 @@ export class SupaDB extends Database {
       await this.pushStyle(defaultStyles);
       await this.pushStyle(defaultSolutionStyle);
     }
-    const style = data!.flatMap(({ data }) => data);
-    return style.map(mergeOptionsWithDefaults);
+    return data!.flatMap(({ data }) => data);
   }
 
   async getStyle(id: string) {
@@ -97,7 +95,7 @@ export class SupaDB extends Database {
       .select('id, data')
       .eq('id', id);
     const option =  data && data.length ? data[0].data : undefined;
-    return option ? mergeOptionsWithDefaults(option): undefined;
+    return option;
   }
 
   async pushStyle(style: GridStyle) {
