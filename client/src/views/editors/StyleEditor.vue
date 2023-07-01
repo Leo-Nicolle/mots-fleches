@@ -1,9 +1,5 @@
 <template>
   <Layout>
-    <template v-slot:header v-if="grid">
-      <ExportButton route="grid-export" :query="{ id: grid.id }" />
-      <ExportSVGButton :grid="grid" />
-    </template>
     <template v-slot:left-panel v-if="style && grid">
       <n-scrollbar y-scrollable style="max-height: calc(100vh - 100px)">
         <GridForm :model-value="grid" />

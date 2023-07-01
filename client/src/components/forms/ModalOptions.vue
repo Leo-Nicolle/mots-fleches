@@ -24,19 +24,6 @@
               v-model:value="value.title"
             />
           </n-form-item>
-          <n-form-item
-            :label="$t('forms.styles')"
-            path="stylesId"
-            v-if="opts.length"
-          >
-            <n-select
-              role="styles"
-              :options="opts"
-              :default-value="defaultSelectOpt"
-              v-model:value="value.styleId"
-              def
-            />
-          </n-form-item>
           <n-form-item :label="$t('forms.comment')" path="description">
             <n-input
               role="comment"

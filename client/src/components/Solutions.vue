@@ -17,6 +17,7 @@
             :focus="nullCell"
             dir="horizontal"
             :style="solutionStyle"
+            :export-options="exportOptions"
             :export-style="exportOptions"
           />
         </div>

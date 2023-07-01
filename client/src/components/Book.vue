@@ -6,6 +6,7 @@
       :grid="grid"
       :style="style"
       :exportOptions="gridExport"
+      :pagination="solutionStyle.pagination"
       :page="solutionStyle.pagination.startIdx + i"
     />
     <IndexPaper

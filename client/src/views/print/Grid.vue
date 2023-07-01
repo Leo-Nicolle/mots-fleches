@@ -3,6 +3,8 @@
     v-if="style && grid"
     :grid="grid"
     :style="style"
+    :pagination="undefined"
+    :page="0"
     :export-options="exportOptions"
   />
 </template>
