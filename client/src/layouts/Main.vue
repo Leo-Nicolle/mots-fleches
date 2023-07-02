@@ -4,7 +4,7 @@
       <span class="left">
         <span class="menutitle" @click="router.push('/')">
           <img class="menuicon" src="/icon.svg" />
-          <span>Motsflex</span>
+          <span v-if="screenSize !== 'phone'">Motsflex</span>
         </span>
         <n-menu
           v-if="showLoginButton"
@@ -28,7 +28,7 @@
                 <LanguageOutline v-else />
               </n-icon>
             </template>
-            {{ selected?.label }}
+            {{ screenSize === "phone" ? "" : selected?.label }}
           </n-button>
         </n-popselect>
         <n-button
@@ -39,7 +39,7 @@
           icon-placement="right"
           @click="isSignedIn ? router.push('/logout') : router.push('/login')"
         >
-          {{ $t(isSignedIn ? "buttons.exit" : "buttons.login") }}
+          {{ screenSize === "phone" ? '' : $t(isSignedIn ? "buttons.exit" : "buttons.login") }}
           <template #icon>
             <n-icon>
               <LogOutOutline />
@@ -50,12 +50,35 @@
     </div>
 
     <div class="body">
-      <div class="left-panel">
+      <div class="left-panel" v-if="screenSize !== 'phone'">
         <n-scrollbar x-scrollable>
           <!-- @slot Slot for element in the left panel  -->
           <slot name="left-panel"> </slot>
         </n-scrollbar>
       </div>
+      <n-drawer
+        v-else
+        v-model:show="showLeftDrawer"
+        @click="showLeftDrawer = false"
+        :width="300"
+        placement="left"
+      >
+        <n-drawer-content>
+          <n-scrollbar>
+            <slot name="left-panel"> </slot>
+          </n-scrollbar>
+        </n-drawer-content>
+      </n-drawer>
+      <n-button
+        v-if="screenSize === 'phone' && leftPanelWidth > 0"
+        class="left-panel-toggle"
+        :type="showLeftDrawer ? 'primary' : 'warning'"
+        icon-placement="right"
+        @click="showLeftDrawer = !showLeftDrawer"
+      >
+        {{ showLeftDrawer ? "<" : ">" }}
+      </n-button>
+
       <n-scrollbar x-scrollable :on-scroll="onScroll" class="scroll">
         <!-- @slot Slot for element in the main panel  -->
         <slot name="body"></slot>
@@ -77,18 +100,24 @@ import {
   watchEffect,
   withDefaults,
   onMounted,
+  onBeforeMount,
+  watch,
+  onBeforeUnmount,
 } from "vue";
 import { RouterLink, useRouter } from "vue-router";
 import { renderIcon } from "../js/utils";
 import { LogOutOutline, LanguageOutline } from "@vicons/ionicons5";
 import { i18n, setLanguage } from "../i18n";
 import { workerController } from "../search-worker";
+import { useResponsive } from "../js/useResponsive";
 import "keyboard-css";
 import { api } from "../api";
 window.api = api;
 const locale = ref(i18n.global.locale);
 const nav = ref<MenuOption[]>([]);
 const router = useRouter();
+const showLeftDrawer = ref(false);
+const { onResize, cleanupUseResponsive, screenSize } = useResponsive();
 const collapsed = ref(true);
 const switchingLocale = ref(false);
 const props = withDefaults(
@@ -111,6 +140,13 @@ function refreshSignedId() {
 }
 const interval = setInterval(() => refreshSignedId(), 10_000);
 const leftWidth = computed(() => {
+  const size = screenSize.value;
+  if (props.leftPanelWidth === 0) return `0px`;
+  if (size === "phone") {
+    return `0`;
+  } else if (size === "tablet") {
+    return `${Math.max(235, props.leftPanelWidth)}px`;
+  }
   return `${props.leftPanelWidth}px`;
 });
 const emit = defineEmits<{
@@ -220,6 +256,10 @@ onMounted(() => {
   nav.value = getNavChildren();
   refreshSignedId();
 });
+onBeforeUnmount(() => {
+  cleanupUseResponsive();
+  clearInterval(interval);
+});
 
 function onScroll(e: Event) {
   emit("scroll", e);
@@ -320,6 +360,17 @@ nav {
   align-content: space-around;
   gap: 4px;
 }
+
+.left-panel-toggle {
+  position: fixed;
+  top: 50%;
+  left: 0;
+  padding: 5px;
+  z-index: 10;
+}
+.n-drawer .n-drawer-content .n-drawer-body-content-wrapper {
+  padding: 1px;
+}
 .scroll {
   max-height: 100%;
   max-width: calc(100vw - v-bind(leftWidth));
@@ -327,5 +378,8 @@ nav {
 }
 .leftpanel > .n-scrollbar {
   max-height: 100vh;
+}
+.n-menu.n-menu--horizontal .n-menu-item-content {
+  padding: 0px;
 }
 </style>

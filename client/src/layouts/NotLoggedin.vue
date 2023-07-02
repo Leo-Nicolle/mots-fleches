@@ -8,7 +8,7 @@
           </template>
           <template #footer>
             <n-collapse-transition :show="alert">
-              <span class="alert"> {{  $t(`alert.${alert && alert.id}`) }}</span>
+              <span class="alert"> {{ $t(`alert.${alert && alert.id}`) }}</span>
             </n-collapse-transition>
             <div class="footer">
               <slot name="footer" />
@@ -24,9 +24,9 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from "vue";
+import { defineProps, onUnmounted } from "vue";
 import Layout from "./Main.vue";
-
+import { useResponsive } from "../js/useResponsive";
 const props = defineProps<{
   alert: { type: string; id: string } | false;
   title: string;
@@ -34,6 +34,17 @@ const props = defineProps<{
 </script>
 
 <style>
+.notloggedincard {
+  max-width: 450px;
+  margin: 0;
+}
+
+@media screen and (max-width: 768px) {
+  .notloggedincard {
+    max-width: 350px;
+  }
+}
+
 .n-scrollbar-content:has(> .notloggedin) {
   height: 100%;
 }
@@ -43,13 +54,11 @@ const props = defineProps<{
   align-items: center;
   justify-content: center;
   height: 100%;
-  width: 100%;
-}
-.notloggedincard {
-  max-width: 450px;
+  width: 100vw;
 }
 .footer {
   display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
   align-items: center;
   justify-content: center;
