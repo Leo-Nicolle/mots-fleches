@@ -1,6 +1,6 @@
 <template>
   <Layout
-    v-if="style && solutionsStyle && grids.length"
+    v-if="style && solutionsStyle"
     :eltList="grids"
     :onCreate="createGrid"
     :onDelete="onDelete"
