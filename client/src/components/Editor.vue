@@ -251,7 +251,7 @@ function onZoomIn() {
   zoom.value = zoom.value + 0.1;
 }
 function onZoomOut() {
-  zoom.value = Math.max(1, zoom.value - 0.1);
+  zoom.value = Math.max(0.5, zoom.value - 0.1);
 }
 function onModeClick() {
   const newIndex =

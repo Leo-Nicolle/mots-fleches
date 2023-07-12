@@ -58,6 +58,9 @@ const email = ref<string>("");
 const password = ref<string>("");
 const { alert, setAlert } = useAlert();
 const route = useRoute();
+function redirect(){
+  return router.push(route.query.redirect as string ||  "/");
+}
 async function login(method: string) {
   const { data, error } = api.supadb.supabase.auth.signInWithOAuth({
     provider: method,
@@ -66,7 +69,7 @@ async function login(method: string) {
     return setAlert("error", "wrongpassword");
   }
   api.mode = "supadb";
-  router.push("/");
+  redirect();
 }
 async function emailLogin() {
   const { data, error } = await api.supadb.supabase.auth.signInWithPassword({
@@ -80,7 +83,7 @@ async function emailLogin() {
     }, 3000);
   } else {
     api.mode = "supadb";
-    router.push("/");
+    redirect();
   }
 }
 async function onForgotPassword() {
@@ -99,7 +102,7 @@ function createAccount() {
 
 async function localMode() {
   api.mode = "idb";
-  router.push("/");
+  redirect();
 }
 </script>
 

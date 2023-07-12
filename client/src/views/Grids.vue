@@ -1,6 +1,6 @@
 <template>
   <Layout
-    v-if="styles.length === grids.length"
+    v-if="style && solutionsStyle && grids.length"
     :eltList="grids"
     :onCreate="createGrid"
     :onDelete="onDelete"
@@ -12,6 +12,11 @@
     <template v-slot:left-panel>
       <h3>{{ $t("nav.grids") }}</h3>
       <ExportButton route="book-export" :query="exportQuery" />
+      <ExportModal
+        :grids="selected.length ? selected : grids"
+        :style="style"
+        :solutionsStyle="solutionsStyle"
+      />
     </template>
     <template #card-title="{ elt }">
       <span>
@@ -23,7 +28,7 @@
         <SVGGrid
           :grid="elt"
           :focus="nullCell"
-          :style="styles[i]"
+          :style="style"
           dir="horizontal"
           :export-options="{
             ...defaultExportOptions,
@@ -41,10 +46,10 @@
 import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import SVGGrid from "../components/svg-renderer/Grid.vue";
-import ExportButton from "../components/ExportButton.vue";
+import ExportModal from "../components/ExportModal.vue";
 import Layout from "../layouts/GridLayout.vue";
 import { defaultExportOptions } from "../types";
-import { Grid, GridStyle, nullCell } from "grid";
+import { Grid, GridStyle, nullCell, SolutionStyle } from "grid";
 import generate from "../js/maze-generator";
 import { api } from "../api";
 import { workerController } from "../search-worker";
@@ -53,7 +58,9 @@ import { workerController } from "../search-worker";
  */
 const router = useRouter();
 const grids = ref<Grid[]>([]);
-const styles = ref<GridStyle[]>([]);
+const style = ref<GridStyle>();
+const solutionsStyle = ref<SolutionStyle>();
+
 const selected = ref<Grid[]>([]);
 
 const exportQuery = computed(() => {
@@ -66,10 +73,11 @@ function fetch() {
       grids.value = gs;
     })
     .then(() =>
-      Promise.all(grids.value.map((grid) => api.db.getStyle(grid.styleId)))
+      Promise.all([api.db.getStyle("default"), api.db.getStyle("solution")])
     )
     .then((opts) => {
-      styles.value = opts as GridStyle[];
+      style.value = opts[0] as GridStyle;
+      solutionsStyle.value = opts[1] as SolutionStyle;
     })
     .catch((e) => {
       console.error("E", e);

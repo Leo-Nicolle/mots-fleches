@@ -1,19 +1,20 @@
 <template>
   <div ref="exporter" class="exporter">
-    <n-button @click="print" round>{{ $t("buttons.export") }}</n-button>
-    <SVGGrid
-      ref="grid"
-      v-if="grid && styles"
-      :grid="grid"
-      dir="horizontal"
-      :export-options="{
-        ...defaultExportOptions,
-        texts: true,
-        highlight: true,
-      }"
-      :focus="nullCell"
-      :style="style"
-    />
+    <n-button @click="print" round>{{ $t("buttons.exportsvg") }}</n-button>
+        <SVGGrid
+          ref="grid"
+          v-if="grid && styles"
+          :grid="grid"
+          dir="horizontal"
+          :export-options="{
+            ...defaultExportOptions,
+            texts: true,
+            highlight: true,
+          }"
+          :focus="nullCell"
+          :style="style"
+        />
+    </div>
   </div>
 </template>
 
@@ -36,7 +37,7 @@ const style = ref<GridStyle>();
 const exporter = ref<HTMLDivElement>();
 
 watchEffect(() => {
-  api.db.getStyle(props.grid.styleId).then(opts => {
+  api.db.getStyle(props.grid.styleId).then((opts) => {
     style.value = opts;
   });
 });
@@ -61,5 +62,13 @@ function print() {
 .exporter > svg {
   position: fixed;
   top: 100%;
+}
+
+.modalbody {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
 }
 </style>

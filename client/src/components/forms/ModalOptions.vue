@@ -46,7 +46,7 @@
             <n-form-item path="randomize">
               <n-button
                 role="randomize"
-                @click="randomConfirmVisible = true"
+                @click="randomConfirmVisible = true; generating = false;"
                 type="warning"
               >
                 {{ $t("forms.randomize") }}
@@ -70,10 +70,10 @@
       v-model:show="randomConfirmVisible"
     >
       <template #action>
-        <n-button @click="randomConfirmVisible = false">{{
+        <n-button :disabled="generating" @click="randomConfirmVisible = false">{{
           $t("buttons.no")
         }}</n-button>
-        <n-button @click="onRandomize()" type="warning">{{
+        <n-button :disabled="generating" @click="onRandomize()" type="warning">{{
           $t("buttons.yes")
         }}</n-button>
       </template>
@@ -111,6 +111,7 @@ const props = defineProps<{
 const opts = ref<{ label: string; value: string }[]>([]);
 const randomConfirmVisible = ref(false);
 const visible = ref(false);
+const generating = ref(false);
 const emit = defineEmits<{
   /**
    * v-model event
@@ -134,10 +135,14 @@ function onUpdate(path: string, newvalue: string | number) {
   });
 }
 function onRandomize() {
-  workerController.getDistribution().then((distribution) => {
+  generating.value = true;
+  nextTick()
+  .then(() => workerController.getDistribution())
+  .then((distribution) => {
     generate({ grid: value.value, distribution });
     emit("update-size", value.value);
     randomConfirmVisible.value = false;
+    generating.value = false;
   });
 }
 watchEffect(() => {

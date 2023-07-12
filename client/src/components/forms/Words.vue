@@ -2,12 +2,8 @@
   <section>
     <n-form inline>
       <n-form-item :label="$t('forms.add')" path="add">
-        <n-auto-complete
+        <n-input
           v-model:value="value"
-          :input-props="{
-            autocomplete: 'enabled',
-          }"
-          :options="options"
           :placeholder="$t('forms.addWord')"
           @keyup="onAddKeyup"
         />

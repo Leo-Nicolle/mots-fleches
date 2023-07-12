@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
+import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import { api } from '../api';
 
 const routes: Array<RouteRecordRaw> = [
@@ -97,7 +97,7 @@ const routes: Array<RouteRecordRaw> = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(''),
   routes
 });
 
@@ -107,7 +107,7 @@ router.beforeEach(async (to, from) => {
     !isSignedin &&
     to.meta.requiresAuth !== false
   ) {
-    return { name: 'login' };
+    return { name: 'login', query: {redirect: to.name} };
   }
 });
 

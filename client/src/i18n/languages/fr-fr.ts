@@ -11,6 +11,7 @@ export const lang = {
     buttons: {
         changeLanguage: "Traduire",
         delete: "Supprimer",
+        cancel: 'Annuler',
         create: "Créer",
         yes: "Oui",
         no: "Non",
@@ -19,7 +20,7 @@ export const lang = {
         newGrid: "Nouvelle grille",
         newStyle: "Nouveau style",
         print: "Imprimer",
-        export: "Exporter",
+        exportsvg: "Export SVG",
         support: "Support MotsFlex",
     },
     suggestions: {
@@ -28,6 +29,8 @@ export const lang = {
     forms: {
         title: "Titre",
         options: "Options",
+        default: 'Défaut',
+        solutions: "Solutions",
         gridSize: "Taille de la grille",
         comment: "Commentaire",
         rows: "Lignes",
@@ -36,6 +39,13 @@ export const lang = {
         cellSize: "Taille des cellules",
         borderSize: "Taille des lignes",
         borderColor: "Couleur des lignes",
+        outerBorders: "Bordures extérieures",
+        borders: "Bordures intérieures",
+        texts: "Textes",
+        highlight: "Surlignage",
+        splits: "Séparations",
+        spaces: 'Espaces',
+        fills: "Remplissages",
         outBorderSize: "Taille des bordures",
         outBorderColor: "Couleur des bordures",
         spaceWidth: "Taille des espaces",
@@ -74,6 +84,9 @@ export const lang = {
         nodef: "n'a pas de définition",
         noarrow: "n'a pas de flèche",
         add: "Ajouter {word} au dictionnaire",
+    },
+    modals: {
+        exportTitle: "Export",
     },
     alert: {
         wrongpassword: "Mot de passe ou email incorrect.",
