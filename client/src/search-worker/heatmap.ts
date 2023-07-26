@@ -1,11 +1,19 @@
 import { Direction, Grid, CellProba, Vec, CellBest, Bounds } from "grid";
 import { dico, ACode } from "./dico";
-// window ? window.dico = dico: undefined;
+import { Tree, Node, intersect, mapToWords, getPossibleParents } from './tree';
 
+interface Possibles {
+  nodes: Node[];
+  isImpossible: boolean;
+}
+
+// window ? window.dico = dico: undefined;
+const trees = new Map<number, Tree>();
 type Interval = [number, number];
+const cachedResult = new Map<string, CellBest[][]>();
 export type BailOptions = { sharedArray: Uint8Array };
 export function initCellMap(grid: Grid) {
-  return grid.cells.reduce((acc, row, y) => {
+  const res = grid.cells.reduce((acc, row, y) => {
     acc.push(
       row.map(({ definition, text }, x) => {
         return {
@@ -25,6 +33,7 @@ export function initCellMap(grid: Grid) {
     );
     return acc;
   }, [] as CellProba[][]);
+  return res;
 }
 
 function intersection(cellMap: CellProba[][], cellBest?: CellBest[][]) {
@@ -129,6 +138,226 @@ export function getCellProbasFast(grid: Grid, options?: BailOptions) {
   };
 }
 
+interface CellA {
+  previousH: CellA | null;
+  previousV: CellA | null;
+  nextH: CellA | null;
+  nextV: CellA | null;
+  x: number;
+  y: number;
+  text: string;
+  validH: boolean;
+  validV: boolean;
+  nodesH: Map<number, Node[]>;
+  nodesV: Map<number, Node[]>;
+  impossible: Set<number>;
+  // impossibleV: Set<number>;
+}
+
+function filter(cell: CellA) {
+  const { text, validH, validV, nodesH, nodesV, impossible } = cell;
+  // filter out and intersect
+  if (text !== '*') {
+    const code = text.charCodeAt(0);
+    if (validH) {
+      const key = nodesH.get(code);
+      nodesH.clear();
+      nodesH.set(code, key || []);
+    }
+    if (validV) {
+      const key = nodesV.get(code);
+      nodesV.clear();
+      nodesV.set(code, key || []);
+    }
+  } else if (validH && validV) {
+    intersect(nodesH, nodesV);
+  }
+  //TODO: check if needed
+  impossible.forEach(code => {
+    nodesH.delete(code);
+    nodesV.delete(code);
+  });
+}
+export function getCellProbasAccurate2(grid: Grid, options?: BailOptions) {
+  const cellsA = grid.cells.reduce((acc: CellA[][], row, y) => {
+    const r = row.map((cell, x) => {
+      const { definition, text } = cell;
+      return {
+        previousH: null,
+        previousV: null,
+        nextH: null,
+        nextV: null,
+        text: text.length ? text : '*',
+        x,
+        y,
+        validH: false,
+        validV: false,
+        nodesH: new Map(),
+        nodesV: new Map(),
+        impossible: new Set<number>(),
+        // impossibleV: new Set<number>(),
+      };
+    });
+    acc.push(r);
+    return acc;
+  }, [] as CellA[][]);
+
+
+  let hasBailed = false;
+  (["horizontal", "vertical"] as Direction[]).forEach((dir) => {
+    grid
+      .getWords(dir)
+      .filter(({ length }) => length > 1)
+      .forEach((bounds) => {
+        const tree = trees.get(bounds.length);
+        const query = bounds.cells[0].text.length ? bounds.cells[0].text : '*';
+        const suffix = dir === 'horizontal' ? 'H' : 'V';
+        cellsA[bounds.start.y][bounds.start.x][`nodes${suffix}`] = tree?.getIntervals(query) || new Map<number, Node[]>();
+        bounds.cells.forEach(({ x, y }, i) => {
+          const cellA = cellsA[y][x];
+          const isV = +(dir === 'vertical');
+          const isH = +(dir === 'horizontal');
+          cellA[`previous${suffix}`] = i === 0 ? null : cellsA[y - 1 * isV][x - 1 * isH];
+          cellA[`next${suffix}`] = i === bounds.length - 1 ? null : cellsA[y + 1 * isV][x + 1 * isH];
+          cellA[`index${suffix}`] = i;
+          cellA[`valid${suffix}`] = true;
+        });
+      });
+  });
+  const sortedCells = cellsA.flat()
+    .filter(({ x, y }) => !grid.cells[y][x].definition)
+    .sort(({ x: xa, y: ya }, { x: xb, y: yb }) => {
+      const dx = xa - xb;
+      const dy = ya - yb;
+      return dy === 0 ? dx : dy;
+    });
+  const lastCells = sortedCells.slice().reverse().filter(({ nextH, nextV }) => !nextH || !nextV);
+  sortedCells.forEach(cell => {
+    const mapH = new Map();
+    const mapV = new Map();
+    const { previousH, previousV, nodesH, nodesV, impossible } = cell;
+    [
+      {
+        prev: previousH,
+        prevNodes: previousH && previousH.nodesH,
+        map: mapH,
+        key: 'nodesH',
+      },
+      {
+        prev: previousV,
+        prevNodes: previousV && previousV.nodesV,
+        map: mapV,
+        key: 'nodesV',
+      }
+    ].forEach(({ prev, key, map, prevNodes }) => {
+      if (!prev || !prevNodes) return;
+      for (let i = 0; i < 26; i++) {
+        map.set(ACode + i, []);
+      }
+      prevNodes.forEach((nodes) => {
+        nodes
+          .forEach(node => {
+            node.children.forEach(child => {
+              map.get(child.code) && map.get(child.code).push(child);
+            });
+          });
+      });
+      cell[key] = map;
+    });
+    filter(cell);
+
+  });
+  // console.log('sortedCells', sortedCells.some(c => Array.isArray(c.nodesH) || Array.isArray(c.nodesV)))
+  let shouldRerun = true;
+  const max = 1;
+  let i = 0;
+  // console.time('firstloop');
+  while (i++ < max) {
+    shouldRerun = false;
+    const Q = lastCells.slice();
+    // console.time('firstloop2')
+    while (Q.length) {
+      const cell = Q.shift()!;
+      const { previousH, previousV, nodesH, nodesV } = cell;
+      [{ prev: previousH, nodes: nodesH, key: 'nodesH' }, { prev: previousV, nodes: nodesV, key: 'nodesV' }]
+        .forEach(({ prev, nodes, key }) => {
+          if (!prev) return;
+          Q.push(prev);
+          const possibleParentsCode = new Set<number>();
+          getPossibleParents(nodes, possibleParentsCode);
+          [...prev[key].keys()].forEach(code => {
+            if (!possibleParentsCode.has(code)) {
+              prev[key].delete(code);
+            }
+          });
+        });
+    }
+    // console.timeEnd('firstloop2')
+    // console.time('firstloop3')
+    sortedCells.forEach(cell => {
+      if (cell.validH && cell.validV) {
+        for (let i = 0; i < 26; i++) {
+          if (!cell.nodesH.has(ACode + i) || !cell.nodesV.has(ACode + i)) {
+            cell.impossible.add(ACode + i);
+          }
+        }
+      } else if (cell.validH) {
+        for (let i = 0; i < 26; i++) {
+          if (!cell.nodesH.has(ACode + i)) {
+            cell.impossible.add(ACode + i);
+          }
+        }
+      } else if (cell.validV) {
+        for (let i = 0; i < 26; i++) {
+          if (!cell.nodesH.has(ACode + i)) {
+            cell.impossible.add(ACode + i);
+          }
+        }
+      }
+    });
+    // console.timeEnd('firstloop3')
+    // console.time('firstloop4')
+    sortedCells.forEach(cell => {
+      const { nextH, nextV, nodesH, nodesV, impossible } = cell;
+      if (nextV) {
+        const keys = [...nextV.nodesV.keys()];
+        keys.forEach(code => {
+          nextV.nodesV.set(code, nextV.nodesV.get(code)!.filter(n => !impossible.has(n.parent.code)));
+        });
+      }
+      if (nextH) {
+        const keys = [...nextH.nodesH.keys()];
+        keys.forEach(code => {
+          nextH.nodesH.set(code, nextH.nodesH.get(code)!.filter(n => !impossible.has(n.parent.code)));
+        });
+      }
+    });
+    // console.timeEnd('firstloop4')
+  }
+
+
+  // (["horizontal", "vertical"] as Direction[]).forEach((dir) => {
+  //   const scores = {};
+  //   grid
+  //     .getWords(dir)
+  //     .filter(({ length }) => length > 1)
+  //     .forEach((bounds) => {
+  //       const suffix = dir === 'horizontal' ? 'H' : 'V';
+
+  //       bounds
+  //       .cells.slice().reverse()
+  //       .forEach(({ x, y }, i) => {
+  //         const cellA = cellsA[y][x];
+  //         const isV = +(dir === 'vertical');
+  //         const isH = +(dir === 'horizontal');
+  //       });
+  //     });
+
+  console.timeEnd('firstloop');
+  console.log(i, sortedCells.filter(c => c.y === 1).map(c => mapToWords(c.nodesH)));
+}
+
+
 export function getCellProbasAccurate(grid: Grid, options?: BailOptions) {
   const cellMap = initCellMap(grid);
   const cellToWordIndexH: Record<string, number> = {};
@@ -178,7 +407,6 @@ export function getCellProbasAccurate(grid: Grid, options?: BailOptions) {
         });
       });
   });
-
   const sortedCells = grid.cells.flat()
     .filter(({ x, y }) => cellMap[y][x].empty && !grid.cells[y][x].definition)
     .sort(({ x: xa, y: ya }, { x: xb, y: yb }) => {
@@ -197,16 +425,6 @@ export function getCellProbasAccurate(grid: Grid, options?: BailOptions) {
     let newStackH: Interval[] = [];
     const validH = cellMap[y][x].validH;
     const validV = cellMap[y][x].validV;
-    // console.log(key, {
-    //   vTotal: (intervalsV[iV] || [])
-    //     .reduce((acc, [start, end]) => acc + end - start + 1, 0),
-    //   v: (intervalsV[iV] || []).length,
-    //   hTotal: (intervalsH[iH] || [])
-    //     .reduce((acc, [start, end]) => acc + end - start + 1, 0),
-    //   h: (intervalsH[iH] || []).length,
-
-    // })
-    // console.time(`cell ${key}`);
     for (let j = 0; j < 26; j++) {
       let stackV = (validV && intervalsV[iV].slice()) as Interval[];
       let stackH = (validH && intervalsH[iH].slice()) as Interval[];
@@ -265,9 +483,7 @@ export function getCellProbasAccurate(grid: Grid, options?: BailOptions) {
       intervalsV[iV] = newStackV;
       newStackV = [];
     }
-    // console.timeEnd(`cell ${key}`);
   });
-
   // count how many words have each letter in each cell
   sortedCells.forEach(({ x, y }) => {
     const key = `${y}-${x}`;
@@ -303,11 +519,9 @@ export function getCellProbasAccurate(grid: Grid, options?: BailOptions) {
     cellMap[y][x].inter = inter;
     cellMap[y][x].totalInter = total;
   }, []);
-
   // compute the scores for each words
   const bestWordsH: Record<string, number[]> = {};
   const bestWordsV: Record<string, number[]> = {};
-
   (["horizontal", "vertical"] as Direction[]).forEach((dir) => {
     const cellToWordIndex =
       dir === "horizontal" ? cellToWordIndexH : cellToWordIndexV;
@@ -338,9 +552,7 @@ export function getCellProbasAccurate(grid: Grid, options?: BailOptions) {
           bestWords[`${y}-${x}`] = best;
         });
       });
-
   });
-
   return {
     cellProbas: grid.cells.reduce((acc, row, y) => {
       acc.push(
@@ -352,7 +564,7 @@ export function getCellProbasAccurate(grid: Grid, options?: BailOptions) {
             validV,
             empty,
             bestWordsV: (bestWordsV[key] || []).map((index) => dico.words[dico.sorted[index]]),
-            bestWordsH: (bestWordsH[key] || []).map((index) => dico.words[dico.sorted[index]]) ,
+            bestWordsH: (bestWordsH[key] || []).map((index) => dico.words[dico.sorted[index]]),
             inter,
             x,
             y,
@@ -368,7 +580,28 @@ export function getCellProbasAccurate(grid: Grid, options?: BailOptions) {
 
 
 export function getCellProbas(grid: Grid, options: BailOptions) {
+  const hash = grid.serialize();
+  if (cachedResult.has(hash)) {
+    return { hasBailed: false, cellProbas: cachedResult.get(hash)! };
+  }
+  if (!trees.size) {
+    console.time('initTree');
+    const min = dico.words[dico.sorted[0]].length;
+    const max = dico.words[dico.sorted[dico.sorted.length - 1]].length;
+    for (let i = min; i <= max; i++) {
+      trees.set(i, new Tree(i));
+    }
+    console.timeEnd('initTree');
+  }
+  console.log('getCellProbas')
   const cellMap = initCellMap(grid);
+  console.time('getCellProbasAccurate2')
+  getCellProbasAccurate2(grid, options);
+  console.timeEnd('getCellProbasAccurate2')
+  console.time('getCellProbasAccurate1')
+  getCellProbasAccurate(grid, options);
+  console.timeEnd('getCellProbasAccurate1')
+  return cellMap;
   const cellToWordIndexH: Record<string, number> = {};
   const cellToWordIndexV: Record<string, number> = {};
   const cellToBoundsH: Record<string, Bounds> = {};
@@ -415,6 +648,13 @@ export function getCellProbas(grid: Grid, options: BailOptions) {
   if (total > 60000) {
     // return getCellProbasFast(grid, options);
   }
-  return getCellProbasAccurate(grid, options);
+  const result = getCellProbasAccurate(grid, options);
+  if (cachedResult.size > 10) {
+    cachedResult.delete([...cachedResult.keys()][0]);
+  }
+  if (!result.hasBailed) {
+    cachedResult.set(hash, result.cellProbas);
+  }
+  return result;
 
 }
