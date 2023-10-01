@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, toRaw } from "vue";
+import { computed, defineProps, onMounted, ref, toRaw, watch } from "vue";
 import { api } from "../../api";
 /**
  * Component to add and delete words
@@ -38,9 +38,18 @@ import { api } from "../../api";
  */
 const value = ref<string>("");
 const words = ref<string[]>([]);
+const props = defineProps<{
+  version?: number;
+}>();
 onMounted(() => {
   getWords();
 });
+watch(
+  () => props.version,
+  () => {
+    getWords();
+  }
+);
 function getWords() {
   api.db.getWords().then((ws) => {
     words.value = ws.sort((a, b) => a.localeCompare(b));

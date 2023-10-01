@@ -21,7 +21,12 @@ export const lang = {
         print: "Imprimir",
         exportsvg: "Exportar SVG",
         support: "Support MotsFlex",
-
+        cancel: "Cancelar",
+        ok: "Ok",
+        download: "Descargar",
+        uploadGrids: "Subir cuadrículas",
+        uploadWords: "Subir palabras",
+        dragdrop: "Arrastrar ficheros aquí (o hacer clic)",
     },
     suggestions: {
         results: "Resultados",
