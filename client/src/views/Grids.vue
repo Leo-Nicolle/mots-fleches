@@ -67,7 +67,6 @@ const router = useRouter();
 const grids = ref<Grid[]>([]);
 const style = ref<GridStyle>();
 const solutionsStyle = ref<SolutionStyle>();
-
 const selected = ref<Grid[]>([]);
 
 const exportQuery = computed(() => {
@@ -105,9 +104,9 @@ function download() {
   a.click();
 }
 
-function onUpload(filesContents: string[]) {
+function onUpload(filesContents: [string, string][]) {
   return Promise.all(
-    filesContents.map((json) => {
+    filesContents.map(([filename, json]) => {
       return Promise.all(
         JSON.parse(json).map((grid) =>
           api.db.pushGrid(Grid.unserialize(JSON.stringify(grid)))

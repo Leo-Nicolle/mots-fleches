@@ -94,6 +94,11 @@ const routes: Array<RouteRecordRaw> = [
     name: 'words',
     component: () => import('../views/Words.vue')
   },
+  {
+    path: '/fonts',
+    name: 'fonts',
+    component: () => import('../views/Fonts.vue')
+  },
 ];
 
 const router = createRouter({

@@ -1,5 +1,9 @@
 <template>
   <n-form-item :label="$t('forms.font')" path="font">
+    <FontSelector />
+  </n-form-item>
+
+  <n-form-item :label="$t('forms.font')" path="font">
     <n-input
       :role="`${rolePrefix}-font`"
       v-model:value="value.font"
@@ -32,6 +36,7 @@ import { defineProps, defineEmits, watch } from "vue";
 import { useModel } from "../../js/useModel";
 import { TextSyle } from "grid";
 import Sizeinput from "./Sizeinput.vue";
+import FontSelector from "../fonts/font-selector.vue";
 /**
  * Form to modify TextStyle.
  */

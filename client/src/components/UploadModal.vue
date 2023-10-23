@@ -10,26 +10,36 @@
       aria-modal="true"
     >
       <template #footer>
-        <input type="file" ref="fileinput" @change="onChange" id="upload" />
-        <div
-          id="drop_zone"
-          @drop.prevent="onDrop"
-          @dragover="onDragOver"
-          @click="onDropClick"
-          @dragstart.prevent.stop
-          @dragend.prevent.stop
-          @dragover.prevent.stop
-          @drop.prevent.stop="onDrop"
-          @mouseout="onMouseout"
-        >
-          <p>{{ $t("buttons.dragdrop") }}</p>
+        <div class="footer">
+          <input type="file" ref="fileinput" @change="onChange" id="upload" />
+          <div
+            id="drop_zone"
+            @drop.prevent="onDrop"
+            @dragover="onDragOver"
+            @click="onDropClick"
+            @dragstart.prevent.stop
+            @dragend.prevent.stop
+            @dragover.prevent.stop
+            @drop.prevent.stop="onDrop"
+            @mouseout="onMouseout"
+          >
+            <p>{{ $t("buttons.dragdrop") }}</p>
+          </div>
+          <n-button
+            v-for="f in filesNames"
+            :key="f"
+            @click="deleteFile(f)"
+            class="file-button"
+            >{{ f }}</n-button
+          >
         </div>
-          <n-button v-for="f in filesNames" :key="f" @click="deleteFile(f)" class="file-button" >{{ f }}</n-button>
       </template>
       <template #action>
         <span class="actions">
           <n-button @click="onCancel"> {{ $t("buttons.cancel") }} </n-button>
-          <n-button type="primary" @click="onOK"> {{ $t("buttons.ok") }} </n-button>
+          <n-button type="primary" @click="onOK">
+            {{ $t("buttons.ok") }}
+          </n-button>
         </span>
       </template>
     </n-card>
@@ -43,10 +53,12 @@ const showModal = ref(false);
 const fileinput = ref<HTMLInputElement>();
 const props = defineProps<{
   title: string;
+  readAsDataURL?: boolean;
+  single?: boolean;
   buttonText: string;
 }>();
 const emit = defineEmits<{
-  (event: "ok", value: string[]): void;
+  (event: "ok", value: [string, string][]): void;
   (event: "cancel"): void;
 }>();
 const filesNames = computed(() => {
@@ -74,7 +86,7 @@ function onDrop(ev: DragEvent) {
     readFile(item);
   });
 }
-function onMouseout(ev){
+function onMouseout(ev) {
   ev.target.classList.remove("dragging");
 }
 
@@ -83,33 +95,40 @@ function deleteFile(filename: string) {
 }
 function readFile(file) {
   const fr = new FileReader();
-  fr.readAsText(file);
+  if (props.readAsDataURL) {
+    fr.readAsDataURL(file);
+  } else {
+    fr.readAsText(file);
+  }
   fr.onloadend = function () {
+    if (props.single) {
+      files.value.clear();
+    }
     files.value.set(file.name, fr.result as string);
   };
 }
 
 function onOK() {
   showModal.value = false;
-  emit("ok", [...files.value.values()]);
+  emit("ok", [...files.value.entries()]);
 }
 function onCancel() {
   showModal.value = false;
   emit("cancel");
 }
-
 </script>
 
 <style>
 #drop_zone {
   border: 2px dashed #ccc;
   border-radius: 20px;
-  width: 480px;
-  height: 180px;
+  width: 280px;
+  height: 120px;
   padding: 20px;
   text-align: center;
   font-size: 20px;
   cursor: pointer;
+  margin: auto;
 }
 #drop_zone.dragging {
   border-color: #18a058;
@@ -122,9 +141,15 @@ function onCancel() {
   display: flex;
   justify-content: space-between;
 }
-.file-button{
+.file-button {
   margin-top: 10px;
   margin-right: 10px;
-
+}
+.footer{
+  display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
 }
 </style>

@@ -31,9 +31,9 @@ function download() {
     a.click();
   });
 }
-function onUpload(filesContents: string[]) {
+function onUpload(filesContents: [string, string][]) {
   return Promise.all(
-    filesContents.map((json) => {
+    filesContents.map(([filename, json]) => {
       return Promise.all(
         JSON.parse(json).map((word) => api.db.pushWord(word.trim()))
       );

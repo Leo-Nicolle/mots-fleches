@@ -6,6 +6,7 @@ import {
 } from 'grid';
 import { Database } from './db';
 import { mergeOptionsWithDefaults } from './utils';
+import { Font } from './types';
 
 export interface MotsFlexDB extends DBSchema {
   grids: {
@@ -22,13 +23,18 @@ export interface MotsFlexDB extends DBSchema {
     value: GridStyle;
     key: string;
     indexes: { 'by-id': string };
+  },
+  fonts: {
+    value: Font;
+    key: string;
+    indexes: { 'by-id': string };
   }
 }
 
 async function create() {
   let promise = Promise.resolve();
-  const db = await openDB<MotsFlexDB>('mots-flex-db', 4, {
-    upgrade(db, old, newV, transaction) {
+  const db = await openDB<MotsFlexDB>('mots-flex-db', 5, {
+    upgrade(db, old, _, transaction) {
       // @ts-ignore
       if (db.objectStoreNames.contains('style')) {
         // @ts-ignore
@@ -51,6 +57,12 @@ async function create() {
           keyPath: 'id',
         });
         optionStore.createIndex('by-id', 'id');
+      }
+      if (!db.objectStoreNames.contains('fonts')) {
+        const gridStore = db.createObjectStore('fonts', {
+          keyPath: 'id',
+        });
+        gridStore.createIndex('by-id', 'id');
       }
 
       // @ts-ignore
@@ -180,6 +192,26 @@ export class Idatabase extends Database {
   async deleteWord(wordId: string) {
     return await this.loadingPromise.then((db) =>
       db.delete('words', wordId)
+    );
+  }
+  async getFonts() {
+    return await this.loadingPromise.then((db) =>
+      db.getAllFromIndex('fonts', 'by-id')
+    )
+  }
+  async getFont(fontId: string) {
+    return await this.loadingPromise.then((db) =>
+      db.get('fonts', fontId)
+    )
+  }
+  async pushFont(font: Font) {
+    return await this.loadingPromise.then((db) =>
+      db.put('fonts', font)
+    );
+  }
+  async deleteFont(fontId: string) {
+    return await this.loadingPromise.then((db) =>
+      db.delete('fonts', fontId)
     );
   }
   async isSignedIn() {

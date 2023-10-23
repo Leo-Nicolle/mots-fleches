@@ -1,7 +1,7 @@
 import { Grid, GridStyle, GridState, defaultStyles, defaultSolutionStyle } from "grid";
 import { Database } from "./db";
 import { SupabaseClient, createClient } from '@supabase/supabase-js'
-import { SBSchema } from "./types";
+import { Font, SBSchema } from "./types";
 
 
 export class SupaDB extends Database {
@@ -94,7 +94,7 @@ export class SupaDB extends Database {
     const { data } = await this.supabase.from('Options')
       .select('id, data')
       .eq('id', id);
-    const option =  data && data.length ? data[0].data : undefined;
+    const option = data && data.length ? data[0].data : undefined;
     return option;
   }
 
@@ -142,6 +142,34 @@ export class SupaDB extends Database {
     await this.supabase.from('Words').upsert({
       userid: this.userid,
       data: words,
+    });
+  }
+
+  async getFonts() {
+    const { data } = await this.supabase.from('Fonts').select();
+    return data!.flatMap(({ data }) => data);
+  }
+
+  async getFont(id: string) {
+    const fonts = await this.getFonts();
+    return fonts.find(f => f.id === id);
+  }
+
+  async pushFont(font: Font) {
+    const fonts = await this.getFonts();
+    fonts.push(font);
+    await this.supabase.from('Fonts').upsert({
+      userid: this.userid,
+      data: fonts,
+    });
+    return font.id;
+  }
+
+  async deleteFont(fontId: string) {
+    const fonts = (await this.getFonts()).filter(f => f.id !== fontId);
+    await this.supabase.from('Fonts').upsert({
+      userid: this.userid,
+      data: fonts,
     });
   }
 

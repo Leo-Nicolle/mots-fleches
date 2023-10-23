@@ -109,7 +109,7 @@ const props = defineProps<{
   /**
    * Callback to create a new element
    */
-  onCreate: () => void;
+  onCreate?: () => void;
   /**
    * Callback to delete selected elements
    */
@@ -117,7 +117,7 @@ const props = defineProps<{
   /**
    * Callback when an element is clicked
    */
-  onClick: (elt: any) => void;
+  onClick?: (elt: any) => void;
 }>();
 const selected = ref<boolean[]>([]);
 const selectedElements = computed(() =>
