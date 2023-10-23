@@ -1,7 +1,14 @@
 <template>
-  <div>
-    <n-form-item :label="$t('forms.family')" path="font-family">
-      <n-select v-model:value="value.family" :options="options" filterable />
+  <div :version="version">
+    <n-form-item :label="$t('forms.family')" path="font-family"
+    >
+      <n-select
+        v-model:value="fontIndex"
+        :options="options"
+        :style="style"
+        filterable
+        @update:value="onChange"
+      />
     </n-form-item>
     <n-form-item :label="$t('forms.weight')" path="font-weight">
       <n-select
@@ -10,18 +17,17 @@
         filterable
       />
     </n-form-item>
-    <link
-      :href="`https://fonts.googleapis.com/css?family=${value.family}:${value.weight}`"
-      rel="stylesheet"
-    />
-    <p :style="{ fontFamily: value.family, fontWeight: value.weight }">
-      Test Rendering font
-    </p>
+    <FontLoader :value="value"/>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, defineProps, ref, watch, defineEmits } from "vue";
+import { computed, onMounted, defineProps, ref, defineEmits } from "vue";
+import { api } from "../../api";
+import { Font } from "database";
+import { loadFont } from "./load-font";
+import FontLoader from "./FontLoader.vue";
+
 const props = defineProps<{
   /**
    * The TextStyle to edit
@@ -29,6 +35,8 @@ const props = defineProps<{
   modelValue: string;
   rolePrefix: string;
 }>();
+const fontIndex = ref(0);
+const version = ref(0);
 const fonts = ref([]);
 const value = ref({
   family: "sans-serif",
@@ -37,9 +45,8 @@ const value = ref({
 });
 const options = computed(() =>
   fonts.value.map((f, i) => ({
-    // @ts-ignore
     label: f.family,
-    value: f.family,
+    value: i,
   }))
 );
 const weightOptions = ref(
@@ -54,27 +61,34 @@ const emit = defineEmits<{
    */
   (event: "update:modelValue", value: string): void;
 }>();
+const style = computed(() => {
+  return {
+    "font-family": value.value.family,
+    "font-weight": value.value.weight,
+  };
+})
 
 onMounted(() => {
-  fetch("/fonts.json")
-    .then((response) => response.json())
-    .then((data) => {
-      console.log(data);
-      fonts.value = data.items;
-    });
+  Promise.all([api.db.getFonts(), fetch("/fonts.json")])
+    .then(([fonts, response]) => Promise.all([fonts, response.json()]))
+    .then(([fts, data]) => {
+      console.log(fts, data);
+      fonts.value = fts
+        .map((f: Font) => ({ ...f, isGoogle: false, family: f.name }))
+        .concat(data.items.map((f) => ({ ...f, isGoogle: true })));
+    })
+    .then(() =>{
+      onChange(fontIndex.value);
+    })
 });
 
-watch([value], () => {
-  if (!value.value) return;
-  // @ts-ignore
-
-  // emit("update:modelValue", fonts.value[value.value].family);
-});
-
-function onUpload(filesContents: string[]) {
-  console.log(filesContents);
-  // const newFonts = JSON.parse(filesContents[0]);
-  // fonts.value = [...fonts.value, ...newFonts.items];
+function onChange(e) {
+  const selectedFont = fonts.value[e];
+  value.value = {
+    ...value.value,
+    family: selectedFont.family,
+    isGoogle: selectedFont.isGoogle,
+  };
 }
 </script>
 

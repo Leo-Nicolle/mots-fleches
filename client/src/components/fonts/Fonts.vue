@@ -32,18 +32,6 @@ function getFonts() {
     fonts.value = ws.sort((a, b) => a.localeCompare(b));
   });
 }
-function onAddKeyup(evt: KeyboardEvent) {
-  if (evt.code !== "Enter") return;
-  api.db.pushWord(toRaw(value.value)).then(() => {
-    getFonts();
-  });
-}
-function onDeleteKeyup(evt: KeyboardEvent) {
-  if (evt.code !== "Enter") return;
-  api.db.deleteWord(toRaw(value.value)).then(() => {
-    getFonts();
-  });
-}
 
 </script>
 
