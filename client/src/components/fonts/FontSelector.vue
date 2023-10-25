@@ -1,6 +1,6 @@
 <template>
   <div :version="version">
-    <n-form-item :label="$t('forms.family')" path="font-family">
+    <n-form-item :label="$t('forms.fontFamily')" path="font-family">
       <n-select
         v-model:value="fontIndex"
         :options="options"
@@ -9,7 +9,7 @@
         @update:value="onChange"
       />
     </n-form-item>
-    <n-form-item :label="$t('forms.weight')" path="font-weight">
+    <n-form-item :label="$t('forms.fontWeight')" path="font-weight">
       <n-select
         v-model:value="value.weight"
         :options="weightOptions"
@@ -43,16 +43,18 @@
 <script setup lang="ts">
 import { computed, onMounted, defineProps, ref, defineEmits } from "vue";
 import { api } from "../../api";
-import { Font } from "database";
-import { loadFont } from "./load-font";
+import { TextSyle } from "grid";
 import FontLoader from "./FontLoader.vue";
+import Sizeinput from "../forms/Sizeinput.vue";
+
 import { useModel } from "../../js/useModel";
+import { Font } from "database";
 
 const props = defineProps<{
   /**
    * The TextStyle to edit
    */
-  modelValue: string;
+  modelValue: TextSyle;
   rolePrefix: string;
 }>();
 const emit = defineEmits<{
@@ -61,10 +63,10 @@ const emit = defineEmits<{
    */
   (event: "update:modelValue", value: string): void;
 }>();
-
+type DBFont =  {family: string, isGoogle: boolean };
 const fontIndex = ref(0);
 const version = ref(0);
-const fonts = ref([]);
+const fonts = ref<DBFont[]>([]);
 const value = useModel(props, emit);
 
 const options = computed(() =>
@@ -90,14 +92,10 @@ onMounted(() => {
   Promise.all([api.db.getFonts(), fetch("/fonts.json")])
     .then(([fonts, response]) => Promise.all([fonts, response.json()]))
     .then(([fts, data]) => {
-      console.log(fts, data);
       fonts.value = fts
         .map((f: Font) => ({ ...f, isGoogle: false, family: f.name }))
         .concat(data.items.map((f) => ({ ...f, isGoogle: true })));
-
-
       const index = fonts.value.findIndex(f => f.family === value.value.family);
-      console.log(index, value.value.family)
       if (index !== -1) {
         fontIndex.value = index;
       }

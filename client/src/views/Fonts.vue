@@ -12,8 +12,8 @@
     </template>
     <template v-slot:left-panel>
       <UploadModal
-        :title="$t('buttons.newfont')"
-        :buttonText="$t('buttons.new')"
+        :title="$t('titles.newFont')"
+        :buttonText="$t('buttons.create')"
         :readAsDataURL="true"
         :single="true"
         @ok="onUpload"

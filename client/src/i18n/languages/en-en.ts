@@ -7,6 +7,7 @@ export const lang = {
     solutions: "Solutions",
     words: "Words",
     about: "About",
+    fonts: "Fonts"
   },
   buttons: {
     changeLanguage: "change language",
@@ -27,6 +28,9 @@ export const lang = {
     uploadGrids: "Upload grids",
     uploadWords: "Upload words",
     dragdrop: "Drag files here (or click)"
+  },
+  titles: {
+    newFont: "New Font",
   },
   suggestions: {
     results: "Results",
@@ -83,6 +87,8 @@ export const lang = {
     grid: "Grid",
     wordLength: "Words Length",
     randomize: "Randomize",
+    fontFamily: "Font family",
+    fontWeight: "Font weight",
   },
   tooltips: {
     incomplete: "is incomplete",

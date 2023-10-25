@@ -7,6 +7,7 @@ export const lang = {
         solutions: "Solutions",
         words: "Mots",
         about: "A propos",
+        fonts: "Polices"
     },
     buttons: {
         changeLanguage: "Traduire",
@@ -30,6 +31,9 @@ export const lang = {
     },
     suggestions: {
         results: "Résultats",
+    },
+    titles: {
+        newFont: "Nouvelle police",
     },
     forms: {
         title: "Titre",
@@ -83,6 +87,9 @@ export const lang = {
         grid: "Grille",
         wordLength: "Longueur des mots",
         randomize: "Regénérer",
+        fontFamily: "Police",
+        fontWeight: "Epaisseur",
+
     },
     tooltips: {
         incomplete: "est incomplet",

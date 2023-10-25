@@ -7,6 +7,7 @@ export const lang = {
         solutions: "Soluciones",
         words: "Palabras",
         about: "Acerca de",
+        fonts: "Fuentes"
     },
     buttons: {
         changeLanguage: "Cambiar idioma",
@@ -27,6 +28,9 @@ export const lang = {
         uploadGrids: "Subir cuadrículas",
         uploadWords: "Subir palabras",
         dragdrop: "Arrastrar ficheros aquí (o hacer clic)",
+    },
+    titles: {
+        newFont: "Nueva fuente",
     },
     suggestions: {
         results: "Resultados",
@@ -83,6 +87,8 @@ export const lang = {
         grid: "Cuadrícula",
         wordLength: "Longitud de las palabras",
         randomize: "Randomizar",
+        fontFamily: "Fuente",
+        fontWeight: "Peso",
     },
     tooltips: {
         incomplete: "esta incompleto",
