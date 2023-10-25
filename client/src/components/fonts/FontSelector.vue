@@ -1,7 +1,6 @@
 <template>
   <div :version="version">
-    <n-form-item :label="$t('forms.family')" path="font-family"
-    >
+    <n-form-item :label="$t('forms.family')" path="font-family">
       <n-select
         v-model:value="fontIndex"
         :options="options"
@@ -17,7 +16,27 @@
         filterable
       />
     </n-form-item>
-    <FontLoader :value="value"/>
+    <n-form-item :label="$t('forms.size')" path="size">
+      <Sizeinput
+        v-if="typeof value.size === 'string'"
+        :role="`${rolePrefix}-size`"
+        v-model="value.size"
+      />
+      <n-input-number
+        v-else
+        :role="`${rolePrefix}-size`"
+        v-model:value="value.size"
+      />
+    </n-form-item>
+    <n-form-item :label="$t('forms.color')" path="color">
+      <n-color-picker
+        :role="`${rolePrefix}-color`"
+        v-model:value="value.color"
+        :show-alpha="false"
+        size="small"
+      />
+    </n-form-item>
+    <FontLoader :value="value" />
   </div>
 </template>
 
@@ -27,6 +46,7 @@ import { api } from "../../api";
 import { Font } from "database";
 import { loadFont } from "./load-font";
 import FontLoader from "./FontLoader.vue";
+import { useModel } from "../../js/useModel";
 
 const props = defineProps<{
   /**
@@ -35,14 +55,18 @@ const props = defineProps<{
   modelValue: string;
   rolePrefix: string;
 }>();
+const emit = defineEmits<{
+  /** v-model event
+   * @param value The new format
+   */
+  (event: "update:modelValue", value: string): void;
+}>();
+
 const fontIndex = ref(0);
 const version = ref(0);
 const fonts = ref([]);
-const value = ref({
-  family: "sans-serif",
-  isGoogle: true,
-  weight: "400",
-});
+const value = useModel(props, emit);
+
 const options = computed(() =>
   fonts.value.map((f, i) => ({
     label: f.family,
@@ -55,18 +79,12 @@ const weightOptions = ref(
     value: `${e}`,
   }))
 );
-const emit = defineEmits<{
-  /** v-model event
-   * @param value The new format
-   */
-  (event: "update:modelValue", value: string): void;
-}>();
 const style = computed(() => {
   return {
     "font-family": value.value.family,
     "font-weight": value.value.weight,
   };
-})
+});
 
 onMounted(() => {
   Promise.all([api.db.getFonts(), fetch("/fonts.json")])
@@ -76,10 +94,17 @@ onMounted(() => {
       fonts.value = fts
         .map((f: Font) => ({ ...f, isGoogle: false, family: f.name }))
         .concat(data.items.map((f) => ({ ...f, isGoogle: true })));
+
+
+      const index = fonts.value.findIndex(f => f.family === value.value.family);
+      console.log(index, value.value.family)
+      if (index !== -1) {
+        fontIndex.value = index;
+      }
     })
-    .then(() =>{
+    .then(() => {
       onChange(fontIndex.value);
-    })
+    });
 });
 
 function onChange(e) {

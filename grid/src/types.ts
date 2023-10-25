@@ -31,7 +31,9 @@ export interface TextSyle<T = string> {
   /**
    * Font family
    */
-  font: string;
+  family: string;
+  weight: string;
+  isGoogle: boolean;
   /**
    * Font size: number if no unit (for SVG)
    */
@@ -207,7 +209,9 @@ export interface GridNumberStyle extends TextSyle {
 
 
 export const defaultTextStyle: TextSyle = {
-  font: "sans-serif",
+  family: "roboto",
+  isGoogle: true,
+  weight: "400",
   size: "1em",
   color: "black",
 }

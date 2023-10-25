@@ -47,7 +47,7 @@
 </template>
 
 <script lang="ts" setup >
-import { computed, defineEmits, defineProps, ref } from "vue";
+import { computed, defineEmits, defineProps, ref, watch } from "vue";
 const files = ref(new Map<string, string>());
 const showModal = ref(false);
 const fileinput = ref<HTMLInputElement>();
@@ -111,10 +111,12 @@ function readFile(file) {
 function onOK() {
   showModal.value = false;
   emit("ok", [...files.value.entries()]);
+  files.value.clear();
 }
 function onCancel() {
   showModal.value = false;
   emit("cancel");
+  files.value.clear();
 }
 </script>
 
@@ -145,11 +147,11 @@ function onCancel() {
   margin-top: 10px;
   margin-right: 10px;
 }
-.footer{
+.footer {
   display: flex;
-    justify-content: center;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 5px;
+  justify-content: center;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
 }
 </style>

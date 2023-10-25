@@ -1,7 +1,8 @@
 
 
-export type Font = {
+export type FontValue = {
   family: string;
   weight: number;
-  file: string;
+  isGoogle: boolean;
+  color: string;
 };

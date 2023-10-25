@@ -92,6 +92,21 @@ async function create() {
             });
           });
       }
+      if (old <= 5) {
+        const styleStore = transaction.objectStore('styles');
+        promise = promise.then(() => styleStore.getAll())
+          .then(styles => {
+            styles.forEach(style => {
+              const def = style.definition
+              // @ts-ignore
+              def.family = 'Roboto';
+              def.isGoogle = true;
+              def.weight = "400";
+              styleStore.put(style as GridStyle);
+            });
+          });
+      }
+
     },
   });
 

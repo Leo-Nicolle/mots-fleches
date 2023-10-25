@@ -53,6 +53,7 @@ import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import SVGGrid from "../components/svg-renderer/Grid.vue";
 import ExportModal from "../components/ExportModal.vue";
+import ExportButton from "../components/ExportButton.vue";
 import Layout from "../layouts/GridLayout.vue";
 import UploadModal from "../components/UploadModal.vue";
 import { defaultExportOptions } from "../types";

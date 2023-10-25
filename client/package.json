@@ -25,11 +25,11 @@
     "keyboard-css": "^1.2.4",
     "lodash.throttle": "^4.1.1",
     "naive-ui": "^2.34.3",
-    "uuid": "^9.0.0",
+    "uuid": "^9.0.1",
     "vector2js": "^2.0.1",
     "vue": "^3.2.13",
-    "vue-router": "^4.0.3",
     "vue-i18n": "^9.2.2",
+    "vue-router": "^4.0.3",
     "vue3-highlightjs": "^1.0.5"
   },
   "devDependencies": {

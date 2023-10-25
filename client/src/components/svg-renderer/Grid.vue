@@ -13,6 +13,7 @@
     @mouseout="onMouseLeave"
     xmlns="http://www.w3.org/2000/svg"
   >
+    <FontLoader :value="style.definition"/>
     <defs></defs>
     <g
       class="cells"
@@ -50,7 +51,8 @@
               v-bind="sp"
               :line-height="defSize"
               :font-size="defSize"
-              :font-family="defFont"
+              :font-family="defFontFamily"
+              :font-weight="defFontWeight"
               :fill="defColor"
             >
               {{ sp.text }}
@@ -160,6 +162,7 @@
 </template>
 
 <script setup lang="ts">
+import FontLoader from "../fonts/FontLoader.vue";
 import { defineEmits, ref, defineProps, computed, nextTick } from "vue";
 import { getD } from "../../js/paths";
 import {
@@ -237,7 +240,9 @@ const outerLineColor = computed(() => props.style.grid.outerBorderColor);
 const defSize = computed(() => props.style.definition.size);
 const textSize = computed(() => props.style.grid.cellSize);
 const textFont = computed(() => `roboto`);
-const defFont = computed(() => `${props.style.definition.font}`);
+const defFontFamily = computed(() => `${props.style.definition.family}`);
+const defFontWeight = computed(() => `${props.style.definition.weight}`);
+
 const defBackgroundColor = computed(
   () => props.style.definition.backgroundColor
 );

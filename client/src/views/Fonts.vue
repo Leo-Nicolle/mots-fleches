@@ -36,6 +36,7 @@ import { v4 as uuid } from "uuid";
 import { api } from "../api";
 import { onMounted, ref } from "vue";
 import { Font } from "database";
+import { loadFont } from "../components/fonts/load-font";
 
 const fonts = ref<Font[]>([]);
 const selected = ref<Font[]>([]);
@@ -49,17 +50,7 @@ function getFonts() {
     fonts.value = fs
       .sort((a, b) => a.updated - b.updated)
       .map((f) => ({ ...f, name: f.name ? f.name : "unamed" }));
-    return Promise.all(
-      fonts.value.map((font) => {
-        const fontface = new FontFace(font.name, `url(${font.content})`);
-        return fontface.load();
-      })
-    ).then((fontfaces) => {
-      console.log({ fontfaces });
-      fontfaces.forEach((fontface) => {
-        document.fonts.add(fontface);
-      });
-    });
+    return Promise.all(fonts.value.map((font) => loadFont(font)));
   });
 }
 function onUpload(filesContents: [string, string][]) {
