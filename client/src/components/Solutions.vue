@@ -76,6 +76,10 @@ const gridNColor = computed(() => {
   if (!props.solutionStyle) return "";
   return props.solutionStyle.grids.gridN.color;
 });
+const gridNMargin = computed(() => {
+  if (!props.solutionStyle) return "";
+  return props.solutionStyle.grids.gridN.margin.bottom;
+});
 const gridsPerPage = computed(() => {
   if (!props.solutionStyle) return [props.grids];
   const { rows, cols } = props.solutionStyle.grids;
@@ -96,6 +100,7 @@ const gridsPerPage = computed(() => {
 }
 .gridN {
   font: v-bind(gridNFont);
+  margin-bottom: v-bind(gridNMargin);
   color: v-bind(gridNColor);
 }
 .grids {

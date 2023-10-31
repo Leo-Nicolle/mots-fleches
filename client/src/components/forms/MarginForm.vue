@@ -1,76 +1,18 @@
 <template>
-  <n-form-item
-    v-if="value.left !== undefined"
-    :label="$t('forms.left')"
-    path="value.left"
-  >
-    <SizeInput
-      v-if="typeof value.left === 'string'"
-      :role="`${rolePrefix}-margin-left`"
-      v-model="value.left"
-    />
-    <n-input-number
-      v-else
-      :role="`${rolePrefix}-margin-left`"
-      v-model:value="value.left"
-    />
-  </n-form-item>
-  <n-form-item
-    v-if="value.right !== undefined"
-    :label="$t('forms.right')"
-    path="value.right"
-  >
-    <SizeInput
-      v-if="typeof value.right === 'string'"
-      :role="`${rolePrefix}-margin-right`"
-      v-model="value.right"
-    />
-    <n-input-number
-      v-else
-      :role="`${rolePrefix}-margin-right`"
-      v-model:value="value.right"
-    />
-  </n-form-item>
-  <n-form-item
-    v-if="value.top !== undefined"
-    :label="$t('forms.top')"
-    path="value.top"
-  >
-    <SizeInput
-      v-if="typeof value.top === 'string'"
-      :role="`${rolePrefix}-margin-top`"
-      v-model="value.top"
-    />
-    <n-input-number
-      v-else
-      :role="`${rolePrefix}-margin-top`"
-      v-model:value="value.top"
-    />
-  </n-form-item>
-  <n-form-item
-    v-if="value.bottom !== undefined"
-    :label="$t('forms.bottom')"
-    path="value.bottom"
-  >
-    <SizeInput
-      v-if="typeof value.bottom === 'string'"
-      :role="`${rolePrefix}-margin-bottom`"
-      v-model="value.bottom"
-    />
-    <n-input-number
-      v-else
-      :role="`${rolePrefix}-margin-bottom`"
-      v-model:value="value.bottom"
-    />
+  <n-form-item v-for="(d, i) in datas" :key="i" :label="d.label" :path="d.path">
+    <SizeInput v-if="d.isString" :role="d.role" v-model="value[d.direction]" />
+    <n-input-number v-else :role="d.role" v-model:value="value[d.direction]" />
   </n-form-item>
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps, defineEmits, watch, toRaw } from "vue";
+import { ref, defineProps, defineEmits, watch, toRaw, computed } from "vue";
+import { useI18n } from "vue-i18n";
 import { useModel } from "../../js/useModel";
 import { Margins } from "grid";
 import SizeInput from "./Sizeinput.vue";
-
+const i18n = useI18n();
+const directions = ["left", "right", "top", "bottom"];
 type PartialMargins = Partial<Margins<string | number>>;
 /**
  * Form to modify TextStyle.
@@ -81,6 +23,7 @@ const props = defineProps<{
    */
   modelValue: PartialMargins;
   rolePrefix: string;
+  marginLabel?: boolean;
 }>();
 const emit = defineEmits<{
   /**
@@ -88,5 +31,22 @@ const emit = defineEmits<{
    */
   (event: "update:modelValue", value: Margins<string | number>): void;
 }>();
+const datas = computed(() => {
+  return directions
+    .filter((d) => props.modelValue[d] !== undefined)
+    .map((d) => {
+      return {
+        direction: d,
+        value: props.modelValue[d],
+        path: `${d}`,
+        role: `${props.rolePrefix}-margin-${d}`,
+        isString: typeof props.modelValue[d] === "string",
+        label: `${props.marginLabel ? i18n.t("forms.margin") : ""} ${i18n.t(
+          `forms.${d}`
+        )}`,
+      };
+    });
+});
+
 const value = useModel<PartialMargins>(props, emit);
 </script>

@@ -67,6 +67,7 @@ export const lang = {
         width: "Largeur",
         height: "Hauteur",
         margins: "Marges",
+        margin: "Marge",
         align: 'Alignement',
         pagination: "Pagination",
         left: "Gauche",

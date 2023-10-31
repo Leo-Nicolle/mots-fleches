@@ -31,8 +31,6 @@
 
 <script setup lang="ts">
 import GridPaper from "../../components/GridPaper.vue";
-import ExportButton from "../../components/ExportButton.vue";
-import ExportSVGButton from "../../components/ExportSVG.vue";
 import OptionsForm from "../../components/forms/GridStyleForm.vue";
 import GridForm from "../../components/forms/GridForm.vue";
 import Layout from "../../layouts/Main.vue";

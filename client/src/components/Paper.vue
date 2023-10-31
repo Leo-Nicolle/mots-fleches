@@ -82,6 +82,14 @@ const paginationJustify = computed(() => {
       : "flex-end"
     : "";
 });
+const paginationMargin = computed(() => {
+  if (!props.pagination) return "";
+  const { bottom, left } = props.pagination.margin;
+  const [amount, unit] = [left.slice(0, -2), left.slice(-2)];
+  return (props.pageNumber || 0) % 2
+    ? `0 0 ${bottom} ${left}`
+    : `0 0 ${bottom} ${-amount}${unit}`;
+});
 const pageWidth = computed(() => {
   if (!props.format) return 0;
   return `${props.format.width}cm`;
@@ -140,10 +148,10 @@ body {
         width: 100%;
         display: flex;
         flex-direction: row;
-        // margin-top: auto;
         font: v-bind(paginationFont);
         color: v-bind(paginationColor);
         justify-content: v-bind(paginationJustify);
+        margin: v-bind(paginationMargin);
       }
     }
   }

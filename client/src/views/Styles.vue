@@ -55,7 +55,7 @@ function onDelete() {
 }
 
 function createStyle() {
-  return api.db.pushStyle(newStyle()).then(() => fetch());
+  // return api.db.pushStyle(newStyle()).then(() => fetch());
 }
 
 onMounted(() => {

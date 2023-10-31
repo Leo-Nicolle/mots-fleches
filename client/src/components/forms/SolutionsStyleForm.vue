@@ -1,12 +1,13 @@
 <template>
+  <h3>{{ $t("forms.gridNum") }}</h3>
+  <FontSelector v-model="value.grids.gridN" role-prefix="gridN"/>
+  <MarginForm v-model="value.grids.gridN.margin" margin-label role-prefix="margin"/>
   <h3>{{ $t("forms.wordIndex") }}</h3>
   <FontSelector v-model="value.words" role-prefix="wordIndex"/>
   <h3>{{ $t("forms.wordLength") }}</h3>
   <FontSelector v-model="value.size" role-prefix="wordLength"/>
   <h3>{{ $t("forms.pagination") }}</h3>
   <PaginationStyle v-model="value.pagination" role-prefix="pagination"/>
-  <h3>{{ $t("forms.gridNum") }}</h3>
-  <FontSelector v-model="value.grids.gridN" role-prefix="gridN"/>
   <h3>{{ $t("forms.solutionsGrid") }}</h3>
   <n-form-item :label="$t('forms.rows')" path="rows">
     <n-input-number role="rows" v-model:value="value.grids.rows" />
@@ -14,7 +15,6 @@
   <n-form-item :label="$t('forms.cols')" path="cols">
     <n-input-number role="cols" v-model:value="value.grids.cols" />
   </n-form-item>
-  <MarginForm v-model="value.grids.gridN.margin" role-prefix="margin"/>
 </template>
 
 <script setup lang="ts">

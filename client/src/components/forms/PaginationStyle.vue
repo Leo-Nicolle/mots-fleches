@@ -13,13 +13,15 @@
       v-model:value="value.startIdx"
     />
   </n-form-item>
-  <FontSelector v-model="value" :role-prefix="rolePrefix" />
+  <FontSelector v-model="value" :role-prefix="`${rolePrefix}-font`" />
+  <MarginForm v-model="value.margin" margin-label :role-prefix="`${rolePrefix}-margin`" />
 </template>
 <script setup lang="ts">
 import { defineProps, defineEmits, watch, ref } from "vue";
 import { useModel } from "../../js/useModel";
 import { PaginationStyle } from "grid";
 import FontSelector from "../fonts/FontSelector.vue";
+import MarginForm from "./MarginForm.vue";
 import { useI18n } from "vue-i18n";
 /**
  * Form to modify TextStyle.

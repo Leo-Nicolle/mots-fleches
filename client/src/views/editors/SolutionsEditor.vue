@@ -66,6 +66,7 @@ function fetch() {
   return promise
     .then(() => api.db.getStyle("solution"))
     .then((s) => {
+      console.log("s", s);
       style.value = s as SolutionStyle;
       indexFirstPage.value =
         grids.value.length + +style.value.pagination.startIdx;
@@ -79,7 +80,7 @@ function save() {
   clearTimeout(saveTimeout.value);
   saveTimeout.value = +setTimeout(() => {
     if (!style.value) return;
-    api.db.pushStyle(toRaw(style.value) as unknown as SolutionStyle);
+    // api.db.pushStyle(toRaw(style.value) as unknown as SolutionStyle);
   }, 100);
 }
 
