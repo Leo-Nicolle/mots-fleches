@@ -131,9 +131,12 @@ async function create() {
 
 export class Idatabase extends Database {
   private loadingPromise: ReturnType<typeof create>;
-  constructor() {
+  constructor(prepromise?: Promise<unknown>) {
     super();
-    this.loadingPromise = create()
+    if (!prepromise) {
+      prepromise = Promise.resolve();
+    }
+    this.loadingPromise = prepromise.then(() => create())
       .then((db) => {
         return db.get('styles', defaultStyles.id)
           .then((style) => style ? Promise.resolve('')
@@ -266,10 +269,10 @@ export function setDatabase(json: any, version: number) {
             const objstore = db.createObjectStore(key, {
               keyPath: 'id',
             });
-            if(key === 'words'){
+            if (key === 'words') {
               // @ts-ignore
               objstore.createIndex('by-word', 'id');
-            }else{
+            } else {
               // @ts-ignore
               objstore.createIndex('by-id', 'id');
             }
@@ -277,7 +280,7 @@ export function setDatabase(json: any, version: number) {
             // @ts-ignore
             const store = transaction.objectStore(key);
             promise = promise
-            // @ts-ignore
+              // @ts-ignore
               .then(() => Promise.all(values.map((value: any) => store.put(value))))
           });
         }
