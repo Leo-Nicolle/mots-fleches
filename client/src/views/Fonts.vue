@@ -7,9 +7,6 @@
     :has-create-button="false"
     :has-delete-button="true"
   >
-    <template #body>
-      <Fonts :version="version" />
-    </template>
     <template v-slot:left-panel>
       <UploadModal
         :title="$t('titles.newFont')"
@@ -20,8 +17,9 @@
       />
     </template>
     <template #card-title="{ elt }">
-      <span class="font-body" :style="{ 'font-family': elt.name }">
-        {{ elt.name }}
+      <FontLoader :value="elt" />
+      <span class="font-body" :style="{ 'font-family': elt.family }">
+        {{ elt.family }}
       </span>
     </template>
     <template #card-body="{ elt, i }"> </template>
@@ -30,8 +28,9 @@
 
 <script setup lang="ts">
 import Layout from "../layouts/GridLayout.vue";
-import Fonts from "../components/fonts/Fonts.vue";
 import UploadModal from "../components/UploadModal.vue";
+import FontLoader from "../components/fonts/FontLoader.vue";
+
 import { v4 as uuid } from "uuid";
 import { api } from "../api";
 import { onMounted, ref } from "vue";
@@ -40,8 +39,6 @@ import { loadFont } from "../components/fonts/load-font";
 
 const fonts = ref<Font[]>([]);
 const selected = ref<Font[]>([]);
-
-const version = ref(0);
 onMounted(() => {
   getFonts();
 });
@@ -56,10 +53,14 @@ function getFonts() {
 function onUpload(filesContents: [string, string][]) {
   return Promise.all(
     filesContents.map(([filename, dataURL]) => {
-      const name = filename.replace(/\..*/, "").replace(/[^\w\s]/gi, "");
+      const family = filename
+        .replace(/\..*/, "")
+        .replace(/[^\w]/gi, "")
+        .replace(/[0-9]+/gi, "");
+      debugger;
       return api.db.pushFont({
         id: uuid(),
-        name,
+        family,
         updated: Date.now(),
         content: dataURL,
       });

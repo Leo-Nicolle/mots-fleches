@@ -45,7 +45,7 @@ const emit = defineEmits<{
    */
   (event: "update:modelValue", value: ExportOptions): void;
 }>();
-const value = useModel(props, emit);
+const value = useModel<ExportOptions>(props, emit);
 </script>
 
 

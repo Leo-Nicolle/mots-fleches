@@ -127,7 +127,7 @@ const emit = defineEmits<{
    */
   (event: "open"): void;
 }>();
-const value = useModel(props, emit);
+const value = useModel<Grid>(props, emit);
 function onUpdate(path: string, newvalue: string | number) {
   value.value[path] = newvalue;
   nextTick(() => {

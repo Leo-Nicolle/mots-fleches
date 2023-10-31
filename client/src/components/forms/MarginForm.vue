@@ -1,5 +1,9 @@
 <template>
-  <n-form-item v-if="value.left" :label="$t('forms.left')" path="value.left">
+  <n-form-item
+    v-if="value.left !== undefined"
+    :label="$t('forms.left')"
+    path="value.left"
+  >
     <SizeInput
       v-if="typeof value.left === 'string'"
       :role="`${rolePrefix}-margin-left`"
@@ -11,7 +15,11 @@
       v-model:value="value.left"
     />
   </n-form-item>
-  <n-form-item v-if="value.right" :label="$t('forms.right')" path="value.right">
+  <n-form-item
+    v-if="value.right !== undefined"
+    :label="$t('forms.right')"
+    path="value.right"
+  >
     <SizeInput
       v-if="typeof value.right === 'string'"
       :role="`${rolePrefix}-margin-right`"
@@ -23,7 +31,11 @@
       v-model:value="value.right"
     />
   </n-form-item>
-  <n-form-item v-if="value.top" :label="$t('forms.top')" path="value.top">
+  <n-form-item
+    v-if="value.top !== undefined"
+    :label="$t('forms.top')"
+    path="value.top"
+  >
     <SizeInput
       v-if="typeof value.top === 'string'"
       :role="`${rolePrefix}-margin-top`"
@@ -36,7 +48,7 @@
     />
   </n-form-item>
   <n-form-item
-    v-if="value.bottom"
+    v-if="value.bottom !== undefined"
     :label="$t('forms.bottom')"
     path="value.bottom"
   >
@@ -58,7 +70,8 @@ import { ref, defineProps, defineEmits, watch, toRaw } from "vue";
 import { useModel } from "../../js/useModel";
 import { Margins } from "grid";
 import SizeInput from "./Sizeinput.vue";
-const directions = ref(["left", "right", "top", "bottom"]);
+
+type PartialMargins = Partial<Margins<string | number>>;
 /**
  * Form to modify TextStyle.
  */
@@ -66,7 +79,7 @@ const props = defineProps<{
   /**
    * The TextStyle to edit
    */
-  modelValue: Margins<string | number>;
+  modelValue: PartialMargins;
   rolePrefix: string;
 }>();
 const emit = defineEmits<{
@@ -75,5 +88,5 @@ const emit = defineEmits<{
    */
   (event: "update:modelValue", value: Margins<string | number>): void;
 }>();
-const value = useModel(props, emit);
+const value = useModel<PartialMargins>(props, emit);
 </script>

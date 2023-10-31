@@ -130,7 +130,7 @@ const format = computed({
   },
 });
 
-const value = useModel(props, emit);
+const value = useModel<Format>(props, emit);
 </script>
 
 <style>

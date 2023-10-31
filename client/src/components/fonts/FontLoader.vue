@@ -4,25 +4,20 @@
 
 <script setup lang="ts">
 import { defineProps, ref } from "vue";
-import { Font } from "database";
 import { watch } from "vue";
 import { loadFont } from "./load-font";
 import axios from "axios";
+import { Font, isGoogleFont } from "grid";
 
 const props = defineProps<{
-  value: {
-    family: string;
-    content: string;
-    weight: string;
-    isGoogle: boolean;
-  };
+  value: Font;
   // TODO: generate <font> tag with data64 font for SVG export.
   isEmbedded?: boolean;
 }>();
 const url = ref<string | null>(null);
 watch([props], () => {
-  const {value} = props;
-  if (props.value.isGoogle) {
+  const { value } = props;
+  if (isGoogleFont(value)) {
     let weightUrl = `https://fonts.googleapis.com/css?family=${value.family}:${value.weight}`;
     let simpletUrl = `https://fonts.googleapis.com/css?family=${value.family}`;
     return axios

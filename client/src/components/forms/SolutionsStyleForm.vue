@@ -14,12 +14,14 @@
   <n-form-item :label="$t('forms.cols')" path="cols">
     <n-input-number role="cols" v-model:value="value.grids.cols" />
   </n-form-item>
+  <MarginForm v-model="value.grids.gridN.margin" role-prefix="margin"/>
 </template>
 
 <script setup lang="ts">
 import { defineProps, defineEmits, watch, ref } from "vue";
 import FontSelector from "../fonts/FontSelector.vue";
 import PaginationStyle from "./PaginationStyle.vue";
+import MarginForm from "./MarginForm.vue";
 import { useModel } from "../../js/useModel";
 import { SolutionStyle } from "grid";
 /**
@@ -38,7 +40,7 @@ const emit = defineEmits<{
    */
   (event: "update:modelValue", value: SolutionStyle): void;
 }>();
-const value = useModel(props, emit);
+const value = useModel<SolutionStyle>(props, emit);
 
 watch(value.value, () => {
   emit("update:modelValue", value.value);

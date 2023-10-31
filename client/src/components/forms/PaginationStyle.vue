@@ -50,7 +50,7 @@ const alignOptions = ref([
   },
 ]);
 
-const value = useModel(props, emit);
+const value = useModel<PaginationStyle>(props, emit);
 
 watch(value.value, () => {
   emit("update:modelValue", value.value);

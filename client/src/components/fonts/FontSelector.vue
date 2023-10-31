@@ -43,12 +43,11 @@
 <script setup lang="ts">
 import { computed, onMounted, defineProps, ref, defineEmits } from "vue";
 import { api } from "../../api";
-import { TextSyle } from "grid";
+import { TextSyle, Font } from "grid";
 import FontLoader from "./FontLoader.vue";
 import Sizeinput from "../forms/Sizeinput.vue";
 
 import { useModel } from "../../js/useModel";
-import { Font } from "database";
 
 const props = defineProps<{
   /**
@@ -63,11 +62,10 @@ const emit = defineEmits<{
    */
   (event: "update:modelValue", value: string): void;
 }>();
-type DBFont = { family: string; isGoogle: boolean };
 const fontIndex = ref(0);
 const version = ref(0);
-const fonts = ref<DBFont[]>([]);
-const value = useModel(props, emit);
+const fonts = ref<Font[]>([]);
+const value = useModel<TextSyle>(props, emit);
 
 const options = computed(() =>
   fonts.value.map((f, i) => ({
@@ -93,7 +91,7 @@ onMounted(() => {
     .then(([fonts, response]) => Promise.all([fonts, response.json()]))
     .then(([fts, data]) => {
       fonts.value = fts
-        .map((f: Font) => ({ ...f, isGoogle: false, family: f.name }))
+        .map((f) => ({ ...f, isGoogle: false }))
         .concat(data.items.map((f) => ({ ...f, isGoogle: true })));
       const index = fonts.value.findIndex(
         (f) => f.family === value.value.family

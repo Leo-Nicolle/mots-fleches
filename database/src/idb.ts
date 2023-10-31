@@ -1,6 +1,6 @@
 import { openDB, DBSchema } from 'idb';
-import { Grid, GridStyle, GridState } from 'grid';
 import {
+  Grid, GridStyle, GridState,
   defaultStyles,
   defaultSolutionStyle,
 } from 'grid';
