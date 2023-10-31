@@ -63,7 +63,7 @@ const emit = defineEmits<{
    */
   (event: "update:modelValue", value: string): void;
 }>();
-type DBFont =  {family: string, isGoogle: boolean };
+type DBFont = { family: string; isGoogle: boolean };
 const fontIndex = ref(0);
 const version = ref(0);
 const fonts = ref<DBFont[]>([]);
@@ -95,13 +95,12 @@ onMounted(() => {
       fonts.value = fts
         .map((f: Font) => ({ ...f, isGoogle: false, family: f.name }))
         .concat(data.items.map((f) => ({ ...f, isGoogle: true })));
-      const index = fonts.value.findIndex(f => f.family === value.value.family);
+      const index = fonts.value.findIndex(
+        (f) => f.family === value.value.family
+      );
       if (index !== -1) {
         fontIndex.value = index;
       }
-    })
-    .then(() => {
-      onChange(fontIndex.value);
     });
 });
 

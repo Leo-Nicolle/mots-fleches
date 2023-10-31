@@ -1,5 +1,6 @@
 <template>
   <div class="page" ref="page">
+    <FontLoader v-if="props.pagination" :value="props.pagination" />
     <div class="content">
       <div :class="`body ${bodyClass} || ''`">
         <slot></slot>
@@ -33,8 +34,10 @@
 
 <script setup lang="ts">
 import { Format, PaginationStyle } from "grid";
-import { defineProps, ref, watchEffect } from "vue";
+import { defineProps, ref } from "vue";
 import { computed } from "vue";
+import FontLoader from "./fonts/FontLoader.vue";
+import { getFont } from "../js/useFont";
 /**
  * Component to render a Page (for printing)
  */
@@ -65,10 +68,7 @@ const margins = computed(() => {
     `${props.format.margin.left}cm`,
   ];
 });
-const paginationFont = computed(() => {
-  if (!props.pagination) return "";
-  return `${props.pagination.size} ${props.pagination.font}`;
-});
+const paginationFont = computed(() => getFont(props.pagination));
 const paginationColor = computed(() => {
   if (!props.pagination) return "";
   return `${props.pagination.color}`;
