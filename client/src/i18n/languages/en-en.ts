@@ -27,7 +27,8 @@ export const lang = {
     download: "Download",
     uploadGrids: "Upload grids",
     uploadWords: "Upload words",
-    dragdrop: "Drag files here (or click)"
+    dragdrop: "Drag files here (or click)",
+    here: "here",
   },
   titles: {
     newFont: "New Font",
@@ -101,6 +102,7 @@ export const lang = {
     wrongpassword: "Wrong password or email",
     passwordsdontmatch: "Passwords don't match",
     passwordtooshort: "Password too short, minimum 6 characters",
+    noGrid: "You don't have any grid yet, please create one before modify styles."
   },
   login: {
     title: "Login",

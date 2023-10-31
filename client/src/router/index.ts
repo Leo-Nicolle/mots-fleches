@@ -32,7 +32,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/styles',
     name: 'stylesList',
-    component: () => import('../views/Styles.vue')
+    component: () => import('../views/editors/StyleEditor.vue')
   },
   {
     path: '/styles/:id',

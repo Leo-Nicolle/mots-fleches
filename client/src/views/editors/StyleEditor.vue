@@ -25,6 +25,7 @@
         }"
         :style="style"
       />
+      <NoGrid v-else />
     </template>
   </Layout>
 </template>
@@ -34,6 +35,7 @@ import GridPaper from "../../components/GridPaper.vue";
 import OptionsForm from "../../components/forms/GridStyleForm.vue";
 import GridForm from "../../components/forms/GridForm.vue";
 import Layout from "../../layouts/Main.vue";
+import NoGrid from "../../components/NoGrid.vue";
 import { defaultExportOptions } from "../../types";
 import { Grid, GridStyle } from "grid";
 import { ref, onMounted, unref, toRaw } from "vue";
@@ -47,10 +49,7 @@ const style = ref<GridStyle>();
 const saveTimeout = ref(0);
 const route = useRoute();
 function fetch() {
-  return Promise.all([
-    api.getGrids(),
-    api.db.getStyle(route.params.id as string),
-  ])
+  return Promise.all([api.getGrids(), api.db.getStyle("default")])
     .then(([grids, opts]) => {
       grid.value = grids[0];
       style.value = opts;
@@ -73,5 +72,5 @@ onMounted(() => {
 });
 </script>
 
-<style scoped>
+<style lang="css">
 </style>

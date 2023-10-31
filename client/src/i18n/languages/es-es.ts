@@ -28,6 +28,7 @@ export const lang = {
         uploadGrids: "Subir cuadrículas",
         uploadWords: "Subir palabras",
         dragdrop: "Arrastrar ficheros aquí (o hacer clic)",
+        here: "aquí",
     },
     titles: {
         newFont: "Nueva fuente",
@@ -101,6 +102,7 @@ export const lang = {
         wrongpassword: "Contraseña incorrecta",
         passwordsdontmatch: "Las contraseñas no coinciden",
         passwordtooshort: "La contraseña es demasiado corta. Mínimo 6 caracteres",
+        noGrid: "No tienes ninguna cuadrícula, por favor crea una antes de modificar los estilos.",
     },
     login: {
         title: "Iniciar sesión",

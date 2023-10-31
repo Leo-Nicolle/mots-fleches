@@ -28,6 +28,7 @@ export const lang = {
         uploadGrids: "Upload grilles",
         uploadWords: "Upload mots",
         dragdrop: "Drag & Drop vos fichiers ici (ou clickez)",
+        here: "ici", 
     },
     suggestions: {
         results: "Résultats",
@@ -105,6 +106,7 @@ export const lang = {
         wrongpassword: "Mot de passe ou email incorrect.",
         passwordsdontmatch: "Les mots de passe ne correspondent pas.",
         passwordtooshort: "Le mot de passe est trop court. Minimum 8 caractères.",
+        noGrid: "Vous n'avez pas de grille, veuillez en créer une avant de modifier les styles.",
     },
     login: {
         title: "Connexion",

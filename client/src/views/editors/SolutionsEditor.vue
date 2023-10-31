@@ -1,6 +1,6 @@
 <template>
-  <Layout v-if="grids.length && style">
-    <template #left-panel>
+  <Layout>
+    <template #left-panel v-if="grids.length && style">
       <OptionsForm v-model="style" @update:modelValue="save" grid format>
         <SolutionsForm v-model="style" @update:modelValue="save" />
       </OptionsForm>
@@ -8,14 +8,17 @@
     <template #body>
       <WordsIndex
         :grids="grids"
+        v-if="grids.length && style"
         class="paper"
         @page-count="solutionFirstPage = $event + indexFirstPage"
         :export-options="exportOptions"
         :solutionStyle="style"
         :page="indexFirstPage"
       />
+      <NoGrid v-else />
       <SolutionsPaper
         :grids="grids"
+        v-if="grids.length && style"
         class="paper"
         :solutionStyle="style"
         :export-options="exportOptions"
@@ -33,6 +36,8 @@ import OptionsForm from "../../components/forms/GridStyleForm.vue";
 import SolutionsPaper from "../../components/Solutions.vue";
 import WordsIndex from "../../components/WordsIndex.vue";
 import SolutionsForm from "../../components/forms/SolutionsStyleForm.vue";
+import NoGrid from "../../components/NoGrid.vue";
+
 import { Grid, SolutionStyle } from "grid";
 import { defaultExportOptions, ExportOptions } from "../../types";
 import { api } from "../../api";
