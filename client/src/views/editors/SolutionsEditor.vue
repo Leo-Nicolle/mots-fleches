@@ -66,7 +66,6 @@ function fetch() {
   return promise
     .then(() => api.db.getStyle("solution"))
     .then((s) => {
-      console.log("s", s);
       style.value = s as SolutionStyle;
       indexFirstPage.value =
         grids.value.length + +style.value.pagination.startIdx;

@@ -3,6 +3,8 @@ import {
   Grid, GridStyle, GridState,
   defaultStyles,
   defaultSolutionStyle,
+  isSolutionStyle,
+  Font as GridFont,
 } from 'grid';
 import { Database } from './db';
 import { mergeOptionsWithDefaults } from './utils';
@@ -97,18 +99,31 @@ async function create() {
         promise = promise.then(() => styleStore.getAll())
           .then(styles => {
             styles.forEach(style => {
-              const def = style.definition
-              // @ts-ignore
-              def.family = 'Roboto';
-              def.isGoogle = true;
-              def.weight = "400";
-              styleStore.put(style as GridStyle);
+              const defs: GridFont[] = [style.definition];
+              if (isSolutionStyle(style)) {
+                //@ts-ignore
+                delete style.pagination.margin.top
+                defs.push(style.grids.gridN);
+                defs.push(style.pagination);
+                defs.push(style.words);
+                defs.push(style.size);
+              }
+              defs.forEach(def => {
+                // @ts-ignore
+                delete def.font;
+                // @ts-ignore
+                delete def.name;
+                def.family = 'Roboto';
+                def.isGoogle = true;
+                def.weight = "400";
+                styleStore.put(style as GridStyle);
+              })
             });
           });
       }
 
     },
-  });
+  })
 
   return promise.then(() => db);
 
@@ -232,4 +247,40 @@ export class Idatabase extends Database {
   async isSignedIn() {
     return Promise.resolve(true);
   }
+}
+export function deleteDatabase() {
+  return new Promise((resolve, reject) => {
+    const rq = indexedDB.deleteDatabase('mots-flex-db')
+    rq.onsuccess = resolve;
+    rq.onerror = reject;
+  });
+}
+export function setDatabase(json: any, version: number) {
+  return deleteDatabase()
+    .then(() => {
+      return openDB<MotsFlexDB>('mots-flex-db', version, {
+        upgrade(db, __, _, transaction) {
+          let promise = Promise.resolve();
+          Object.entries(json).forEach(([key, values]) => {
+            // @ts-ignore
+            const objstore = db.createObjectStore(key, {
+              keyPath: 'id',
+            });
+            if(key === 'words'){
+              // @ts-ignore
+              objstore.createIndex('by-word', 'id');
+            }else{
+              // @ts-ignore
+              objstore.createIndex('by-id', 'id');
+            }
+            console.log('creating', key);
+            // @ts-ignore
+            const store = transaction.objectStore(key);
+            promise = promise
+            // @ts-ignore
+              .then(() => Promise.all(values.map((value: any) => store.put(value))))
+          });
+        }
+      });
+    });
 }
