@@ -26,6 +26,8 @@
         v-else
         :role="`${rolePrefix}-size`"
         v-model:value="value.size"
+        :precision="2"
+        :step="0.1"
       />
     </n-form-item>
     <n-form-item :label="$t('forms.color')" path="color">

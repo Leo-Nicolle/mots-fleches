@@ -60,6 +60,7 @@ function fetch() {
 }
 
 function onUpdate() {
+  console.log('on update');
   clearTimeout(saveTimeout.value);
   saveTimeout.value = setTimeout(() => {
     if (!style.value) return;

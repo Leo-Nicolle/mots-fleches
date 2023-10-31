@@ -162,7 +162,7 @@ export class SupaDB extends Database {
       userid: this.userid,
       data: fonts,
     });
-    return font.id;
+    return font.family;
   }
 
   async deleteFont(fontId: string) {

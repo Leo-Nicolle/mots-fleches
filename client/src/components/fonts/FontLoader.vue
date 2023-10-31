@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, ref } from "vue";
+import { defineProps, onMounted, ref } from "vue";
 import { watch } from "vue";
 import { loadFont } from "./load-font";
 import axios from "axios";
@@ -15,7 +15,8 @@ const props = defineProps<{
   isEmbedded?: boolean;
 }>();
 const url = ref<string | null>(null);
-watch([props], () => {
+
+function update() {
   const { value } = props;
   if (isGoogleFont(value)) {
     let weightUrl = `https://fonts.googleapis.com/css?family=${value.family}:${value.weight}`;
@@ -31,6 +32,12 @@ watch([props], () => {
   }
   url.value = null;
   loadFont(value);
+}
+watch([props], () => {
+  update();
+});
+onMounted(() => {
+  update();
 });
 </script>
 

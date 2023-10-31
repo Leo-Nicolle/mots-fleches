@@ -91,6 +91,7 @@ export const lang = {
         randomize: "Randomizar",
         fontFamily: "Fuente",
         fontWeight: "Peso",
+        offset: "Desplazamiento",
     },
     tooltips: {
         incomplete: "esta incompleto",

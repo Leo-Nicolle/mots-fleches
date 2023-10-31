@@ -178,6 +178,10 @@ export type GridStyle = {
     backgroundColor: string;
   };
   /**
+  * Style of the solutions within the grid
+  */
+  solutions: TextStyle<number> & { top: number };
+  /**
    * Arrow style
    */
   arrow: {
@@ -250,6 +254,11 @@ export const defaultStyles: GridStyle = {
     outerBorderSize: 2,
     outerBorderColor: '#000000',
     spaceSize: 4,
+  },
+  solutions: {
+    ...defaultTextStyle,
+    size: 1,
+    top: 0
   },
   definition: {
     ...defaultTextStyle,

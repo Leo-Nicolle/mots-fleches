@@ -57,9 +57,7 @@ function onUpload(filesContents: [string, string][]) {
         .replace(/\..*/, "")
         .replace(/[^\w]/gi, "")
         .replace(/[0-9]+/gi, "");
-      debugger;
       return api.db.pushFont({
-        id: uuid(),
         family,
         updated: Date.now(),
         content: dataURL,

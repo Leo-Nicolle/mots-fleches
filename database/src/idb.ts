@@ -5,6 +5,7 @@ import {
   defaultSolutionStyle,
   isSolutionStyle,
   Font as GridFont,
+  defaultTextStyle,
 } from 'grid';
 import { Database } from './db';
 import { mergeOptionsWithDefaults } from './utils';
@@ -34,8 +35,8 @@ export interface MotsFlexDB extends DBSchema {
 }
 
 async function create() {
-  let promise = Promise.resolve();
-  const db = await openDB<MotsFlexDB>('mots-flex-db', 5, {
+  let promise: Promise<unknown> = Promise.resolve();
+  const db = await openDB<MotsFlexDB>('mots-flex-db', 6, {
     upgrade(db, old, _, transaction) {
       // @ts-ignore
       if (db.objectStoreNames.contains('style')) {
@@ -61,10 +62,10 @@ async function create() {
         optionStore.createIndex('by-id', 'id');
       }
       if (!db.objectStoreNames.contains('fonts')) {
-        const gridStore = db.createObjectStore('fonts', {
-          keyPath: 'id',
+        const fontStore = db.createObjectStore('fonts', {
+          keyPath: 'family',
         });
-        gridStore.createIndex('by-id', 'id');
+        fontStore.createIndex('by-id', 'family');
       }
 
       // @ts-ignore
@@ -84,49 +85,58 @@ async function create() {
       if (old <= 3) {
         const gridStore = transaction.objectStore('grids');
         promise = promise.then(() => gridStore.getAll())
-          .then(grids => {
-            grids.forEach(grid => {
-              // @ts-ignore
-              grid.styleId = grid.optionsId;
-              // @ts-ignore
-              delete grid.optionsId;
-              gridStore.put(grid as GridState);
-            });
-          });
+          .then(grids => Promise.all(grids.map(grid => {
+            // @ts-ignore
+            grid.styleId = grid.optionsId;
+            // @ts-ignore
+            delete grid.optionsId;
+            return gridStore.put(grid as GridState);
+          })));
       }
       if (old <= 5) {
         const styleStore = transaction.objectStore('styles');
         promise = promise.then(() => styleStore.getAll())
-          .then(styles => {
-            styles.forEach(style => {
-              const defs: GridFont[] = [style.definition];
-              if (isSolutionStyle(style)) {
-                //@ts-ignore
-                delete style.pagination.margin.top
-                defs.push(style.grids.gridN);
-                defs.push(style.pagination);
-                defs.push(style.words);
-                defs.push(style.size);
-              }
-              defs.forEach(def => {
-                // @ts-ignore
-                delete def.font;
-                // @ts-ignore
-                delete def.name;
-                def.family = 'Roboto';
-                def.isGoogle = true;
-                def.weight = "400";
-                styleStore.put(style as GridStyle);
-              })
+          .then(styles => Promise.all(styles.map(style => {
+            const defs: GridFont[] = [style.definition];
+            if (isSolutionStyle(style)) {
+              //@ts-ignore
+              delete style.pagination.margin.top
+              defs.push(style.grids.gridN);
+              defs.push(style.pagination);
+              defs.push(style.words);
+              defs.push(style.size);
+            }
+            defs.forEach(def => {
+              // @ts-ignore
+              delete def.font;
+              // @ts-ignore
+              delete def.name;
+              def.family = 'Roboto';
+              def.isGoogle = true;
+              def.weight = "400";
             });
-          });
+            return styleStore.put(style as GridStyle);
+          })));
       }
-
+      if (old <= 6) {
+        console.log('UPDATE TO 6');
+        const styleStore = transaction.objectStore('styles');
+        db.deleteObjectStore('fonts');
+        const fontStore = db.createObjectStore('fonts', {
+          keyPath: 'family',
+        });
+        fontStore.createIndex('by-id', 'family');
+        promise = promise
+          .then(() => styleStore.getAll())
+          .then(styles => Promise.all(styles.map(style => {
+            style.definition.size = 1;
+            style.solutions = { ...defaultTextStyle, size: 1, top: 0 };
+            return styleStore.put(style as GridStyle);
+          })));
+      }
     },
   })
-
   return promise.then(() => db);
-
 }
 
 export class Idatabase extends Database {
@@ -136,7 +146,10 @@ export class Idatabase extends Database {
     if (!prepromise) {
       prepromise = Promise.resolve();
     }
-    this.loadingPromise = prepromise.then(() => create())
+    this.loadingPromise = prepromise.then(() => {
+      console.log('Create');
+      return create()
+    })
       .then((db) => {
         return db.get('styles', defaultStyles.id)
           .then((style) => style ? Promise.resolve('')
@@ -259,11 +272,11 @@ export function deleteDatabase() {
   });
 }
 export function setDatabase(json: any, version: number) {
+  let promise = Promise.resolve();
   return deleteDatabase()
     .then(() => {
       return openDB<MotsFlexDB>('mots-flex-db', version, {
         upgrade(db, __, _, transaction) {
-          let promise = Promise.resolve();
           Object.entries(json).forEach(([key, values]) => {
             // @ts-ignore
             const objstore = db.createObjectStore(key, {
@@ -285,5 +298,6 @@ export function setDatabase(json: any, version: number) {
           });
         }
       });
-    });
+    })
+    .then(() => promise);
 }

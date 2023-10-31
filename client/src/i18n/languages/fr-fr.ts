@@ -91,6 +91,7 @@ export const lang = {
         randomize: "Regénérer",
         fontFamily: "Police",
         fontWeight: "Epaisseur",
+        offset: "Décalage",
 
     },
     tooltips: {

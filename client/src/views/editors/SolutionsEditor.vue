@@ -2,7 +2,7 @@
   <Layout>
     <template #left-panel v-if="grids.length && style">
       <OptionsForm v-model="style" @update:modelValue="save" grid format>
-        <SolutionsForm v-model="style" @update:modelValue="save" />
+        <SolutionsForm v-model="style" @update:modelValue="save"/>
       </OptionsForm>
     </template>
     <template #body>
@@ -81,10 +81,11 @@ function fetch() {
 }
 
 function save() {
+  console.log("on update");
   clearTimeout(saveTimeout.value);
   saveTimeout.value = +setTimeout(() => {
     if (!style.value) return;
-    // api.db.pushStyle(toRaw(style.value) as unknown as SolutionStyle);
+    api.db.pushStyle(toRaw(style.value) as unknown as SolutionStyle);
   }, 100);
 }
 

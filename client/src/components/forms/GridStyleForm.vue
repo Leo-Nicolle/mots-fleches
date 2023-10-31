@@ -51,6 +51,16 @@
           <n-input-number role="space" v-model:value="value.grid.spaceSize" />
         </n-form-item>
       </div>
+      <h3>{{ $t("forms.solutions") }}</h3>
+      <FontSelector v-model="value.solutions" role-prefix="solutions" />
+      <n-form-item :label="$t('forms.offset')" path="top">
+        <n-input-number
+          v-model:value="value.solutions.top"
+          :step="0.5"
+          :precision="1"
+          role="solutions-top"
+        />
+      </n-form-item>
       <div v-if="definition">
         <h3>{{ $t("forms.definitions") }}</h3>
         <FontSelector v-model="value.definition" rolePrefix="definition" />
@@ -126,7 +136,9 @@ const emit = defineEmits<{
   (event: "update:modelValue", value: GridStyle): void;
 }>();
 const value = useModel<GridStyle>(props, emit);
-
+watch(value.value, () => {
+  emit("update:modelValue", value.value);
+});
 </script>
 
 <style scoped>

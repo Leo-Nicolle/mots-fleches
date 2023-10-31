@@ -1,7 +1,6 @@
 import { GridStyle, GridState } from "grid";
 
 export type Font = {
-  id: string;
   family: string;
   content: string;
   updated: number;
