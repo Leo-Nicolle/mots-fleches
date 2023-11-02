@@ -3,6 +3,7 @@
     {{ $t("buttons.exportsvg") }}
   </n-button>
   <n-modal
+    v-if="grids && style && solutionsStyle && grids.length"
     class="exportmodal"
     v-model:show="visible"
     preset="dialog"
@@ -14,7 +15,6 @@
     <div class="modalbody">
       <div class="exporter">
         <SVGGrid
-          v-if="grids && style && grids.length"
           :grid="grids[selectedIndex]"
           dir="horizontal"
           :export-options="exportOptions"

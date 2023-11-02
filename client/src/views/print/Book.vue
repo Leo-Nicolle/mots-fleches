@@ -9,7 +9,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, watch } from "vue";
 import { useRoute } from "vue-router";
 import { Grid, GridStyle, SolutionStyle } from "grid";
 import { ExportOptions } from "../../types";
@@ -55,6 +55,9 @@ function fetch() {
 
 onMounted(() => {
   fetch().then(() => usePrintMessage());
+});
+watch([route], () => {
+  fetch();
 });
 onUnmounted(() => {
   cleanupPrintMessage();
