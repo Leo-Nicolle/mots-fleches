@@ -12,10 +12,7 @@
           </n-icon>
         </template>
       </n-button>
-      <n-button
-        icon-placement="right"
-        @click="emit('dir', dir === 'horizontal' ? 'vertical' : 'horizontal')"
-      >
+      <n-button icon-placement="right" @click="emit('dir', dir === 'horizontal' ? 'vertical' : 'horizontal')">
         <template #icon>
           <n-icon>
             <ArrowForward v-if="dir === 'horizontal'" />
@@ -25,24 +22,15 @@
       </n-button>
     </span>
 
-    <n-data-table
-      v-if="!loading"
-      :bordered="false"
-      :single-line="false"
-      :columns="[
-        {
-          title: `${totalResults} ${$t('suggestions.results')}`,
-          key: 'word',
-        },
-      ]"
-      :data="results"
-      :pagination="{
-        pageSize: 13,
-        simple: true,
-      }"
-      @mousemove="onMouseEvt($event, false)"
-      @click="onMouseEvt($event, true)"
-    />
+    <n-data-table v-if="!loading" :bordered="false" :single-line="false" :columns="[
+      {
+        title: `${totalResults} ${$t('suggestions.results')}`,
+        key: 'word',
+      },
+    ]" :data="results" :pagination="{
+  pageSize: 13,
+  simple: true,
+}" @mousemove="onMouseEvt($event, false)" @click="onMouseEvt($event, true)" />
     <n-button class="loading" v-else :loading="true"></n-button>
   </div>
 </template>
@@ -63,7 +51,7 @@ import { Method, Ordering } from "../types";
 /**
  * Component to display words suggestions
  */
-const results = ref<{word:string}[]>([]);
+const results = ref<{ word: string; }[]>([]);
 const totalResults = ref(0);
 const suggestion = ref(null);
 const version = ref(0);
@@ -143,7 +131,7 @@ function getSuggestions(
     words.sort(() => Math.random() - 0.5);
   }
   totalResults.value = words.length;
-  results.value = words.map((word) => ({word}));
+  results.value = words.map((word) => ({ word }));
 }
 
 function orderingText() {
@@ -174,19 +162,22 @@ function onMouseEvt(evt: MouseEvent, click = false) {
 </script>
 
 <style>
-.n-data-table-tr > td {
+.n-data-table-tr>td {
   cursor: pointer;
 }
+
 .suggestion {
   display: flex;
   flex-direction: column;
   height: 100%;
   width: 100%;
 }
-.suggestion > .loading {
+
+.suggestion>.loading {
   flex: 1;
   padding: 150px 0;
 }
+
 .buttons {
   display: flex;
   flex-direction: row;

@@ -50,25 +50,6 @@ function getChildren(start: number, end: number, index: number, size: number, pa
 
 let interSet: Set<number>;
 export function intersect(a: Map<number, Node[][]>, b: Map<number, Node[][]>) {
-  // const interA: Node[] = [];
-  // const interB: Node[] = [];
-  // interSet = new Set(a.map(c => c.code));
-  // for (let i = 0; i < b.length; i++) {
-  //   if (!interSet.has(b[i].code)) {
-  //     // removedB.push(b[i])
-  //     continue;
-  //   }
-  //   interB.push(b[i]);
-  // }
-  // interSet.clear();
-  // interSet = new Set(b.map(c => c.code));
-  // for (let i = 0; i < a.length; i++) {
-  //   if (!interSet.has(a[i].code)) {
-  //     // removedA.push(a[i]);
-  //     continue;
-  //   }
-  //   interA.push(a[i]);
-  // }
   for (let i = ACode; i < ACode + 26; i++) {
     if (!a.has(i) || !b.has(i)) {
       a.delete(i);
@@ -93,7 +74,7 @@ function parentHasCode(nodes: Node[], code: number, start: number, end: number, 
     const middle = (start + end) >>> 1;
     const parentCode = nodes[middle].parent!.code;
     if (!parentCode) break;
-    foundCodes.add(parentCode)
+    foundCodes.add(parentCode);
     if (parentCode < code) start = middle + 1;
     else end = middle - 1;
   }

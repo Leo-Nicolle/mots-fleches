@@ -11,7 +11,7 @@ interface Possibles {
 const trees = new Map<number, Tree>();
 type Interval = [number, number];
 const cachedResult = new Map<string, CellBest[][]>();
-export type BailOptions = { sharedArray: Uint8Array };
+export type BailOptions = { sharedArray: Uint8Array; };
 export function initCellMap(grid: Grid) {
   const res = grid.cells.reduce((acc, row, y) => {
     acc.push(
@@ -34,6 +34,10 @@ export function initCellMap(grid: Grid) {
     return acc;
   }, [] as CellProba[][]);
   return res;
+}
+
+function cantor(x: number, y: number) {
+  return ((x + y) * (x + y + 1)) / 2 + y;
 }
 
 function intersection(cellMap: CellProba[][], cellBest?: CellBest[][]) {
@@ -171,6 +175,13 @@ function filter(cell: CellA) {
     }
   } else if (validH && validV) {
     intersect(nodesH, nodesV);
+    for (let i = ACode; i < ACode + 26; i++) {
+      const h = nodesH.get(i);
+      const v = nodesV.get(i);
+      if (!h || !v || h.length === 0 || v.length === 0) {
+        impossible.add(i);
+      }
+    }
   }
   //TODO: check if needed
   impossible.forEach(code => {
@@ -272,7 +283,7 @@ export function getCellProbasAccurate2(grid: Grid, options?: BailOptions) {
   const max = 1;
   let i = 0;
   // console.time('firstloop');
-  while (i++ < max) {
+  while (false && i++ < max) {
     shouldRerun = false;
     const Q = lastCells.slice();
     // console.time('firstloop2')
@@ -336,25 +347,109 @@ export function getCellProbasAccurate2(grid: Grid, options?: BailOptions) {
   }
 
 
-  // (["horizontal", "vertical"] as Direction[]).forEach((dir) => {
-  //   const scores = {};
-  //   grid
-  //     .getWords(dir)
-  //     .filter(({ length }) => length > 1)
-  //     .forEach((bounds) => {
-  //       const suffix = dir === 'horizontal' ? 'H' : 'V';
+  const res = cellsA.map((row, y) => {
+    const r = row.map((cell, x) => {
+      const { validH, validV, text } = cellsA[y][x];
+      const res: CellBest = {
+        x, y, validH, validV, empty: text === '*',
+        occurencesH: {},
+        occurencesV: {},
+        total: 0,
+        // bestWordsH: [],
+        // bestWordsV: [],
+        inter: {}
+      };
+      return res;
+    });
+    return r;
+  });
 
-  //       bounds
-  //       .cells.slice().reverse()
-  //       .forEach(({ x, y }, i) => {
-  //         const cellA = cellsA[y][x];
-  //         const isV = +(dir === 'vertical');
-  //         const isH = +(dir === 'horizontal');
-  //       });
-  //     });
+  cellsA.forEach((row) => {
+    row.forEach(({ x, y, nodesH, nodesV, validH, validV }) => {
+      res[y][x].occurencesH = new Map();
+      res[y][x].occurencesV = new Map();
+      if (!validH && !validV) return;
+      for (let i = ACode; i < ACode + 26; i++) {
+        validH && res[y][x].occurencesH.set(i, (nodesH.get(i) || []).reduce((acc, n) => acc + n.end - n.start + 1, 0));
+        validV && res[y][x].occurencesV.set(i, (nodesV.get(i) || []).reduce((acc, n) => acc + n.end - n.start + 1, 0));
+        res[y][x].inter[i] = validH && validV
+          ? Math.min(res[y][x].occurencesH.get(i), res[y][x].occurencesV.get(i))
+          : validH ? res[y][x].occurencesH.get(i) : res[y][x].occurencesV.get(i);
+      }
+      res[y][x].total = Object.values(res[y][x].inter).reduce((acc, v) => acc + v, 0);
+    });
+  });
 
-  console.timeEnd('firstloop');
-  console.log(i, sortedCells.filter(c => c.y === 1).map(c => mapToWords(c.nodesH)));
+  const visitedH = new Set<number>();
+  const visitedV = new Set<number>();
+
+  lastCells.forEach(({ previousH, previousV, x, y, nodesH, nodesV }) => {
+    // const wordsV = mapToWords(cell.nodesV);
+    if (previousH && previousH.validH && !visitedH.has(cantor(x, y))) {
+      const wordsH = mapToWords(nodesH);
+      const scores = new Map();
+      for (let i = 0; i < wordsH.length; i++) {
+        const word = wordsH[i];
+        let score = 0;
+        for (let j = 0; j < word.length; j++) {
+          const letter = word.charCodeAt(j);
+          const xh = x + 1 - word.length + j;
+          score += res[y][xh].inter[letter] / res[y][xh].total;
+        }
+        scores.set(i, score);
+      }
+      let i = 1;
+      visitedH.add(cantor(x, y));
+      let prev = previousH;
+      while (prev && prev.validH) {
+        visitedH.add(cantor(x - i++, y));
+        prev = prev.previousH;
+      }
+      res[y][x - i + 1].bestWordsH = [...scores.entries()]
+        .sort(([, scoreA], [, scoreB]) => scoreB - scoreA)
+        .slice(0, 100)
+        .map(([index]) => wordsH[index]);
+
+    }
+
+    if (previousV && previousV.validH && !visitedV.has(cantor(x, y))) {
+      const wordsV = mapToWords(nodesV);
+      const scores = new Map();
+      for (let i = 0; i < wordsV.length; i++) {
+        const word = wordsV[i];
+        let score = 0;
+        for (let j = 0; j < word.length; j++) {
+          const letter = word.charCodeAt(j);
+          const yh = y + 1 - word.length + j;
+          score += res[yh][x].inter[letter] / res[yh][x].total;
+        }
+        scores.set(i, score);
+      }
+      let i = 1;
+      visitedV.add(cantor(x, y));
+      let prev = previousV;
+      while (prev && prev.validV) {
+        visitedV.add(cantor(x, y - i++));
+        prev = prev.previousV;
+      }
+      res[y - i + 1][x].bestWordsV = [...scores.entries()]
+        .sort(([, scoreA], [, scoreB]) => scoreB - scoreA)
+        .slice(0, 100)
+        .map(([index]) => wordsV[index]);
+    }
+  });
+  res.forEach((row) => {
+    row.forEach(c => {
+      c.inter = Object.entries(c.inter).reduce((acc, [k, v]) => {
+        acc[String.fromCharCode(k)] = v;
+        return acc;
+      }, {});
+    });
+  });
+  return {
+    hasBailed,
+    cellProbas: res,
+  };
 }
 
 
@@ -593,68 +688,44 @@ export function getCellProbas(grid: Grid, options: BailOptions) {
     }
     console.timeEnd('initTree');
   }
-  console.log('getCellProbas')
+  console.log('getCellProbas');
   const cellMap = initCellMap(grid);
-  console.time('getCellProbasAccurate2')
-  getCellProbasAccurate2(grid, options);
-  console.timeEnd('getCellProbasAccurate2')
-  console.time('getCellProbasAccurate1')
-  getCellProbasAccurate(grid, options);
-  console.timeEnd('getCellProbasAccurate1')
-  return cellMap;
-  const cellToWordIndexH: Record<string, number> = {};
-  const cellToWordIndexV: Record<string, number> = {};
-  const cellToBoundsH: Record<string, Bounds> = {};
-  const cellToBoundsV: Record<string, Bounds> = {};
-  const intervalsH: Interval[][] = [];
-  const intervalsV: Interval[][] = [];
-  const cellToIntervalsH: Record<string, number> = {};
-  const cellToIntervalsV: Record<string, number> = {};
-  (["horizontal", "vertical"] as Direction[]).forEach((dir) => {
-    const cellToWordIndex =
-      dir === "horizontal" ? cellToWordIndexH : cellToWordIndexV;
-    const validKey = `valid${dir[0].toUpperCase()}` as 'validH' | 'validV';
-    const cellToBounds = dir === "horizontal" ? cellToBoundsH : cellToBoundsV;
-    const cellToIntervals = dir === "horizontal" ? cellToIntervalsH : cellToIntervalsV;
-    const intervals = dir === "horizontal" ? intervalsH : intervalsV;
-    grid
-      .getWords(dir)
-      .filter(({ length }) => length > 1)
-      .forEach((bounds) => {
-        intervals.push(dico.findInterval(
-          bounds.cells.map((c) => (c.text.length ? c.text : "*")).join("")
-        ) as Interval[]);
+  console.time('getCellProbasAccurate2');
+  const a = getCellProbasAccurate2(grid, options);
+  console.timeEnd('getCellProbasAccurate2');
+  // console.time('getCellProbasAccurate1');
+  // const b = getCellProbasAccurate(grid, options);
+  // console.timeEnd('getCellProbasAccurate1');
+  return a;
+}
 
-        bounds.cells.forEach(({ x, y }, i) => {
-          const cell = cellMap[y][x];
-          if (!cell.empty) {
-            return;
-          }
-          const key = `${y}-${x}`;
-          cell[validKey] = true;
-          cellToWordIndex[key] = i;
-          cellToBounds[key] = bounds;
-          cellToIntervals[key] = intervals.length - 1;
-        });
-      });
+export function copyCellProbas(cellProbas: CellBest[][]) {
+  const visitedH = new Set<number>();
+  const visitedV = new Set<number>();
+  return cellProbas.forEach((row) => {
+    row.forEach(cell => {
+      const { x, y, bestWordsH, bestWordsV } = cell;
+      const ctor = cantor(x, y);
+      if (!visitedH.has(ctor) && bestWordsH) {
+        let i = 0;
+        let current = cell;
+        while (current && current.validH) {
+          visitedH.add(ctor);
+          current.bestWordsH = bestWordsH;
+          current = row[x + i++];
+        }
+      }
+      if (!visitedV.has(ctor) && bestWordsV) {
+        let i = 0;
+        let current = cell;
+        while (current && current.validV) {
+          current.bestWordsV = bestWordsV;
+          visitedV.add(ctor);
+          const nextRow = cellProbas[y + i++];
+          if (!nextRow) break;
+          current = nextRow[x];
+        }
+      }
+    });
   });
-  const total = [intervalsH, intervalsV].reduce((total, is) => total + is
-    .reduce((acc, intervals) => acc + intervals
-      .reduce((acc, [start, end]) => acc + (end - start + 1), 0)
-      , 0)
-    , 0);
-  // from tests, takes like 1sec to test 60k words.
-  // TODO reuse computation above
-  if (total > 60000) {
-    // return getCellProbasFast(grid, options);
-  }
-  const result = getCellProbasAccurate(grid, options);
-  if (cachedResult.size > 10) {
-    cachedResult.delete([...cachedResult.keys()][0]);
-  }
-  if (!result.hasBailed) {
-    cachedResult.set(hash, result.cellProbas);
-  }
-  return result;
-
 }

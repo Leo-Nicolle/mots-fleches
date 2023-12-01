@@ -2,6 +2,7 @@ import { CellProba, Direction, Grid, GridValidity, Vec } from "grid";
 import EventEmitter from "eventemitter3";
 import * as fflate from 'fflate';
 import { api } from "../api";
+import { copyCellProbas } from "./heatmap";
 
 export type Events = {
   'run-result': CellProba[][];
@@ -10,13 +11,13 @@ export type Events = {
   'locale-changed': undefined;
   'start-locale-change': undefined;
   'check-result': GridValidity;
-}
+};
 
 class WorkerController extends EventEmitter<Events> {
   public searchWorker: Worker;
   public probaWorker: Worker;
   private busy: boolean[] = [false, false];
-  private queues: { type: string, data: string }[][] = [[], []];
+  private queues: { type: string, data: string; }[][] = [[], []];
   private flagsBuffer: SharedArrayBuffer;
   private flagsArray: Uint8Array;
   private distribution: [number, number][];
@@ -102,6 +103,7 @@ class WorkerController extends EventEmitter<Events> {
       this.emit('check-result', data);
     }
     if (type === 'run-result') {
+      copyCellProbas(data);
       this.emit('run-result', data);
     }
     if (type === 'bail-result') {
@@ -158,9 +160,9 @@ class WorkerController extends EventEmitter<Events> {
 
   setLocale(locale: string) {
     if (this.locale === locale) return this.loadingPromise
-    .then(() => {
-      this.emit('locale-changed');
-    });
+      .then(() => {
+        this.emit('locale-changed');
+      });
     this.locale = locale;
     this.emit('start-locale-change');
     this.loadingPromise = Promise.all([
@@ -207,7 +209,7 @@ class WorkerController extends EventEmitter<Events> {
       });
     return this.loadingPromise;
   }
-  
+
 }
 
 export const workerController = new WorkerController(localStorage.getItem('locale') || 'fr-fr');
