@@ -14,4 +14,4 @@ build/
 dist/
 docs/.vuepress/.cache
 docs/.vuepress/.temp
-scripts/api-key.js
+scripts/api-key.mjs
