@@ -1,11 +1,14 @@
 import { Direction, Grid, CellProba, Vec, CellBest, Bounds } from "grid";
 import { dico, ACode } from "./dico";
-// window ? window.dico = dico: undefined;
+import { Tree, Node, intersect, mapToWords, getPossibleParents } from './tree';
 
-type Interval = [number, number];
-export type BailOptions = { sharedArray: Uint8Array };
+const trees = new Map<number, Tree>();
+const cachedResult = new Map<string, CellBest[][]>();
+const hashes: string[] = [];
+
+export type BailOptions = { sharedArray: Uint8Array; };
 export function initCellMap(grid: Grid) {
-  return grid.cells.reduce((acc, row, y) => {
+  const res = grid.cells.reduce((acc, row, y) => {
     acc.push(
       row.map(({ definition, text }, x) => {
         return {
@@ -25,6 +28,11 @@ export function initCellMap(grid: Grid) {
     );
     return acc;
   }, [] as CellProba[][]);
+  return res;
+}
+
+function cantor(x: number, y: number) {
+  return ((x + y) * (x + y + 1)) / 2 + y;
 }
 
 function intersection(cellMap: CellProba[][], cellBest?: CellBest[][]) {
@@ -129,292 +137,299 @@ export function getCellProbasFast(grid: Grid, options?: BailOptions) {
   };
 }
 
+interface CellA {
+  previousH: CellA | null;
+  previousV: CellA | null;
+  nextH: CellA | null;
+  nextV: CellA | null;
+  x: number;
+  y: number;
+  text: string;
+  validH: boolean;
+  validV: boolean;
+  nodesH: Map<number, Node[]>;
+  nodesV: Map<number, Node[]>;
+  impossible: Set<number>;
+  // impossibleV: Set<number>;
+}
+
+function filter(cell: CellA) {
+  const { text, validH, validV, nodesH, nodesV, impossible } = cell;
+  // filter out and intersect
+  if (text !== '*') {
+    const code = text.charCodeAt(0);
+    if (validH) {
+      const key = nodesH.get(code);
+      nodesH.clear();
+      nodesH.set(code, key || []);
+    }
+    if (validV) {
+      const key = nodesV.get(code);
+      nodesV.clear();
+      nodesV.set(code, key || []);
+    }
+  } else if (validH && validV) {
+    intersect(nodesH, nodesV);
+    for (let i = ACode; i < ACode + 26; i++) {
+      const h = nodesH.get(i);
+      const v = nodesV.get(i);
+      if (!h || !v || h.length === 0 || v.length === 0) {
+        impossible.add(i);
+      }
+    }
+  }
+  //TODO: check if needed
+  impossible.forEach(code => {
+    nodesH.delete(code);
+    nodesV.delete(code);
+  });
+}
 export function getCellProbasAccurate(grid: Grid, options?: BailOptions) {
-  const cellMap = initCellMap(grid);
-  const cellToWordIndexH: Record<string, number> = {};
-  const cellToWordIndexV: Record<string, number> = {};
-  const cellToBoundsH: Record<string, Bounds> = {};
-  const cellToBoundsV: Record<string, Bounds> = {};
-  const intervalsH: Interval[][] = [];
-  const intervalsV: Interval[][] = [];
-  const cellToIntervalsH: Record<string, number> = {};
-  const cellToIntervalsV: Record<string, number> = {};
+  const cellsA = grid.cells.reduce((acc: CellA[][], row, y) => {
+    const r = row.map((cell, x) => {
+      const { text } = cell;
+      return {
+        previousH: null,
+        previousV: null,
+        nextH: null,
+        nextV: null,
+        text: text.length ? text : '*',
+        x,
+        y,
+        validH: false,
+        validV: false,
+        nodesH: new Map(),
+        nodesV: new Map(),
+        impossible: new Set<number>(),
+      };
+    });
+    acc.push(r);
+    return acc;
+  }, [] as CellA[][]);
+
+
   let hasBailed = false;
   (["horizontal", "vertical"] as Direction[]).forEach((dir) => {
-    const cellToWordIndex =
-      dir === "horizontal" ? cellToWordIndexH : cellToWordIndexV;
-    const validKey = `valid${dir[0].toUpperCase()}` as 'validH' | 'validV';
-    const cellToBounds = dir === "horizontal" ? cellToBoundsH : cellToBoundsV;
-    const cellToIntervals = dir === "horizontal" ? cellToIntervalsH : cellToIntervalsV;
-    const intervals = dir === "horizontal" ? intervalsH : intervalsV;
-
     grid
       .getWords(dir)
       .filter(({ length }) => length > 1)
       .forEach((bounds) => {
-        if (options && options.sharedArray[0]) {
-          hasBailed = true;
-          return;
-        }
-        intervals.push(dico.findInterval(
-          bounds.cells.map((c) => (c.text.length ? c.text : "*")).join("")
-        ) as Interval[]);
-
-
+        const tree = trees.get(bounds.length);
+        const query = bounds.cells[0].text.length ? bounds.cells[0].text : '*';
+        const suffix = dir === 'horizontal' ? 'H' : 'V';
+        cellsA[bounds.start.y][bounds.start.x][`nodes${suffix}`] = tree?.getIntervals(query) || new Map<number, Node[]>();
         bounds.cells.forEach(({ x, y }, i) => {
-          if (options && options.sharedArray[0]) {
-            hasBailed = true;
-            return;
-          }
-          const cell = cellMap[y][x];
-          if (!cell.empty) {
-            return;
-          }
-          const key = `${y}-${x}`;
-          cell[validKey] = true;
-          cellToWordIndex[key] = i;
-          cellToBounds[key] = bounds;
-          cellToIntervals[key] = intervals.length - 1;
+          const cellA = cellsA[y][x];
+          const isV = +(dir === 'vertical');
+          const isH = +(dir === 'horizontal');
+          cellA[`previous${suffix}`] = i === 0 ? null : cellsA[y - 1 * isV][x - 1 * isH];
+          cellA[`next${suffix}`] = i === bounds.length - 1 ? null : cellsA[y + 1 * isV][x + 1 * isH];
+          cellA[`index${suffix}`] = i;
+          cellA[`valid${suffix}`] = true;
         });
       });
   });
-
-  const sortedCells = grid.cells.flat()
-    .filter(({ x, y }) => cellMap[y][x].empty && !grid.cells[y][x].definition)
+  const sortedCells = cellsA.flat()
+    .filter(({ x, y }) => !grid.cells[y][x].definition)
     .sort(({ x: xa, y: ya }, { x: xb, y: yb }) => {
       const dx = xa - xb;
       const dy = ya - yb;
       return dy === 0 ? dx : dy;
     });
-
-  sortedCells.forEach(({ x, y }) => {
-    const key = `${y}-${x}`;
-    const iV = cellToIntervalsV[key];
-    const iH = cellToIntervalsH[key];
-    const indexH = cellToWordIndexH[key];
-    const indexV = cellToWordIndexV[key];
-    let newStackV: Interval[] = [];
-    let newStackH: Interval[] = [];
-    const validH = cellMap[y][x].validH;
-    const validV = cellMap[y][x].validV;
-    // console.log(key, {
-    //   vTotal: (intervalsV[iV] || [])
-    //     .reduce((acc, [start, end]) => acc + end - start + 1, 0),
-    //   v: (intervalsV[iV] || []).length,
-    //   hTotal: (intervalsH[iH] || [])
-    //     .reduce((acc, [start, end]) => acc + end - start + 1, 0),
-    //   h: (intervalsH[iH] || []).length,
-
-    // })
-    // console.time(`cell ${key}`);
-    for (let j = 0; j < 26; j++) {
-      let stackV = (validV && intervalsV[iV].slice()) as Interval[];
-      let stackH = (validH && intervalsH[iH].slice()) as Interval[];
-      const lengthH = newStackH.length;
-      const lengthV = newStackV.length;
-      while (validH && stackH.length) {
-        const [start, end] = stackH.pop()!;
-        const newStart = dico.stringBS.findStartIdx(
-          ACode + j,
-          indexH,
-          start,
-          end
-        );
-        const newEnd = dico.stringBS.findEndIdx(
-          ACode + j,
-          indexH,
-          newStart,
-          end
-        );
-        if (newStart > newEnd) continue;
-        newStackH.push([newStart, newEnd]);
+  const lastCells = sortedCells.slice().reverse().filter(({ nextH, nextV }) => !nextH || !nextV);
+  sortedCells.forEach(cell => {
+    const mapH = new Map();
+    const mapV = new Map();
+    const { previousH, previousV } = cell;
+    [
+      {
+        prev: previousH,
+        prevNodes: previousH && previousH.nodesH,
+        map: mapH,
+        key: 'nodesH',
+      },
+      {
+        prev: previousV,
+        prevNodes: previousV && previousV.nodesV,
+        map: mapV,
+        key: 'nodesV',
       }
-      while (validV && stackV.length) {
-        const [start, end] = stackV.pop()!;
-        const newStart = dico.stringBS.findStartIdx(
-          ACode + j,
-          indexV,
-          start,
-          end
-        );
-        const newEnd = dico.stringBS.findEndIdx(
-          ACode + j,
-          indexV,
-          newStart,
-          end
-        );
-        if (newStart > newEnd) continue;
-        newStackV.push([newStart, newEnd]);
-      }
-      if (stackV && stackH) {
-        const dv = newStackV.length - lengthV;
-        const dh = newStackH.length - lengthH;
-        if (dh && !dv) {
-          newStackH = newStackH.slice(0, lengthH);
-        }
-        if (!dh && dv) {
-          newStackV = newStackV.slice(0, lengthV);
-        }
-      }
-    }
-    if (validH) {
-      intervalsH[iH] = newStackH;
-      newStackH = [];
-    }
-    if (validV) {
-      intervalsV[iV] = newStackV;
-      newStackV = [];
-    }
-    // console.timeEnd(`cell ${key}`);
-  });
-
-  // count how many words have each letter in each cell
-  sortedCells.forEach(({ x, y }) => {
-    const key = `${y}-${x}`;
-    const iV = cellToIntervalsV[key];
-    const iH = cellToIntervalsH[key];
-    const indexH = cellToWordIndexH[key];
-    const indexV = cellToWordIndexV[key];
-    const stackV = (cellMap[y][x].validV && intervalsV[iV].slice()) as Interval[];
-    const stackH = (cellMap[y][x].validH && intervalsH[iH].slice()) as Interval[];
-    const occurencesV = {} as Record<string, number>;
-    const occurencesH = {} as Record<string, number>;
-
-    stackV && stackV.forEach(([start, end]) => {
-      const letter = dico.words[dico.sorted[start]][indexV];
-      occurencesV[letter] = (occurencesV[letter] || 0) + (end - start + 1);
-    });
-    stackH && stackH.forEach(([start, end]) => {
-      const letter = dico.words[dico.sorted[start]][indexH];
-      occurencesH[letter] = (occurencesH[letter] || 0) + (end - start + 1);
-    });
-    let total = 0;
-    let inter: Record<string, number> = {};
-    if (stackV && stackH) {
+    ].forEach(({ prev, key, map, prevNodes }) => {
+      if (!prev || !prevNodes) return;
       for (let i = 0; i < 26; i++) {
-        const letter = String.fromCharCode(ACode + i);
-        inter[letter] = Math.min(occurencesV[letter] || 0, occurencesH[letter] || 0);
-        total += inter[letter];
+        map.set(ACode + i, []);
       }
-    } else {
-      inter = stackV ? occurencesV : occurencesH;
-      total = Object.entries(inter).reduce((total, [_, value]) => total + value, 0);
-    }
-    cellMap[y][x].inter = inter;
-    cellMap[y][x].totalInter = total;
-  }, []);
-
-  // compute the scores for each words
-  const bestWordsH: Record<string, number[]> = {};
-  const bestWordsV: Record<string, number[]> = {};
-
-  (["horizontal", "vertical"] as Direction[]).forEach((dir) => {
-    const cellToWordIndex =
-      dir === "horizontal" ? cellToWordIndexH : cellToWordIndexV;
-    const bestWords = dir === "horizontal" ? bestWordsH : bestWordsV;
-    const cellToIntervals = dir === "horizontal" ? cellToIntervalsH : cellToIntervalsV;
-    const intervalMap = dir === "horizontal" ? intervalsH : intervalsV;
-    grid
-      .getWords(dir)
-      .filter(({ length }) => length > 1)
-      .forEach((bounds) => {
-        const scores = {} as Record<number, number>;
-        bounds.cells.forEach(({ x, y }) => {
-          (intervalMap[cellToIntervals[`${y}-${x}`]] || [])
-            .forEach(([start, end]) => {
-              const word = dico.words[dico.sorted[start]];
-              const letter = word[cellToWordIndex[`${y}-${x}`]];
-              const score = (cellMap[y][x].inter[letter] || 0) / cellMap[y][x].totalInter;
-              for (let i = start; i <= end; i++) {
-                scores[i] = (scores[i] || 0) + score;
-              }
+      prevNodes.forEach((nodes) => {
+        nodes
+          .forEach(node => {
+            node.children.forEach(child => {
+              map.get(child.code) && map.get(child.code).push(child);
             });
-        });
-        const best = Object.entries(scores)
-          .sort(([, scoreA], [, scoreB]) => scoreB - scoreA)
-          .slice(0, 100)
-          .map(([index]) => Number(index));
-        bounds.cells.forEach(({ x, y }) => {
-          bestWords[`${y}-${x}`] = best;
-        });
+          });
       });
+      cell[key] = map;
+    });
+    filter(cell);
 
   });
+  const res = cellsA.map((row, y) => {
+    const r = row.map((cell, x) => {
+      const { validH, validV, text } = cellsA[y][x];
+      const res: CellBest = {
+        x, y, validH, validV, empty: text === '*',
+        occurencesH: {},
+        occurencesV: {},
+        total: 0,
+        // bestWordsH: [],
+        // bestWordsV: [],
+        inter: {}
+      };
+      return res;
+    });
+    return r;
+  });
 
+  cellsA.forEach((row) => {
+    row.forEach(({ x, y, nodesH, nodesV, validH, validV }) => {
+      res[y][x].occurencesH = new Map();
+      res[y][x].occurencesV = new Map();
+      if (!validH && !validV) return;
+      for (let i = ACode; i < ACode + 26; i++) {
+        validH && res[y][x].occurencesH.set(i, (nodesH.get(i) || []).reduce((acc, n) => acc + n.end - n.start + 1, 0));
+        validV && res[y][x].occurencesV.set(i, (nodesV.get(i) || []).reduce((acc, n) => acc + n.end - n.start + 1, 0));
+        res[y][x].inter[i] = validH && validV
+          ? Math.min(res[y][x].occurencesH.get(i), res[y][x].occurencesV.get(i))
+          : validH ? res[y][x].occurencesH.get(i) : res[y][x].occurencesV.get(i);
+      }
+      res[y][x].total = Object.values(res[y][x].inter).reduce((acc, v) => acc + v, 0);
+    });
+  });
+
+  const visitedH = new Set<number>();
+  const visitedV = new Set<number>();
+
+  lastCells.forEach(({ previousH, previousV, x, y, nodesH, nodesV }) => {
+    // const wordsV = mapToWords(cell.nodesV);
+    if (previousH && previousH.validH && !visitedH.has(cantor(x, y))) {
+      const wordsH = mapToWords(nodesH);
+      const scores = new Map();
+      for (let i = 0; i < wordsH.length; i++) {
+        const word = wordsH[i];
+        let score = 0;
+        for (let j = 0; j < word.length; j++) {
+          const letter = word.charCodeAt(j);
+          const xh = x + 1 - word.length + j;
+          score += res[y][xh].inter[letter] / res[y][xh].total;
+        }
+        scores.set(i, score);
+      }
+      let i = 1;
+      visitedH.add(cantor(x, y));
+      let prev = previousH;
+      while (prev && prev.validH) {
+        visitedH.add(cantor(x - i++, y));
+        prev = prev.previousH;
+      }
+      res[y][x - i + 1].bestWordsH = [...scores.entries()]
+        .sort(([, scoreA], [, scoreB]) => scoreB - scoreA)
+        .slice(0, 100)
+        .map(([index]) => wordsH[index]);
+
+    }
+
+    if (previousV && previousV.validH && !visitedV.has(cantor(x, y))) {
+      const wordsV = mapToWords(nodesV);
+      const scores = new Map();
+      for (let i = 0; i < wordsV.length; i++) {
+        const word = wordsV[i];
+        let score = 0;
+        for (let j = 0; j < word.length; j++) {
+          const letter = word.charCodeAt(j);
+          const yh = y + 1 - word.length + j;
+          score += res[yh][x].inter[letter] / res[yh][x].total;
+        }
+        scores.set(i, score);
+      }
+      let i = 1;
+      visitedV.add(cantor(x, y));
+      let prev = previousV;
+      while (prev && prev.validV) {
+        visitedV.add(cantor(x, y - i++));
+        prev = prev.previousV;
+      }
+      res[y - i + 1][x].bestWordsV = [...scores.entries()]
+        .sort(([, scoreA], [, scoreB]) => scoreB - scoreA)
+        .slice(0, 100)
+        .map(([index]) => wordsV[index]);
+    }
+  });
+  res.forEach((row) => {
+    row.forEach(c => {
+      c.inter = Object.entries(c.inter).reduce((acc, [k, v]) => {
+        acc[String.fromCharCode(k)] = v;
+        return acc;
+      }, {});
+    });
+  });
   return {
-    cellProbas: grid.cells.reduce((acc, row, y) => {
-      acc.push(
-        row.map((_, x) => {
-          const { validH, validV, empty, inter } = cellMap[y][x];
-          const key = `${y}-${x}`;
-          return {
-            validH,
-            validV,
-            empty,
-            bestWordsV: (bestWordsV[key] || []).map((index) => dico.words[dico.sorted[index]]),
-            bestWordsH: (bestWordsH[key] || []).map((index) => dico.words[dico.sorted[index]]) ,
-            inter,
-            x,
-            y,
-          };
-        })
-      );
-      return acc;
-    }, [] as CellBest[][]),
-    hasBailed
+    hasBailed,
+    cellProbas: res,
   };
-
 }
 
-
 export function getCellProbas(grid: Grid, options: BailOptions) {
-  const cellMap = initCellMap(grid);
-  const cellToWordIndexH: Record<string, number> = {};
-  const cellToWordIndexV: Record<string, number> = {};
-  const cellToBoundsH: Record<string, Bounds> = {};
-  const cellToBoundsV: Record<string, Bounds> = {};
-  const intervalsH: Interval[][] = [];
-  const intervalsV: Interval[][] = [];
-  const cellToIntervalsH: Record<string, number> = {};
-  const cellToIntervalsV: Record<string, number> = {};
-  (["horizontal", "vertical"] as Direction[]).forEach((dir) => {
-    const cellToWordIndex =
-      dir === "horizontal" ? cellToWordIndexH : cellToWordIndexV;
-    const validKey = `valid${dir[0].toUpperCase()}` as 'validH' | 'validV';
-    const cellToBounds = dir === "horizontal" ? cellToBoundsH : cellToBoundsV;
-    const cellToIntervals = dir === "horizontal" ? cellToIntervalsH : cellToIntervalsV;
-    const intervals = dir === "horizontal" ? intervalsH : intervalsV;
-    grid
-      .getWords(dir)
-      .filter(({ length }) => length > 1)
-      .forEach((bounds) => {
-        intervals.push(dico.findInterval(
-          bounds.cells.map((c) => (c.text.length ? c.text : "*")).join("")
-        ) as Interval[]);
+  console.time('getCellProbas');
 
-        bounds.cells.forEach(({ x, y }, i) => {
-          const cell = cellMap[y][x];
-          if (!cell.empty) {
-            return;
-          }
-          const key = `${y}-${x}`;
-          cell[validKey] = true;
-          cellToWordIndex[key] = i;
-          cellToBounds[key] = bounds;
-          cellToIntervals[key] = intervals.length - 1;
-        });
-      });
-  });
-  const total = [intervalsH, intervalsV].reduce((total, is) => total + is
-    .reduce((acc, intervals) => acc + intervals
-      .reduce((acc, [start, end]) => acc + (end - start + 1), 0)
-      , 0)
-    , 0);
-  // from tests, takes like 1sec to test 60k words.
-  // TODO reuse computation above
-  if (total > 60000) {
-    // return getCellProbasFast(grid, options);
+  const hash = grid.serialize();
+  if (cachedResult.has(hash)) {
+    console.timeEnd('getCellProbas');
+    return { hasBailed: false, cellProbas: cachedResult.get(hash)! };
   }
-  return getCellProbasAccurate(grid, options);
+  if (!trees.size) {
+    const min = dico.words[dico.sorted[0]].length;
+    const max = dico.words[dico.sorted[dico.sorted.length - 1]].length;
+    for (let i = min; i <= max; i++) {
+      trees.set(i, new Tree(i));
+    }
+  }
+  const a = getCellProbasAccurate(grid, options);
+  cachedResult.set(hash, a.cellProbas);
+  hashes.push(hash);
+  if (hashes.length > 50) {
+    const hash = hashes.shift()!;
+    cachedResult.delete(hash);
+  }
+  console.timeEnd('getCellProbas');
+  return a;
+}
 
+export function copyCellProbas(cellProbas: CellBest[][]) {
+  const visitedH = new Set<number>();
+  const visitedV = new Set<number>();
+  return cellProbas.forEach((row) => {
+    row.forEach(cell => {
+      const { x, y, bestWordsH, bestWordsV } = cell;
+      const ctor = cantor(x, y);
+      if (!visitedH.has(ctor) && bestWordsH) {
+        let i = 0;
+        let current = cell;
+        while (current && current.validH) {
+          visitedH.add(ctor);
+          current.bestWordsH = bestWordsH;
+          current = row[x + i++];
+        }
+      }
+      if (!visitedV.has(ctor) && bestWordsV) {
+        let i = 0;
+        let current = cell;
+        while (current && current.validV) {
+          current.bestWordsV = bestWordsV;
+          visitedV.add(ctor);
+          const nextRow = cellProbas[y + i++];
+          if (!nextRow) break;
+          current = nextRow[x];
+        }
+      }
+    });
+  });
 }

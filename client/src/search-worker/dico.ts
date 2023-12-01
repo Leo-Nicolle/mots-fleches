@@ -1,6 +1,8 @@
 import { StringBS } from "./string-bs";
 
 export const ACode = "A".charCodeAt(0);
+export const ZCode = "Z".charCodeAt(0);
+
 
 /**
  * Dico is a sigleton class that contains the dictionnary
@@ -60,6 +62,12 @@ export class Dico {
         return this.words[a].localeCompare(this.words[b]);
       });
     this.stringBS = new StringBS(this.words, this.sorted);
+  }
+
+  findLengthInterval(length: number) {
+    const start = this.stringBS.byLengthStart(length, 0, this.words.length - 1);
+    const end = this.stringBS.byLengthEnd(length, start, this.words.length - 1);
+    return [start, end];
   }
 
   findInterval(query: string) {
