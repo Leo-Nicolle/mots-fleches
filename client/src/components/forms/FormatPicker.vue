@@ -1,6 +1,6 @@
 <template>
   <span class="formatpicker">
-    <h3>{{ $t('forms.format') }}</h3>
+    <h3>{{ $t("forms.format") }}</h3>
     <n-form-item :label="$t('forms.format')" path="fomat.name">
       <n-select v-model:value="format" :options="options" />
     </n-form-item>
@@ -13,31 +13,8 @@
     <n-form-item :label="$t('forms.height')" path="format.height">
       <n-input-number role="format-height" v-model:value="value.height" />
     </n-form-item>
-    <h3>{{ $t('forms.margins') }}</h3>
-    <n-form-item :label="$t('forms.left')" path="format.margin.left">
-      <n-input-number
-        role="format-margin-left"
-        v-model:value="value.margin.left"
-      />
-    </n-form-item>
-    <n-form-item :label="$t('forms.right')" path="format.margin.right">
-      <n-input-number
-        role="format-margin-right"
-        v-model:value="value.margin.right"
-      />
-    </n-form-item>
-    <n-form-item :label="$t('forms.top')" path="format.margin.top">
-      <n-input-number
-        role="format-margin-top"
-        v-model:value="value.margin.top"
-      />
-    </n-form-item>
-    <n-form-item :label="$t('forms.bottom')" path="format.margin.bottom">
-      <n-input-number
-        role="format-margin-bottom"
-        v-model:value="value.margin.bottom"
-      />
-    </n-form-item>
+    <h3>{{ $t("forms.margins") }}</h3>
+    <MarginForm v-if="value" v-model="value.margin" role-prefix="format.margins" />
   </span>
 </template>
 
@@ -45,6 +22,7 @@
 import { ref, defineProps, defineEmits, computed, watchEffect } from "vue";
 import { useModel } from "../../js/useModel";
 import { Format } from "grid";
+import MarginForm from "./MarginForm.vue";
 /**
  * Form to edit paper format and margins
  */
@@ -130,7 +108,7 @@ const format = computed({
   },
 });
 
-const value = useModel(props, emit);
+const value = useModel<Format>(props, emit);
 </script>
 
 <style>

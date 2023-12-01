@@ -169,6 +169,7 @@ const emit = defineEmits<{
    */
   (event: "size-update"): void;
 }>();
+
 const dir = ref<Direction>("horizontal");
 const focus = ref<Cell>(nullCell);
 const hoveredCell = ref<Cell>(nullCell);

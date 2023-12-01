@@ -1,5 +1,6 @@
 <template>
   <div v-if="grids && solutionStyle">
+    <FontLoader :value="solutionStyle.grids.gridN" />
     <Paper
       v-for="(gs, i) in gridsPerPage"
       :key="i"
@@ -30,9 +31,11 @@
 import { defineProps, defineEmits } from "vue";
 import SVGGrid from "./svg-renderer/Grid.vue";
 import Paper from "./Paper.vue";
+import FontLoader from "./fonts/FontLoader.vue";
 import { Grid, nullCell, SolutionStyle } from "grid";
 import { computed } from "vue";
 import { ExportOptions } from "../types";
+import { getFont } from "../js/useFont";
 
 const emit = defineEmits<{
   pageCount: number;
@@ -68,13 +71,14 @@ const cols = computed(() => {
   if (!props.solutionStyle) return "";
   return `repeat(${props.solutionStyle.grids.cols},0)`;
 });
-const gridNFont = computed(() => {
-  if (!props.solutionStyle) return "";
-  return `${props.solutionStyle.grids.gridN.size} ${props.solutionStyle.grids.gridN.font}`;
-});
+const gridNFont = computed(() => getFont(props.solutionStyle.grids.gridN));
 const gridNColor = computed(() => {
   if (!props.solutionStyle) return "";
   return props.solutionStyle.grids.gridN.color;
+});
+const gridNMargin = computed(() => {
+  if (!props.solutionStyle) return "";
+  return props.solutionStyle.grids.gridN.margin.bottom;
 });
 const gridsPerPage = computed(() => {
   if (!props.solutionStyle) return [props.grids];
@@ -96,6 +100,7 @@ const gridsPerPage = computed(() => {
 }
 .gridN {
   font: v-bind(gridNFont);
+  margin-bottom: v-bind(gridNMargin);
   color: v-bind(gridNColor);
 }
 .grids {

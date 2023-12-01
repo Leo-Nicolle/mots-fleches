@@ -49,13 +49,13 @@ function fetch() {
     });
 }
 function onDelete() {
-  Promise.all(
+  return Promise.all(
     selected.value.map((style, i) => api.db.deleteStyle(style.id))
   ).then(() => fetch());
 }
 
 function createStyle() {
-  return api.db.pushStyle(newStyle()).then(() => fetch());
+  // return api.db.pushStyle(newStyle()).then(() => fetch());
 }
 
 onMounted(() => {

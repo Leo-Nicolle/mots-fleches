@@ -32,7 +32,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/styles',
     name: 'stylesList',
-    component: () => import('../views/Styles.vue')
+    component: () => import('../views/editors/StyleEditor.vue')
   },
   {
     path: '/styles/:id',
@@ -93,6 +93,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/words',
     name: 'words',
     component: () => import('../views/Words.vue')
+  },
+  {
+    path: '/fonts',
+    name: 'fonts',
+    component: () => import('../views/Fonts.vue')
   },
 ];
 

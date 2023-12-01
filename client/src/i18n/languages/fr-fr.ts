@@ -7,11 +7,11 @@ export const lang = {
         solutions: "Solutions",
         words: "Mots",
         about: "A propos",
+        fonts: "Polices"
     },
     buttons: {
         changeLanguage: "Traduire",
         delete: "Supprimer",
-        cancel: 'Annuler',
         create: "Créer",
         yes: "Oui",
         no: "Non",
@@ -22,9 +22,19 @@ export const lang = {
         print: "Imprimer",
         exportsvg: "Export SVG",
         support: "Support MotsFlex",
+        cancel: "Annuler",
+        ok: "Ok",
+        download: "Télécharger",
+        uploadGrids: "Upload grilles",
+        uploadWords: "Upload mots",
+        dragdrop: "Drag & Drop vos fichiers ici (ou clickez)",
+        here: "ici", 
     },
     suggestions: {
         results: "Résultats",
+    },
+    titles: {
+        newFont: "Nouvelle police",
     },
     forms: {
         title: "Titre",
@@ -58,11 +68,12 @@ export const lang = {
         width: "Largeur",
         height: "Hauteur",
         margins: "Marges",
+        margin: "Marge",
         align: 'Alignement',
         pagination: "Pagination",
         left: "Gauche",
         center: 'Centre',
-        startIndex: 'Index première page',    
+        startIndex: 'Index première page',
         top: "Haut",
         right: "Droite",
         bottom: "Bas",
@@ -78,6 +89,10 @@ export const lang = {
         grid: "Grille",
         wordLength: "Longueur des mots",
         randomize: "Regénérer",
+        fontFamily: "Police",
+        fontWeight: "Epaisseur",
+        offset: "Décalage",
+
     },
     tooltips: {
         incomplete: "est incomplet",
@@ -92,6 +107,7 @@ export const lang = {
         wrongpassword: "Mot de passe ou email incorrect.",
         passwordsdontmatch: "Les mots de passe ne correspondent pas.",
         passwordtooshort: "Le mot de passe est trop court. Minimum 8 caractères.",
+        noGrid: "Vous n'avez pas de grille, veuillez en créer une avant de modifier les styles.",
     },
     login: {
         title: "Connexion",

@@ -17,6 +17,12 @@
         :style="style"
         :solutionsStyle="solutionsStyle"
       />
+      <n-button round @click="download"> {{ $t('buttons.download') }} </n-button>
+      <UploadModal
+        :title="$t('buttons.uploadGrids')"
+        :buttonText="$t('buttons.uploadGrids')"
+        @ok="onUpload"
+      />
     </template>
     <template #card-title="{ elt }">
       <span>
@@ -47,7 +53,9 @@ import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import SVGGrid from "../components/svg-renderer/Grid.vue";
 import ExportModal from "../components/ExportModal.vue";
+import ExportButton from "../components/ExportButton.vue";
 import Layout from "../layouts/GridLayout.vue";
+import UploadModal from "../components/UploadModal.vue";
 import { defaultExportOptions } from "../types";
 import { Grid, GridStyle, nullCell, SolutionStyle } from "grid";
 import generate from "../js/maze-generator";
@@ -60,7 +68,6 @@ const router = useRouter();
 const grids = ref<Grid[]>([]);
 const style = ref<GridStyle>();
 const solutionsStyle = ref<SolutionStyle>();
-
 const selected = ref<Grid[]>([]);
 
 const exportQuery = computed(() => {
@@ -85,11 +92,30 @@ function fetch() {
 }
 
 function onDelete() {
-  Promise.all(selected.value.map((grid) => api.db.deleteGrid(grid.id))).then(
-    () => fetch()
-  );
+  return Promise.all(
+    selected.value.map((grid) => api.db.deleteGrid(grid.id))
+  ).then(() => fetch());
+}
+function download() {
+  const toDl = selected.value.length ? selected.value : grids.value;
+  const a = document.createElement("a");
+  const file = new Blob([JSON.stringify(toDl)], { type: "text/plain" });
+  a.href = URL.createObjectURL(file);
+  a.download = "grids.json";
+  a.click();
 }
 
+function onUpload(filesContents: [string, string][]) {
+  return Promise.all(
+    filesContents.map(([filename, json]) => {
+      return Promise.all(
+        JSON.parse(json).map((grid) =>
+          api.db.pushGrid(Grid.unserialize(JSON.stringify(grid)))
+        )
+      );
+    })
+  ).then(() => fetch());
+}
 function createGrid() {
   const newGrid = new Grid(10, 10);
   newGrid.title = "Nouvelle Grille";

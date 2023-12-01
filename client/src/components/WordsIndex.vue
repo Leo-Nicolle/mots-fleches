@@ -1,5 +1,7 @@
 <template>
   <div v-if="grids && solutionStyle">
+    <FontLoader :value="solutionStyle.grids.gridN" />
+    <FontLoader :value="solutionStyle.words" />
     <Paper
       v-for="(words, i) in layout.wordsPerPage"
       :key="i"
@@ -34,10 +36,12 @@
 
 <script setup lang="ts">
 import { defineProps, ref, defineEmits, watch } from "vue";
-import Paper from "./Paper.vue";
 import { Grid, getAllWords, SolutionStyle } from "grid";
 import { computed } from "vue";
+import Paper from "./Paper.vue";
+import FontLoader from "./fonts/FontLoader.vue";
 import { ExportOptions } from "../types";
+import { getFont } from "../js/useFont";
 /**
  * Component to render the list of words used in an array of grids
  */
@@ -63,14 +67,9 @@ const emit = defineEmits<{
   (event: "pageCount", value: number): void;
 }>();
 
-const wordFont = computed(
-  () =>
-    `${props.solutionStyle.words.size} ${props.solutionStyle.words.font}`
-);
+const wordFont = computed(() => getFont(props.solutionStyle.words));
 const wordsColor = computed(() => props.solutionStyle.words.color);
-const sizeFont = computed(
-  () => `${props.solutionStyle.size.size} ${props.solutionStyle.size.font}`
-);
+const sizeFont = computed(() => getFont(props.solutionStyle.size));
 const sizeColor = computed(() => props.solutionStyle.size.color);
 const layout = ref<{ wordsPerPage: (number | string)[][]; heights: string[] }>({
   wordsPerPage: [],

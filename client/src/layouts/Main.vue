@@ -207,6 +207,17 @@ function getNavChildren() {
         h(
           RouterLink,
           {
+            to: "/fonts",
+          },
+          { default: () => i18n.global.t("nav.fonts") }
+        ),
+      key: "go-to-fonts",
+    },
+    {
+      label: () =>
+        h(
+          RouterLink,
+          {
             to: "/about",
           },
           { default: () => i18n.global.t("nav.about") }

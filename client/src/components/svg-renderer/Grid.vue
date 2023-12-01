@@ -13,6 +13,8 @@
     @mouseout="onMouseLeave"
     xmlns="http://www.w3.org/2000/svg"
   >
+    <FontLoader :value="style.definition" />
+    <FontLoader v-if="isSolutionStyle(style)" :value="style.solutions" />
     <defs></defs>
     <g
       class="cells"
@@ -50,7 +52,8 @@
               v-bind="sp"
               :line-height="defSize"
               :font-size="defSize"
-              :font-family="defFont"
+              :font-family="defFontFamily"
+              :font-weight="defFontWeight"
               :fill="defColor"
             >
               {{ sp.text }}
@@ -58,10 +61,13 @@
           </text>
           <text
             :x="xText(cell)"
-            :y="yText(cell) + (6 * cellWidth(style)) / 7"
-            :font-family="textFont"
+            :y="yText(cell) + cellWidth(style) / 2 + textTopOffset"
+            alignment-baseline="central"
+            dominant-baseline="center"
+            :font-family="textFontFamily"
+            :font-weight="textFontWeight"
+            :fill="textFontColor"
             :font-size="textSize"
-            dominant-baseline="alphabetic"
             v-else-if="!cell.definition && exportOptions.texts"
           >
             {{ cell.text || cell.suggestion }}
@@ -160,6 +166,7 @@
 </template>
 
 <script setup lang="ts">
+import FontLoader from "../fonts/FontLoader.vue";
 import { defineEmits, ref, defineProps, computed, nextTick } from "vue";
 import { getD } from "../../js/paths";
 import {
@@ -179,6 +186,8 @@ import {
   getLines,
   arrowPositions,
   ArrowDir,
+  SolutionStyle,
+  isSolutionStyle,
 } from "grid";
 import { ExportOptions } from "../../types";
 import { getCellClass } from "../../js/utils";
@@ -194,7 +203,7 @@ const props = defineProps<{
   /**
    * The style of the grid
    */
-  style: GridStyle;
+  style: SolutionStyle | GridStyle;
   /**
    * The focused cell (can be nullCell)
    */
@@ -234,10 +243,23 @@ const lineColor = computed(() => props.style.grid.borderColor);
 const spaceStroke = computed(() => props.style.grid.spaceSize);
 const outerLineStroke = computed(() => props.style.grid.outerBorderSize);
 const outerLineColor = computed(() => props.style.grid.outerBorderColor);
-const defSize = computed(() => props.style.definition.size);
-const textSize = computed(() => props.style.grid.cellSize);
-const textFont = computed(() => `roboto`);
-const defFont = computed(() => `${props.style.definition.font}`);
+const defSize = computed(
+  () => (props.style.grid.cellSize / 4) * props.style.definition.size
+);
+const textSize = computed(() => {
+  return (
+    (isSolutionStyle(props.style) ? props.style.solutions.size : 1) *
+    props.style.grid.cellSize
+  );
+});
+const textFontFamily = computed(() => props.style.solutions.family);
+const textFontWeight = computed(() => props.style.solutions.weight);
+const textFontColor = computed(() => props.style.solutions.color);
+const textTopOffset = computed(() => props.style.solutions.top);
+
+const defFontFamily = computed(() => `${props.style.definition.family}`);
+const defFontWeight = computed(() => `${props.style.definition.weight}`);
+
 const defBackgroundColor = computed(
   () => props.style.definition.backgroundColor
 );
@@ -308,8 +330,7 @@ const splits = computed(() =>
         ratio * cellWidth(props.style);
       return {
         x1: cell.x * cellAndBorderWidth(props.style),
-        x2:
-          cell.x * cellAndBorderWidth(props.style) + cellWidth(props.style),
+        x2: cell.x * cellAndBorderWidth(props.style) + cellWidth(props.style),
         y1: y,
         y2: y,
       };
@@ -347,9 +368,7 @@ const spaces = computed(() => {
 });
 
 function xText(cell: Cell) {
-  return (
-    cell.x * cellAndBorderWidth(props.style) + cellWidth(props.style) / 2
-  );
+  return cell.x * cellAndBorderWidth(props.style) + cellWidth(props.style) / 2;
 }
 function yText(cell: Cell) {
   return cell.y * cellAndBorderWidth(props.style);

@@ -7,6 +7,7 @@ export const lang = {
     solutions: "Solutions",
     words: "Words",
     about: "About",
+    fonts: "Fonts"
   },
   buttons: {
     changeLanguage: "change language",
@@ -21,6 +22,16 @@ export const lang = {
     print: "Print",
     exportsvg: "Export SVG",
     support: "Support MotsFlex",
+    cancel: "Cancel",
+    ok: "Ok",
+    download: "Download",
+    uploadGrids: "Upload grids",
+    uploadWords: "Upload words",
+    dragdrop: "Drag files here (or click)",
+    here: "here",
+  },
+  titles: {
+    newFont: "New Font",
   },
   suggestions: {
     results: "Results",
@@ -57,6 +68,7 @@ export const lang = {
     width: "Width",
     height: "Height",
     margins: "Margins",
+    margin: "Margin",
     align: 'Alignment',
     pagination: "Pagination",
     left: "Left",
@@ -77,6 +89,9 @@ export const lang = {
     grid: "Grid",
     wordLength: "Words Length",
     randomize: "Randomize",
+    fontFamily: "Font family",
+    fontWeight: "Font weight",
+    offset: "Offset",
   },
   tooltips: {
     incomplete: "is incomplete",
@@ -88,6 +103,7 @@ export const lang = {
     wrongpassword: "Wrong password or email",
     passwordsdontmatch: "Passwords don't match",
     passwordtooshort: "Password too short, minimum 6 characters",
+    noGrid: "You don't have any grid yet, please create one before modify styles."
   },
   login: {
     title: "Login",

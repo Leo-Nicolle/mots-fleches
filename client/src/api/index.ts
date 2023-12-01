@@ -1,11 +1,16 @@
 import { Grid } from 'grid';
-import { Idatabase, SupaDB } from 'database';
-
+import { Idatabase, SupaDB, setDatabase } from 'database';
+import axios from 'axios';
+const debugMigration = true;
 class API {
   public idb: Idatabase;
   public supadb: SupaDB;
   public _mode: string;
   constructor(mode: string = 'unknown') {
+    // axios.get('/test-db-5.json')
+    // .then(({ data }) => {
+    //   setDatabase(data, 5)
+    // });
     this.idb = new Idatabase();
     this.supadb = new SupaDB('https://tnvxmrqhkdlynhtdzmpw.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRudnhtcnFoa2RseW5odGR6bXB3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODIyNTM0MTEsImV4cCI6MTk5NzgyOTQxMX0.4PczPPAxbkwBvig7NTHNbR8JumuwPPqfyS_kGnkxP5I');
     this._mode = mode;

@@ -113,7 +113,7 @@ const props = defineProps<{
    */
   zoom: number;
 }>();
-const { cellSize, textSize, textFont, defSize, defFont } = useSvgSizes(props);
+const { cellSize, textSize, textFont, defSize, defSizePx, defFont } = useSvgSizes(props);
 const transform = computed(() => useTransform(props, props.cell));
 function onChange(evt: Event) {
   const { x, y } = props.cell;
@@ -288,9 +288,9 @@ textarea:focus-visible {
   color: #777;
 }
 .definition {
-  line-height: v-bind(defSize);
-  font-size: v-bind(defSize);
   font: v-bind(defFont);
+  line-height: v-bind(defSizePx);
+  text-wrap: nowrap;
   background: #aaa;
 }
 

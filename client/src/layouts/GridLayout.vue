@@ -67,7 +67,7 @@
             <n-button @click="deleteVisible = false">{{
               $t("buttons.no")
             }}</n-button>
-            <n-button @click="onDelete(selectedElements)" type="warning">{{
+            <n-button @click="onDel" type="warning">{{
               $t("buttons.yes")
             }}</n-button>
           </template>
@@ -109,15 +109,15 @@ const props = defineProps<{
   /**
    * Callback to create a new element
    */
-  onCreate: () => void;
+  onCreate?: () => void;
   /**
    * Callback to delete selected elements
    */
-  onDelete: (selected: any[]) => void;
+  onDelete: (selected: any[]) => Promise<unknown>;
   /**
    * Callback when an element is clicked
    */
-  onClick: (elt: any) => void;
+  onClick?: (elt: any) => void;
 }>();
 const selected = ref<boolean[]>([]);
 const selectedElements = computed(() =>
@@ -127,7 +127,11 @@ const deleteVisible = ref<boolean>(false);
 const emit = defineEmits<{
   (event: "select", value: any[]): void;
 }>();
-
+function onDel() {
+  props.onDelete(selectedElements.value).then(() => {
+    deleteVisible.value = false;
+  });
+}
 watchEffect(() => {
   selected.value = props.eltList.map(() => false);
 });

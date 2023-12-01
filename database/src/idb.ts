@@ -1,11 +1,15 @@
 import { openDB, DBSchema } from 'idb';
-import { Grid, GridStyle, GridState } from 'grid';
 import {
+  Grid, GridStyle, GridState,
   defaultStyles,
   defaultSolutionStyle,
+  isSolutionStyle,
+  Font as GridFont,
+  defaultTextStyle,
 } from 'grid';
 import { Database } from './db';
 import { mergeOptionsWithDefaults } from './utils';
+import { Font } from './types';
 
 export interface MotsFlexDB extends DBSchema {
   grids: {
@@ -22,13 +26,18 @@ export interface MotsFlexDB extends DBSchema {
     value: GridStyle;
     key: string;
     indexes: { 'by-id': string };
+  },
+  fonts: {
+    value: Font;
+    key: string;
+    indexes: { 'by-id': string };
   }
 }
 
 async function create() {
-  let promise = Promise.resolve();
-  const db = await openDB<MotsFlexDB>('mots-flex-db', 4, {
-    upgrade(db, old, newV, transaction) {
+  let promise: Promise<unknown> = Promise.resolve();
+  const db = await openDB<MotsFlexDB>('mots-flex-db', 6, {
+    upgrade(db, old, _, transaction) {
       // @ts-ignore
       if (db.objectStoreNames.contains('style')) {
         // @ts-ignore
@@ -52,6 +61,12 @@ async function create() {
         });
         optionStore.createIndex('by-id', 'id');
       }
+      if (!db.objectStoreNames.contains('fonts')) {
+        const fontStore = db.createObjectStore('fonts', {
+          keyPath: 'family',
+        });
+        fontStore.createIndex('by-id', 'family');
+      }
 
       // @ts-ignore
       if (db.objectStoreNames.contains('options')) {
@@ -70,28 +85,71 @@ async function create() {
       if (old <= 3) {
         const gridStore = transaction.objectStore('grids');
         promise = promise.then(() => gridStore.getAll())
-          .then(grids => {
-            grids.forEach(grid => {
+          .then(grids => Promise.all(grids.map(grid => {
+            // @ts-ignore
+            grid.styleId = grid.optionsId;
+            // @ts-ignore
+            delete grid.optionsId;
+            return gridStore.put(grid as GridState);
+          })));
+      }
+      if (old <= 5) {
+        const styleStore = transaction.objectStore('styles');
+        promise = promise.then(() => styleStore.getAll())
+          .then(styles => Promise.all(styles.map(style => {
+            const defs: GridFont[] = [style.definition];
+            if (isSolutionStyle(style)) {
+              //@ts-ignore
+              delete style.pagination.margin.top
+              defs.push(style.grids.gridN);
+              defs.push(style.pagination);
+              defs.push(style.words);
+              defs.push(style.size);
+            }
+            defs.forEach(def => {
               // @ts-ignore
-              grid.styleId = grid.optionsId;
+              delete def.font;
               // @ts-ignore
-              delete grid.optionsId;
-              gridStore.put(grid as GridState);
+              delete def.name;
+              def.family = 'Roboto';
+              def.isGoogle = true;
+              def.weight = "400";
             });
-          });
+            return styleStore.put(style as GridStyle);
+          })));
+      }
+      if (old <= 6) {
+        console.log('UPDATE TO 6');
+        const styleStore = transaction.objectStore('styles');
+        db.deleteObjectStore('fonts');
+        const fontStore = db.createObjectStore('fonts', {
+          keyPath: 'family',
+        });
+        fontStore.createIndex('by-id', 'family');
+        promise = promise
+          .then(() => styleStore.getAll())
+          .then(styles => Promise.all(styles.map(style => {
+            style.definition.size = 1;
+            style.solutions = { ...defaultTextStyle, size: 1, top: 0 };
+            return styleStore.put(style as GridStyle);
+          })));
       }
     },
-  });
-
+  })
   return promise.then(() => db);
-
 }
 
 export class Idatabase extends Database {
   private loadingPromise: ReturnType<typeof create>;
-  constructor() {
+  constructor(prepromise?: Promise<unknown>) {
     super();
-    this.loadingPromise = create()
+    if (!prepromise) {
+      prepromise = Promise.resolve();
+    }
+    this.loadingPromise = prepromise.then(() => {
+      console.log('Create');
+      return create()
+    })
       .then((db) => {
         return db.get('styles', defaultStyles.id)
           .then((style) => style ? Promise.resolve('')
@@ -182,7 +240,64 @@ export class Idatabase extends Database {
       db.delete('words', wordId)
     );
   }
+  async getFonts() {
+    return await this.loadingPromise.then((db) =>
+      db.getAllFromIndex('fonts', 'by-id')
+    )
+  }
+  async getFont(fontId: string) {
+    return await this.loadingPromise.then((db) =>
+      db.get('fonts', fontId)
+    )
+  }
+  async pushFont(font: Font) {
+    return await this.loadingPromise.then((db) =>
+      db.put('fonts', font)
+    );
+  }
+  async deleteFont(fontId: string) {
+    return await this.loadingPromise.then((db) =>
+      db.delete('fonts', fontId)
+    );
+  }
   async isSignedIn() {
     return Promise.resolve(true);
   }
+}
+export function deleteDatabase() {
+  return new Promise((resolve, reject) => {
+    const rq = indexedDB.deleteDatabase('mots-flex-db')
+    rq.onsuccess = resolve;
+    rq.onerror = reject;
+  });
+}
+export function setDatabase(json: any, version: number) {
+  let promise = Promise.resolve();
+  return deleteDatabase()
+    .then(() => {
+      return openDB<MotsFlexDB>('mots-flex-db', version, {
+        upgrade(db, __, _, transaction) {
+          Object.entries(json).forEach(([key, values]) => {
+            // @ts-ignore
+            const objstore = db.createObjectStore(key, {
+              keyPath: 'id',
+            });
+            if (key === 'words') {
+              // @ts-ignore
+              objstore.createIndex('by-word', 'id');
+            } else {
+              // @ts-ignore
+              objstore.createIndex('by-id', 'id');
+            }
+            console.log('creating', key);
+            // @ts-ignore
+            const store = transaction.objectStore(key);
+            promise = promise
+              // @ts-ignore
+              .then(() => Promise.all(values.map((value: any) => store.put(value))))
+          });
+        }
+      });
+    })
+    .then(() => promise);
 }

@@ -7,6 +7,7 @@ export const lang = {
         solutions: "Soluciones",
         words: "Palabras",
         about: "Acerca de",
+        fonts: "Fuentes"
     },
     buttons: {
         changeLanguage: "Cambiar idioma",
@@ -21,7 +22,16 @@ export const lang = {
         print: "Imprimir",
         exportsvg: "Exportar SVG",
         support: "Support MotsFlex",
-
+        cancel: "Cancelar",
+        ok: "Ok",
+        download: "Descargar",
+        uploadGrids: "Subir cuadrículas",
+        uploadWords: "Subir palabras",
+        dragdrop: "Arrastrar ficheros aquí (o hacer clic)",
+        here: "aquí",
+    },
+    titles: {
+        newFont: "Nueva fuente",
     },
     suggestions: {
         results: "Resultados",
@@ -58,6 +68,7 @@ export const lang = {
         width: "Ancho",
         height: "Altura",
         margins: "Márgenes",
+        margin: "Márgen",
         align: 'Alineación',
         pagination: "Paginación",
         left: "Izquierda",
@@ -78,6 +89,9 @@ export const lang = {
         grid: "Cuadrícula",
         wordLength: "Longitud de las palabras",
         randomize: "Randomizar",
+        fontFamily: "Fuente",
+        fontWeight: "Peso",
+        offset: "Desplazamiento",
     },
     tooltips: {
         incomplete: "esta incompleto",
@@ -89,6 +103,7 @@ export const lang = {
         wrongpassword: "Contraseña incorrecta",
         passwordsdontmatch: "Las contraseñas no coinciden",
         passwordtooshort: "La contraseña es demasiado corta. Mínimo 6 caracteres",
+        noGrid: "No tienes ninguna cuadrícula, por favor crea una antes de modificar los estilos.",
     },
     login: {
         title: "Iniciar sesión",

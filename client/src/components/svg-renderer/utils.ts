@@ -17,14 +17,15 @@ export function useSvgSizes(props: Props) {
   const cellSizeC = computed(() => cellSize(props));
   const textSize = computed(() => props.style.grid.cellSize * (props.zoom || 1));
   const textFont = computed(() => `${textSize.value}px roboto`);
-  const defSize = computed(() => props.style.definition.size * (props.zoom || 1));
-  const defFont = computed(() => `${defSize.value}px ${props.style.definition.font}`);
+  const defSize = computed(() => props.style.grid.cellSize / 4 * props.style.definition.size * (props.zoom || 1));
+  const defFont = computed(() => `${defSize.value}px ${props.style.definition.family}`);
 
   return {
     cellSize: cellSizeC,
     textSize,
     textFont,
     defSize,
+    defSizePx: `${Math.floor(defSize.value)}px`,
     defFont,
   };
 }

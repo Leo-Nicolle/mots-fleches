@@ -27,13 +27,19 @@
             size="small"
           />
         </n-form-item>
-        <n-form-item :label="$t('forms.outBorderSize')" path="grid.outerBorderSize">
+        <n-form-item
+          :label="$t('forms.outBorderSize')"
+          path="grid.outerBorderSize"
+        >
           <n-input-number
             role="outerBorder-size"
             v-model:value="value.grid.outerBorderSize"
           />
         </n-form-item>
-        <n-form-item :label="$t('forms.outBorderColor')" path="grid.outerBorderColor">
+        <n-form-item
+          :label="$t('forms.outBorderColor')"
+          path="grid.outerBorderColor"
+        >
           <n-color-picker
             role="outerBorder-color"
             v-model:value="value.grid.outerBorderColor"
@@ -45,10 +51,23 @@
           <n-input-number role="space" v-model:value="value.grid.spaceSize" />
         </n-form-item>
       </div>
+      <h3>{{ $t("forms.solutions") }}</h3>
+      <FontSelector v-model="value.solutions" role-prefix="solutions" />
+      <n-form-item :label="$t('forms.offset')" path="top">
+        <n-input-number
+          v-model:value="value.solutions.top"
+          :step="0.5"
+          :precision="1"
+          role="solutions-top"
+        />
+      </n-form-item>
       <div v-if="definition">
-        <h3>{{$t('forms.definitions')}}</h3>
-        <TextStyle v-model="value.definition" rolePrefix="definition" />
-        <n-form-item :label="$t('forms.backgroundColor')" path="definition.backgroundColor">
+        <h3>{{ $t("forms.definitions") }}</h3>
+        <FontSelector v-model="value.definition" rolePrefix="definition" />
+        <n-form-item
+          :label="$t('forms.backgroundColor')"
+          path="definition.backgroundColor"
+        >
           <n-color-picker
             role="definition-background-color"
             v-model:value="value.definition.backgroundColor"
@@ -58,7 +77,7 @@
         </n-form-item>
       </div>
       <div v-if="arrows">
-        <h3>{{ $t('forms.arrows') }}</h3>
+        <h3>{{ $t("forms.arrows") }}</h3>
         <n-form-item :label="$t('forms.size')" path="arrow.size">
           <n-input-number role="arrow-size" v-model:value="value.arrow.size" />
         </n-form-item>
@@ -83,7 +102,7 @@ import { defineProps, defineEmits, watch } from "vue";
 import { useModel } from "../../js/useModel";
 import { GridStyle } from "grid";
 import FormatPicker from "./FormatPicker.vue";
-import TextStyle from "./TextStyle.vue";
+import FontSelector from "../fonts/FontSelector.vue";
 /**
  * Form to modify GridStyle.
  */
@@ -116,8 +135,7 @@ const emit = defineEmits<{
    */
   (event: "update:modelValue", value: GridStyle): void;
 }>();
-const value = useModel(props, emit);
-
+const value = useModel<GridStyle>(props, emit);
 watch(value.value, () => {
   emit("update:modelValue", value.value);
 });

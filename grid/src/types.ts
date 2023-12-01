@@ -24,14 +24,30 @@ export type Arrow = {
    */
   direction: ArrowDir;
 }
+
+export type GoogleFont = {
+  isGoogle: true;
+  family: string;
+  weight: string;
+}
+export type CustomFont = {
+  isGoogle: false;
+  content: string;
+  family: string;
+  weight: string;
+}
+export type Font = GoogleFont | CustomFont;
+
+export function isGoogleFont(font: Font): font is GoogleFont {
+  return (font as GoogleFont).isGoogle;
+}
+export function isCustomFont(font: Font): font is CustomFont {
+  return !(font as CustomFont).isGoogle;
+}
 /**
 * TextStyle 
 */
-export interface TextSyle<T = string> {
-  /**
-   * Font family
-   */
-  font: string;
+export type TextStyle<T = string> = Font & {
   /**
    * Font size: number if no unit (for SVG)
    */
@@ -158,9 +174,13 @@ export type GridStyle = {
   /**
    * Definition style
    */
-  definition: TextSyle<number> & {
+  definition: TextStyle<number> & {
     backgroundColor: string;
   };
+  /**
+  * Style of the solutions within the grid
+  */
+  solutions: TextStyle<number> & { top: number };
   /**
    * Arrow style
    */
@@ -196,18 +216,20 @@ export type Bounds = {
 }
 export type Direction = 'horizontal' | 'vertical';
 
-export interface PaginationStyle extends TextSyle {
+export type PaginationStyle = TextStyle & {
   startIdx: number;
   align: 'center' | 'left';
-  margin: Pick<Margins<string>, 'top' | 'bottom' | 'left'>;
+  margin: Pick<Margins<string>, 'bottom' | 'left'>;
 }
-export interface GridNumberStyle extends TextSyle {
-  margin: Pick<Margins<string>, 'bottom' >;
+export type GridNumberStyle = TextStyle & {
+  margin: Pick<Margins<string>, 'bottom'>;
 }
 
 
-export const defaultTextStyle: TextSyle = {
-  font: "sans-serif",
+export const defaultTextStyle: TextStyle = {
+  family: "Roboto",
+  isGoogle: true,
+  weight: "400",
   size: "1em",
   color: "black",
 }
@@ -217,7 +239,6 @@ export const defaultPaginationStyle: PaginationStyle = {
   startIdx: 1,
   align: 'left',
   margin: {
-    top: '1rem',
     bottom: '1rem',
     left: '1rem',
   }
@@ -233,6 +254,11 @@ export const defaultStyles: GridStyle = {
     outerBorderSize: 2,
     outerBorderColor: '#000000',
     spaceSize: 4,
+  },
+  solutions: {
+    ...defaultTextStyle,
+    size: 1,
+    top: 0
   },
   definition: {
     ...defaultTextStyle,
@@ -281,14 +307,14 @@ export type SolutionStyle = GridStyle & {
   /**
    * Style of the words index
    */
-  words: TextSyle & {
+  words: TextStyle & {
     tolerance: number;
   };
   pagination: PaginationStyle
   /**
    * Size of the words in word index
    */
-  size: TextSyle;
+  size: TextStyle;
 };
 
 const expOptions: DeepPartial<SolutionStyle> = {
@@ -427,4 +453,7 @@ export type CellBest = {
   inter: Record<string, number>;
 };
 
+export function isSolutionStyle(style: GridStyle | SolutionStyle): style is SolutionStyle {
+  return (style as SolutionStyle).isSolution;
+}
 export const DPI_TO_PIXEL = 25.4;

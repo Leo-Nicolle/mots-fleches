@@ -1,5 +1,10 @@
-import { GridStyle, GridState } from "grid"
+import { GridStyle, GridState } from "grid";
 
+export type Font = {
+  family: string;
+  content: string;
+  updated: number;
+}
 export type Json =
   | string
   | number
@@ -64,6 +69,26 @@ export interface SBSchema {
           data?: string[]
           userid?: string
         }
+      }
+    }
+    Fonts: {
+      Row: {
+        updated: string
+        fileId: string
+        id: string
+        userid: string
+      }
+      Insert: {
+        updated: string
+        fileId: string
+        id: string
+        userid?: string
+      }
+      Update: {
+        updated: string
+        fileId: string
+        id?: string
+        userid?: string
       }
     }
     Views: {

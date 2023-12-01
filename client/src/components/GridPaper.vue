@@ -40,7 +40,7 @@ const props = defineProps<{
    */
   exportOptions: ExportOptions;
   pagination?: PaginationStyle;
-  page: number;
+  page?: number;
 }>();
 </script>
 
