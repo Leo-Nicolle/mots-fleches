@@ -237,6 +237,7 @@ export function getCellProbasAccurate(grid: Grid, options?: BailOptions) {
       return dy === 0 ? dx : dy;
     });
   const lastCells = sortedCells.slice().reverse().filter(({ nextH, nextV }) => !nextH || !nextV);
+  // top down pass
   sortedCells.forEach(cell => {
     const mapH = new Map();
     const mapV = new Map();
@@ -255,7 +256,9 @@ export function getCellProbasAccurate(grid: Grid, options?: BailOptions) {
         key: 'nodesV',
       }
     ].forEach(({ prev, key, map, prevNodes }) => {
-      if (!prev || !prevNodes) return;
+      if (!prev || !prevNodes) {
+        return;
+      };
       for (let i = 0; i < 26; i++) {
         map.set(ACode + i, []);
       }
@@ -270,7 +273,103 @@ export function getCellProbasAccurate(grid: Grid, options?: BailOptions) {
       cell[key] = map;
     });
     filter(cell);
+  });
 
+  //bottom up pass
+  const visitedH = new Set<number>();
+  const visitedV = new Set<number>();
+  sortedCells.slice().reverse().forEach(cell => {
+    const { previousH, previousV, nodesH, nodesV } = cell;
+    [{
+      previous: previousH,
+      key: 'nodesH',
+      valid: previousH && previousH.validH,
+      nodes: nodesH,
+    }, {
+      previous: previousV,
+      key: 'nodesV',
+      valid: previousV && previousV.validV,
+      nodes: nodesV,
+    }].forEach(({ previous, nodes, valid, key }) => {
+      if (!valid) return;
+      const map = new Map<number, Set<Node>>();
+      for (let i = 0; i < 26; i++) {
+        map.set(ACode + i, new Set<Node>());
+      }
+      nodes.forEach((nodes) => {
+        nodes
+          .forEach(node => {
+            const parent = node.parent!;
+            map.get(parent.code) && map.get(parent.code)!.add(parent);
+          });
+      });
+      const resMap = new Map<number, Node[]>();
+      map.forEach((set, key) => {
+        resMap.set(key, Array.from(set));
+      });
+      previous[key] = resMap;
+      filter(previous);
+    });
+  });
+  // propagate impossible: 
+  lastCells.forEach(cell => {
+    let current = cell;
+    let shouldClean = false;
+    while (current) {
+      // const ctr = cantor(current.x, current.y);
+      const { previousH, validH, nodesH, x, y } = current;
+      if (!previousH || !validH) break;
+      if (!nodesH.size) {
+        shouldClean = true;
+        break;
+      }
+      current = previousH;
+    }
+    if (shouldClean) {
+      current = cell;
+      while (current) {
+        const { previousH, validH, text } = current;
+        if (!previousH || !validH) break;
+        if (text !== '*') {
+          current = previousH;
+          continue;
+        }
+        current.nodesV = new Map();
+        current.nodesH = new Map();
+        for (let i = ACode; i < ACode + 26; i++) {
+          current.impossible.add(i);
+        }
+        current = previousH;
+      }
+    }
+    shouldClean = false;
+    current = cell;
+    while (current) {
+      const { previousV, validV, nodesV, x, y } = current;
+      if (!previousV || !validV) break;
+      if (!nodesV.size) {
+        shouldClean = true;
+        break;
+      }
+      current = previousV;
+    }
+    if (shouldClean) {
+      current = cell;
+      while (current) {
+        const { previousV, validV, text } = current;
+        if (!previousV || !validV) break;
+        if (text !== '*') {
+          current = previousV;
+          continue;
+        }
+        current.nodesV = new Map();
+        current.nodesH = new Map();
+        for (let i = ACode; i < ACode + 26; i++) {
+          current.impossible.add(i);
+        }
+        current = previousV;
+      }
+    }
   });
   const res = cellsA.map((row, y) => {
     const r = row.map((cell, x) => {
@@ -280,15 +379,13 @@ export function getCellProbasAccurate(grid: Grid, options?: BailOptions) {
         occurencesH: {},
         occurencesV: {},
         total: 0,
-        // bestWordsH: [],
-        // bestWordsV: [],
         inter: {}
       };
       return res;
     });
     return r;
   });
-
+  // compute occurences of each letters on each cell
   cellsA.forEach((row) => {
     row.forEach(({ x, y, nodesH, nodesV, validH, validV }) => {
       res[y][x].occurencesH = new Map();
@@ -305,11 +402,8 @@ export function getCellProbasAccurate(grid: Grid, options?: BailOptions) {
     });
   });
 
-  const visitedH = new Set<number>();
-  const visitedV = new Set<number>();
-
+  // compute scores for each word
   lastCells.forEach(({ previousH, previousV, x, y, nodesH, nodesV }) => {
-    // const wordsV = mapToWords(cell.nodesV);
     if (previousH && previousH.validH && !visitedH.has(cantor(x, y))) {
       const wordsH = mapToWords(nodesH);
       const scores = new Map();
@@ -337,7 +431,7 @@ export function getCellProbasAccurate(grid: Grid, options?: BailOptions) {
 
     }
 
-    if (previousV && previousV.validH && !visitedV.has(cantor(x, y))) {
+    if (previousV && previousV.validV && !visitedV.has(cantor(x, y))) {
       const wordsV = mapToWords(nodesV);
       const scores = new Map();
       for (let i = 0; i < wordsV.length; i++) {
@@ -363,6 +457,7 @@ export function getCellProbasAccurate(grid: Grid, options?: BailOptions) {
         .map(([index]) => wordsV[index]);
     }
   });
+
   res.forEach((row) => {
     row.forEach(c => {
       c.inter = Object.entries(c.inter).reduce((acc, [k, v]) => {
@@ -378,11 +473,11 @@ export function getCellProbasAccurate(grid: Grid, options?: BailOptions) {
 }
 
 export function getCellProbas(grid: Grid, options: BailOptions) {
-  console.time('getCellProbas');
+  // console.time('getCellProbas');
 
   const hash = grid.serialize();
   if (cachedResult.has(hash)) {
-    console.timeEnd('getCellProbas');
+    // console.timeEnd('getCellProbas');
     return { hasBailed: false, cellProbas: cachedResult.get(hash)! };
   }
   if (!trees.size) {
@@ -399,7 +494,7 @@ export function getCellProbas(grid: Grid, options: BailOptions) {
     const hash = hashes.shift()!;
     cachedResult.delete(hash);
   }
-  console.timeEnd('getCellProbas');
+  // console.timeEnd('getCellProbas');
   return a;
 }
 

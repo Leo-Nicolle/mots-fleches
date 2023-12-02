@@ -13,7 +13,7 @@ export type Node = {
 function getChildren(start: number, end: number, index: number, size: number, parent?: Node): Node[] {
   if (index === size) return [];
   if (start === end) return [{
-    code: dico.words[start].charCodeAt(index),
+    code: dico.words[dico.sorted[start]].charCodeAt(index),
     start,
     end,
     index,
