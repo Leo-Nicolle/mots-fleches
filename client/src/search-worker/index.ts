@@ -7,6 +7,7 @@ import { copyCellProbas } from "./heatmap";
 export type Events = {
   'run-result': CellProba[][];
   'search-result': string[];
+  'autofill-result': Grid;
   'bail-result': undefined;
   'locale-changed': undefined;
   'start-locale-change': undefined;
@@ -75,6 +76,13 @@ class WorkerController extends EventEmitter<Events> {
     this._postMessage('run', grid.serialize(), this.probaWorkerId);
   }
 
+  autofill(grid: Grid, words: string[]) {
+    this._postMessage('autofill', JSON.stringify({
+      grid: grid.serialize(),
+      words
+    }), this.probaWorkerId);
+  }
+
   _postMessage(type: string, data: string, workerId: number) {
     if (this.busy[workerId]) {
       this.queues[workerId].push({ type, data });
@@ -105,6 +113,9 @@ class WorkerController extends EventEmitter<Events> {
     if (type === 'run-result') {
       copyCellProbas(data);
       this.emit('run-result', data);
+    }
+    if (type === 'autofill-result') {
+      this.emit('autofill-result', Grid.unserialize(data));
     }
     if (type === 'bail-result') {
       this.emit('bail-result');
