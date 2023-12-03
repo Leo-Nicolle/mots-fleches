@@ -3,6 +3,8 @@ import EventEmitter from "eventemitter3";
 import * as fflate from 'fflate';
 import { api } from "../api";
 import { copyCellProbas } from "./heatmap";
+// import { dico as debugDico, Dico } from "./dico";
+// import { autoFill } from "./auto-fill";
 
 export type Events = {
   'run-result': CellProba[][];
@@ -11,6 +13,7 @@ export type Events = {
   'bail-result': undefined;
   'locale-changed': undefined;
   'start-locale-change': undefined;
+  'searchword-result': string[];
   'check-result': GridValidity;
 };
 
@@ -22,12 +25,12 @@ class WorkerController extends EventEmitter<Events> {
   private flagsBuffer: SharedArrayBuffer;
   private flagsArray: Uint8Array;
   private distribution: [number, number][];
-  private wordsBuffer: SharedArrayBuffer;
-  private wordsArray: Uint8Array;
+  public wordsBuffer: SharedArrayBuffer;
+  public wordsArray: Uint8Array;
   private searchWorkerId = 0;
   private probaWorkerId = 1;
   private locale = '';
-  private loadingPromise;
+  public loadingPromise;
 
   /* setting data */
   /* sending the buffer (copy) to worker */
@@ -77,10 +80,20 @@ class WorkerController extends EventEmitter<Events> {
   }
 
   autofill(grid: Grid, words: string[]) {
-    this._postMessage('autofill', JSON.stringify({
-      grid: grid.serialize(),
-      words
-    }), this.probaWorkerId);
+    this.loadingPromise.then(() => {
+      //   const data = autoFill(grid, words);
+      //   this.emit('autofill-result', Grid.unserialize(data));
+      this._postMessage('autofill', JSON.stringify({
+        grid: grid.serialize(),
+        words
+      }), this.probaWorkerId);
+    });
+  }
+
+  searchWord(query: string) {
+    this.loadingPromise.then(() => {
+      this._postMessage('searchword', query, this.searchWorkerId);
+    });
   }
 
   _postMessage(type: string, data: string, workerId: number) {
@@ -119,6 +132,9 @@ class WorkerController extends EventEmitter<Events> {
     }
     if (type === 'bail-result') {
       this.emit('bail-result');
+    }
+    if (type == 'searchword-result') {
+      this.emit('searchword-result', data);
     }
     const queue = this.queues[workerId];
     const job = queue.shift();
@@ -194,6 +210,7 @@ class WorkerController extends EventEmitter<Events> {
         for (let i = 0; i < encoded.byteLength; i++) {
           this.wordsArray[i] = encoded[i];
         }
+        // debugDico.load(words);
         return Promise.all(
           [this.searchWorker, this.probaWorker]
             .map(worker => {
@@ -220,6 +237,15 @@ class WorkerController extends EventEmitter<Events> {
       });
     return this.loadingPromise;
   }
+
+
+  // getWords() {
+  //   return this.loadingPromise.then(() => {
+  //     const encoded = new Uint8Array(this.wordsBuffer.byteLength);
+  //     encoded.set(new Uint8Array(this.wordsBuffer));
+  //     return new TextDecoder().decode(encoded).split(',');
+  //   });
+  // }
 
 }
 

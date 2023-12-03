@@ -1,30 +1,15 @@
 <template>
   <Layout>
     <template v-slot:left-panel v-if="style && grid">
-      <n-scrollbar y-scrollable style="max-height: calc(100vh - 100px)">
-        <GridForm :model-value="grid" />
-        <OptionsForm
-          v-model="style"
-          @update:modelValue="onUpdate"
-          grid
-          definition
-          arrows
-          format
-        />
-      </n-scrollbar>
+      <GridForm :model-value="grid" />
+      <OptionsForm v-model="style" @update:modelValue="onUpdate" grid definition arrows format />
     </template>
     <template v-slot:body>
-      <GridPaper
-        v-if="grid && style"
-        class="paper"
-        :grid="grid"
-        :export-options="{
-          ...defaultExportOptions,
-          texts: true,
-          highlight: true,
-        }"
-        :style="style"
-      />
+      <GridPaper v-if="grid && style" class="paper" :grid="grid" :export-options="{
+        ...defaultExportOptions,
+        texts: true,
+        highlight: true,
+      }" :style="style" />
       <NoGrid v-else />
     </template>
   </Layout>
@@ -73,5 +58,4 @@ onMounted(() => {
 });
 </script>
 
-<style lang="css">
-</style>
+<style lang="css"></style>

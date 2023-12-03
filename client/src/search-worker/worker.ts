@@ -38,8 +38,12 @@ onmessage = function (e) {
   if (type === 'autofill') {
     const { grid: gridJson, words } = JSON.parse(data);
     const grid = Grid.unserialize(gridJson);
-    autoFill(grid, words);
-    postMessage({ type: 'autofill-result', data: grid.serialize() });
+    const res = autoFill(grid, words);
+    postMessage({ type: 'autofill-result', data: res });
+  }
+  if (type === 'searchword') {
+    const res = dico.searchWord(data);
+    postMessage({ type: 'searchword-result', data: res });
   }
 
   if (type === 'check') {

@@ -1,16 +1,11 @@
 <template>
-  <div>
+  <div class="gridhighlightcontainer">
     <span class="heatmap" v-if="mode === 'heatmap'">
       <canvas ref="heatmapref" />
     </span>
     <span class="gridhighlight" v-if="visible">
       <span class="highlight"> </span>
-      <span
-        class="tooltip"
-        @mouseenter="hovered = true"
-        @mouseleave="hovered = false"
-        @mousemove="onMouseMove"
-      >
+      <span class="tooltip" @mouseenter="hovered = true" @mouseleave="hovered = false" @mousemove="onMouseMove">
         <span v-if="tooltip === 'unknown'">
           <n-button @click="add" circle> + </n-button>
           {{ $t("tooltips.add", { word }) }}
@@ -19,14 +14,10 @@
           {{ word }} {{ $t("tooltips.incomplete") }}
         </span>
         <span v-if="tooltip === 'nodef'">
-          {{ word }} {{ $t("tooltips.nodef") }}</span
-        >
+          {{ word }} {{ $t("tooltips.nodef") }}</span>
         <span v-if="tooltip === 'noarrow'">
-          {{ word }} {{ $t("tooltips.noarrow") }}</span
-        >
-        <span
-          v-if="tooltip === 'heatmap' && (hotLetters.length || cellHeat.length)"
-        >
+          {{ word }} {{ $t("tooltips.noarrow") }}</span>
+        <span v-if="tooltip === 'heatmap' && (hotLetters.length || cellHeat.length)">
           {{ hotLetters }}
         </span>
       </span>
@@ -60,7 +51,7 @@ import chroma from "chroma-js";
 import { dico } from "../../search-worker/dico";
 import { api } from "../../api";
 
-export type Mode = "normal" | "check" | "heatmap";
+export type Mode = "normal" | "check" | "heatmap" | "autofill";
 
 /**
  * Button to add words from the grid to the dictionnary
@@ -130,6 +121,7 @@ watchEffect(() => {
     props.dir === "horizontal" ? 1 : length
   );
   transform.value = useTransform(props, cells[0]);
+  console.log(transform.value, cells[0].x);
   const validity =
     props.validity[props.dir][`${bounds.start.y}-${bounds.start.x}`];
   tooltip.value = validity ? validity.problem : "";
@@ -237,7 +229,7 @@ watchEffect(() => {
   // cellHeat.value = getHeat(props.cell, props.cellProbas);
   refreshHeatmap();
 });
-function onMouseMove(evt: MouseEvent) {}
+function onMouseMove(evt: MouseEvent) { }
 function add() {
   api.db.pushWord(toRaw(word.value)).then(() => {
     tooltip.value = "";
@@ -247,8 +239,12 @@ function add() {
 </script>
 
 <style scoped>
+.gridhighlightcontainer {
+  pointer-events: none;
+}
+
 .gridhighlight {
-  position: absolute;
+  /* position: absolute; */
   top: 0;
   left: 0;
   padding: 0;
@@ -261,12 +257,14 @@ function add() {
   justify-content: center;
   pointer-events: none;
 }
+
 .highlight {
   width: v-bind(width);
   height: v-bind(height);
   box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.5);
 }
-.gridhighlight > .tooltip {
+
+.gridhighlight>.tooltip {
   pointer-events: visible;
   padding: 4px;
   background-color: white;
@@ -279,8 +277,9 @@ function add() {
   align-items: center;
   gap: 4px;
 }
+
 .heatmap {
-  position: absolute;
+  position: relative;
   top: 0;
   left: 0;
   transform: v-bind(heatmapTransform);

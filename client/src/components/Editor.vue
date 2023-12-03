@@ -5,52 +5,37 @@
         <h2>
           {{ grid.title ? grid.title : $t("buttons.newGrid") }}
         </h2>
-        <ModalOptions
-          :modelValue="grid"
-          @update-size="emit('size-update')"
-          @update:model-value="emit('update')"
-          @open="focus = nullCell"
-        />
+        <ModalOptions :modelValue="grid" @update-size="emit('size-update')" @update:model-value="emit('update')"
+          @open="focus = nullCell" />
       </span>
       <span>
         <n-button @click="onModeClick">
           {{ $t(`modes.${highlightMode}`) }}
         </n-button>
       </span>
-      <Suggestion
-        v-if="!focus.definition"
-        :point="focus"
-        :dir="dir"
-        :query="''"
-        :grid-id="grid.id"
-        :method="method"
-        :ordering="ordering"
-        :cellProbas="cellProbas"
-        :searchResult="searchResult"
-        :loading="isLoadingSuggestions"
-        @hover="onHover"
-        @click="onClick"
-        @dir="(d) => (dir = d)"
-        @mouseout="onMouseOut"
-        @methodswitch="
+      <Autofill v-if="highlightMode === 'autofill'" />
+      <Suggestion v-else-if="!focus.definition" :point="focus" :dir="dir" :query="''" :grid-id="grid.id" :method="method"
+        :ordering="ordering" :cellProbas="cellProbas" :searchResult="searchResult" :loading="isLoadingSuggestions"
+        @hover="onHover" @click="onClick" @dir="(d) => (dir = d)" @mouseout="onMouseOut" @methodswitch="
           method =
-            methods[
-              (methods.findIndex((o) => o === method) + 1) % methods.length
-            ]
-        "
-        @orderswitch="
-          ordering =
-            orderings[
-              (orderings.findIndex((o) => o === ordering) + 1) %
-                orderings.length
-            ]
-        "
-      >
+          methods[
+          (methods.findIndex((o) => o === method) + 1) % methods.length
+          ]
+          " @orderswitch="
+    ordering =
+    orderings[
+    (orderings.findIndex((o) => o === ordering) + 1) %
+    orderings.length
+    ]
+    ">
       </Suggestion>
     </template>
     <template #body>
       <div class="container" ref="container">
         <div class="controls">
+          <n-button class="zoom-controls" @click="resetGrid">
+            Reset
+          </n-button>
           <span class="zoom-controls">
             Zoom
             <n-button @click="onZoomIn" circle>
@@ -65,47 +50,20 @@
             </n-button>
           </span>
         </div>
-        <SVGGrid
-          @focus="(cell) => (focus = cell)"
-          @hover="(cell) => (hoveredCell = cell)"
-          :grid="grid"
-          :focus="focus"
-          :dir="dir"
-          :style="style"
-          :zoom="1 / zoom"
-          :highlights="highlights"
-          class="svg-grid"
-          :export-options="{
-            ...defaultExportOptions,
-            texts: true,
-            highlight: true,
-          }"
-        ></SVGGrid>
-        <GridInput
-          :grid="grid"
-          :dir="dir"
-          :style="style"
-          :cell="focus"
-          :offset="offset"
-          :zoom="zoom"
-          @focus="(point) => (focus = point)"
-          @update="onGridUpdate()"
-          @keyup="onKeyUp"
-        >
-        </GridInput>
-        <GridHighlight
-          :grid="grid"
-          :style="style"
-          :cell="hoveredCell"
-          :validity="validity"
-          :cellProbas="cellProbas"
-          :zoom="zoom"
-          :mode="highlightMode"
-          :gridVersion="gridVersion"
-          :offset="offset"
-          :dir="dir"
-          @update="onGridUpdate()"
-        />
+        <div class="superpose">
+          <SVGGrid @focus="(cell) => (focus = cell)" @hover="(cell) => (hoveredCell = cell)" :grid="grid" :focus="focus"
+            :dir="dir" :style="style" :zoom="1 / zoom" :highlights="highlights" class="svg-grid" :export-options="{
+              ...defaultExportOptions,
+              texts: true,
+              highlight: true,
+            }"></SVGGrid>
+          <GridHighlight :grid="grid" :style="style" :cell="hoveredCell" :validity="validity" :cellProbas="cellProbas"
+            :zoom="zoom" :mode="highlightMode" :gridVersion="gridVersion" :offset="offset" :dir="dir"
+            @update="onGridUpdate()" />
+          <GridInput :grid="grid" :dir="dir" :style="style" :cell="focus" :offset="offset" :zoom="zoom"
+            @focus="(point) => (focus = point)" @update="onGridUpdate()" @keyup="onKeyUp">
+          </GridInput>
+        </div>
       </div>
     </template>
   </Layout>
@@ -143,6 +101,7 @@ import SVGGrid from "./svg-renderer/Grid.vue";
 import GridInput from "./svg-renderer/GridInput.vue";
 import { defaultExportOptions, Method, Ordering } from "../types";
 import ModalOptions from "./forms/ModalOptions.vue";
+import Autofill from "./forms/Autofill.vue";
 import GridHighlight, { Mode } from "./svg-renderer/GridHighlight.vue";
 import Suggestion from "./Suggestion.vue";
 import { workerController } from "../search-worker/index";
@@ -183,13 +142,38 @@ const ordering = ref<Ordering>("best");
 const orderings = ref<Ordering[]>(["best", "alpha", "inverse-alpha", "random"]);
 const zoom = ref(1);
 const highlights = ref(new Map());
-const highlightModes = ["normal", "check", "heatmap"] as Mode[];
-const highlightMode = ref<Mode>(highlightModes[2]);
+const highlightModes = ["normal", "check", "heatmap", 'autofill'] as Mode[];
+const highlightMode = ref<Mode>(highlightModes[3]);
 const cellProbas = ref<CellProba[][]>([]);
 const searchResult = ref<string[]>([]);
 const refreshingRun = ref(false);
 const refreshingSearch = ref(false);
 
+function resetGrid() {
+  props.grid.cells.forEach((row) => {
+    row.forEach((cell) => {
+      if (cell.definition) return;
+      cell.text = '';
+    });
+  });
+  onGridUpdate();
+}
+function autofill() {
+  console.log("autofill");
+  refreshingRun.value = true;
+  workerController.autofill(props.grid, [
+    'FAN',
+    'PENTES',
+    'PARADE',
+    'PESAIS',
+    'CARAFE',
+    'RAPAS',
+    'CAPANT',
+    'DON',
+    'TA',
+    'ANA',
+  ]);
+}
 function refreshCellProba() {
   refreshingRun.value = true;
   workerController.run(props.grid);
@@ -201,6 +185,7 @@ function refreshSimpleSearch() {
 function refreshValidity() {
   workerController.checkGrid(props.grid);
 }
+const throttledAutofill = throttle(autofill, 200);
 const throttledRefresCellProba = throttle(refreshCellProba, 200);
 const throttledRefresSimpleSearch = throttle(refreshSimpleSearch, 60);
 const throttledRefresValidity = throttle(refreshValidity, 60);
@@ -242,12 +227,14 @@ watch(method, () => {
 });
 onMounted(() => {
   computeOffset(null);
+  console.log('mounted');
   workerController.checkGrid(props.grid);
+  throttledAutofill();
   throttledRefresCellProba();
   throttledRefresValidity();
 });
 
-onBeforeUnmount(() => {});
+onBeforeUnmount(() => { });
 function onZoomIn() {
   zoom.value = zoom.value + 0.1;
 }
@@ -325,6 +312,11 @@ workerController.on("search-result", (data) => {
   refreshingSearch.value = false;
   searchResult.value = data;
 });
+workerController.on("autofill-result", (data) => {
+  refreshingRun.value = false;
+  props.grid.copyFrom(data);
+  onGridUpdate();
+});
 
 workerController.on("locale-changed", () => {
   throttledRefresCellProba();
@@ -351,15 +343,18 @@ const isLoadingSuggestions = computed(() => {
   box-sizing: border-box;
   margin-left: 10px;
 }
+
 .title {
   display: flex;
   justify-content: space-around;
   width: 100%;
 }
+
 .svg-grid {
   padding-right: 20px;
   padding-bottom: 20px;
 }
+
 .controls {
   position: fixed;
   bottom: 10px;
@@ -374,6 +369,7 @@ const isLoadingSuggestions = computed(() => {
   z-index: 100;
   pointer-events: none;
 }
+
 .zoom-controls {
   pointer-events: auto;
   background-color: #fff;
@@ -387,22 +383,36 @@ const isLoadingSuggestions = computed(() => {
 .unknown {
   fill: rgba(252, 226, 42, 0.8);
 }
+
 .incomplete {
   fill: rgba(214, 19, 85, 0.8);
 }
+
 .nodef {
   fill: rgba(249, 74, 41, 0.8);
 }
+
 .noarrow {
   fill: rgba(237, 43, 42, 0.8);
 }
+
 text.highlighted {
   fill: #000;
 }
+
 .text.suggested {
   fill: #777;
 }
-.text.highlighted > rect {
+
+.text.highlighted>rect {
   fill: #def;
+}
+
+.superpose {
+  display: grid;
+}
+
+.superpose>* {
+  grid-area: 1 / 1 / 1 / 1;
 }
 </style>

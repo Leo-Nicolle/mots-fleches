@@ -5,7 +5,7 @@ type Props = {
   style: GridStyle;
   zoom?: number;
   offset: [number, number];
-}
+};
 export function cellAndBorderSize(props: Props, scale = 1) {
   return `${cellAndBorderWidth(props.style) * (props.zoom || 1) * scale}px`;
 }
@@ -33,15 +33,16 @@ export function useTransform(props: Props, origin: Cell) {
   const o = {
     x: unref(origin.x),
     y: unref(origin.y),
-  }
+  };
   const { x, y } = o;
+  debugger;
   return `translate(${(x * cellAndBorderWidth(props.style) +
     outerBorderWidth(props.style)) *
     (props.zoom || 1) -
-    props.offset[0]
+    props.offset[0] * 0
     }px, ${(y * cellAndBorderWidth(props.style) +
       outerBorderWidth(props.style)) *
     (props.zoom || 1) -
-    props.offset[1]
+    props.offset[1] * 0
     }px)`;
 }

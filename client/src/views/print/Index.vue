@@ -1,11 +1,5 @@
 <template>
-  <WordsIndex
-    v-if="grids && style"
-    :grids="grids"
-    class="paper"
-    :export-options="exportOptions"
-    :solutionStyle="style"
-  />
+  <WordsIndex v-if="grids && style" :grids="grids" class="paper" :export-options="exportOptions" :solutionStyle="style" />
 </template>
 
 <script setup lang="ts">
@@ -45,21 +39,24 @@ onMounted(() => {
 .paper {
   margin: 20px;
 }
+
 .solutions {
   display: flex;
   flex-direction: row;
   height: 100%;
 }
+
 .leftpanel {
   width: 210px;
   min-width: 210px;
   overflow: hidden;
 }
-.leftpanel > .n-scrollbar {
+
+.leftpanel>.n-scrollbar {
   max-height: 100vh;
 }
+
 .viewer {
-  position: relative;
   top: 20px;
 }
 </style>

@@ -491,7 +491,7 @@ export function getCellProbas(grid: Grid) {
   const a = getCellProbasAccurate(grid);
   cachedResult.set(hash, a.cellProbas);
   hashes.push(hash);
-  if (hashes.length > 50) {
+  if (hashes.length > 250) {
     const hash = hashes.shift()!;
     cachedResult.delete(hash);
   }

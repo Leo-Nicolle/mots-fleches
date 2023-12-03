@@ -28,7 +28,7 @@
         key: 'word',
       },
     ]" :data="results" :pagination="{
-  pageSize: 13,
+  pageSize: 8,
   simple: true,
 }" @mousemove="onMouseEvt($event, false)" @click="onMouseEvt($event, true)" />
     <n-button class="loading" v-else :loading="true"></n-button>
@@ -167,10 +167,12 @@ function onMouseEvt(evt: MouseEvent, click = false) {
 }
 
 .suggestion {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
   width: 100%;
+  margin: 10px 0;
+  gap: 5px;
+  display: grid;
+  height: 100%;
+  grid-template-rows: max-content auto;
 }
 
 .suggestion>.loading {
@@ -183,5 +185,9 @@ function onMouseEvt(evt: MouseEvent, click = false) {
   flex-direction: row;
   justify-content: center;
   gap: 2px;
+}
+
+.n-data-table .n-data-table__pagination {
+  justify-content: space-around;
 }
 </style>

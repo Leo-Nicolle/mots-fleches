@@ -1,3 +1,4 @@
+import MiniSearch from "minisearch";
 import { StringBS } from "./string-bs";
 
 export const ACode = "A".charCodeAt(0);
@@ -20,6 +21,8 @@ export class Dico {
 
   public sorted: number[];
   public stringBS: StringBS;
+
+  private minisearch: MiniSearch;
 
   constructor() {
     this.words = [];
@@ -62,6 +65,22 @@ export class Dico {
         return this.words[a].localeCompare(this.words[b]);
       });
     this.stringBS = new StringBS(this.words, this.sorted);
+
+    const documents = this.words.map((w, i) => ({
+      id: i,
+      title: w,
+      text: w,
+    }));
+    this.minisearch = new MiniSearch({
+      fields: ['title', 'text'],
+      storeFields: ['title', 'text']
+    });
+
+    // Add documents to the index
+    this.minisearch.addAll(documents);
+
+    // Search for documents:
+    // => [
   }
 
   findLengthInterval(length: number) {
@@ -141,6 +160,13 @@ export class Dico {
    */
   getWords() {
     return this.words;
+  }
+
+  searchWord(word: string) {
+    const options = {
+      fuzzy: 0.4
+    };
+    return this.minisearch.search(word, options).slice(0, 20).map(({ id }) => this.words[id]);
   }
 
   getDistribution() {

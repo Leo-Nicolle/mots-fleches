@@ -19,15 +19,9 @@
       <div class="border top" :style="{ top: 0 }"></div>
       <div class="border bottom" :style="{ top: pageHeight }"></div>
       <div class="margin left" :style="{ left: margins[3] }"></div>
-      <div
-        class="margin right"
-        :style="{ left: `calc(${pageWidth} - ${margins[1]})` }"
-      ></div>
+      <div class="margin right" :style="{ left: `calc(${pageWidth} - ${margins[1]})` }"></div>
       <div class="margin top" :style="{ top: margins[0] }"></div>
-      <div
-        class="margin bottom"
-        :style="{ top: `calc(${pageHeight} - ${margins[2]})` }"
-      ></div>
+      <div class="margin bottom" :style="{ top: `calc(${pageHeight} - ${margins[2]})` }"></div>
     </div>
   </div>
 </template>
@@ -78,8 +72,8 @@ const paginationJustify = computed(() => {
     ? props.pagination.align === "center"
       ? "space-around"
       : (props.pageNumber || 0) % 2
-      ? "flex-start"
-      : "flex-end"
+        ? "flex-start"
+        : "flex-end"
     : "";
 });
 const paginationMargin = computed(() => {
@@ -118,11 +112,13 @@ body {
   padding: 0;
   size: v-bind(formatStyle);
 }
+
 @media print {
   button {
     display: none;
   }
 }
+
 .page {
   height: v-bind(pageHeight);
   width: v-bind(pageWidth);
@@ -130,11 +126,13 @@ body {
   position: relative;
   break-inside: avoid;
   box-sizing: border-box;
+
   .content {
     display: flex;
     flex-direction: column;
     height: 100%;
     justify-content: space-between;
+
     .body {
       display: flex;
       flex-direction: column;
@@ -143,6 +141,7 @@ body {
       height: 100%;
       width: 100%;
     }
+
     .footer {
       .pagination {
         width: 100%;
@@ -155,17 +154,20 @@ body {
       }
     }
   }
+
   .borders {
     .border {
       position: absolute;
       border-right: 1px dashed black;
       border-bottom: 1px dashed black;
     }
+
     .margin {
       position: absolute;
       border-right: 1px dashed red;
       border-bottom: 1px dashed red;
     }
+
     .margin.left,
     .margin.right,
     .border.left,
@@ -174,6 +176,7 @@ body {
       bottom: 0;
       width: 0;
     }
+
     .margin.top,
     .margin.bottom,
     .border.top,
