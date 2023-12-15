@@ -1,28 +1,13 @@
 <template>
-  <Layout
-    v-if="style && solutionsStyle"
-    :eltList="grids"
-    :onCreate="createGrid"
-    :onDelete="onDelete"
-    :onClick="(grid) => $router.push(`/grid/${grid.id}`)"
-    @select="(s) => (selected = s)"
-    :has-create-button="true"
-    :has-delete-button="true"
-  >
+  <Layout v-if="style && solutionsStyle" :eltList="grids" :onCreate="createGrid" :onDelete="onDelete"
+    :onClick="(grid) => $router.push(`/grid/${grid.id}`)" @select="(s) => (selected = s)" :has-create-button="true"
+    :has-delete-button="true">
     <template v-slot:left-panel>
       <h3>{{ $t("nav.grids") }}</h3>
       <ExportButton route="book-export" :query="exportQuery" />
-      <ExportModal
-        :grids="selected.length ? selected : grids"
-        :style="style"
-        :solutionsStyle="solutionsStyle"
-      />
+      <ExportModal :grids="selected.length ? selected : grids" :style="style" :solutionsStyle="solutionsStyle" />
       <n-button round @click="download"> {{ $t('buttons.download') }} </n-button>
-      <UploadModal
-        :title="$t('buttons.uploadGrids')"
-        :buttonText="$t('buttons.uploadGrids')"
-        @ok="onUpload"
-      />
+      <UploadModal :title="$t('buttons.uploadGrids')" :buttonText="$t('buttons.uploadGrids')" @ok="onUpload" />
     </template>
     <template #card-title="{ elt }">
       <span>
@@ -31,19 +16,13 @@
     </template>
     <template #card-body="{ elt, i }">
       <div class="preview">
-        <SVGGrid
-          :grid="elt"
-          :focus="nullCell"
-          :style="style"
-          dir="horizontal"
-          :export-options="{
-            ...defaultExportOptions,
-            texts: true,
-            highlight: true,
-          }"
-        ></SVGGrid>
+        <img :src="thumbnails[i] || '/placeholder.png'" />
+        {{ thumbnails[i] }}
       </div>
       {{ elt.comment ? elt.comment : $t("buttons.newGrid") }}
+    </template>
+    <template v-slot:outside>
+      <GridThumbnail v-if="grids[exportingG]" :grid="grids[exportingG]" :style="style" @update="onExported" />
     </template>
   </Layout>
 </template>
@@ -52,6 +31,7 @@
 import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import SVGGrid from "../components/svg-renderer/Grid.vue";
+import GridThumbnail from "../components/svg-renderer/GridThumbnail.vue";
 import ExportModal from "../components/ExportModal.vue";
 import ExportButton from "../components/ExportButton.vue";
 import Layout from "../layouts/GridLayout.vue";
@@ -69,7 +49,9 @@ const grids = ref<Grid[]>([]);
 const style = ref<GridStyle>();
 const solutionsStyle = ref<SolutionStyle>();
 const selected = ref<Grid[]>([]);
-
+const exporting = ref(false);
+const exportingG = ref<number>(0);
+const thumbnails = ref<string[]>([]);
 const exportQuery = computed(() => {
   return { ids: selected.value.map((s) => s.id).join(",") };
 });
@@ -77,7 +59,8 @@ function fetch() {
   return api
     .getGrids()
     .then((gs) => {
-      grids.value = gs;
+      console.log("gs", gs);
+      grids.value = gs.sort((a, b) => b.created - a.created);
     })
     .then(() =>
       Promise.all([api.db.getStyle("default"), api.db.getStyle("solution")])
@@ -85,10 +68,18 @@ function fetch() {
     .then((opts) => {
       style.value = opts[0] as GridStyle;
       solutionsStyle.value = opts[1] as SolutionStyle;
+      exporting.value = true;
+      exportingG.value = 0;
+      thumbnails.value = [];
     })
     .catch((e) => {
       console.error("E", e);
     });
+}
+
+function onExported(str: string) {
+  thumbnails.value.push(str);
+  exportingG.value = exportingG.value + 1;
 }
 
 function onDelete() {
@@ -141,12 +132,14 @@ onMounted(() => {
   max-height: 170px;
   overflow: hidden;
 }
+
 .card-body {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
-.card-body > svg {
+
+.card-body>svg {
   max-width: 340px;
   max-height: 340px;
 }

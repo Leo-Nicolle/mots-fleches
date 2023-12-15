@@ -1,166 +1,61 @@
 <template>
-  <svg
-    ref="container"
-    class="grid"
-    :viewBox="`${-outerLineStroke} ${-outerLineStroke} ${gridTotalWidth(
-      grid,
-      style
-    )} ${gridTotalHeight(grid, style)}`"
-    :width="`${gridTotalWidth(grid, style) / (zoom || 1)}px`"
-    :height="`${gridTotalHeight(grid, style) / (zoom || 1)}px`"
-    @click="onClick"
-    @mousemove="onMouseMove"
-    @mouseout="onMouseLeave"
-    xmlns="http://www.w3.org/2000/svg"
-  >
+  <svg ref="container" class="grid" :viewBox="`${-outerLineStroke} ${-outerLineStroke} ${gridTotalWidth(
+    grid,
+    style
+  )} ${gridTotalHeight(grid, style)}`" :width="`${gridTotalWidth(grid, style) / (zoom || 1)}px`"
+    :height="`${gridTotalHeight(grid, style) / (zoom || 1)}px`" @click="onClick" @mousemove="onMouseMove"
+    @mouseout="onMouseLeave" xmlns="http://www.w3.org/2000/svg">
     <FontLoader :value="style.definition" />
     <FontLoader v-if="isSolutionStyle(style)" :value="style.solutions" />
     <defs></defs>
-    <g
-      class="cells"
-      text-anchor="middle"
-      alignment-baseline="middle"
-      dominant-baseline="middle"
-    >
+    <g class="cells" text-anchor="middle" alignment-baseline="middle" dominant-baseline="middle">
       <g class="row" v-for="(row, i) in grid.cells" :key="i">
-        <g
-          class="cell"
-          v-for="(cell, j) in row"
-          :key="j"
-          :class="getCellClass(cell, focus)"
-        >
-          <rect
-            :x="cellAndBorderWidth(style) * cell.x"
-            :y="cellAndBorderWidth(style) * cell.y"
-            :width="cellWidth(style)"
-            :height="cellWidth(style)"
-            :fill="
-              exportOptions.fills && cell.definition
-                ? defBackgroundColor
-                : 'none'
-            "
-            :class="highlights ? highlights.get(`${cell.y}-${cell.x}`) : ''"
-          />
-          <text
-            :x="xText(cell)"
-            :y="yText(cell)"
-            v-if="cell.definition && exportOptions.definitions"
-          >
-            <tspan
-              v-for="(sp, k) in lines(cell)"
-              :key="k"
-              v-bind="sp"
-              :line-height="defSize"
-              :font-size="defSize"
-              :font-family="defFontFamily"
-              :font-weight="defFontWeight"
-              :fill="defColor"
-            >
+        <g class="cell" v-for="(cell, j) in row" :key="j" :class="getCellClass(cell, focus)">
+          <rect :x="cellAndBorderWidth(style) * cell.x" :y="cellAndBorderWidth(style) * cell.y" :width="cellWidth(style)"
+            :height="cellWidth(style)" :fill="exportOptions.fills && cell.definition
+              ? defBackgroundColor
+              : 'none'
+              " :class="highlights ? highlights.get(`${cell.y}-${cell.x}`) : ''" />
+          <text :x="xText(cell)" :y="yText(cell)" v-if="cell.definition && exportOptions.definitions">
+            <tspan v-for="(sp, k) in lines(cell)" :key="k" v-bind="sp" :line-height="defSize" :font-size="defSize"
+              :font-family="defFontFamily" :font-weight="defFontWeight" :fill="defColor">
               {{ sp.text }}
             </tspan>
           </text>
-          <text
-            :x="xText(cell)"
-            :y="yText(cell) + cellWidth(style) / 2 + textTopOffset"
-            alignment-baseline="central"
-            dominant-baseline="center"
-            :font-family="textFontFamily"
-            :font-weight="textFontWeight"
-            :fill="textFontColor"
-            :font-size="textSize"
-            v-else-if="!cell.definition && exportOptions.texts"
-          >
+          <text :x="xText(cell)" :y="yText(cell) + cellWidth(style) / 2 + textTopOffset" alignment-baseline="central"
+            dominant-baseline="center" :font-family="textFontFamily" :font-weight="textFontWeight" :fill="textFontColor"
+            :font-size="textSize" v-else-if="!cell.definition && exportOptions.texts">
             {{ cell.text || cell.suggestion }}
           </text>
         </g>
       </g>
     </g>
-    <rect
-      v-if="exportOptions.outerBorders"
-      :x="-outerLineStroke / 2"
-      :y="-outerLineStroke / 2"
-      :width="gridTotalWidth(grid, style) - outerLineStroke"
-      :height="gridTotalHeight(grid, style) - outerLineStroke"
-      :stroke-width="outerLineStroke"
-      :stroke="outerLineColor"
-      fill="none"
-      stroke-miterlimit="10"
-      class="outerRect"
-    />
+    <rect v-if="exportOptions.outerBorders" :x="-outerLineStroke / 2" :y="-outerLineStroke / 2"
+      :width="gridTotalWidth(grid, style) - outerLineStroke" :height="gridTotalHeight(grid, style) - outerLineStroke"
+      :stroke-width="outerLineStroke" :stroke="outerLineColor" fill="none" stroke-miterlimit="10" class="outerRect" />
     <g class="lines" v-if="exportOptions.borders">
-      <line
-        v-for="i in rows.length - 1"
-        :key="i"
-        :x1="0"
-        :y1="i * cellWidth(style) + (i - 0.5) * borderWidth(style)"
-        :x2="gridWidth(grid, style)"
-        :y2="i * cellWidth(style) + (i - 0.5) * borderWidth(style)"
-        fill="none"
-        :stroke-width="lineStroke"
-        stroke-miterlimit="10"
-        :stroke="lineColor"
-      />
-      <line
-        v-for="i in cols.length - 1"
-        :key="i"
-        :x1="i * cellWidth(style) + (i - 0.5) * borderWidth(style)"
-        :y1="0"
-        :x2="i * cellWidth(style) + (i - 0.5) * borderWidth(style)"
-        :y2="gridHeight(grid, style)"
-        fill="none"
-        :stroke-width="lineStroke"
-        stroke-miterlimit="10"
-        :stroke="lineColor"
-      />
+      <line v-for="i in rows.length - 1" :key="i" :x1="0" :y1="i * cellWidth(style) + (i - 0.5) * borderWidth(style)"
+        :x2="gridWidth(grid, style)" :y2="i * cellWidth(style) + (i - 0.5) * borderWidth(style)" fill="none"
+        :stroke-width="lineStroke" stroke-miterlimit="10" :stroke="lineColor" />
+      <line v-for="i in cols.length - 1" :key="i" :x1="i * cellWidth(style) + (i - 0.5) * borderWidth(style)" :y1="0"
+        :x2="i * cellWidth(style) + (i - 0.5) * borderWidth(style)" :y2="gridHeight(grid, style)" fill="none"
+        :stroke-width="lineStroke" stroke-miterlimit="10" :stroke="lineColor" />
     </g>
-    <g
-      class="arrows"
-      stroke-linecap="round"
-      stroke-width="10"
-      fill="none"
-      :stroke="style.arrow.color"
-      v-if="exportOptions.arrows"
-    >
-      <g
-        v-for="(arrow, i) in arrows"
-        :key="i"
-        :transform="`translate(${arrow.x},${arrow.y})scale(${arrowScale},${arrowScale})`"
-      >
-        <path
-          :class="arrow.dir"
-          :d="getD(arrow.dir)"
-          :transform="arrow.transform"
-        />
+    <g class="arrows" stroke-linecap="round" stroke-width="10" fill="none" :stroke="style.arrow.color"
+      v-if="exportOptions.arrows">
+      <g v-for="(arrow, i) in arrows" :key="i"
+        :transform="`translate(${arrow.x},${arrow.y})scale(${arrowScale},${arrowScale})`">
+        <path :class="arrow.dir" :d="getD(arrow.dir)" :transform="arrow.transform" />
       </g>
     </g>
 
     <g class="splits" v-if="exportOptions.splits">
-      <line
-        v-for="(line, i) in splits"
-        :key="i"
-        :x1="line.x1"
-        :y1="line.y1"
-        :x2="line.x2"
-        :y2="line.y2"
-        class="split"
-        :stroke-width="lineStroke"
-        stroke-miterlimit="10"
-        :stroke="lineColor"
-      />
+      <line v-for="(line, i) in splits" :key="i" :x1="line.x1" :y1="line.y1" :x2="line.x2" :y2="line.y2" class="split"
+        :stroke-width="lineStroke" stroke-miterlimit="10" :stroke="lineColor" />
     </g>
     <g class="spaces" v-if="exportOptions.spaces">
-      <line
-        v-for="(line, i) in spaces"
-        :key="i"
-        :x1="line.x1"
-        :y1="line.y1"
-        :x2="line.x2"
-        :y2="line.y2"
-        class="space"
-        :stroke-width="spaceStroke"
-        stroke-miterlimit="10"
-        :stroke="lineColor"
-      />
+      <line v-for="(line, i) in spaces" :key="i" :x1="line.x1" :y1="line.y1" :x2="line.x2" :y2="line.y2" class="space"
+        :stroke-width="spaceStroke" stroke-miterlimit="10" :stroke="lineColor" />
     </g>
   </svg>
 </template>
@@ -278,26 +173,26 @@ const arrows = computed(
           return cell.arrows[i] === "none"
             ? null
             : {
-                dir: cell.arrows[i],
-                x:
-                  cellAndBorderWidth(props.style) * cell.x +
-                  cellAndBorderWidth(props.style) * x,
-                y:
-                  cellAndBorderWidth(props.style) * cell.y +
-                  cellAndBorderWidth(props.style) * y,
-                transform: cell.arrows[i].startsWith("right")
-                  ? "rotate(180)scale(-1, -1)"
-                  : "scale(-1, 1)rotate(90)",
-              };
+              dir: cell.arrows[i],
+              x:
+                cellAndBorderWidth(props.style) * cell.x +
+                cellAndBorderWidth(props.style) * x,
+              y:
+                cellAndBorderWidth(props.style) * cell.y +
+                cellAndBorderWidth(props.style) * y,
+              transform: cell.arrows[i].startsWith("right")
+                ? "rotate(180)scale(-1, -1)"
+                : "scale(-1, 1)rotate(90)",
+            };
         });
       })
       .flat()
       .filter((e) => e) as unknown as {
-      dir: ArrowDir;
-      x: string;
-      y: string;
-      transform: string;
-    }[]
+        dir: ArrowDir;
+        x: string;
+        y: string;
+        transform: string;
+      }[]
 );
 /**
  * The splits to display
@@ -314,17 +209,17 @@ const splits = computed(() =>
           ? split === 2
             ? 0.5
             : split === 1
-            ? 1 / 4
-            : 3 / 4
+              ? 1 / 4
+              : 3 / 4
           : lines === 3
-          ? split === 1
-            ? 1 / 3
-            : 2 / 3
-          : lines === 2
-          ? split === 1
-            ? 0.5
-            : 0
-          : 0;
+            ? split === 1
+              ? 1 / 3
+              : 2 / 3
+            : lines === 2
+              ? split === 1
+                ? 0.5
+                : 0
+              : 0;
       const y =
         cell.y * cellAndBorderWidth(props.style) +
         ratio * cellWidth(props.style);
@@ -364,7 +259,7 @@ const spaces = computed(() => {
         });
       }
       return spaces;
-    }, [] as { x1: number; x2: number; y1: number; y2: number }[]);
+    }, [] as { x1: number; x2: number; y1: number; y2: number; }[]);
 });
 
 function xText(cell: Cell) {
@@ -399,12 +294,12 @@ function lines(cell: Cell) {
   const topGaps = !splited
     ? new Array(lines.length).fill(1 / (lines.length + 1))
     : lines.length === 3
-    ? split === 0
-      ? [2 / 9, 7 / 18, 2 / 9]
-      : [2 / 9, 2 / 9, 7 / 18]
-    : lines.length === 2
-    ? [1 / 4, 1 / 2]
-    : [1 / 6, 1 / 6, 1 / 3, 1 / 6];
+      ? split === 0
+        ? [2 / 9, 7 / 18, 2 / 9]
+        : [2 / 9, 2 / 9, 7 / 18]
+      : lines.length === 2
+        ? [1 / 4, 1 / 2]
+        : [1 / 6, 1 / 6, 1 / 3, 1 / 6];
   const res = lines.map((line, i) => {
     return {
       text: line,
@@ -453,5 +348,4 @@ function onMouseLeave(evt: MouseEvent) {
 }
 </script>
 
-<style>
-</style>
+<style></style>

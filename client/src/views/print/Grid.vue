@@ -1,12 +1,6 @@
 <template>
-  <GridPaper
-    v-if="style && grid"
-    :grid="grid"
-    :style="style"
-    :pagination="undefined"
-    :page="0"
-    :export-options="exportOptions"
-  />
+  <GridPaper v-if="style && grid" :grid="grid" :style="style" :pagination="undefined" :page="0"
+    :export-options="exportOptions" />
 </template>
 
 <script setup lang="ts">
@@ -45,12 +39,11 @@ function fetch() {
 
 onMounted(() => {
   fetch()
-  .then(() => usePrintMessage());
+    .then(() => usePrintMessage());
 });
 onUnmounted(() => {
   cleanupPrintMessage();
 });
 </script>
 
-<style lang="less">
-</style>
+<style lang="less"></style>

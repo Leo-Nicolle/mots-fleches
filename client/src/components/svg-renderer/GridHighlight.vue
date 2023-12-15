@@ -121,7 +121,6 @@ watchEffect(() => {
     props.dir === "horizontal" ? 1 : length
   );
   transform.value = useTransform(props, cells[0]);
-  console.log(transform.value, cells[0].x);
   const validity =
     props.validity[props.dir][`${bounds.start.y}-${bounds.start.x}`];
   tooltip.value = validity ? validity.problem : "";
@@ -241,10 +240,10 @@ function add() {
 <style scoped>
 .gridhighlightcontainer {
   pointer-events: none;
+  position: absolute;
 }
 
 .gridhighlight {
-  /* position: absolute; */
   top: 0;
   left: 0;
   padding: 0;

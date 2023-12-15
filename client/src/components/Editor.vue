@@ -84,7 +84,6 @@ import {
 import {
   AddCircleOutline,
   RemoveCircleOutline,
-  SwapVertical,
 } from "@vicons/ionicons5";
 import throttle from "lodash.throttle";
 import {
