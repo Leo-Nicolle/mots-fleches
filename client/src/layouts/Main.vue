@@ -50,7 +50,7 @@
         :type="showLeftDrawer ? 'primary' : 'warning'" icon-placement="right" @click="showLeftDrawer = !showLeftDrawer">
         {{ showLeftDrawer ? "<" : ">" }} </n-button>
 
-          <div :on-scroll="onScroll" class="maincontentscroll scroll">
+          <div @scroll="onScroll" class="maincontentscroll scroll">
             <!-- @slot Slot for element in the main panel  -->
             <slot name="body"></slot>
           </div>
@@ -124,7 +124,7 @@ const emit = defineEmits<{
   /**
    * Scroll within main panel
    */
-  (event: "scroll"): void;
+  (event: "scroll", data: Event): void;
 }>();
 // use this to try to make sure we dont watch the whole global object
 function getNavChildren() {
@@ -329,7 +329,7 @@ nav {
   grid-row-start: 2;
   display: grid;
   grid-template-columns: v-bind(leftWidth) auto;
-  grid-template-rows: fit-content(calc(100vh - 42px));
+  grid-template-rows: calc(100vh - 42px);
   grid-column-gap: 15px;
 }
 
