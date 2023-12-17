@@ -8,26 +8,25 @@
     <FontLoader :value="style.definition" />
     <FontLoader v-if="isSolutionStyle(style)" :value="style.solutions" />
     <defs></defs>
-    <g class="cells" text-anchor="middle" alignment-baseline="middle" dominant-baseline="middle">
-      <g class="row" v-for="(row, i) in grid.cells" :key="i">
-        <g class="cell" v-for="(cell, j) in row" :key="j" :class="getCellClass(cell, focus)">
-          <rect :x="cellAndBorderWidth(style) * cell.x" :y="cellAndBorderWidth(style) * cell.y" :width="cellWidth(style)"
-            :height="cellWidth(style)" :fill="exportOptions.fills && cell.definition
-              ? defBackgroundColor
-              : 'none'
-              " :class="highlights ? highlights.get(`${cell.y}-${cell.x}`) : ''" />
-          <text :x="xText(cell)" :y="yText(cell)" v-if="cell.definition && exportOptions.definitions">
-            <tspan v-for="(sp, k) in lines(cell)" :key="k" v-bind="sp" :line-height="defSize" :font-size="defSize"
-              :font-family="defFontFamily" :font-weight="defFontWeight" :fill="defColor">
-              {{ sp.text }}
-            </tspan>
-          </text>
-          <text :x="xText(cell)" :y="yText(cell) + cellWidth(style) / 2 + textTopOffset" alignment-baseline="central"
-            dominant-baseline="center" :font-family="textFontFamily" :font-weight="textFontWeight" :fill="textFontColor"
-            :font-size="textSize" v-else-if="!cell.definition && exportOptions.texts">
-            {{ cell.text || cell.suggestion }}
-          </text>
-        </g>
+    <g class="cells" text-anchor="middle" alignment-baseline="middle" dominant-baseline="hanging">
+      <g v-for="(cell, i) in textCells" :key="i" :class="getCellClass(cell, focus)">
+        <rect :x="cellAndBorderWidth(style) * cell.x" :y="cellAndBorderWidth(style) * cell.y" :width="cellWidth(style)"
+          :height="cellWidth(style)" :fill="exportOptions.fills && cell.definition
+            ? defBackgroundColor
+            : 'none'
+            " :class="highlights ? highlights.get(`${cell.y}-${cell.x}`) : ''" />
+        <text :x="xText(cell)" :y="yText(cell)" v-if="cell.definition && exportOptions.definitions">
+          <tspan v-for="(sp, k) in lines(cell)" :key="k" v-bind="sp" :line-height="defSize" :font-size="defSize"
+            :font-family="defFontFamily" :font-weight="defFontWeight" :fill="defColor">
+            {{ sp.text }}
+          </tspan>
+        </text>
+        <text :x="xText(cell)" :y="yText(cell)" alignment-baseline="central" dominant-baseline="center"
+          :font-family="textFontFamily" :font-weight="textFontWeight" :fill="textFontColor" :font-size="textSize"
+          v-else-if="!cell.definition && exportOptions.texts">
+          {{ cell.text || cell.suggestion }}
+        </text>
+        <!-- </g> -->
       </g>
     </g>
     <rect v-if="exportOptions.outerBorders" :x="-outerLineStroke / 2" :y="-outerLineStroke / 2"
@@ -131,6 +130,9 @@ const rows = computed(() =>
 );
 const cols = computed(() =>
   new Array(props.grid.cols).fill(0).map((e, i) => i)
+);
+const textCells = computed(() =>
+  props.grid.cells.flat().filter((c) => c.definition || props.exportOptions.texts)
 );
 const arrowScale = computed(() => 0.01 * props.style.arrow.size);
 const lineStroke = computed(() => props.style.grid.borderSize);
