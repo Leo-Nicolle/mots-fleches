@@ -289,6 +289,7 @@ function lines(cell: Cell) {
   const splited = isSplited(cell);
   const split = splitIndex(cell);
   const lines = getLines(cell);
+  const offset = Math.round(defSize.value * 0.171875 / 2);
   const borderSize = props.style.grid.borderSize;
   const freeHeight =
     cellHeight - +splited * borderSize - lines.length * defSize.value;
@@ -296,18 +297,22 @@ function lines(cell: Cell) {
   const topGaps = !splited
     ? new Array(lines.length).fill(1 / (lines.length + 1))
     : lines.length === 3
-      ? split === 0
-        ? [2 / 9, 7 / 18, 2 / 9]
-        : [2 / 9, 2 / 9, 7 / 18]
+      ? split === 1
+        ? [1 / 8, 1 / 4, 1 / 2]
+        : [1 / 4, 1 / 4, 3 / 8]
       : lines.length === 2
         ? [1 / 4, 1 / 2]
-        : [1 / 6, 1 / 6, 1 / 3, 1 / 6];
+        : [1 / 8, 1 / 8, 1 / 8, 1 / 2];
+  if (cell.x === 0 && cell.y === 1) {
+    console.log({ split });
+  }
   const res = lines.map((line, i) => {
     return {
       text: line,
       "dominant-baseline": "middle",
       dy:
-        (i === 0 ? defSize.value / 2 : defSize.value) + topGaps[i] * freeHeight,
+        (i === 0 ? offset + defSize.value / 2 : defSize.value) + Math.ceil(topGaps[i] * freeHeight)
+        + ((splited && i === split) ? borderSize : 0),
       x: xText(cell),
       class: "definition",
     };
