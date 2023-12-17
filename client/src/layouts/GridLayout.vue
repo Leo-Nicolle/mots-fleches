@@ -157,6 +157,7 @@ watch(selectedElements, () => {
   gap: 8px 12px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 300px));
+  padding-bottom: 12px;
   width: 100%;
 }
 

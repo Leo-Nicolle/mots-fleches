@@ -376,8 +376,8 @@ nav {
 }
 
 .maincontentscroll {
-  /* max-width: 100%; */
-  /* max-height: 100%; */
   overflow: scroll;
+  padding-bottom: 10px;
+  padding-right: 10px;
 }
 </style>
