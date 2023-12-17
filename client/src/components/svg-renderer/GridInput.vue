@@ -238,6 +238,10 @@ watchEffect(() => {
   transform: v-bind(transform);
 }
 
+.definition {
+  font: v-bind(defFont);
+}
+
 textarea {
   overflow: hidden;
   resize: none;
