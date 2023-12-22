@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 import { workerController } from "../../search-worker";
 import throttle from "lodash.throttle";
 import { Grid } from "grid";
@@ -50,7 +50,6 @@ function refreshGetSuggestions() {
 function onDelete(index: number) {
   words.value.splice(index, 1);
 }
-
 const throttledSuggesttions = throttle(refreshGetSuggestions, 200);
 watch(editingValue, (value, previous) => {
   if (value === previous) return;
@@ -82,16 +81,18 @@ onMounted(() => {
   // console.log('onMounted');
   // getOptions();
 });
+
+const templateCols = computed(() => `repeat(${words.value.length}, 2.5em)`);
 </script>
 
 <style scoped>
 .autofill {
   margin: 10px 0;
   gap: 5px;
-  display: grid;
-  height: calc(100% - 25px);
+  display: flex;
+  flex-direction: column;
+  max-height: min(900px, calc(100vh - 200px));
   width: 100%;
-  grid-template-rows: max-content auto;
 }
 
 .autofill>.autofillinput {
@@ -100,12 +101,11 @@ onMounted(() => {
 
 .autofill>.words {
   display: grid;
-  grid-template-rows: repeat(auto-fill, 2.5em);
+  grid-template-rows: v-bind(templateCols);
   margin: 5px 0 5px 5px;
   height: 100%;
   overflow-x: hidden;
   overflow-y: scroll;
-  /* gap: 1rem; */
   align-items: flex-start;
   font-size: 1.2em;
 }
