@@ -15,24 +15,23 @@
             ? defBackgroundColor
             : 'none'
             " :class="highlights ? highlights.get(`${cell.y}-${cell.x}`) : ''" />
-        <text :x="xText(cell)" :y="yText(cell)" v-if="cell.definition && exportOptions.definitions">
-          <tspan v-for="(sp, k) in lines(cell)" :key="k" v-bind="sp" :line-height="defSize" :font-size="defSize"
-            :font-family="defFontFamily" :font-weight="defFontWeight" :fill="defColor">
+        <g v-if="cell.definition && exportOptions.definitions">
+          <text v-for="(sp, k) in lines(cell)" :key="k" :line-height="defSize" :font-size="defSize"
+            :font-family="defFontFamily" :font-weight="defFontWeight" :fill="defColor" v-bind="sp">
             {{ sp.text }}
-          </tspan>
-        </text>
-        <text :x="xText(cell)" :y="yText(cell)" alignment-baseline="central" dominant-baseline="center"
+          </text>
+        </g>
+        <text :x="xText(cell)" :y="yText(cell) + textSize / 2" alignment-baseline="central" dominant-baseline="center"
           :font-family="textFontFamily" :font-weight="textFontWeight" :fill="textFontColor" :font-size="textSize"
           v-else-if="!cell.definition && exportOptions.texts">
           {{ cell.text || cell.suggestion }}
         </text>
-        <!-- </g> -->
       </g>
     </g>
     <rect v-if="exportOptions.outerBorders" :x="-outerLineStroke / 2" :y="-outerLineStroke / 2"
       :width="gridTotalWidth(grid, style) - outerLineStroke" :height="gridTotalHeight(grid, style) - outerLineStroke"
       :stroke-width="outerLineStroke" :stroke="outerLineColor" fill="none" stroke-miterlimit="10" class="outerRect" />
-    <g class="lines" v-if="exportOptions.borders">
+    <g class="lines">
       <line v-for="i in rows.length - 1" :key="i" :x1="0" :y1="i * cellWidth(style) + (i - 0.5) * borderWidth(style)"
         :x2="gridWidth(grid, style)" :y2="i * cellWidth(style) + (i - 0.5) * borderWidth(style)" fill="none"
         :stroke-width="lineStroke" stroke-miterlimit="10" :stroke="lineColor" />
@@ -153,7 +152,6 @@ const textFontFamily = computed(() => props.style.solutions.family);
 const textFontWeight = computed(() => props.style.solutions.weight);
 const textFontColor = computed(() => props.style.solutions.color);
 const textTopOffset = computed(() => props.style.solutions.top);
-
 const defFontFamily = computed(() => `${props.style.definition.family}`);
 const defFontWeight = computed(() => `${props.style.definition.weight}`);
 
@@ -275,49 +273,44 @@ function yText(cell: Cell) {
  * computes the lines to display
  */
 function lines(cell: Cell) {
+  const { text } = cell;
+  const cellHeight = cellWidth(props.style);
+
   if (!cell.definition) {
     return [
       {
-        text: cell.text,
-        y: yText(cell),
+        text,
+        y: yText(cell) + cellHeight / 2,
         x: xText(cell),
         class: "text",
+        "dominant-baseline": "middle",
       },
     ];
   }
-  const cellHeight = cellWidth(props.style);
   const splited = isSplited(cell);
   const split = splitIndex(cell);
   const lines = getLines(cell);
-  const offset = Math.round(defSize.value * 0.171875 / 2);
+  const ln = lines.length;
   const borderSize = props.style.grid.borderSize;
-  const freeHeight =
-    cellHeight - +splited * borderSize - lines.length * defSize.value;
-
-  const topGaps = !splited
-    ? new Array(lines.length).fill(1 / (lines.length + 1))
-    : lines.length === 3
-      ? split === 1
-        ? [1 / 8, 1 / 4, 1 / 2]
-        : [1 / 4, 1 / 4, 3 / 8]
-      : lines.length === 2
-        ? [1 / 4, 1 / 2]
-        : [1 / 8, 1 / 8, 1 / 8, 1 / 2];
-  if (cell.x === 0 && cell.y === 1) {
-    console.log({ split });
-  }
-  const res = lines.map((line, i) => {
+  const fourth = cellHeight / 4;
+  const freeSpace = Math.max(0, cellHeight - (+splited * borderSize) - ln * fourth)
+    / (ln + 1);
+  return lines.map((line, i, arr) => {
+    const y =
+      cell.y * cellAndBorderWidth(props.style)
+      + freeSpace * (i + 1)
+      + i * fourth
+      + (splited && i >= split) * (borderSize);
+    const height = freeSpace / ln;
     return {
       text: line,
-      "dominant-baseline": "middle",
-      dy:
-        (i === 0 ? offset + defSize.value / 2 : defSize.value) + Math.ceil(topGaps[i] * freeHeight)
-        + ((splited && i === split) ? borderSize : 0),
       x: xText(cell),
+      y,
+      height,
+      "dominant-baseline": "hanging",
       class: "definition",
     };
   });
-  return res;
 }
 
 function getCell(evt: MouseEvent) {
@@ -335,6 +328,7 @@ function getCell(evt: MouseEvent) {
   }
   const cY = Math.floor(y / cellAndBorderWidth(props.style) / ratio);
   const cX = Math.floor(x / cellAndBorderWidth(props.style) / ratio);
+  if (cX < 0 || cX > props.grid.cols - 1 || cY < 0 || cY > props.grid.rows - 1) return nullCell;
   return props.grid.cells[cY][cX];
 }
 function onClick(evt: MouseEvent) {

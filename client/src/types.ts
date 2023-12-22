@@ -26,7 +26,7 @@ export const defaultExportOptions: ExportOptions = {
   margins: true,
   spaces: true,
   fills: true,
-  pagination: true
+  pagination: true,
 };
 
 export type Rect = {

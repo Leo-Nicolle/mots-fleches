@@ -1,5 +1,20 @@
 <template>
   <div class="gridhighlightcontainer">
+    <span v-if="false" class="lines">
+      <span style="top: 102.5px; background-color: blue" />
+
+      <span style="top: 56.6px" />
+      <span style="top: 136px" />
+    </span>
+    <span v-if="false" class="v-lines">
+      <span />
+      <span style="transform: translate(10px,29px);" />
+      <span style="transform: translate(20px,58px);" />
+      <span style="transform: translate(30px,87px);" />
+      <span style="transform: translate(40px,116px);" />
+      <span style="transform: translate(50px,145px);" />
+      <span style="transform: translate(60px,174px);" />
+    </span>
     <span class="heatmap" v-if="mode === 'heatmap'">
       <canvas ref="heatmapref" />
     </span>
@@ -283,5 +298,29 @@ function add() {
   left: 0;
   transform: v-bind(heatmapTransform);
   pointer-events: none;
+}
+
+.lines {
+  position: relative;
+}
+
+.lines>span {
+  width: 1500px;
+  height: 1px;
+  background-color: red;
+  position: absolute;
+}
+
+.v-lines {
+  position: relative;
+}
+
+.v-lines>span {
+  left: 204px;
+  width: 102px;
+  height: 29px;
+  background-color: red;
+  position: absolute;
+  opacity: 0.5;
 }
 </style>

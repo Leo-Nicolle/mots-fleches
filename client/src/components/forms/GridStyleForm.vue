@@ -8,44 +8,20 @@
           {{ $t("forms.grid") }}
         </h3>
         <n-form-item :label="$t('forms.cellSize')" path="grid.cellSize">
-          <n-input-number
-            role="cell-size"
-            v-model:value="value.grid.cellSize"
-          />
+          <n-input-number role="cell-size" v-model:value="value.grid.cellSize" />
         </n-form-item>
         <n-form-item :label="$t('forms.borderSize')" path="grid.borderSize">
-          <n-input-number
-            role="border-size"
-            v-model:value="value.grid.borderSize"
-          />
+          <n-input-number role="border-size" v-model:value="value.grid.borderSize" />
         </n-form-item>
         <n-form-item :label="$t('forms.borderColor')" path="grid.borderColor">
-          <n-color-picker
-            role="border-color"
-            v-model:value="value.grid.borderColor"
-            :show-alpha="false"
-            size="small"
-          />
+          <n-color-picker role="border-color" v-model:value="value.grid.borderColor" :show-alpha="false" size="small" />
         </n-form-item>
-        <n-form-item
-          :label="$t('forms.outBorderSize')"
-          path="grid.outerBorderSize"
-        >
-          <n-input-number
-            role="outerBorder-size"
-            v-model:value="value.grid.outerBorderSize"
-          />
+        <n-form-item :label="$t('forms.outBorderSize')" path="grid.outerBorderSize">
+          <n-input-number role="outerBorder-size" v-model:value="value.grid.outerBorderSize" />
         </n-form-item>
-        <n-form-item
-          :label="$t('forms.outBorderColor')"
-          path="grid.outerBorderColor"
-        >
-          <n-color-picker
-            role="outerBorder-color"
-            v-model:value="value.grid.outerBorderColor"
-            :show-alpha="false"
-            size="small"
-          />
+        <n-form-item :label="$t('forms.outBorderColor')" path="grid.outerBorderColor">
+          <n-color-picker role="outerBorder-color" v-model:value="value.grid.outerBorderColor" :show-alpha="false"
+            size="small" />
         </n-form-item>
         <n-form-item :label="$t('forms.spaceWidth')" path="grid.spaceSize">
           <n-input-number role="space" v-model:value="value.grid.spaceSize" />
@@ -54,26 +30,18 @@
       <h3>{{ $t("forms.solutions") }}</h3>
       <FontSelector v-model="value.solutions" role-prefix="solutions" />
       <n-form-item :label="$t('forms.offset')" path="top">
-        <n-input-number
-          v-model:value="value.solutions.top"
-          :step="0.5"
-          :precision="1"
-          role="solutions-top"
-        />
+        <n-input-number v-model:value="value.solutions.top" :step="0.5" :precision="1" role="solutions-top" />
       </n-form-item>
       <div v-if="definition">
         <h3>{{ $t("forms.definitions") }}</h3>
         <FontSelector v-model="value.definition" rolePrefix="definition" />
-        <n-form-item
-          :label="$t('forms.backgroundColor')"
-          path="definition.backgroundColor"
-        >
-          <n-color-picker
-            role="definition-background-color"
-            v-model:value="value.definition.backgroundColor"
-            :show-alpha="false"
-            size="small"
-          />
+        <!-- <n-form-item :label="$t('forms.offset')" path="definition.offset"><n-form-item :label="$t('forms.offset')"
+            path="definition.offset">
+            <n-input-number v-model:value="value.definition.offset" :step="0.2" :precision="1" role="definitions-offset" />
+          </n-form-item> -->
+        <n-form-item :label="$t('forms.backgroundColor')" path="definition.backgroundColor">
+          <n-color-picker role="definition-background-color" v-model:value="value.definition.backgroundColor"
+            :show-alpha="false" size="small" />
         </n-form-item>
       </div>
       <div v-if="arrows">
@@ -82,12 +50,7 @@
           <n-input-number role="arrow-size" v-model:value="value.arrow.size" />
         </n-form-item>
         <n-form-item :label="$t('forms.color')" path="arrow.size">
-          <n-color-picker
-            role="arrow-color"
-            v-model:value="value.arrow.color"
-            :show-alpha="false"
-            size="small"
-          />
+          <n-color-picker role="arrow-color" v-model:value="value.arrow.color" :show-alpha="false" size="small" />
         </n-form-item>
       </div>
       <div v-if="format">
@@ -146,6 +109,7 @@ watch(value.value, () => {
   flex-direction: column;
   width: 192px;
 }
+
 .n-color-picker {
   width: 150px;
 }

@@ -35,7 +35,6 @@ export function useTransform(props: Props, origin: Cell) {
     y: unref(origin.y),
   };
   const { x, y } = o;
-  debugger;
   return `translate(${(x * cellAndBorderWidth(props.style) +
     outerBorderWidth(props.style)) *
     (props.zoom || 1) -
