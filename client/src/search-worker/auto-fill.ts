@@ -117,6 +117,8 @@ export function autoFill(grid: Grid, words: string[]) {
     }
     return acc;
   }, { score: -Infinity, grid: '' });
+
+  
   return bestGrid;
   // const maxScore = Array.from(visited.values()).reduce((acc, { score }) => Math.max(acc, score), 0);
   // let placed = true;

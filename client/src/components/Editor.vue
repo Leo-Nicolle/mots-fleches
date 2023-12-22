@@ -1,5 +1,5 @@
 <template>
-  <Layout @scroll="onScroll">
+  <Layout @scroll="onScroll" :left-panel-scroll="highlightMode !== 'autofill'">
     <template #left-panel>
       <span class="title">
         <h2>
@@ -13,7 +13,7 @@
           {{ $t(`modes.${highlightMode}`) }}
         </n-button>
       </span>
-      <Autofill v-if="highlightMode === 'autofill'" />
+      <Autofill v-if="highlightMode === 'autofill'" :grid="grid" />
       <Suggestion v-else-if="!focus.definition" :point="focus" :dir="dir" :query="''" :grid-id="grid.id" :method="method"
         :ordering="ordering" :cellProbas="cellProbas" :searchResult="searchResult" :loading="isLoadingSuggestions"
         @hover="onHover" @click="onClick" @dir="(d) => (dir = d)" @mouseout="onMouseOut" @methodswitch="
@@ -21,13 +21,9 @@
           methods[
           (methods.findIndex((o) => o === method) + 1) % methods.length
           ]
-          " @orderswitch="
-    ordering =
-    orderings[
-    (orderings.findIndex((o) => o === ordering) + 1) %
-    orderings.length
-    ]
-    ">
+          " @orderswitch="ordering = orderings[
+    (orderings.findIndex((o) => o === ordering) + 1) % orderings.length
+  ]">
       </Suggestion>
     </template>
     <template #body>
@@ -139,10 +135,10 @@ const method = ref<Method>("accurate");
 const methods = ref<Method[]>(["accurate", "simple"]);
 const ordering = ref<Ordering>("best");
 const orderings = ref<Ordering[]>(["best", "alpha", "inverse-alpha", "random"]);
-const zoom = ref(5);
+const zoom = ref(1);
 const highlights = ref(new Map());
 const highlightModes = ["normal", "check", "heatmap", 'autofill'] as Mode[];
-const highlightMode = ref<Mode>(highlightModes[3]);
+const highlightMode = ref<Mode>(highlightModes[2]);
 const cellProbas = ref<CellProba[][]>([]);
 const searchResult = ref<string[]>([]);
 const refreshingRun = ref(false);
@@ -157,22 +153,6 @@ function resetGrid() {
   });
   onGridUpdate();
 }
-function autofill() {
-  console.log("autofill");
-  refreshingRun.value = true;
-  workerController.autofill(props.grid, [
-    'FAN',
-    'PENTES',
-    'PARADE',
-    'PESAIS',
-    'CARAFE',
-    'RAPAS',
-    'CAPANT',
-    'DON',
-    'TA',
-    'ANA',
-  ]);
-}
 function refreshCellProba() {
   refreshingRun.value = true;
   workerController.run(props.grid);
@@ -184,7 +164,6 @@ function refreshSimpleSearch() {
 function refreshValidity() {
   workerController.checkGrid(props.grid);
 }
-const throttledAutofill = throttle(autofill, 200);
 const throttledRefresCellProba = throttle(refreshCellProba, 200);
 const throttledRefresSimpleSearch = throttle(refreshSimpleSearch, 60);
 const throttledRefresValidity = throttle(refreshValidity, 60);
@@ -228,7 +207,6 @@ onMounted(() => {
   computeOffset(null);
   console.log('mounted');
   workerController.checkGrid(props.grid);
-  throttledAutofill();
   throttledRefresCellProba();
   throttledRefresValidity();
 });
@@ -310,11 +288,6 @@ workerController.on("bail-result", () => {
 workerController.on("search-result", (data) => {
   refreshingSearch.value = false;
   searchResult.value = data;
-});
-workerController.on("autofill-result", (data) => {
-  refreshingRun.value = false;
-  props.grid.copyFrom(data);
-  onGridUpdate();
 });
 
 workerController.on("locale-changed", () => {

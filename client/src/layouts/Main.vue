@@ -36,8 +36,9 @@
     </div>
 
     <div class="body">
-      <div class="left-panel scroll" v-if="screenSize !== 'phone'">
-        <slot name="left-panel"> </slot>
+      <div :class="`left-panel ${leftPanelScroll ? 'scroll' : 'noscroll'}`" v-if="screenSize !== 'phone'">
+        <slot name="left-panel">
+        </slot>
       </div>
       <n-drawer v-else v-model:show="showLeftDrawer" @click="showLeftDrawer = false" :width="300" placement="left">
         <n-drawer-content>
@@ -92,10 +93,14 @@ const { onResize, cleanupUseResponsive, screenSize } = useResponsive();
 const collapsed = ref(true);
 const switchingLocale = ref(false);
 const props = withDefaults(
-  defineProps<{ showLoginButton?: boolean; leftPanelWidth?: number; }>(),
+  defineProps<{
+    showLoginButton?: boolean; leftPanelWidth?: number;
+    leftPanelScroll?: boolean;
+  }>(),
   {
     showLoginButton: true,
     leftPanelWidth: 235,
+    leftPanelScroll: true
   }
 );
 const isSignedIn = ref(false);
@@ -361,6 +366,10 @@ nav {
   left: 0;
   padding: 5px;
   z-index: 10;
+}
+
+.left-panel.noscroll {
+  overflow: hidden;
 }
 
 .n-drawer .n-drawer-content .n-drawer-body-content-wrapper {

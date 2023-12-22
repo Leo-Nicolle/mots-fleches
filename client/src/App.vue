@@ -44,4 +44,5 @@ onMounted(async () => {
 
 h2 {
   margin-top: 0;
-}</style>
+}
+</style>

@@ -256,6 +256,11 @@ function add() {
 .gridhighlightcontainer {
   pointer-events: none;
   position: absolute;
+  display: grid;
+}
+
+.gridhighlightcontainer>* {
+  grid-area: 1 / 1 / 1 / 1;
 }
 
 .gridhighlight {
@@ -268,7 +273,8 @@ function add() {
   transform: v-bind(transform);
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  gap: 10px;
   pointer-events: none;
 }
 
