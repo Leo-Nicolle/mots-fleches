@@ -255,7 +255,6 @@ function add() {
 <style scoped>
 .gridhighlightcontainer {
   pointer-events: none;
-  position: absolute;
   display: grid;
 }
 

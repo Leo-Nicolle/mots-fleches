@@ -1,6 +1,7 @@
 import { Bounds, CellBest, CellProba, Direction, Grid } from "grid";
 import { getCellProbas } from "./heatmap";
 import { cantor } from "./utils";
+import { dico } from "./dico";
 
 function hash(x: number, y: number, dir: Direction) {
   const z = dir === 'horizontal' ? 1 : 2;
@@ -78,7 +79,7 @@ export function autoFill(grid: Grid, words: string[]) {
     return false;
   });
   const visited = new Map<string, State>();
-  const maxIter = 200; //Math.min(words.length, 30);
+  const maxIter = 2000; //Math.min(words.length, 30);
   const baseScore = Math.max(1, getScore(cellProbas));
   const baseWords = words.length;
   let iter = 0;
@@ -119,7 +120,7 @@ export function autoFill(grid: Grid, words: string[]) {
   }, { score: -Infinity, grid: '' });
 
   
-  return bestGrid;
+  return fillupGrid(Grid.unserialize(bestGrid)).serialize();
   // const maxScore = Array.from(visited.values()).reduce((acc, { score }) => Math.max(acc, score), 0);
   // let placed = true;
   // while (placed) {
@@ -161,9 +162,11 @@ function placeRandomWord2(
       const stwords = words.slice();
       stwords.splice(index!, 1);
       const { cellProbas } = getCellProbas(grid2);
+      if (cellProbas.flat().filter(c => c.validH ||c.validV).some(c => c.total === 0)) return null;
       const score = getScore(cellProbas) / baseScore + 1 - words.length / baseWords;
       return { score, words: stwords, grid: grid2.serialize(), spots: spots.filter(s => s !== spot) };
-    });
+    })
+    .filter(e=> e) as State[];
   // spotsByLength.set(word.length, spotsByLength.get(word.length)!.filter(s => s !== spot));
   // grid.setWord(word, spot!.start, spot!.direction);
   // words.splice(index!, 1);
@@ -230,4 +233,62 @@ function getBestSpot(cellProbas: CellBest[][], word: string, spots: DBounds[]) {
     }
     return acc;
   }, { score: -Infinity, spot: spots[0] });
+}
+
+function fillupGrid(grid: Grid){
+  // const { cellProbas } = getCellProbas(grid);
+
+  const words = grid.getWords('horizontal')
+  .map(c => ({...c, horizontal: true, vertical: false}))
+  .concat(grid.getWords('vertical')
+  .map(c => ({...c, horizontal: false, vertical: true})));
+  let i =0;
+  let maxCount = 1000;
+  const queue = [{grid, score: 0}];
+  const visited = new Map<string, unknown>();
+  visited.set(queue[0].grid.serialize(), queue[0]);
+  while (i < maxCount && queue.length ){
+    i++;
+    const {grid} = queue.shift()!;
+    const { cellProbas } = getCellProbas(grid);
+    const incomplete = words
+    .filter(w => w.length> 1 && !w.cells.every(c => c.text && c.text.length))
+    .map((w) => {
+      const cp =cellProbas[w.start.y][w.start.x]; 
+      const ws = (w.horizontal ? cp.bestWordsH : cp.bestWordsV);
+      // if (!ws) return min;
+      const ns = ws.length;
+      return {...w, ns, ws};
+      // return ns < min.ns
+      //  ? {...w, ns, ws}
+      //  : min;
+    })
+    .sort((a, b) => a.ns - b.ns)
+    .filter(w => w.ns > 0)
+    .slice(0,3);
+
+    incomplete
+    .map(({ws, start, vertical}) => {
+      const cp =Grid.unserialize(grid.serialize());
+      cp.setWord(ws[Math.floor(Math.random() * ws.length)], start, vertical? 'vertical': 'horizontal');
+      const { cellProbas } = getCellProbas(cp);
+      if (cellProbas.flat().filter(c => c.validH ||c.validV).some(c => c.total === 0)) return null;
+      const score = getScore(cellProbas);
+      return{
+        grid: cp,
+        score
+      };
+    })
+    .filter(e => e)
+    .forEach(state => {
+      queue.push(state);
+    });
+  }
+  const { grid: bestGrid } = Array.from(visited.values()).reduce((acc, { score, grid }) => {
+    if (score > acc.score) {
+      return { score, grid };
+    }
+    return acc;
+  }, { score: -Infinity, grid: '' });
+  return bestGrid;
 }

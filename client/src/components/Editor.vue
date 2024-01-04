@@ -96,9 +96,9 @@ import SVGGrid from "./svg-renderer/Grid.vue";
 import GridInput from "./svg-renderer/GridInput.vue";
 import { defaultExportOptions, Method, Ordering } from "../types";
 import ModalOptions from "./forms/ModalOptions.vue";
-import Autofill from "./forms/Autofill.vue";
+import Autofill from "./sidebars/Autofill.vue";
 import GridHighlight, { Mode } from "./svg-renderer/GridHighlight.vue";
-import Suggestion from "./Suggestion.vue";
+import Suggestion from "./sidebars/Suggestion.vue";
 import { workerController } from "../search-worker/index";
 /**
  * Component to edit a grid

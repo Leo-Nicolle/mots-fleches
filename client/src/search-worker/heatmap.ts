@@ -473,11 +473,15 @@ export function getCellProbasAccurate(grid: Grid) {
   };
 }
 
-export function getCellProbas(grid: Grid) {
+function getHash(grid: Grid){
+  return grid.cells.reduce((acc, row) => acc + row.reduce((acc, cell) => acc + cell.text, '') + '\n', '');
+}
+
+export function getCellProbas(grid: Grid, useCache = true) {
   // console.time('getCellProbas');
 
-  const hash = grid.serialize();
-  if (cachedResult.has(hash)) {
+  const hash = getHash(grid);
+  if (cachedResult.has(hash) && useCache) {
     // console.timeEnd('getCellProbas');
     return { hasBailed: false, cellProbas: cachedResult.get(hash)! };
   }

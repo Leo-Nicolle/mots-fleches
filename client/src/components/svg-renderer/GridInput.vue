@@ -92,6 +92,10 @@ const props = defineProps<{
   zoom: number;
 }>();
 const { cellSize, textSize, textFont, defSize, defSizePx, defFont } = useSvgSizes(props);
+const defSizeZoom = computed(() => `${defSize.value * props.zoom}px`);
+const defBackgroundColor = computed(
+  () => props.style.definition.backgroundColor
+);
 const transform = computed(() => useTransform(props, props.cell));
 function onChange(evt: Event) {
   const { x, y } = props.cell;
@@ -199,6 +203,7 @@ function onKeyup(evt: KeyboardEvent) {
  * Updates the arrows of the cell
  */
 function setArrow(dir: ArrowDir, index: number) {
+  debugger;
   Grid.setArrow(props.cell, index, dir);
   container.value.querySelector("textarea")?.focus();
   emit("update");
@@ -267,6 +272,7 @@ textarea:focus-visible {
 
 .text {
   font: v-bind(textFont);
+  line-height: v-bind(defSizeZoom);
   background: #acf;
 }
 
@@ -275,13 +281,15 @@ textarea:focus-visible {
 }
 
 .definition {
-  font: v-bind(defFont);
+  font: v - bind(defFont);
   line-height: v-bind(defSizePx);
+  background-color: v-bind(defBackgroundColor);
   text-wrap: nowrap;
   background: #aaa;
 }
 
 .handle {
+  pointer-events: initial;
   position: absolute;
   cursor: pointer;
   padding: 4px;
