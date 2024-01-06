@@ -20,9 +20,12 @@ export class Dico {
   public wordsMap: Map<string, number> = new Map();
 
   public sorted: number[];
+  public definitions: string[] = [];
   public stringBS: StringBS;
 
   private minisearch: MiniSearch;
+  private defsSearch: MiniSearch;
+
 
   constructor() {
     this.words = [];
@@ -75,12 +78,30 @@ export class Dico {
       fields: ['title', 'text'],
       storeFields: ['title', 'text']
     });
-
     // Add documents to the index
     this.minisearch.addAll(documents);
+  }
 
-    // Search for documents:
-    // => [
+  loadDefinitions(definitions: string) {
+    const defs = definitions.split('\n');
+    this.defsSearch = new MiniSearch({
+      fields: ['title', 'text'],
+      storeFields: ['title', 'text']
+    });
+    defs.forEach(d => {
+      const [word, ...defs] = d.split(',');
+      this.defsSearch.add({
+        id: word,
+        title: word,
+        text: defs.map(d => d.slice(1,-1).replaceAll('\n', ' ')).join('\n')
+      });
+    });
+  }
+
+  getDefinitions(word: string) {
+    const res = this.defsSearch.search(word, { fuzzy: 0.2, fields: ['title']})
+    .slice(0, 40);
+    return res.map(({ title, text }) => ({title, text}));
   }
 
   findLengthInterval(length: number) {

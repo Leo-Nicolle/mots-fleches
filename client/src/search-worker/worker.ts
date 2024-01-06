@@ -10,11 +10,12 @@ let options = { sharedArray: new Int8Array(1) };
 onmessage = function (e) {
   const { type, data } = e.data;
   if (e.data.words && e.data.flags) {
-    const { words, flags } = e.data as { words: ArrayBuffer, flags: ArrayBuffer; };
+    const { words, flags, definitions} = e.data as { words: ArrayBuffer, flags: ArrayBuffer; definitions: string };
     options.sharedArray = new Int8Array(flags);
     const encoded = new Uint8Array(words.byteLength);
     encoded.set(new Uint8Array(e.data.words));
     dico.load(new TextDecoder().decode(encoded).split(','));
+    dico.loadDefinitions(definitions);
     return this.postMessage({ type: 'loaded' });
   }
   if (type === 'run') {
@@ -40,6 +41,10 @@ onmessage = function (e) {
     const grid = Grid.unserialize(gridJson);
     const res = autoFill(grid, words);
     postMessage({ type: 'autofill-result', data: res });
+  }
+  if (type === 'searchdefinition'){
+    const res = dico.getDefinitions(data);
+    postMessage({ type: 'searchdefinition-result', data: res });
   }
   if (type === 'searchword') {
     const res = dico.searchWord(data);

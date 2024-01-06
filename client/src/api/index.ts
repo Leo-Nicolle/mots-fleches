@@ -44,6 +44,11 @@ class API {
       .then((grid) => grid ? Grid.unserialize(JSON.stringify(grid)) : undefined);
   }
 
+  getDefinitions(){
+    return axios.get('/definitions.txt')
+    .then(({data}) => data);
+  }
+
   isSignedIn() {
     return localStorage.getItem('db-mode') === 'idb' ?
       Promise.resolve(true) :

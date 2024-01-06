@@ -43,3 +43,4 @@ export type Handle = {
 }
 export type Ordering = 'best' | 'alpha' | 'inverse-alpha' | 'random';
 export type Method = 'simple' | 'accurate';
+export type Mode = "normal" | "check" | "heatmap" | "autofill";

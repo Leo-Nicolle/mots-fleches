@@ -65,8 +65,8 @@ import {
 import chroma from "chroma-js";
 import { dico } from "../../search-worker/dico";
 import { api } from "../../api";
+import { Mode } from "../../types";
 
-export type Mode = "normal" | "check" | "heatmap" | "autofill";
 
 /**
  * Button to add words from the grid to the dictionnary

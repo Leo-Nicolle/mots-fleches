@@ -14,6 +14,7 @@ export type Events = {
   'locale-changed': undefined;
   'start-locale-change': undefined;
   'searchword-result': string[];
+  'searchdefinition-result': {title: string, text: string}[];
   'check-result': GridValidity;
 };
 
@@ -96,6 +97,12 @@ class WorkerController extends EventEmitter<Events> {
     });
   }
 
+  searchDefinition(query: string) {
+    this.loadingPromise.then(() => {
+      this._postMessage('searchdefinition', query, this.searchWorkerId);
+    });
+  }
+
   _postMessage(type: string, data: string, workerId: number) {
     if (this.busy[workerId]) {
       this.queues[workerId].push({ type, data });
@@ -135,6 +142,9 @@ class WorkerController extends EventEmitter<Events> {
     }
     if (type == 'searchword-result') {
       this.emit('searchword-result', data);
+    }
+    if (type == 'searchdefinition-result') {
+      this.emit('searchdefinition-result', data);
     }
     const queue = this.queues[workerId];
     const job = queue.shift();
@@ -194,9 +204,10 @@ class WorkerController extends EventEmitter<Events> {
     this.emit('start-locale-change');
     this.loadingPromise = Promise.all([
       this._fetchLocales(),
-      api.db.getWords() as Promise<string[]>
+      api.db.getWords() as Promise<string[]>,
+      api.getDefinitions() as Promise<string>
     ])
-      .then(([locales, words]) => {
+      .then(([locales, words, definitions]) => {
         locales[locale]
           .forEach(locale => {
             const wordsInLocale = locale.split(',');
@@ -215,7 +226,8 @@ class WorkerController extends EventEmitter<Events> {
           [this.searchWorker, this.probaWorker]
             .map(worker => {
               this.promisifiedCall(
-                { flags: this.flagsBuffer, words: this.wordsBuffer },
+                { flags: this.flagsBuffer, words: this.wordsBuffer,
+                definitions },
                 worker === this.probaWorker ? this.probaWorkerId : this.searchWorkerId,
                 'loaded'
               );

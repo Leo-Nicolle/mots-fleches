@@ -13,18 +13,13 @@
           {{ $t(`modes.${highlightMode}`) }}
         </n-button>
       </span>
+      <Buttons v-model:dir="dir" v-model:method="method" v-model:ordering="ordering" :mode="highlightMode"></Buttons>
       <Autofill v-if="highlightMode === 'autofill'" :grid="grid" />
-      <Suggestion v-else-if="!focus.definition" :point="focus" :dir="dir" :query="''" :grid-id="grid.id" :method="method"
+      <Suggestion v-else-if="!focus.definition" :point="focus" :dir="dir" :grid-id="grid.id" :method="method"
         :ordering="ordering" :cellProbas="cellProbas" :searchResult="searchResult" :loading="isLoadingSuggestions"
-        @hover="onHover" @click="onClick" @dir="(d) => (dir = d)" @mouseout="onMouseOut" @methodswitch="
-          method =
-          methods[
-          (methods.findIndex((o) => o === method) + 1) % methods.length
-          ]
-          " @orderswitch="ordering = orderings[
-    (orderings.findIndex((o) => o === ordering) + 1) % orderings.length
-  ]">
+        @hover="onHover" @click="onClick" @mouseout="onMouseOut">
       </Suggestion>
+      <Definition v-else-if="focus.definition" :grid="grid" :focus="focus" />
     </template>
     <template #body>
       <div class="container" ref="container">
@@ -94,11 +89,13 @@ import {
 import Layout from "../layouts/Main.vue";
 import SVGGrid from "./svg-renderer/Grid.vue";
 import GridInput from "./svg-renderer/GridInput.vue";
-import { defaultExportOptions, Method, Ordering } from "../types";
+import { defaultExportOptions, Method, Mode, Ordering } from "../types";
 import ModalOptions from "./forms/ModalOptions.vue";
 import Autofill from "./sidebars/Autofill.vue";
-import GridHighlight, { Mode } from "./svg-renderer/GridHighlight.vue";
+import GridHighlight from "./svg-renderer/GridHighlight.vue";
 import Suggestion from "./sidebars/Suggestion.vue";
+import Definition from './sidebars/Definition.vue';
+import Buttons from './sidebars/Buttons.vue';
 import { workerController } from "../search-worker/index";
 /**
  * Component to edit a grid
@@ -132,7 +129,6 @@ const gridVersion = ref(1);
 const container = ref(null as unknown as HTMLDivElement);
 const offset = ref<[number, number]>([-10, 0]);
 const method = ref<Method>("accurate");
-const methods = ref<Method[]>(["accurate", "simple"]);
 const ordering = ref<Ordering>("best");
 const orderings = ref<Ordering[]>(["best", "alpha", "inverse-alpha", "random"]);
 const zoom = ref(1);
@@ -191,21 +187,12 @@ watchEffect(() => {
 });
 watch(method, () => {
   if (method.value === "accurate") {
-    if (ordering.value !== "best") {
-      ordering.value = "best";
-    }
-    orderings.value = ["best", "alpha", "inverse-alpha", "random"];
     return throttledRefresCellProba();
   }
-  if (ordering.value === "best") {
-    ordering.value = "alpha";
-  }
-  orderings.value = ["alpha", "inverse-alpha", "random"];
   throttledRefresSimpleSearch();
 });
 onMounted(() => {
   computeOffset(null);
-  console.log('mounted');
   workerController.checkGrid(props.grid);
   throttledRefresCellProba();
   throttledRefresValidity();
@@ -250,6 +237,7 @@ function onKeyUp(evt: KeyboardEvent) {
     dir.value = "horizontal";
     consumed = true;
   }
+  // TODO: check how to delegate this to Buttons.vue
   if (evt.key === ">" || evt.key === "<") {
     // ordering.value = ordering.value * -1;
     const ords = unref(orderings);

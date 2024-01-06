@@ -272,7 +272,6 @@ textarea:focus-visible {
 
 .text {
   font: v-bind(textFont);
-  line-height: v-bind(defSizeZoom);
   background: #acf;
 }
 
