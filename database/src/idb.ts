@@ -15,22 +15,32 @@ export interface MotsFlexDB extends DBSchema {
   grids: {
     value: GridState;
     key: string;
-    indexes: { 'by-id': number };
+    indexes: { 'by-id': number; };
   };
   words: {
-    value: { id: string };
+    value: { id: string; };
     key: string;
-    indexes: { 'by-word': string };
+    indexes: { 'by-word': string; };
   };
   styles: {
     value: GridStyle;
     key: string;
-    indexes: { 'by-id': string };
+    indexes: { 'by-id': string; };
   },
   fonts: {
     value: Font;
     key: string;
-    indexes: { 'by-id': string };
+    indexes: { 'by-id': string; };
+  },
+  bannedwords: {
+    value: {id: string; };
+    key: string;
+    indexes: {'by-word': string};
+  }
+  definitions: {
+    value: {id: string; def: string };
+    key: string;
+    indexes: {'by-word': string};
   }
 }
 
@@ -67,6 +77,18 @@ async function create() {
         });
         fontStore.createIndex('by-id', 'family');
       }
+      if (!db.objectStoreNames.contains('bannedwords')) {
+        const gridStore = db.createObjectStore('bannedwords', {
+          keyPath: 'id',
+        });
+        gridStore.createIndex('by-word', 'id');
+      }
+      if (!db.objectStoreNames.contains('definitions')) {
+        const gridStore = db.createObjectStore('definitions', {
+          keyPath: 'id',
+        });
+        gridStore.createIndex('by-word', 'id');
+      }
 
       // @ts-ignore
       if (db.objectStoreNames.contains('options')) {
@@ -77,7 +99,7 @@ async function create() {
           .then(styles => {
             styles.forEach(style => {
               store.put(mergeOptionsWithDefaults(style as GridStyle));
-            })
+            });
             // @ts-ignore
           }).then(() => db.deleteObjectStore('options'));
       }
@@ -100,7 +122,7 @@ async function create() {
             const defs: GridFont[] = [style.definition];
             if (isSolutionStyle(style)) {
               //@ts-ignore
-              delete style.pagination.margin.top
+              delete style.pagination.margin.top;
               defs.push(style.grids.gridN);
               defs.push(style.pagination);
               defs.push(style.words);
@@ -119,7 +141,6 @@ async function create() {
           })));
       }
       if (old <= 6) {
-        console.log('UPDATE TO 6');
         const styleStore = transaction.objectStore('styles');
         db.deleteObjectStore('fonts');
         const fontStore = db.createObjectStore('fonts', {
@@ -129,13 +150,12 @@ async function create() {
         promise = promise
           .then(() => styleStore.getAll())
           .then(styles => Promise.all(styles.map(style => {
-            style.definition.size = 1;
             style.solutions = { ...defaultTextStyle, size: 1, top: 0 };
             return styleStore.put(style as GridStyle);
           })));
       }
     },
-  })
+  });
   return promise.then(() => db);
 }
 
@@ -147,8 +167,7 @@ export class Idatabase extends Database {
       prepromise = Promise.resolve();
     }
     this.loadingPromise = prepromise.then(() => {
-      console.log('Create');
-      return create()
+      return create();
     })
       .then((db) => {
         return db.get('styles', defaultStyles.id)
@@ -191,7 +210,7 @@ export class Idatabase extends Database {
   async getGrid(gridId: string) {
     return await this.loadingPromise.then((db) =>
       db.get('grids', gridId)
-    )
+    );
   }
 
   async getStyles() {
@@ -218,6 +237,51 @@ export class Idatabase extends Database {
     );
   }
 
+  async getBannedWords() {
+    return await this.loadingPromise.then((db) =>
+      db.getAllFromIndex('bannedwords', 'by-word')
+    ).then((words) =>
+      words.map(({ id }) => id)
+    );
+  }
+  async getBannedWord(wordId: string) {
+    return await this.loadingPromise.then((db) =>
+      db.get('bannedwords', wordId)
+    ).then((word) => word ? word.id : undefined);
+  }
+  async pushBannedWord(word: string) {
+    return await this.loadingPromise.then((db) =>
+      db.put('bannedwords', { id: word })
+    );
+  }
+  async deleteBannedWord(wordId: string) {
+    return await this.loadingPromise.then((db) =>
+      db.delete('bannedwords', wordId)
+    );
+  }
+  async getDefinitions() {
+    return await this.loadingPromise.then((db) =>
+      db.getAllFromIndex('definitions', 'by-word')
+    ).then((definitions) =>
+      definitions.map(({ id }) => id)
+    );
+  }
+  async getDefinition(wordId: string) {
+    return await this.loadingPromise.then((db) =>
+      db.get('definitions', wordId)
+    ).then((word) => word ? word.def : undefined);
+  }
+  async pushDefinition(word: string, def: string) {
+    return await this.loadingPromise.then((db) =>
+      db.put('definitions', { id: word, def })
+    );
+  }
+  async deleteDefinition(wordId: string) {
+    return await this.loadingPromise.then((db) =>
+      db.delete('definitions', wordId)
+    );
+  }
+  
   async getWords() {
     return await this.loadingPromise.then((db) =>
       db.getAllFromIndex('words', 'by-word')
@@ -243,12 +307,12 @@ export class Idatabase extends Database {
   async getFonts() {
     return await this.loadingPromise.then((db) =>
       db.getAllFromIndex('fonts', 'by-id')
-    )
+    );
   }
   async getFont(fontId: string) {
     return await this.loadingPromise.then((db) =>
       db.get('fonts', fontId)
-    )
+    );
   }
   async pushFont(font: Font) {
     return await this.loadingPromise.then((db) =>
@@ -266,7 +330,7 @@ export class Idatabase extends Database {
 }
 export function deleteDatabase() {
   return new Promise((resolve, reject) => {
-    const rq = indexedDB.deleteDatabase('mots-flex-db')
+    const rq = indexedDB.deleteDatabase('mots-flex-db');
     rq.onsuccess = resolve;
     rq.onerror = reject;
   });
@@ -294,7 +358,7 @@ export function setDatabase(json: any, version: number) {
             const store = transaction.objectStore(key);
             promise = promise
               // @ts-ignore
-              .then(() => Promise.all(values.map((value: any) => store.put(value))))
+              .then(() => Promise.all(values.map((value: any) => store.put(value))));
           });
         }
       });

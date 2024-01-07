@@ -16,6 +16,14 @@ export abstract class Database {
   abstract getWord(wordId: string) : Promise<string | undefined>;
   abstract pushWord(word: any) : Promise<string>;
   abstract deleteWord(wordId: string) : Promise<void>;
+  abstract getBannedWords() : Promise<string[]>;
+  abstract getBannedWord(wordId: string) : Promise<string | undefined>;
+  abstract pushBannedWord(word: any) : Promise<string>;
+  abstract deleteBannedWord(wordId: string) : Promise<void>;
+  abstract getDefinitions() : Promise<string[]>;
+  abstract getDefinition(wordId: string) : Promise<string | undefined>;
+  abstract pushDefinition(word: any, def: string) : Promise<string>;
+  abstract deleteDefinition(wordId: string) : Promise<void>;
   abstract getFonts() : Promise<Font[]>;
   abstract getFont(fontId: string) : Promise<Font | undefined>;
   abstract pushFont(font: Font) : Promise<string>;

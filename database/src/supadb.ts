@@ -145,6 +145,62 @@ export class SupaDB extends Database {
     });
   }
 
+  async getBannedWords() {
+    const { data } = await this.supabase.from('BannedWords').select();
+    return data!.flatMap(({ data }) => data);
+  }
+
+  async getBannedWord(id: string) {
+    const words = await this.getBannedWords();
+    return words.find(w => w === id);
+  }
+
+  async pushBannedWord(word: string) {
+    const words = await this.getBannedWords();
+    words.push(word);
+    await this.supabase.from('BannedWords').upsert({
+      userid: this.userid,
+      data: words,
+    });
+    return word;
+  }
+
+  async deleteBannedWord(wordId: string) {
+    const words = (await this.getWords()).filter(w => w !== wordId);
+    await this.supabase.from('Words').upsert({
+      userid: this.userid,
+      data: words,
+    });
+  }
+
+  async getDefinitions() {
+    const { data } = await this.supabase.from('Definitions').select();
+    return data!.flatMap(({ data }) => data);
+  }
+
+  async getDefinition(id: string) {
+    const words = await this.getDefinitions();
+    return words.find(w => w === id);
+  }
+
+  async pushDefinition(word: string) {
+    const words = await this.getDefinitions();
+    words.push(word);
+    await this.supabase.from('Definitions').upsert({
+      userid: this.userid,
+      data: words,
+    });
+    return word;
+  }
+
+  async deleteDefinition(wordId: string) {
+    const words = (await this.getWords()).filter(w => w !== wordId);
+    await this.supabase.from('Words').upsert({
+      userid: this.userid,
+      data: words,
+    });
+  }
+
   async getFonts() {
     const { data } = await this.supabase.from('Fonts').select();
     return data!.flatMap(({ data }) => data);
