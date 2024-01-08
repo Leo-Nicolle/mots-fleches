@@ -449,7 +449,6 @@ export class Grid {
       ]
     ];
 
-
     const [horizontal, vertical] = [this.getWords('horizontal'), this.getWords('vertical')]
       .map((boundsVH, i) => boundsVH
         .reduce((acc, bounds) => {
