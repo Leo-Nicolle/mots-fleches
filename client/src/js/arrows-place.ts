@@ -1,5 +1,5 @@
 import { ArrowDir, Grid } from "grid";
-import { cantor, reverseCantor } from "../search-worker/utils";
+import { cantor, reverseCantor } from "../worker/utils/math";
 
 export function arrowsPlace(grid: Grid){
   const map = new Map();

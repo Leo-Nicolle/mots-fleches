@@ -23,10 +23,6 @@ export class Dico {
   public definitions: string[] = [];
   public stringBS: StringBS;
 
-  private minisearch: MiniSearch;
-  private defsSearch: MiniSearch;
-
-
   constructor() {
     this.words = [];
     this.sorted = [];
@@ -37,7 +33,6 @@ export class Dico {
   /**
    * Load the dictionnary from the files in the dictionnary folder
    * And in the user's dictionary
-   * @returns The promise that will resolve when the dictionnary is loaded
    */
   load(rawWords: string[]) {
     this.words = [];
@@ -68,44 +63,8 @@ export class Dico {
         return this.words[a].localeCompare(this.words[b]);
       });
     this.stringBS = new StringBS(this.words, this.sorted);
-
-    const documents = this.words.map((w, i) => ({
-      id: i,
-      title: w,
-      text: w,
-    }));
-    this.minisearch = new MiniSearch({
-      fields: ['title', 'text'],
-      storeFields: ['title', 'text']
-    });
-    // Add documents to the index
-    this.minisearch.addAll(documents);
   }
 
-  loadDefinitions(definitions: string) {
-    const defs = definitions.split('\n');
-    this.defsSearch = new MiniSearch({
-      fields: ['title', 'text'],
-      storeFields: ['title', 'text']
-    });
-    defs.forEach(d => {
-      const [word, ...defs] = d.split(',');
-      this.defsSearch.add({
-        id: word,
-        title: word,
-        text: defs.map(d => d.slice(1,-1).replaceAll('\n', ' ')).join('\n')
-      });
-    });
-  }
-
-  getDefinitions(words: string[]) {
-   return words.reduce((acc,word) => {
-      const res = this.defsSearch.search(word, { fuzzy: 0.2, fields: ['title']})
-      .slice(0, 40);
-      acc.push(...res.map(({ title, text }) => ({title, text})));
-      return acc;
-    }, [] as {title: string, text: string}[]);
-  }
 
   findLengthInterval(length: number) {
     const start = this.stringBS.byLengthStart(length, 0, this.words.length - 1);
@@ -184,25 +143,6 @@ export class Dico {
    */
   getWords() {
     return this.words;
-  }
-
-  searchWord(word: string) {
-    const options = {
-      fuzzy: 0.4
-    };
-    return this.minisearch.search(word, options).slice(0, 20).map(({ id }) => this.words[id]);
-  }
-
-  getDistribution() {
-    const distribution = new Map();
-    this.words.forEach(word => {
-      const length = word.length;
-      if (!distribution.has(length)) {
-        distribution.set(length, 0);
-      }
-      distribution.set(length, distribution.get(length) + 1);
-    });
-    return [...distribution.entries()];
   }
 
 }

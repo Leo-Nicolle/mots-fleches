@@ -1,7 +1,7 @@
-import { Direction, Grid, CellProba, Vec, CellBest, Bounds } from "grid";
+import { Direction, Grid, CellProba,  CellBest } from "grid";
 import { dico, ACode } from "./dico";
-import { Tree, Node, intersect, mapToWords, getPossibleParents } from './tree';
-import { cantor } from "./utils";
+import { Tree, Node, intersect, mapToWords } from './tree';
+import { cantor } from "./math";
 
 const trees = new Map<number, Tree>();
 const cachedResult = new Map<string, CellBest[][]>();

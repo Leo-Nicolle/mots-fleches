@@ -1,16 +1,5 @@
-import { Bounds, CellBest, CellProba, Direction, Grid } from "grid";
+import { Bounds, CellBest, Direction, Grid } from "grid";
 import { getCellProbas } from "./heatmap";
-import { cantor } from "./utils";
-import { dico } from "./dico";
-
-function hash(x: number, y: number, dir: Direction) {
-  const z = dir === 'horizontal' ? 1 : 2;
-  return cantor(cantor(x, y), z);
-}
-function hash2(x: number, y: number, index: number, dir: Direction) {
-  const z = dir === 'horizontal' ? 1 : 2;
-  return cantor(cantor(cantor(x, y), z), index);
-}
 
 function getSpotsByLength(spots: DBounds[]) {
   return spots.reduce((acc, spot) => {

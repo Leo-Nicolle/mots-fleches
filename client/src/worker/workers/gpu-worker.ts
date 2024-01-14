@@ -1,6 +1,6 @@
-import {bindUniforms, createAttributeLocs, createProgram, createUniforms} from './webgl-utils';
-import vert from './shaders/vertex.vert';
-import frag from './shaders/fragment.frag';
+import {bindUniforms, createAttributeLocs, createProgram, createUniforms} from '../utils/webgl-utils';
+import vert from '../shaders/vertex.vert';
+import frag from '../shaders/fragment.frag';
 const w = 256;
 export class WebGLWorker{
   private _canvas: HTMLCanvasElement;

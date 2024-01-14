@@ -2,9 +2,7 @@ import { CellProba, Direction, Grid, GridValidity, Vec } from "grid";
 import EventEmitter from "eventemitter3";
 import * as fflate from 'fflate';
 import { api } from "../api";
-import { copyCellProbas } from "./heatmap";
-// import { dico as debugDico, Dico } from "./dico";
-// import { autoFill } from "./auto-fill";
+import { copyCellProbas } from "./utils/heatmap";
 
 export type Events = {
   'run-result': CellProba[][];
@@ -20,16 +18,16 @@ export type Events = {
 
 class WorkerController extends EventEmitter<Events> {
   public searchWorker: Worker;
-  public probaWorker: Worker;
+  public suggestionWorker: Worker;
+  public definitionWorker: Worker;
   private busy: boolean[] = [false, false];
-  private queues: { type: string, data: string; }[][] = [[], []];
+  private queues: { type: string, data: string; }[][] = [[], [], []];
   private flagsBuffer: SharedArrayBuffer;
   private flagsArray: Uint8Array;
   private distribution: [number, number][];
-  public wordsBuffer: SharedArrayBuffer;
-  public wordsArray: Uint8Array;
   private searchWorkerId = 0;
-  private probaWorkerId = 1;
+  private suggestionWorkerId = 1;
+  private definitionWorkerId = 2;
   private locale = '';
   public loadingPromise;
 
@@ -45,18 +43,16 @@ class WorkerController extends EventEmitter<Events> {
       this.flagsBuffer = new SharedArrayBuffer(1);
       this.flagsArray = new Uint8Array(this.flagsBuffer);
       this.flagsArray[0] = 0;
-      this.wordsBuffer = new SharedArrayBuffer(1);
-      this.wordsArray = new Uint8Array(this.wordsBuffer);
-      this.wordsArray[0] = 0;
     } else {
       throw new Error('SharedArrayBuffer is not supported');
     }
     this.distribution = [];
-    this.searchWorker = new Worker(new URL('./worker', import.meta.url), { type: 'module' });
-    this.probaWorker = new Worker(new URL('./worker', import.meta.url), { type: 'module' });
-
+    this.searchWorker = new Worker(new URL('./workers/search', import.meta.url), { type: 'module' });
+    this.suggestionWorker = new Worker(new URL('./workers/suggestion', import.meta.url), { type: 'module' });
+    this.definitionWorker = new Worker(new URL('./workers/definition', import.meta.url), { type: 'module' });
     this.searchWorker.addEventListener('message', (evt) => this.onMessage(this.searchWorkerId, evt));
-    this.probaWorker.addEventListener('message', (evt) => this.onMessage(this.probaWorkerId, evt));
+    this.suggestionWorker.addEventListener('message', (evt) => this.onMessage(this.suggestionWorkerId, evt));
+    this.definitionWorker.addEventListener('message', (evt) => this.onMessage(this.definitionWorkerId, evt));
     this.setLocale(locale);
   }
 
@@ -77,7 +73,7 @@ class WorkerController extends EventEmitter<Events> {
   }
 
   run(grid: Grid) {
-    this._postMessage('run', grid.serialize(), this.probaWorkerId);
+    this._postMessage('run', grid.serialize(), this.suggestionWorkerId);
   }
 
   autofill(grid: Grid, words: string[]) {
@@ -87,7 +83,7 @@ class WorkerController extends EventEmitter<Events> {
       this._postMessage('autofill', JSON.stringify({
         grid: grid.serialize(),
         words
-      }), this.probaWorkerId);
+      }), this.suggestionWorkerId);
     });
   }
 
@@ -99,7 +95,7 @@ class WorkerController extends EventEmitter<Events> {
 
   searchDefinition(query: string[]) {
     this.loadingPromise.then(() => {
-      this._postMessage('searchdefinition', JSON.stringify(query), this.searchWorkerId);
+      this._postMessage('searchdefinition', JSON.stringify(query), this.definitionWorkerId);
     });
   }
 
@@ -111,7 +107,12 @@ class WorkerController extends EventEmitter<Events> {
     }
     this.busy[workerId] = true;
     this.flagsArray[0] = 0;
-    const ww = workerId === this.probaWorkerId ? this.probaWorker : this.searchWorker;
+    console.log('post message', type, workerId)
+    const ww = workerId === this.suggestionWorkerId 
+      ? this.suggestionWorker 
+      : workerId === this.searchWorkerId
+      ? this.searchWorker 
+      : this.definitionWorker;
     this.loadingPromise.then(() => {
       ww.postMessage({ type, data });
     });
@@ -121,9 +122,9 @@ class WorkerController extends EventEmitter<Events> {
   onMessage(workerId: number, event: MessageEvent) {
     const { type, data } = event.data;
     this.busy[workerId] = false;
-    if (type === 'loaded') {
-      this.emit('locale-changed');
-    }
+    // if (type === 'loaded') {
+    //   this.emit('locale-changed');
+    // }
     if (type === 'search-result') {
       this.emit('search-result', data);
     }
@@ -155,7 +156,7 @@ class WorkerController extends EventEmitter<Events> {
   }
 
   destroy() {
-    this.probaWorker.terminate();
+    this.suggestionWorker.terminate();
     this.searchWorker.terminate();
     this.removeAllListeners();
   }
@@ -182,7 +183,11 @@ class WorkerController extends EventEmitter<Events> {
   }
 
   private promisifiedCall<T>(data: any, workerId: number, event: string) {
-    const worker = workerId === this.probaWorkerId ? this.probaWorker : this.searchWorker;
+    const worker = workerId === this.suggestionWorkerId 
+    ? this.suggestionWorker 
+    : workerId === this.searchWorkerId
+    ? this.searchWorker
+    : this.definitionWorker;
     return new Promise<T>((resolve) => {
       const listenner = (evt: MessageEvent) => {
         if (evt.data.type === event) {
@@ -216,26 +221,18 @@ class WorkerController extends EventEmitter<Events> {
               words.push(wordsInLocale[i]);
             }
           });
-        const encoded = new TextEncoder().encode(words.join(','));
-        this.wordsBuffer = new SharedArrayBuffer(encoded.byteLength);
-        this.wordsArray = new Uint8Array(this.wordsBuffer);
-        for (let i = 0; i < encoded.byteLength; i++) {
-          this.wordsArray[i] = encoded[i];
-        }
         // debugDico.load(words);
-        return Promise.all(
-          [this.searchWorker, this.probaWorker]
-            .map(worker => {
-              this.promisifiedCall(
-                { flags: this.flagsBuffer, words: this.wordsBuffer,
-                  bannedWords,
-                definitions },
-                worker === this.probaWorker ? this.probaWorkerId : this.searchWorkerId,
-                'loaded'
-              );
-            })
-        );
-      })
+        return Promise.all([
+          this.promisifiedCall({
+            words, 
+          }, this.searchWorkerId, 'loaded'),
+          this.promisifiedCall({
+            words, flags: this.flagsBuffer,
+          }, this.suggestionWorkerId, 'loaded'),
+          this.promisifiedCall({
+            definitions
+          }, this.definitionWorkerId, 'loaded'),
+        ])
       .then(() => this.promisifiedCall<[number, number][]>({
         type: 'distribution'
       },
@@ -249,6 +246,7 @@ class WorkerController extends EventEmitter<Events> {
       .catch((err) => {
         console.error(err);
       });
+    });
     return this.loadingPromise;
   }
 }

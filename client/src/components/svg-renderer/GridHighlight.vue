@@ -63,7 +63,6 @@ import {
   useTransform,
 } from "./utils";
 import chroma from "chroma-js";
-import { dico } from "../../search-worker/dico";
 import { api } from "../../api";
 import { Mode } from "../../types";
 
@@ -155,37 +154,6 @@ function getLetters(cell: Cell, heatmapLetters: CellProba[][]) {
     .filter(([_, proba]) => proba > 0.01)
     .map(([l, proba]) => `${l}: ${proba}`)
     .join(", ");
-}
-
-function getHeat(cell: Cell, heatmapLetters: CellProba[][]) {
-  if (!heatmapLetters || !cell) return "";
-  const row = heatmapLetters[cell.y];
-  if (!row) return "";
-  const cellHeatmap = row[cell.x];
-  if (!cellHeatmap) return "";
-  const {
-    horizontal,
-    vertical,
-    validH,
-    validV,
-    empty,
-    bestWordsH,
-    bestWordsV,
-  } = cellHeatmap;
-  const bestWords = (
-    (props.dir === "horizontal" ? bestWordsH : bestWordsV) || []
-  )
-    .slice(0, 5)
-    .reduce((acc, index) => {
-      acc.push(dico.words[dico.sorted[index]]);
-      return acc;
-    }, []);
-  if ((!validH && !validV) || !empty) return "";
-  return bestWords.join(", ");
-  // if (validH && validV)
-  //   return `Horizontal: ${horizontal}, Vertical: ${vertical}`;
-  // if (!validV) return `Horizontal: ${horizontal}`;
-  // if (!validH) return `Vertical: ${vertical}`;
 }
 
 const colorScale = chroma.scale(["red", "#22C", "#014"]).mode("lab");

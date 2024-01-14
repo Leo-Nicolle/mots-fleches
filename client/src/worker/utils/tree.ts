@@ -1,4 +1,3 @@
-import { remove } from 'fs-extra';
 import { ACode, ZCode, dico } from './dico';
 
 export type Node = {

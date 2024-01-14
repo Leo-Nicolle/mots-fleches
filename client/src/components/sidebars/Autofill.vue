@@ -14,7 +14,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
-import { workerController } from "../../search-worker";
+import { workerController } from "../../worker";
 import throttle from "lodash.throttle";
 import { Grid } from "grid";
 const props = defineProps<{
@@ -131,4 +131,4 @@ const templateCols = computed(() => `repeat(${words.value.length}, 2.5em)`);
 .run>button {
   width: 100%;
 }
-</style>
+</style>../../worker

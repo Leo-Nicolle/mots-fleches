@@ -80,7 +80,7 @@ import { RouterLink, useRouter } from "vue-router";
 import { renderIcon } from "../js/utils";
 import { LogOutOutline, LanguageOutline } from "@vicons/ionicons5";
 import { i18n, setLanguage } from "../i18n";
-import { workerController } from "../search-worker";
+import { workerController } from "../worker";
 import { useResponsive } from "../js/useResponsive";
 import "keyboard-css";
 import { api } from "../api";

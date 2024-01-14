@@ -20,7 +20,7 @@
 import { defineProps, onMounted, ref, toRaw, watch } from "vue";
 import throttle from "lodash.throttle";
 import { api } from "../../api";
-import { workerController } from "../../search-worker";
+import { workerController } from "../../worker";
 /**
  * Component to add and delete words
  * Also has a list of all the words
@@ -110,3 +110,4 @@ function unban(word: string) {
   text-decoration: underline;
 }
 </style>
+../../worker

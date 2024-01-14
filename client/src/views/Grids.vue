@@ -40,7 +40,7 @@ import { defaultExportOptions } from "../types";
 import { Grid, GridStyle, nullCell, SolutionStyle } from "grid";
 import generate from "../js/maze-generator";
 import { api } from "../api";
-import { workerController } from "../search-worker";
+import { workerController } from "../worker";
 /**
  * View to display all grids in a grid layout
  */
@@ -145,3 +145,4 @@ onMounted(() => {
 }
 </style>
 
+../worker

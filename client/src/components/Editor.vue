@@ -96,7 +96,7 @@ import GridHighlight from "./svg-renderer/GridHighlight.vue";
 import Suggestion from "./sidebars/Suggestion.vue";
 import Definition from './sidebars/Definition.vue';
 import Buttons from './sidebars/Buttons.vue';
-import { workerController } from "../search-worker/index";
+import { workerController } from "../worker";
 /**
  * Component to edit a grid
  */

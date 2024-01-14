@@ -15,7 +15,7 @@
 
 <script setup lang="ts">
 import { defineProps, ref, onMounted, watch, watchEffect } from "vue";
-import { workerController } from "../../search-worker";
+import { workerController } from "../../worker";
 
 import throttle from "lodash.throttle";
 import { Cell, Grid, Direction, Vec } from "grid";
@@ -139,4 +139,4 @@ onMounted(() => {
 .definition .loading {
   padding: 150px 0;
 }
-</style>
+</style>../../worker

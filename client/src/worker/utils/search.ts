@@ -1,5 +1,5 @@
 import { Direction, Grid, Vec } from "grid";
-import { dico } from "./dico";
+import { wordsSearch } from "./words-search";
 
 export function getWordsSimple({
   grid,
@@ -19,6 +19,8 @@ export function getWordsSimple({
     cells.push(current);
   }
   if (cells.length < 2) return [];
-  return dico.queryBinary(str.toUpperCase())
-  .map(index => dico.words[dico.sorted[index]]);
+  // TODO: test this wildcard search
+  return wordsSearch.searchWord(str, {fuzzy: 0});
+  // return dico.queryBinary(str.toUpperCase())
+  // .map(index => dico.words[dico.sorted[index]]);
 }
