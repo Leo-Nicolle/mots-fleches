@@ -43,7 +43,7 @@ onmessage = function (e) {
     postMessage({ type: 'autofill-result', data: res });
   }
   if (type === 'searchdefinition'){
-    const res = dico.getDefinitions(data);
+    const res = dico.getDefinitions(JSON.parse(data));
     postMessage({ type: 'searchdefinition-result', data: res });
   }
   if (type === 'searchword') {

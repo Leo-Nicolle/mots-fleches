@@ -98,10 +98,13 @@ export class Dico {
     });
   }
 
-  getDefinitions(word: string) {
-    const res = this.defsSearch.search(word, { fuzzy: 0.2, fields: ['title']})
-    .slice(0, 40);
-    return res.map(({ title, text }) => ({title, text}));
+  getDefinitions(words: string[]) {
+   return words.reduce((acc,word) => {
+      const res = this.defsSearch.search(word, { fuzzy: 0.2, fields: ['title']})
+      .slice(0, 40);
+      acc.push(...res.map(({ title, text }) => ({title, text})));
+      return acc;
+    }, [] as {title: string, text: string}[]);
   }
 
   findLengthInterval(length: number) {

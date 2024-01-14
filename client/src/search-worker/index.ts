@@ -97,9 +97,9 @@ class WorkerController extends EventEmitter<Events> {
     });
   }
 
-  searchDefinition(query: string) {
+  searchDefinition(query: string[]) {
     this.loadingPromise.then(() => {
-      this._postMessage('searchdefinition', query, this.searchWorkerId);
+      this._postMessage('searchdefinition', JSON.stringify(query), this.searchWorkerId);
     });
   }
 
@@ -205,9 +205,10 @@ class WorkerController extends EventEmitter<Events> {
     this.loadingPromise = Promise.all([
       this._fetchLocales(),
       api.db.getWords() as Promise<string[]>,
+      api.db.getBannedWords() as Promise<string[]>,
       api.getDefinitions() as Promise<string>
     ])
-      .then(([locales, words, definitions]) => {
+      .then(([locales, words, bannedWords, definitions]) => {
         locales[locale]
           .forEach(locale => {
             const wordsInLocale = locale.split(',');
@@ -227,6 +228,7 @@ class WorkerController extends EventEmitter<Events> {
             .map(worker => {
               this.promisifiedCall(
                 { flags: this.flagsBuffer, words: this.wordsBuffer,
+                  bannedWords,
                 definitions },
                 worker === this.probaWorker ? this.probaWorkerId : this.searchWorkerId,
                 'loaded'
@@ -249,16 +251,6 @@ class WorkerController extends EventEmitter<Events> {
       });
     return this.loadingPromise;
   }
-
-
-  // getWords() {
-  //   return this.loadingPromise.then(() => {
-  //     const encoded = new Uint8Array(this.wordsBuffer.byteLength);
-  //     encoded.set(new Uint8Array(this.wordsBuffer));
-  //     return new TextDecoder().decode(encoded).split(',');
-  //   });
-  // }
-
 }
 
 export const workerController = new WorkerController(localStorage.getItem('locale') || 'fr-fr');

@@ -474,7 +474,7 @@ export function getCellProbasAccurate(grid: Grid) {
 }
 
 function getHash(grid: Grid){
-  return grid.cells.reduce((acc, row) => acc + row.reduce((acc, cell) => acc + cell.text, '') + '\n', '');
+  return grid.cells.reduce((acc, row) => acc + row.reduce((acc, cell) => acc + (cell.definition ? '#' : cell.text || ' '), '') + '\n', '');
 }
 
 export function getCellProbas(grid: Grid, useCache = true) {

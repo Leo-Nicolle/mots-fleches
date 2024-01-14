@@ -1,11 +1,12 @@
 <template>
   <div class="grid-input" ref="container">
-    <textarea @input="onChange($event)" @keyup="onKeyup($event)" @keydown="onKeydown($event)" :value="cell.text.length
-      ? cell.text
-      : cell.suggestion.length
-        ? cell.suggestion
-        : ''
-      " :rows="cell.definition ? 5 : 1" :class="getCellClass(cell, cell)" />
+    <textarea @input="onChange($event)" @focusout="onLooseFocus($event)" @keyup="onKeyup($event)"
+      @keydown="onKeydown($event)" :value="cell.text.length
+        ? cell.text
+        : cell.suggestion.length
+          ? cell.suggestion
+          : ''
+        " :rows="cell.definition ? 5 : 1" :class="getCellClass(cell, cell)" />
     <div class="handles" v-if="cell.definition">
       <n-popover v-for="(handle, k) in handles" :key="k" trigger="hover">
         <template #trigger>
@@ -226,6 +227,10 @@ const handles = computed<Handle[]>(() => {
     };
   });
 });
+function onLooseFocus(evt: FocusEvent) {
+  if (Grid.equal(props.cell, nullCell)) return;
+  evt.target.focus();
+}
 
 watchEffect(() => {
   if (props.cell === nullCell || !container.value) return;
@@ -251,6 +256,7 @@ textarea {
   overflow: hidden;
   resize: none;
   padding: 0;
+  margin: 0;
   width: v-bind(cellSize);
   height: v-bind(cellSize);
   text-align: center;

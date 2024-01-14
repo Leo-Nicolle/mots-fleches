@@ -30,6 +30,12 @@ export const lang = {
     dragdrop: "Drag files here (or click)",
     here: "here",
   },
+  errors: {
+    'no-horizontal-arrow': 'No horizontal arrow',
+    'no-vertical-arrow': 'No vertical arrow',
+    'incomplete-word': 'Incomplete word',
+    'no-definition': 'No definition found',
+  },
   titles: {
     newFont: "New Font",
   },

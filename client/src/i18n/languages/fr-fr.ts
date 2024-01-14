@@ -33,6 +33,12 @@ export const lang = {
     suggestions: {
         results: "Résultats",
     },
+    errors: {
+        'no-horizontal-arrow': 'Pas de flèche horizontale',
+        'no-vertical-arrow': 'Pas de flèche verticale ',
+        'incomplete-word': 'Mot incomplet',
+        'no-definition': 'Pas de définition',
+    },    
     titles: {
         newFont: "Nouvelle police",
     },

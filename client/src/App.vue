@@ -24,6 +24,21 @@ onMounted(async () => {
   border-radius: 20px;
 }
 
+/** loader rotation animation */
+@keyframes loader {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.rotating {
+  animation: rotating 2s linear infinite;
+}
+
 .hidden-input {
   position: absolute;
   bottom: 0px;

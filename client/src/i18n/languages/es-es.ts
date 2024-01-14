@@ -36,6 +36,12 @@ export const lang = {
     suggestions: {
         results: "Resultados",
     },
+    errors: {
+        'no-horizontal-arrow': 'No hay flecha horizontal',
+        'no-vertical-arrow': 'No hay flecha vertical',
+        'incomplete-word': 'Palabra incompleta',
+        'no-definition': 'No hay definición',
+    },
     forms: {
         title: "Título",
         options: "Opciones",

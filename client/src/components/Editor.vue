@@ -19,7 +19,7 @@
         :ordering="ordering" :cellProbas="cellProbas" :searchResult="searchResult" :loading="isLoadingSuggestions"
         @hover="onHover" @click="onClick" @mouseout="onMouseOut">
       </Suggestion>
-      <Definition v-else-if="focus.definition" :grid="grid" :focus="focus" />
+      <Definition v-else-if="focus.definition" :grid="grid" :focus="focus" :dir="dir" />
     </template>
     <template #body>
       <div class="container" ref="container">
@@ -143,8 +143,10 @@ const refreshingSearch = ref(false);
 function resetGrid() {
   props.grid.cells.forEach((row) => {
     row.forEach((cell) => {
-      if (cell.definition) return;
-      cell.text = '';
+      if (cell.definition) {
+        cell.arrows = ['none', 'none', 'none'];
+      }
+      // cell.text = '';
     });
   });
   onGridUpdate();
@@ -252,6 +254,9 @@ function onKeyUp(evt: KeyboardEvent) {
   // @ts-ignore
   evt.canceled = consumed;
 }
+watch([focus], () => {
+  console.log('focus changed', focus.value);
+});
 watch([dir, validity, highlightMode], () => {
   if (highlightMode.value === "check" && validity.value) {
     const newMap = new Map();

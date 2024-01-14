@@ -1,9 +1,13 @@
 <template>
   <div class="definition">
-    <div v-for="{ title, texts } in results" :key="title">
+    <div v-if="error">
+      {{ $t(`errors.${error}`) }}
+    </div>
+    <n-button v-else-if="busy" class="loading" :loading="true"></n-button>
+    <div v-else v-for="{ title, texts } in results" :key="title">
       <h3>{{ title }}</h3>
       <ul>
-        <li v-for="text in texts" :key="text" @click="onSetDefinition(text)">{{ text }}</li>
+        <li v-for="text in texts" :key="text" @click="onSetDefinition($event, text)">{{ text }}</li>
       </ul>
     </div>
   </div>
@@ -12,32 +16,88 @@
 <script setup lang="ts">
 import { defineProps, ref, onMounted, watch, watchEffect } from "vue";
 import { workerController } from "../../search-worker";
+
 import throttle from "lodash.throttle";
-import { Cell, Grid } from "grid";
+import { Cell, Grid, Direction, Vec } from "grid";
 const props = defineProps<{
   grid: Grid;
   focus: Cell;
+  dir: Direction;
 }>();
 const results = ref<{ title: string; texts: string[]; }[]>([]);
 const busy = ref(false);
+const error = ref('');
 function refreshGetDefinitions() {
-  console.log('search');
-  workerController.searchDefinition("ABAISSAIT");
+  const arrows = props.focus.arrows;
+  const vecs: Vec[] = [];
+  if (props.dir === 'horizontal') {
+    if (arrows.find(e => e === 'downright')) {
+      vecs.push({
+        x: 0,
+        y: 1
+      });
+    }
+    if (arrows.find(e => e === 'right')) {
+      vecs.push({
+        x: 1,
+        y: 0
+      });
+    }
+    if (!vecs.length) {
+      return error.value = 'no-horizontal-arrow';
+    }
+  } else {
+    if (arrows.find(e => e === 'rightdown')) {
+      vecs.push({
+        x: 1,
+        y: 0
+      });
+    }
+    else if (arrows.find(e => e === 'down')) {
+      vecs.push({
+        x: 0,
+        y: 1
+      });
+    }
+    if (!vecs.length) {
+      return error.value = 'no-vertical-arrow';
+    }
+  }
+  const { x, y } = props.focus;
+  const bounds = vecs.map(vec => props.grid.getBounds({
+    x: x + vec.x,
+    y: y + vec.y,
+  }, props.dir));
+
+  if (bounds.some(({ cells }) => cells.some(b => !b.text))) {
+    return error.value = 'incomplete-word';
+  }
+  error.value = '';
+  const words = bounds.map(({ cells }) => cells
+    .map(c => c.text)
+    .join(''));
+
+  workerController.searchDefinition(words);
 }
 const throttledSearch = throttle(refreshGetDefinitions, 200);
 
-function onSetDefinition(text: string) {
-  console.log('ici', text);
-  props.grid.setText(props.focus, text);
+function onSetDefinition(event: MouseEvent, text: string) {
+  console.log('onSetDefinition', event, text);
+  event.preventDefault();
+  event.stopPropagation();
+  const t = props.focus.text;
+  props.grid.setText(props.focus, `${t}${t.length ? '\n' : ''}${text}`);
 }
-watch([props.focus], () => {
-  console.log('watch focus');
+watch(() => [props.focus.x, props.focus.y, props.focus.arrows[0],
+props.focus.arrows[1], props.focus.arrows[2], props.dir], () => {
   throttledSearch();
 });
 workerController.on("searchdefinition-result", (data) => {
   busy.value = false;
-  console.log(data);
   results.value = data.map(({ title, text }) => ({ title, texts: text.toLowerCase().split('\n') }));
+  if (!results.value.length) {
+    error.value = 'no-definition';
+  }
 });
 
 onMounted(() => {
@@ -46,7 +106,7 @@ onMounted(() => {
 
 </script>
 
-<style scoped>
+<style>
 .definition {
   margin: 10px 0;
   gap: 5px;
@@ -74,5 +134,9 @@ onMounted(() => {
 
 .definition li:hover {
   text-decoration: underline;
+}
+
+.definition .loading {
+  padding: 150px 0;
 }
 </style>

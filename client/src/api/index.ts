@@ -1,4 +1,4 @@
-import { Grid } from 'grid';
+import { Grid, getDefinitions } from 'grid';
 import { Idatabase, SupaDB, setDatabase } from 'database';
 import axios from 'axios';
 const debugMigration = true;
@@ -42,6 +42,17 @@ class API {
   getGrid(id: string): Promise<Grid | undefined> {
     return this.db.getGrid(id)
       .then((grid) => grid ? Grid.unserialize(JSON.stringify(grid)) : undefined);
+  }
+
+  getUserDefinitions() {
+    const res = new Map<string, Set<string>>();
+    return this.getGrids()
+    .then((grids) => {
+      grids.forEach(grid => {
+        getDefinitions(grid, res);
+      });
+      return res;
+    });
   }
 
   getDefinitions(){

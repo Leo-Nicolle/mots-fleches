@@ -46,7 +46,7 @@ export interface MotsFlexDB extends DBSchema {
 
 async function create() {
   let promise: Promise<unknown> = Promise.resolve();
-  const db = await openDB<MotsFlexDB>('mots-flex-db', 6, {
+  const db = await openDB<MotsFlexDB>('mots-flex-db', 7, {
     upgrade(db, old, _, transaction) {
       // @ts-ignore
       if (db.objectStoreNames.contains('style')) {

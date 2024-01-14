@@ -228,7 +228,9 @@ async function refreshHeatmap() {
     if (!ctx) return;
     colors.forEach((row, i) => {
       row.forEach((color, j) => {
-        if (!props.cellProbas[i][j].empty || !color) return;
+        if (!props.cellProbas[i][j].empty
+          || props.grid.cells[i][j].definition
+          || !color) return;
         const [r, g, b, a] = color;
         ctx.fillStyle = `rgba(${r},${g},${b},${a})`;
 
