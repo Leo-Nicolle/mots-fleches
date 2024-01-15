@@ -1,12 +1,6 @@
 <template>
   <div id="Grid">
-    <Editor
-      v-if="grid && style"
-      :grid="grid"
-      @update="onUpdate"
-      @size-update="onSizeUpdate"
-      :style="style"
-    ></Editor>
+    <Editor v-if="grid && style" :grid="grid" @update="onUpdate" @size-update="onSizeUpdate" :style="style"></Editor>
   </div>
 </template>
 
@@ -16,6 +10,7 @@ import { Grid, GridStyle } from "grid";
 import { ref, onMounted, toRaw } from "vue";
 import { useRoute } from "vue-router";
 import { api } from "../../api";
+import { workerController } from '../../worker';
 /**
  * Route to edit a grid
  * Uses the route query to get the grid id
@@ -34,6 +29,14 @@ function fetch() {
     })
     .then((opts) => {
       style.value = opts;
+    })
+    .then(() => {
+      api.getGrids().then((gs) => {
+        const ids = gs.map((g) => g.id)
+          .filter((id) => id !== grid.value!.id);
+        return api.getUserDefinitions(ids);
+      })
+        .then((definitions) => workerController.setUserDefinitions(definitions));
     })
     .catch((e) => {
       console.error("E", e);
@@ -65,6 +68,7 @@ onMounted(() => {
   max-height: 100vh;
   overflow: hidden;
 }
+
 body {
   width: min-content;
   max-width: 100vw;

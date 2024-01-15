@@ -44,20 +44,23 @@ class API {
       .then((grid) => grid ? Grid.unserialize(JSON.stringify(grid)) : undefined);
   }
 
-  getUserDefinitions() {
+  getUserDefinitions(gridids?: string[]) {
     const res = new Map<string, Set<string>>();
+    const idsSet = new Set(gridids || []);
     return this.getGrids()
-    .then((grids) => {
-      grids.forEach(grid => {
-        getDefinitions(grid, res);
+      .then((grids) => {
+        grids
+          .filter(grid => gridids && gridids.length ? idsSet.has(grid.id) : true)
+          .forEach(grid => {
+            getDefinitions(grid, res);
+          });
+        return res;
       });
-      return res;
-    });
   }
 
-  getDefinitions(){
+  getDefinitions() {
     return axios.get('/definitions.txt')
-    .then(({data}) => data);
+      .then(({ data }) => data);
   }
 
   isSignedIn() {
@@ -68,7 +71,7 @@ class API {
         : Promise.resolve(false);
   }
   signout() {
-    console.log('signout')
+    console.log('signout');
     localStorage.removeItem('db-mode');
     if (this.mode === 'supadb') {
       return this.supadb.supabase.auth.signOut();

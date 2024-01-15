@@ -13,6 +13,7 @@ export type Events = {
   'start-locale-change': undefined;
   'searchword-result': string[];
   'searchdefinition-result': { title: string, text: string; }[];
+  'setuserdefinition-done': undefined;
   'check-result': GridValidity;
 };
 
@@ -98,6 +99,13 @@ class WorkerController extends EventEmitter<Events> {
       this._postMessage('searchdefinition', JSON.stringify(query), this.definitionWorkerId);
     });
   }
+  setUserDefinitions(userDefinitions: Map<string, Set<string>>) {
+    this.loadingPromise.then(() => {
+      const data = JSON.stringify(Array.from(userDefinitions.entries())
+        .map(([key, value]) => [key, Array.from(value.keys())]));
+      this._postMessage('setuserdefinitions', data, this.definitionWorkerId);
+    });
+  }
 
   _postMessage(type: string, data: string, workerId: number) {
     if (this.busy[workerId]) {
@@ -146,6 +154,9 @@ class WorkerController extends EventEmitter<Events> {
     }
     if (type == 'searchdefinition-result') {
       this.emit('searchdefinition-result', data);
+    }
+    if (type == 'setuserdefinitions-result') {
+      this.emit('setuserdefinition-done');
     }
     const queue = this.queues[workerId];
     const job = queue.shift();

@@ -120,6 +120,10 @@ function createGrid() {
 }
 
 onMounted(() => {
+  api.getUserDefinitions()
+    .then(defs => {
+      console.log(defs);
+    });
   fetch();
 });
 </script>
