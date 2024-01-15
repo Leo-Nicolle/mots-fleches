@@ -181,9 +181,6 @@ export class Grid {
     if (!cell.arrows) {
       cell.arrows = ['none', 'none', 'none'];
     }
-    if (!isSplited(cell)) {
-      cell.arrows[1] = 'none';
-    }
     cell.arrows[index] = direction;
   }
 
@@ -483,7 +480,8 @@ export class Grid {
             if (arrowIndex < 0) return false;
             const lines = cell.text.split('\n\n');
             const lineIndex = arrowIndex === 2 ? 1 : 0;
-            return !lines[lineIndex] || !lines[lineIndex].length;
+            return !lines[lineIndex] || !lines[lineIndex].length
+              || lines[lineIndex].match(/^\s+$/);
           })) {
             acc[`${bounds.start.y}-${bounds.start.x}`] = {
               ...bounds,
