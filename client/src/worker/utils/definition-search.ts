@@ -1,5 +1,6 @@
 import MiniSearch from "minisearch";
 
+const userMarker = '__USER__';
 export class WordsSearch {
   private minisearch: MiniSearch;
   private userDefinitions: [string, string[]][];
@@ -46,7 +47,7 @@ export class WordsSearch {
         const newDefs = new Set<string>(text.split('\n'));
         oldDefs.forEach(d => newDefs.delete(d));
         const newDefsArr = Array.from(newDefs).map(d => d.replaceAll('\n', ' ').trim());
-        if (!newDefsArr.length) {
+        if (!newDefsArr.length || newDefsArr[0] === userMarker) {
           return this.minisearch.remove({ id });
         }
         this.minisearch.replace({ id, title, text: newDefsArr.join('\n') });
@@ -57,14 +58,18 @@ export class WordsSearch {
       .forEach(([word, newDefs]) => {
         const entry = this.minisearch.search(word, { fuzzy: 0, fields: ['title'] })[0];
         if (!entry) {
+          const texts = [userMarker, ...newDefs.map(d => d.replaceAll('\n', ' ').trim())];
           return this.minisearch.add({
             title: word,
             id: newId++,
-            text: newDefs.map(d => d.replaceAll('\n', ' ').trim()).join('\n')
+            text: texts.join('\n')
           });
         }
         const { title, text, id } = entry;
         const oldDefs = new Set<string>(text.split('\n'));
+        if (!oldDefs.has(userMarker)) {
+          oldDefs.add(userMarker);
+        }
         newDefs.forEach(d => oldDefs.add(d));
         const newDefsArr = Array.from(oldDefs).map(d => d.replaceAll('\n', ' ').trim());
         this.minisearch.replace({ id, title, text: newDefsArr.join('\n') });

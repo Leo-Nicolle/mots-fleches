@@ -4,10 +4,13 @@
       {{ $t(`errors.${error}`) }}
     </div>
     <n-button v-else-if="busy" class="loading" :loading="true"></n-button>
-    <div v-else v-for="{ title, texts } in results" :key="title">
+    <div v-else v-for="{ title, user, dico } in results" :key="title">
       <h3>{{ title }}</h3>
-      <ul>
-        <li v-for="text in texts" :key="text" @click="onSetDefinition($event, text)">{{ text }}</li>
+      <ul v-if="user">
+        <li v-for="text in user" :key="text" @click="onSetDefinition($event, text)">{{ text }}</li>
+      </ul>
+      <ul v-if="dico">
+        <li v-for="text in dico" :key="text" @click="onSetDefinition($event, text)">{{ text }}</li>
       </ul>
     </div>
   </div>
@@ -94,7 +97,27 @@ props.focus.arrows[1], props.focus.arrows[2], props.dir], () => {
 });
 workerController.on("searchdefinition-result", (data) => {
   busy.value = false;
-  results.value = data.map(({ title, text }) => ({ title, texts: text.toLowerCase().split('\n') }));
+  results.value = data.map(({ title, text }) => {
+    const texts = text.toLowerCase().split('\n');
+    let isUser = false;
+    const [user, dico] = texts.reduce((acc, text) => {
+      const [user, dico] = acc;
+      if (text === '__user__') {
+        isUser = true;
+        return acc;
+      }
+      if (isUser) {
+        user.push(text);
+      } else {
+        dico.push(text);
+      }
+      return acc;
+    }, [[], []] as [string[], string[]]);
+    return {
+      title, user, dico
+    };
+
+  });
   if (!results.value.length) {
     error.value = 'no-definition';
   }

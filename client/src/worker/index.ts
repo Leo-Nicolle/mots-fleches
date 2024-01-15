@@ -12,7 +12,7 @@ export type Events = {
   'locale-changed': undefined;
   'start-locale-change': undefined;
   'searchword-result': string[];
-  'searchdefinition-result': { title: string, text: string; }[];
+  'searchdefinition-result': ({ title: string, text: string; }[]);
   'setuserdefinition-done': undefined;
   'check-result': GridValidity;
 };
