@@ -7,10 +7,10 @@ import { getWordsSimple } from '../utils/search';
 onmessage = function (e) {
   const { type, data } = e.data;
   if (e.data.words) {
-    const { words} = e.data as { words: string[]; };
+    const { words, bannedWords } = e.data as { words: string[]; };
     console.log('start words load');
     console.time('words-load');
-    wordsSearch.load(words);
+    wordsSearch.load(words, bannedWords);
     console.timeEnd('words-load');
     return this.postMessage({ type: 'loaded' });
   }

@@ -19,7 +19,8 @@ export class WordsSearch {
    * Load the dictionnary from the files in the dictionnary folder
    * And in the user's dictionary
    */
-  load(rawWords: string[]) {
+  load(rawWords: string[], bannedWords: string[]) {
+    const bannedSet = new Set(bannedWords);
     this.wordsMap = new Map();
     this.distribution = new Map();
     this.minisearch.removeAll();
@@ -34,7 +35,7 @@ export class WordsSearch {
       )
       // .sort((a, b) => Math.abs(b.length - 10) - Math.abs(a.length - 10))
       .forEach((word) => {
-        if (this.wordsMap.has(word)) return;
+        if (this.wordsMap.has(word) || bannedSet.has(word)) return;
         const dicoIndex = this.wordsMap.size;
         this.wordsMap.set(word, dicoIndex);
         const length = word.length;
@@ -43,12 +44,12 @@ export class WordsSearch {
         }
         this.distribution.set(length, this.distribution.get(length)! + 1);
       });
-      this.minisearch.addAll(Array.from(this.wordsMap.keys()).map((text, id) => ({text, id})));
+    this.minisearch.addAll(Array.from(this.wordsMap.keys()).map((text, id) => ({ text, id })));
   }
 
-  searchWord(word: string, options?: {fuzzy: number}) {
-    options = options ? options: {
-      fuzzy: 0.4 
+  searchWord(word: string, options?: { fuzzy: number; }) {
+    options = options ? options : {
+      fuzzy: 0.4
     };
     return this.minisearch.search(word, options).slice(0, 20).map(({ text }) => text);
   }

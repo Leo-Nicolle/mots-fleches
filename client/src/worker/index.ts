@@ -12,7 +12,7 @@ export type Events = {
   'locale-changed': undefined;
   'start-locale-change': undefined;
   'searchword-result': string[];
-  'searchdefinition-result': {title: string, text: string}[];
+  'searchdefinition-result': { title: string, text: string; }[];
   'check-result': GridValidity;
 };
 
@@ -107,12 +107,12 @@ class WorkerController extends EventEmitter<Events> {
     }
     this.busy[workerId] = true;
     this.flagsArray[0] = 0;
-    console.log('post message', type, workerId)
-    const ww = workerId === this.suggestionWorkerId 
-      ? this.suggestionWorker 
+    console.log('post message', type, workerId);
+    const ww = workerId === this.suggestionWorkerId
+      ? this.suggestionWorker
       : workerId === this.searchWorkerId
-      ? this.searchWorker 
-      : this.definitionWorker;
+        ? this.searchWorker
+        : this.definitionWorker;
     this.loadingPromise.then(() => {
       ww.postMessage({ type, data });
     });
@@ -183,11 +183,11 @@ class WorkerController extends EventEmitter<Events> {
   }
 
   private promisifiedCall<T>(data: any, workerId: number, event: string) {
-    const worker = workerId === this.suggestionWorkerId 
-    ? this.suggestionWorker 
-    : workerId === this.searchWorkerId
-    ? this.searchWorker
-    : this.definitionWorker;
+    const worker = workerId === this.suggestionWorkerId
+      ? this.suggestionWorker
+      : workerId === this.searchWorkerId
+        ? this.searchWorker
+        : this.definitionWorker;
     return new Promise<T>((resolve) => {
       const listenner = (evt: MessageEvent) => {
         if (evt.data.type === event) {
@@ -224,29 +224,30 @@ class WorkerController extends EventEmitter<Events> {
         // debugDico.load(words);
         return Promise.all([
           this.promisifiedCall({
-            words, 
+            words, bannedWords
           }, this.searchWorkerId, 'loaded'),
           this.promisifiedCall({
             words, flags: this.flagsBuffer,
+            bannedWords
           }, this.suggestionWorkerId, 'loaded'),
           this.promisifiedCall({
             definitions
           }, this.definitionWorkerId, 'loaded'),
         ])
-      .then(() => this.promisifiedCall<[number, number][]>({
-        type: 'distribution'
-      },
-        this.searchWorkerId,
-        'distrib-result'
-      ))
-      .then((distribution) => {
-        this.distribution = distribution;
-        return this.emit('locale-changed');
-      })
-      .catch((err) => {
-        console.error(err);
+          .then(() => this.promisifiedCall<[number, number][]>({
+            type: 'distribution'
+          },
+            this.searchWorkerId,
+            'distrib-result'
+          ))
+          .then((distribution) => {
+            this.distribution = distribution;
+            return this.emit('locale-changed');
+          })
+          .catch((err) => {
+            console.error(err);
+          });
       });
-    });
     return this.loadingPromise;
   }
 }

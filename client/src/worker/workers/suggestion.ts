@@ -8,10 +8,14 @@ let options = { sharedArray: new Int8Array(1) };
 onmessage = function (e) {
   const { type, data } = e.data;
   if (e.data.words && e.data.flags) {
-    const { words, flags} = e.data as { words: string[], flags: ArrayBuffer; };
+    const { words, flags, bannedWords } = e.data as {
+      words: string[],
+      bannedWords: string[],
+      flags: ArrayBuffer;
+    };
     options.sharedArray = new Int8Array(flags);
     console.time('dico-load');
-    dico.load(words);
+    dico.load(words, bannedWords);
     console.timeEnd('dico-load');
     return this.postMessage({ type: 'loaded' });
   }

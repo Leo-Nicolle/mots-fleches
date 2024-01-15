@@ -34,7 +34,8 @@ export class Dico {
    * Load the dictionnary from the files in the dictionnary folder
    * And in the user's dictionary
    */
-  load(rawWords: string[]) {
+  load(rawWords: string[], bannedWords: string[]) {
+    const bannedMap = new Set(bannedWords);
     this.words = [];
     this.wordsMap = new Map();
     rawWords
@@ -48,7 +49,7 @@ export class Dico {
       )
       // .sort((a, b) => Math.abs(b.length - 10) - Math.abs(a.length - 10))
       .forEach((word) => {
-        if (this.wordsMap.has(word)) return;
+        if (this.wordsMap.has(word) || bannedMap.has(word)) return;
         const dicoIndex = this.words.length;
         this.wordsMap.set(word, dicoIndex);
         this.words.push(word);
