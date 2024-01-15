@@ -222,7 +222,7 @@ function add() {
 }
 </script>
 
-<style scoped>
+<style>
 .gridhighlightcontainer {
   pointer-events: none;
   display: grid;
@@ -232,7 +232,7 @@ function add() {
   grid-area: 1 / 1 / 1 / 1;
 }
 
-.gridhighlight {
+.gridhighlightcontainer>.gridhighlight {
   top: 0;
   left: 0;
   padding: 0;
@@ -247,13 +247,13 @@ function add() {
   pointer-events: none;
 }
 
-.highlight {
+.gridhighlightcontainer>.gridhighlight>.highlight {
   width: v-bind(width);
   height: v-bind(height);
   box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.5);
 }
 
-.gridhighlight>.tooltip {
+.gridhighlightcontainer>.gridhighlight>.tooltip {
   pointer-events: visible;
   padding: 4px;
   background-color: white;
@@ -267,7 +267,7 @@ function add() {
   gap: 4px;
 }
 
-.heatmap {
+.gridhighlightcontainer>.heatmap {
   position: relative;
   top: 0;
   left: 0;
@@ -275,27 +275,39 @@ function add() {
   pointer-events: none;
 }
 
-.lines {
+.gridhighlightcontainer>.lines {
   position: relative;
 }
 
-.lines>span {
+.gridhighlightcontainer>.lines>span {
   width: 1500px;
   height: 1px;
   background-color: red;
   position: absolute;
 }
 
-.v-lines {
+.gridhighlightcontainer>.v-lines {
   position: relative;
 }
 
-.v-lines>span {
+.gridhighlightcontainer>.v-lines>span {
   left: 204px;
   width: 102px;
   height: 29px;
   background-color: red;
   position: absolute;
   opacity: 0.5;
+}
+
+.incomplete {
+  fill: rgba(255, 107, 107, 0.8);
+}
+
+.nodef {
+  fill: rgba(17, 138, 178, 0.8);
+}
+
+.noarrow {
+  fill: rgba(255, 209, 102, 0.8);
 }
 </style>

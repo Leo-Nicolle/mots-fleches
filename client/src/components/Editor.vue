@@ -345,22 +345,6 @@ const isLoadingSuggestions = computed(() => {
   gap: 5px;
 }
 
-.unknown {
-  fill: rgba(252, 226, 42, 0.8);
-}
-
-.incomplete {
-  fill: rgba(214, 19, 85, 0.8);
-}
-
-.nodef {
-  fill: rgba(249, 74, 41, 0.8);
-}
-
-.noarrow {
-  fill: rgba(237, 43, 42, 0.8);
-}
-
 text.highlighted {
   fill: #000;
 }

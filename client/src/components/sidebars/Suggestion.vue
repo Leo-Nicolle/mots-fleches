@@ -8,7 +8,7 @@
     ]" :data="results" :pagination="{
   pageSize: 8,
   simple: true,
-}" @mousemove="onMouseEvt($event, false)" @click="onMouseEvt($event, true)" />
+}" @mousemove="onMouseEvt($event, false)" @click="onMouseEvt($event, true)" @mouseout="onMouseOut" />
     <n-button class="loading" v-else :loading="true"></n-button>
   </div>
 </template>
@@ -104,6 +104,11 @@ function onMouseEvt(evt: MouseEvent, click = false) {
   if (text === hovered && !click) return;
   hovered = text;
   return click ? emit("click", text) : emit("hover", text);
+}
+function onMouseOut() {
+  hovered = "";
+  return emit("hover", '');
+
 }
 </script>
 
