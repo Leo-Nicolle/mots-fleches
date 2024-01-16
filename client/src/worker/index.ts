@@ -62,7 +62,7 @@ class WorkerController extends EventEmitter<Events> {
       JSON.stringify({
         grid: grid.serialize(),
         coords, dir
-      }), this.searchWorkerId);
+      }), this.suggestionWorkerId);
   }
 
   getDistribution() {

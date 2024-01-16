@@ -3,6 +3,7 @@ import { autoFill } from '../utils/auto-fill';
 import { dico } from '../utils/dico';
 import { getCellProbas } from '../utils/heatmap';
 import { Grid } from 'grid';
+import { getWordsSimple } from '../utils/search';
 // was the old hasBailed shared array, might be used in autofill.
 let options = { sharedArray: new Int8Array(1) };
 onmessage = function (e) {
@@ -26,6 +27,12 @@ onmessage = function (e) {
       return postMessage({ type: 'bail-result' });
     }
     postMessage({ type: 'run-result', data: cellProbas });
+  }
+  if (type === 'search') {
+    const { grid: gridJson, coords, dir } = JSON.parse(data);
+    const grid = Grid.unserialize(gridJson);
+    const wordIndexes = getWordsSimple({ grid, coords, dir });
+    postMessage({ type: 'search-result', data: wordIndexes });
   }
   if (type === 'autofill') {
     const { grid: gridJson, words } = JSON.parse(data);

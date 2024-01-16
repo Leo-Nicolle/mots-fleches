@@ -1,23 +1,16 @@
 
 import { wordsSearch } from '../utils/words-search';
 import { Grid } from 'grid';
-import { getWordsSimple } from '../utils/search';
 
 // was the old hasBailed shared array, might be used in autofill.
 onmessage = function (e) {
   const { type, data } = e.data;
   if (e.data.words) {
-    const { words, bannedWords } = e.data as { words: string[]; };
+    const { words, bannedWords } = e.data as { words: string[]; bannedWords: string[]; };
     console.time('words-load');
     wordsSearch.load(words, bannedWords);
     console.timeEnd('words-load');
     return this.postMessage({ type: 'loaded' });
-  }
-  if (type === 'search') {
-    const { grid: gridJson, coords, dir } = JSON.parse(data);
-    const grid = Grid.unserialize(gridJson);
-    const wordIndexes = getWordsSimple({ grid, coords, dir });
-    postMessage({ type: 'search-result', data: wordIndexes });
   }
   if (type === 'distribution') {
     const distribution = wordsSearch.getDistribution();

@@ -255,7 +255,6 @@ function onKeyUp(evt: KeyboardEvent) {
   evt.canceled = consumed;
 }
 watch([focus], () => {
-  console.log('focus changed', focus.value);
 });
 watch([dir, validity, highlightMode], () => {
   if (highlightMode.value === "check" && validity.value) {
