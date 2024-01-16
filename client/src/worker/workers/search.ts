@@ -8,7 +8,6 @@ onmessage = function (e) {
   const { type, data } = e.data;
   if (e.data.words) {
     const { words, bannedWords } = e.data as { words: string[]; };
-    console.log('start words load');
     console.time('words-load');
     wordsSearch.load(words, bannedWords);
     console.timeEnd('words-load');

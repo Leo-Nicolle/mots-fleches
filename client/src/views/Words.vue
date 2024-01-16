@@ -43,7 +43,6 @@ function download() {
 }
 function nextMode() {
   const index = modes.indexOf(mode.value);
-  console.log(index);
   mode.value = modes[(index + 1) % modes.length];
 }
 function onUpload(filesContents: [string, string][]) {

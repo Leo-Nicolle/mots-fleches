@@ -115,7 +115,6 @@ class WorkerController extends EventEmitter<Events> {
     }
     this.busy[workerId] = true;
     this.flagsArray[0] = 0;
-    console.log('post message', type, workerId);
     const ww = workerId === this.suggestionWorkerId
       ? this.suggestionWorker
       : workerId === this.searchWorkerId

@@ -24,6 +24,7 @@ export class WordsSearch {
     this.wordsMap = new Map();
     this.distribution = new Map();
     this.minisearch.removeAll();
+    console.time('words-map');
     rawWords
       .map((w) =>
         w
@@ -33,7 +34,6 @@ export class WordsSearch {
           .replace(/ ?\'?-?/g, "")
           .toUpperCase()
       )
-      // .sort((a, b) => Math.abs(b.length - 10) - Math.abs(a.length - 10))
       .forEach((word) => {
         if (this.wordsMap.has(word) || bannedSet.has(word)) return;
         const dicoIndex = this.wordsMap.size;
@@ -43,8 +43,15 @@ export class WordsSearch {
           this.distribution.set(length, 0);
         }
         this.distribution.set(length, this.distribution.get(length)! + 1);
+        // this.minisearch.add({
+        //   id: dicoIndex,
+        //   text: word
+        // });
       });
+    console.timeEnd('words-map');
+    console.time('minisearch-load');
     this.minisearch.addAll(Array.from(this.wordsMap.keys()).map((text, id) => ({ text, id })));
+    console.timeEnd('minisearch-load');
   }
 
   searchWord(word: string, options?: { fuzzy: number; }) {

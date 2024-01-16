@@ -78,8 +78,6 @@ workerController.on('autofill-result', (data) => {
   busy.value = false;
 });
 onMounted(() => {
-  // console.log('onMounted');
-  // getOptions();
 });
 
 const templateCols = computed(() => `repeat(${words.value.length}, 2.5em)`);

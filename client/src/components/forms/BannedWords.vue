@@ -59,7 +59,6 @@ const throttledSearch = throttle(refreshWords, 50);
 
 function getWords() {
   api.db.getBannedWords().then((ws) => {
-    console.log(ws);
     words.value = ws.sort((a, b) => a.localeCompare(b));
   });
 }

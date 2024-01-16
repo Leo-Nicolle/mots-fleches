@@ -85,7 +85,6 @@ function refreshGetDefinitions() {
 const throttledSearch = throttle(refreshGetDefinitions, 200);
 
 function onSetDefinition(event: MouseEvent, text: string) {
-  console.log('onSetDefinition', event, text);
   event.preventDefault();
   event.stopPropagation();
   const t = props.focus.text;

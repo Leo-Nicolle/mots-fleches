@@ -88,7 +88,6 @@ watch(() => props.method, (curr) => {
 });
 
 watch(() => props.mode, (curr) => {
-  console.log('mode');
   getButtons(curr);
 });
 

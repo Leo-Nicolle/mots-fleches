@@ -3,10 +3,8 @@ import { definitionSearch } from '../utils/definition-search';
 
 onmessage = function (e) {
   const { type, data } = e.data;
-  console.log(e.data);
   if (e.data.definitions) {
     const { definitions } = e.data as { definitions: string; };
-    console.log('start defs load');
     console.time('definitions-load');
     definitionSearch.loadDefinitions(definitions);
     console.timeEnd('definitions-load');

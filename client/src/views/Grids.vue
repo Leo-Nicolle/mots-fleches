@@ -59,7 +59,6 @@ function fetch() {
   return api
     .getGrids()
     .then((gs) => {
-      console.log("gs", gs);
       grids.value = gs.sort((a, b) => b.created - a.created);
     })
     .then(() =>
@@ -121,9 +120,7 @@ function createGrid() {
 
 onMounted(() => {
   api.getUserDefinitions()
-    .then(defs => {
-      console.log(defs);
-    });
+    .then(defs => { });
   fetch();
 });
 </script>
