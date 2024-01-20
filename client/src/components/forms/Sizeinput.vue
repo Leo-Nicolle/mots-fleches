@@ -28,7 +28,7 @@ const units = ["cm", "mm", "px", "pt", "em", "rem"];
 const unitSet = new Set(units);
 
 const options = ref(units.map((u) => {
-    return { label: u, value: u };
+  return { label: u, value: u };
 }));
 const value = computed<number>({
   get: () => {
@@ -54,6 +54,7 @@ const unit = computed<string>({
 .sizeinput {
   display: flex;
 }
+
 .n-base-selection-label {
   min-width: 72px;
 }

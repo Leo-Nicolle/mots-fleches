@@ -36,6 +36,12 @@ export const lang = {
     suggestions: {
         results: "Resultados",
     },
+    errors: {
+        'no-horizontal-arrow': 'No hay flecha horizontal',
+        'no-vertical-arrow': 'No hay flecha vertical',
+        'incomplete-word': 'Palabra incompleta',
+        'no-definition': 'No hay definición',
+    },
     forms: {
         title: "Título",
         options: "Opciones",
@@ -83,6 +89,9 @@ export const lang = {
         font: "Fuente",
         add: "Añadir",
         addWord: "Añadir palabra",
+        ban: "Prohibir",
+        bannedwords: "Palabras prohibidas",
+        banword: "Prohibir palabra",
         delete: "Borrar",
         deleteWord: "Borrar palabra",
         myWords: "Mis palabras",

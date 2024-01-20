@@ -181,9 +181,6 @@ export class Grid {
     if (!cell.arrows) {
       cell.arrows = ['none', 'none', 'none'];
     }
-    if (!isSplited(cell)) {
-      cell.arrows[1] = 'none';
-    }
     cell.arrows[index] = direction;
   }
 
@@ -372,7 +369,7 @@ export class Grid {
    * @returns A new grid
    */
   static unserialize(s: string) {
-    const { rows, cols, comment, title, id, cells, created, styleId } = JSON.parse(s) as GridState
+    const { rows, cols, comment, title, id, cells, created, styleId } = JSON.parse(s) as GridState;
     const res = new Grid(rows, cols, id);
     cells.forEach((row, i) => {
       row.forEach((cell, j) => {
@@ -386,6 +383,17 @@ export class Grid {
     res.created = created;
     res.styleId = styleId;
     return res;
+  }
+
+  copyFrom(grid: Grid) {
+    this.rows = grid.rows;
+    this.cols = grid.cols;
+    this.comment = grid.comment;
+    this.title = grid.title;
+    this.styleId = grid.styleId;
+    this.id = grid.id;
+    this.created = grid.created;
+    this.cells = grid.cells.map(row => row.map(cell => ({ ...cell })));
   }
   /**
    * Creates a new cell
@@ -427,7 +435,7 @@ export class Grid {
   }
 
   check(words: Map<string, number>): GridValidity {
-    const arrows: { x: number; y: number; arrow: ArrowDir }[][] = [
+    const arrows: { x: number; y: number; arrow: ArrowDir; }[][] = [
       [
         { x: -1, y: 0, arrow: 'right' },
         { x: 0, y: -1, arrow: 'downright' },
@@ -437,7 +445,6 @@ export class Grid {
         { x: -1, y: 0, arrow: 'rightdown' },
       ]
     ];
-
 
     const [horizontal, vertical] = [this.getWords('horizontal'), this.getWords('vertical')]
       .map((boundsVH, i) => boundsVH
@@ -473,7 +480,8 @@ export class Grid {
             if (arrowIndex < 0) return false;
             const lines = cell.text.split('\n\n');
             const lineIndex = arrowIndex === 2 ? 1 : 0;
-            return !lines[lineIndex] || !lines[lineIndex].length;
+            return !lines[lineIndex] || !lines[lineIndex].length
+              || lines[lineIndex].match(/^\s+$/);
           })) {
             acc[`${bounds.start.y}-${bounds.start.x}`] = {
               ...bounds,

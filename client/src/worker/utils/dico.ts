@@ -1,3 +1,4 @@
+import MiniSearch from "minisearch";
 import { StringBS } from "./string-bs";
 
 export const ACode = "A".charCodeAt(0);
@@ -19,6 +20,7 @@ export class Dico {
   public wordsMap: Map<string, number> = new Map();
 
   public sorted: number[];
+  public definitions: string[] = [];
   public stringBS: StringBS;
 
   constructor() {
@@ -31,9 +33,9 @@ export class Dico {
   /**
    * Load the dictionnary from the files in the dictionnary folder
    * And in the user's dictionary
-   * @returns The promise that will resolve when the dictionnary is loaded
    */
-  load(rawWords: string[]) {
+  load(rawWords: string[], bannedWords: string[]) {
+    const bannedMap = new Set(bannedWords);
     this.words = [];
     this.wordsMap = new Map();
     rawWords
@@ -47,7 +49,7 @@ export class Dico {
       )
       // .sort((a, b) => Math.abs(b.length - 10) - Math.abs(a.length - 10))
       .forEach((word) => {
-        if (this.wordsMap.has(word)) return;
+        if (this.wordsMap.has(word) || bannedMap.has(word)) return;
         const dicoIndex = this.words.length;
         this.wordsMap.set(word, dicoIndex);
         this.words.push(word);
@@ -63,6 +65,7 @@ export class Dico {
       });
     this.stringBS = new StringBS(this.words, this.sorted);
   }
+
 
   findLengthInterval(length: number) {
     const start = this.stringBS.byLengthStart(length, 0, this.words.length - 1);
@@ -141,18 +144,6 @@ export class Dico {
    */
   getWords() {
     return this.words;
-  }
-
-  getDistribution() {
-    const distribution = new Map();
-    this.words.forEach(word => {
-      const length = word.length;
-      if (!distribution.has(length)) {
-        distribution.set(length, 0);
-      }
-      distribution.set(length, distribution.get(length) + 1);
-    });
-    return [...distribution.entries()];
   }
 
 }

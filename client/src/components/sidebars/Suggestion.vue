@@ -1,53 +1,23 @@
 <template>
   <div ref="suggestion" class="suggestion" :version="version">
-    <span class="buttons">
-      <n-button icon-placement="right" @click="emit('orderswitch')">
-        {{ orderingText() }}
-      </n-button>
-      <n-button icon-placement="right" @click="emit('methodswitch')">
-        <template #icon>
-          <n-icon>
-            <Hammer v-if="method === 'accurate'" />
-            <Flash v-else />
-          </n-icon>
-        </template>
-      </n-button>
-      <n-button icon-placement="right" @click="emit('dir', dir === 'horizontal' ? 'vertical' : 'horizontal')">
-        <template #icon>
-          <n-icon>
-            <ArrowForward v-if="dir === 'horizontal'" />
-            <ArrowDown v-else />
-          </n-icon>
-        </template>
-      </n-button>
-    </span>
-
     <n-data-table v-if="!loading" :bordered="false" :single-line="false" :columns="[
       {
         title: `${totalResults} ${$t('suggestions.results')}`,
         key: 'word',
       },
     ]" :data="results" :pagination="{
-  pageSize: 13,
+  pageSize: 8,
   simple: true,
-}" @mousemove="onMouseEvt($event, false)" @click="onMouseEvt($event, true)" />
+}" @mousemove="onMouseEvt($event, false)" @click="onMouseEvt($event, true)" @mouseout="onMouseOut" />
     <n-button class="loading" v-else :loading="true"></n-button>
   </div>
 </template>
 
 <script setup lang="ts">
 import { defineProps, defineEmits, ref, watchEffect, computed } from "vue";
-import {
-  ArrowDown,
-  ArrowUp,
-  ArrowForward,
-  Hammer,
-  Flash,
-  ReturnUpBackOutline,
-} from "@vicons/ionicons5";
 
 import { CellProba, Direction, Vec } from "grid";
-import { Method, Ordering } from "../types";
+import { Method, Ordering } from "../../types";
 /**
  * Component to display words suggestions
  */
@@ -90,18 +60,6 @@ const emit = defineEmits<{
    * Click on a suggestion
    */
   (event: "click", value: string): void;
-  /**
-   * Change direction
-   */
-  (event: "dir", value: Direction): void;
-  /**
-   * Change method
-   */
-  (event: "methodswitch"): void;
-  /**
-   * Change ordering
-   */
-  (event: "orderswitch"): void;
 }>();
 
 function getSuggestions(
@@ -134,18 +92,6 @@ function getSuggestions(
   results.value = words.map((word) => ({ word }));
 }
 
-function orderingText() {
-  switch (props.ordering) {
-    case "alpha":
-      return "A-Z";
-    case "inverse-alpha":
-      return "Z-A";
-    case "best":
-      return "Score";
-    case "random":
-      return "Random";
-  }
-}
 // send request everytime props change
 watchEffect(() => {
   getSuggestions(props.point, props.dir, props.ordering, props.method);
@@ -159,6 +105,11 @@ function onMouseEvt(evt: MouseEvent, click = false) {
   hovered = text;
   return click ? emit("click", text) : emit("hover", text);
 }
+function onMouseOut() {
+  hovered = "";
+  return emit("hover", '');
+
+}
 </script>
 
 <style>
@@ -167,10 +118,12 @@ function onMouseEvt(evt: MouseEvent, click = false) {
 }
 
 .suggestion {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
   width: 100%;
+  margin: 10px 0;
+  gap: 5px;
+  display: grid;
+  height: 100%;
+  grid-template-rows: max-content auto;
 }
 
 .suggestion>.loading {
@@ -183,5 +136,9 @@ function onMouseEvt(evt: MouseEvent, click = false) {
   flex-direction: row;
   justify-content: center;
   gap: 2px;
+}
+
+.n-data-table .n-data-table__pagination {
+  justify-content: space-around;
 }
 </style>

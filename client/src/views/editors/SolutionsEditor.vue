@@ -2,28 +2,16 @@
   <Layout>
     <template #left-panel v-if="grids.length && style">
       <OptionsForm v-model="style" @update:modelValue="save" grid format>
-        <SolutionsForm v-model="style" @update:modelValue="save"/>
+        <SolutionsForm v-model="style" @update:modelValue="save" />
       </OptionsForm>
     </template>
     <template #body>
-      <WordsIndex
-        :grids="grids"
-        v-if="grids.length && style"
-        class="paper"
-        @page-count="solutionFirstPage = $event + indexFirstPage"
-        :export-options="exportOptions"
-        :solutionStyle="style"
-        :page="indexFirstPage"
-      />
+      <WordsIndex :grids="grids" v-if="grids.length && style" class="paper"
+        @page-count="solutionFirstPage = $event + indexFirstPage" :export-options="exportOptions" :solutionStyle="style"
+        :page="indexFirstPage" />
       <NoGrid v-else />
-      <SolutionsPaper
-        :grids="grids"
-        v-if="grids.length && style"
-        class="paper"
-        :solutionStyle="style"
-        :export-options="exportOptions"
-        :page="solutionFirstPage"
-      />
+      <SolutionsPaper :grids="grids" v-if="grids.length && style" class="paper" :solutionStyle="style"
+        :export-options="exportOptions" :page="solutionFirstPage" />
     </template>
   </Layout>
 </template>
@@ -61,13 +49,13 @@ const saveTimeout = ref(0);
 function fetch() {
   const promise = route.query.ids
     ? Promise.all(
-        (route.query.ids as string).split(",").map((id) => api.getGrid(id))
-      ).then((gs) => {
-        grids.value = gs.filter((e) => e) as Grid[];
-      })
+      (route.query.ids as string).split(",").map((id) => api.getGrid(id))
+    ).then((gs) => {
+      grids.value = gs.filter((e) => e) as Grid[];
+    })
     : api.getGrids().then((gs) => {
-        grids.value = gs;
-      });
+      grids.value = gs;
+    });
   return promise
     .then(() => api.db.getStyle("solution"))
     .then((s) => {
@@ -81,7 +69,6 @@ function fetch() {
 }
 
 function save() {
-  console.log("on update");
   clearTimeout(saveTimeout.value);
   saveTimeout.value = +setTimeout(() => {
     if (!style.value) return;

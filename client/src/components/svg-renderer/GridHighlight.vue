@@ -1,16 +1,26 @@
 <template>
-  <div>
+  <div class="gridhighlightcontainer">
+    <span v-if="false" class="lines">
+      <span style="top: 102.5px; background-color: blue" />
+
+      <span style="top: 56.6px" />
+      <span style="top: 136px" />
+    </span>
+    <span v-if="false" class="v-lines">
+      <span />
+      <span style="transform: translate(10px,29px);" />
+      <span style="transform: translate(20px,58px);" />
+      <span style="transform: translate(30px,87px);" />
+      <span style="transform: translate(40px,116px);" />
+      <span style="transform: translate(50px,145px);" />
+      <span style="transform: translate(60px,174px);" />
+    </span>
     <span class="heatmap" v-if="mode === 'heatmap'">
       <canvas ref="heatmapref" />
     </span>
     <span class="gridhighlight" v-if="visible">
       <span class="highlight"> </span>
-      <span
-        class="tooltip"
-        @mouseenter="hovered = true"
-        @mouseleave="hovered = false"
-        @mousemove="onMouseMove"
-      >
+      <span class="tooltip" @mouseenter="hovered = true" @mouseleave="hovered = false" @mousemove="onMouseMove">
         <span v-if="tooltip === 'unknown'">
           <n-button @click="add" circle> + </n-button>
           {{ $t("tooltips.add", { word }) }}
@@ -19,14 +29,10 @@
           {{ word }} {{ $t("tooltips.incomplete") }}
         </span>
         <span v-if="tooltip === 'nodef'">
-          {{ word }} {{ $t("tooltips.nodef") }}</span
-        >
+          {{ word }} {{ $t("tooltips.nodef") }}</span>
         <span v-if="tooltip === 'noarrow'">
-          {{ word }} {{ $t("tooltips.noarrow") }}</span
-        >
-        <span
-          v-if="tooltip === 'heatmap' && (hotLetters.length || cellHeat.length)"
-        >
+          {{ word }} {{ $t("tooltips.noarrow") }}</span>
+        <span v-if="tooltip === 'heatmap' && (hotLetters.length || cellHeat.length)">
           {{ hotLetters }}
         </span>
       </span>
@@ -57,10 +63,9 @@ import {
   useTransform,
 } from "./utils";
 import chroma from "chroma-js";
-import { dico } from "../../search-worker/dico";
 import { api } from "../../api";
+import { Mode } from "../../types";
 
-export type Mode = "normal" | "check" | "heatmap";
 
 /**
  * Button to add words from the grid to the dictionnary
@@ -151,37 +156,6 @@ function getLetters(cell: Cell, heatmapLetters: CellProba[][]) {
     .join(", ");
 }
 
-function getHeat(cell: Cell, heatmapLetters: CellProba[][]) {
-  if (!heatmapLetters || !cell) return "";
-  const row = heatmapLetters[cell.y];
-  if (!row) return "";
-  const cellHeatmap = row[cell.x];
-  if (!cellHeatmap) return "";
-  const {
-    horizontal,
-    vertical,
-    validH,
-    validV,
-    empty,
-    bestWordsH,
-    bestWordsV,
-  } = cellHeatmap;
-  const bestWords = (
-    (props.dir === "horizontal" ? bestWordsH : bestWordsV) || []
-  )
-    .slice(0, 5)
-    .reduce((acc, index) => {
-      acc.push(dico.words[dico.sorted[index]]);
-      return acc;
-    }, []);
-  if ((!validH && !validV) || !empty) return "";
-  return bestWords.join(", ");
-  // if (validH && validV)
-  //   return `Horizontal: ${horizontal}, Vertical: ${vertical}`;
-  // if (!validV) return `Horizontal: ${horizontal}`;
-  // if (!validH) return `Vertical: ${vertical}`;
-}
-
 const colorScale = chroma.scale(["red", "#22C", "#014"]).mode("lab");
 async function refreshHeatmap() {
   const inters = props.cellProbas.map((row) =>
@@ -222,7 +196,9 @@ async function refreshHeatmap() {
     if (!ctx) return;
     colors.forEach((row, i) => {
       row.forEach((color, j) => {
-        if (!props.cellProbas[i][j].empty || !color) return;
+        if (!props.cellProbas[i][j].empty
+          || props.grid.cells[i][j].definition
+          || !color) return;
         const [r, g, b, a] = color;
         ctx.fillStyle = `rgba(${r},${g},${b},${a})`;
 
@@ -237,7 +213,7 @@ watchEffect(() => {
   // cellHeat.value = getHeat(props.cell, props.cellProbas);
   refreshHeatmap();
 });
-function onMouseMove(evt: MouseEvent) {}
+function onMouseMove(evt: MouseEvent) { }
 function add() {
   api.db.pushWord(toRaw(word.value)).then(() => {
     tooltip.value = "";
@@ -246,9 +222,17 @@ function add() {
 }
 </script>
 
-<style scoped>
-.gridhighlight {
-  position: absolute;
+<style>
+.gridhighlightcontainer {
+  pointer-events: none;
+  display: grid;
+}
+
+.gridhighlightcontainer>* {
+  grid-area: 1 / 1 / 1 / 1;
+}
+
+.gridhighlightcontainer>.gridhighlight {
   top: 0;
   left: 0;
   padding: 0;
@@ -258,15 +242,18 @@ function add() {
   transform: v-bind(transform);
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  gap: 10px;
   pointer-events: none;
 }
-.highlight {
+
+.gridhighlightcontainer>.gridhighlight>.highlight {
   width: v-bind(width);
   height: v-bind(height);
   box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.5);
 }
-.gridhighlight > .tooltip {
+
+.gridhighlightcontainer>.gridhighlight>.tooltip {
   pointer-events: visible;
   padding: 4px;
   background-color: white;
@@ -279,11 +266,48 @@ function add() {
   align-items: center;
   gap: 4px;
 }
-.heatmap {
-  position: absolute;
+
+.gridhighlightcontainer>.heatmap {
+  position: relative;
   top: 0;
   left: 0;
   transform: v-bind(heatmapTransform);
   pointer-events: none;
+}
+
+.gridhighlightcontainer>.lines {
+  position: relative;
+}
+
+.gridhighlightcontainer>.lines>span {
+  width: 1500px;
+  height: 1px;
+  background-color: red;
+  position: absolute;
+}
+
+.gridhighlightcontainer>.v-lines {
+  position: relative;
+}
+
+.gridhighlightcontainer>.v-lines>span {
+  left: 204px;
+  width: 102px;
+  height: 29px;
+  background-color: red;
+  position: absolute;
+  opacity: 0.5;
+}
+
+.incomplete {
+  fill: rgba(255, 107, 107, 0.8);
+}
+
+.nodef {
+  fill: rgba(17, 138, 178, 0.8);
+}
+
+.noarrow {
+  fill: rgba(255, 209, 102, 0.8);
 }
 </style>

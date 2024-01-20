@@ -1,6 +1,6 @@
 import merge from 'merge';
-export type Vec = { x: number, y: number };
-export type Lookup<T> = { [key: number | string]: T };
+export type Vec = { x: number, y: number; };
+export type Lookup<T> = { [key: number | string]: T; };
 export type DefGrid = boolean[][];
 export type DeepPartial<T> = T extends object ? {
   [P in keyof T]?: DeepPartial<T[P]>;
@@ -23,19 +23,19 @@ export type Arrow = {
    * Direction of the arrow
    */
   direction: ArrowDir;
-}
+};
 
 export type GoogleFont = {
   isGoogle: true;
   family: string;
   weight: string;
-}
+};
 export type CustomFont = {
   isGoogle: false;
   content: string;
   family: string;
   weight: string;
-}
+};
 export type Font = GoogleFont | CustomFont;
 
 export function isGoogleFont(font: Font): font is GoogleFont {
@@ -56,7 +56,7 @@ export type TextStyle<T = string> = Font & {
    * Text color
    */
   color: string;
-}
+};
 export type Cell = {
   /**
    * X position of the cell
@@ -94,7 +94,7 @@ export type Cell = {
    * Wether there is a space on Horizontal direction
    */
   spaceH: boolean;
-}
+};
 
 export type Margins<T> = {
   top: T;
@@ -127,7 +127,7 @@ export type Format = {
    * Margin of the paper (cm)
    */
   margin: Margins<number>;
-}
+};
 
 /**
  * Grid style
@@ -180,7 +180,7 @@ export type GridStyle = {
   /**
   * Style of the solutions within the grid
   */
-  solutions: TextStyle<number> & { top: number };
+  solutions: TextStyle<number> & { top: number; };
   /**
    * Arrow style
    */
@@ -213,17 +213,17 @@ export type Bounds = {
    * Length of the word
    */
   length: number;
-}
+};
 export type Direction = 'horizontal' | 'vertical';
 
 export type PaginationStyle = TextStyle & {
   startIdx: number;
   align: 'center' | 'left';
   margin: Pick<Margins<string>, 'bottom' | 'left'>;
-}
+};
 export type GridNumberStyle = TextStyle & {
   margin: Pick<Margins<string>, 'bottom'>;
-}
+};
 
 
 export const defaultTextStyle: TextStyle = {
@@ -232,7 +232,7 @@ export const defaultTextStyle: TextStyle = {
   weight: "400",
   size: "1em",
   color: "black",
-}
+};
 export const defaultPaginationStyle: PaginationStyle = {
   ...defaultTextStyle,
   size: '1.5em',
@@ -310,7 +310,7 @@ export type SolutionStyle = GridStyle & {
   words: TextStyle & {
     tolerance: number;
   };
-  pagination: PaginationStyle
+  pagination: PaginationStyle;
   /**
    * Size of the words in word index
    */
@@ -343,7 +343,7 @@ const expOptions: DeepPartial<SolutionStyle> = {
   },
   pagination: { ...defaultPaginationStyle },
   isSolution: true
-}
+};
 export const defaultSolutionStyle: SolutionStyle = merge.recursive(
   JSON.parse(JSON.stringify(defaultStyles)),
   expOptions,
@@ -367,13 +367,13 @@ export type WordAndPosition = {
   word: string;
   start: Vec;
   direction: Direction;
-}
+};
 
-export type ProblemBound = Bounds & { problem: string };
+export type ProblemBound = Bounds & { problem: string; };
 export type GridValidity = {
   horizontal: Record<string, ProblemBound>;
   vertical: Record<string, ProblemBound>;
-}
+};
 
 /**
  * Type returned by the heatmap function
@@ -444,7 +444,10 @@ export type CellBest = {
    */
   y: number;
   empty: boolean;
-
+  /**
+   * Total number of words in the inter
+   */
+  total: number;
   /**
    * indexes in dico
    */

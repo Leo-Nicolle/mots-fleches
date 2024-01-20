@@ -5,70 +5,38 @@
         <CogIcon />
       </n-icon>
     </n-button>
-    <n-modal
-      preset="dialog"
-      :title="$t('forms.options')"
-      :showIcon="false"
-      v-model:show="visible"
-    >
+    <n-modal preset="dialog" :title="$t('forms.options')" :showIcon="false" v-model:show="visible">
       <template #header>
         {{ value.title }}
       </template>
       <template #action>
         <n-form :label-width="80" :model="value">
           <n-form-item :label="$t('forms.title')" path="title">
-            <n-input
-              role="title"
-              type="text"
-              placeholder="Nouvelle Grille"
-              v-model:value="value.title"
-            />
+            <n-input role="title" type="text" placeholder="Nouvelle Grille" v-model:value="value.title" />
           </n-form-item>
           <n-form-item :label="$t('forms.comment')" path="description">
-            <n-input
-              role="comment"
-              type="textarea"
-              :placeholder="`${$t('forms.comment')}...`"
-              v-model:value="value.comment"
-              :autosize="{
+            <n-input role="comment" type="textarea" :placeholder="`${$t('forms.comment')}...`"
+              v-model:value="value.comment" :autosize="{
                 minRows: 3,
-              }"
-            />
+              }" />
           </n-form-item>
           <span class="rowcols">
             <n-form-item :label="$t('forms.rows')" path="rows">
-              <n-input-number
-                role="rows"
-                v-model:value="value.rows"
-                :on-update:value="(v) => onUpdate('rows', v)"
-              />
+              <n-input-number role="rows" v-model:value="value.rows" :on-update:value="(v) => onUpdate('rows', v)" />
             </n-form-item>
             <n-form-item path="randomize">
-              <n-button
-                role="randomize"
-                @click="randomConfirmVisible = true; generating = false;"
-                type="warning"
-              >
+              <n-button role="randomize" @click="randomConfirmVisible = true; generating = false;" type="warning">
                 {{ $t("forms.randomize") }}
               </n-button>
             </n-form-item>
             <n-form-item :label="$t('forms.cols')" path="grid.cols">
-              <n-input-number
-                role="cols"
-                v-model:value="value.cols"
-                :on-update:value="(v) => onUpdate('cols', v)"
-              />
+              <n-input-number role="cols" v-model:value="value.cols" :on-update:value="(v) => onUpdate('cols', v)" />
             </n-form-item>
           </span>
         </n-form>
       </template>
     </n-modal>
-    <n-modal
-      preset="dialog"
-      :title="`${$t('forms.randomize')} ?`"
-      :showIcon="false"
-      v-model:show="randomConfirmVisible"
-    >
+    <n-modal preset="dialog" :title="`${$t('forms.randomize')} ?`" :showIcon="false" v-model:show="randomConfirmVisible">
       <template #action>
         <n-button :disabled="generating" @click="randomConfirmVisible = false">{{
           $t("buttons.no")
@@ -97,7 +65,7 @@ import { Grid } from "grid";
 import { useModel } from "../../js/useModel";
 import generate from "../../js/maze-generator";
 import { api } from "../../api";
-import { workerController } from "../../search-worker";
+import { workerController } from "../../worker";
 
 /**
  * Form to edit grid metadata: rows, cols. title, comment and options
@@ -108,7 +76,7 @@ const props = defineProps<{
    */
   modelValue: Grid;
 }>();
-const opts = ref<{ label: string; value: string }[]>([]);
+const opts = ref<{ label: string; value: string; }[]>([]);
 const randomConfirmVisible = ref(false);
 const visible = ref(false);
 const generating = ref(false);
@@ -137,13 +105,13 @@ function onUpdate(path: string, newvalue: string | number) {
 function onRandomize() {
   generating.value = true;
   nextTick()
-  .then(() => workerController.getDistribution())
-  .then((distribution) => {
-    generate({ grid: value.value, distribution });
-    emit("update-size", value.value);
-    randomConfirmVisible.value = false;
-    generating.value = false;
-  });
+    .then(() => workerController.getDistribution())
+    .then((distribution) => {
+      generate({ grid: value.value, distribution });
+      emit("update-size", value.value);
+      randomConfirmVisible.value = false;
+      generating.value = false;
+    });
 }
 watchEffect(() => {
   if (!visible.value) return;
@@ -176,11 +144,13 @@ onMounted(() => {
 .n-form {
   width: 100%;
 }
+
 .rowcols {
   display: flex;
   justify-content: space-between;
 }
-.rowcols > .n-form-item {
+
+.rowcols>.n-form-item {
   max-width: 100px;
 }
-</style>
+</style>../../worker

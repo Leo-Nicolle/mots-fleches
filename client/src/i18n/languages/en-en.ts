@@ -30,6 +30,12 @@ export const lang = {
     dragdrop: "Drag files here (or click)",
     here: "here",
   },
+  errors: {
+    'no-horizontal-arrow': 'No horizontal arrow',
+    'no-vertical-arrow': 'No vertical arrow',
+    'incomplete-word': 'Incomplete word',
+    'no-definition': 'No definition found',
+  },
   titles: {
     newFont: "New Font",
   },
@@ -83,6 +89,9 @@ export const lang = {
     font: "Font",
     add: "Add",
     addWord: "Add word",
+    ban: "Ban",
+    bannedwords: "Banned words",
+    banword: "Ban word",
     delete: "Delete",
     deleteWord: "Delete word",
     myWords: "My words",

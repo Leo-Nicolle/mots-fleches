@@ -33,6 +33,12 @@ export const lang = {
     suggestions: {
         results: "Résultats",
     },
+    errors: {
+        'no-horizontal-arrow': 'Pas de flèche horizontale',
+        'no-vertical-arrow': 'Pas de flèche verticale ',
+        'incomplete-word': 'Mot incomplet',
+        'no-definition': 'Pas de définition',
+    },    
     titles: {
         newFont: "Nouvelle police",
     },
@@ -82,6 +88,9 @@ export const lang = {
         wordIndex: "Index",
         font: "Police",
         add: "Ajouter",
+        ban: "Bannir",
+        bannedwords: "Mots bannis",
+        banword: "Bannir un mot",
         addWord: "Ajouter un mot",
         delete: "Supprimer",
         deleteWord: "Supprimer un mot",

@@ -186,3 +186,38 @@ export function getAllWords(grids: Grid[]) {
   })
   return words;
 }
+
+export function getDefinitions(grid: Grid, defs?: Map<string, Set<string>>){
+  const definitions = defs || new Map<string, Set<string>>();
+  const {wordsAndBounds} = getWords(grid);
+  const directions = {
+    'horizontal': new Set(['right', 'downright']),
+    'vertical': new Set(['down', 'rightdown']),
+  };
+  wordsAndBounds.filter(({word}) => word.length > 1)
+  .forEach(({word, start, direction}) => {
+    const candidates = [
+      {x: start.x - 1, y: start.y}, 
+      {x: start.x, y: start.y-1}
+    ].filter(({x, y}) => {
+      if(!grid.isValid({x, y})) return false;
+      const {definition, arrows} = grid.cells[y][x];
+      if(!definition) return false;
+      if(!arrows.some(a  => directions[direction].has(a))) return false;
+      return true;
+    });
+
+    if(candidates.length !== 1) return;
+    const {x, y} = candidates[0];
+    const {text, arrows} = grid.cells[y][x];
+    const lines = text.split("\n\n").map(line => line.replace("\n", ' '));
+    const index = arrows.findIndex(a => directions[direction].has(a));
+    const line = index === 0 ? lines[0] : lines[lines.length - 1];
+    if(!line) return;
+
+    const set = definitions.get(word) || new Set<string>();
+    set.add(line);
+    definitions.set(word, set);
+  });
+  return definitions;
+}

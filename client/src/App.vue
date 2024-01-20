@@ -1,7 +1,5 @@
 <template>
-  <div>
-    <router-view />
-  </div>
+  <router-view />
 </template>
 
 <script setup lang="ts">
@@ -26,6 +24,21 @@ onMounted(async () => {
   border-radius: 20px;
 }
 
+/** loader rotation animation */
+@keyframes loader {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.rotating {
+  animation: rotating 2s linear infinite;
+}
+
 .hidden-input {
   position: absolute;
   bottom: 0px;
@@ -34,13 +47,16 @@ onMounted(async () => {
   visibility: hidden;
   display: block;
 }
+
 .title {
   display: flex;
   justify-content: space-between;
 }
+
 .title .n-button {
   margin-right: 4px;
 }
+
 h2 {
   margin-top: 0;
 }

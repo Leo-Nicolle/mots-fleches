@@ -6,16 +6,8 @@
           <img class="menuicon" src="/icon.svg" />
           <span v-if="screenSize !== 'phone'">Motsflex</span>
         </span>
-        <n-menu
-          v-if="showLoginButton"
-          class="burger"
-          :accordion="true"
-          :mode="'horizontal'"
-          :collapsed="collapsed"
-          :collapsed-width="64"
-          :collapsed-icon-size="22"
-          :options="menuOptions"
-        />
+        <n-menu v-if="showLoginButton" class="burger" :accordion="true" :mode="'horizontal'" :collapsed="collapsed"
+          :collapsed-width="64" :collapsed-icon-size="22" :options="menuOptions" />
         <!-- @slot Slot for element in the left of the header  -->
         <slot name="header"> </slot>
       </span>
@@ -31,14 +23,8 @@
             {{ screenSize === "phone" ? "" : selected?.label }}
           </n-button>
         </n-popselect>
-        <n-button
-          v-if="showLoginButton"
-          strong
-          secondary
-          :type="isSignedIn ? 'warning' : 'primary'"
-          icon-placement="right"
-          @click="isSignedIn ? router.push('/logout') : router.push('/login')"
-        >
+        <n-button v-if="showLoginButton" strong secondary :type="isSignedIn ? 'warning' : 'primary'"
+          icon-placement="right" @click="isSignedIn ? router.push('/logout') : router.push('/login')">
           {{ screenSize === "phone" ? '' : $t(isSignedIn ? "buttons.exit" : "buttons.login") }}
           <template #icon>
             <n-icon>
@@ -50,39 +36,25 @@
     </div>
 
     <div class="body">
-      <div class="left-panel" v-if="screenSize !== 'phone'">
-        <n-scrollbar x-scrollable>
-          <!-- @slot Slot for element in the left panel  -->
-          <slot name="left-panel"> </slot>
-        </n-scrollbar>
+      <div :class="`left-panel ${leftPanelScroll ? 'scroll' : 'noscroll'}`" v-if="screenSize !== 'phone'">
+        <slot name="left-panel">
+        </slot>
       </div>
-      <n-drawer
-        v-else
-        v-model:show="showLeftDrawer"
-        @click="showLeftDrawer = false"
-        :width="300"
-        placement="left"
-      >
+      <n-drawer v-else v-model:show="showLeftDrawer" @click="showLeftDrawer = false" :width="300" placement="left">
         <n-drawer-content>
           <n-scrollbar>
             <slot name="left-panel"> </slot>
           </n-scrollbar>
         </n-drawer-content>
       </n-drawer>
-      <n-button
-        v-if="screenSize === 'phone' && leftPanelWidth > 0"
-        class="left-panel-toggle"
-        :type="showLeftDrawer ? 'primary' : 'warning'"
-        icon-placement="right"
-        @click="showLeftDrawer = !showLeftDrawer"
-      >
-        {{ showLeftDrawer ? "<" : ">" }}
-      </n-button>
+      <n-button v-if="screenSize === 'phone' && leftPanelWidth > 0" class="left-panel-toggle"
+        :type="showLeftDrawer ? 'primary' : 'warning'" icon-placement="right" @click="showLeftDrawer = !showLeftDrawer">
+        {{ showLeftDrawer ? "<" : ">" }} </n-button>
 
-      <n-scrollbar x-scrollable :on-scroll="onScroll" class="scroll">
-        <!-- @slot Slot for element in the main panel  -->
-        <slot name="body"></slot>
-      </n-scrollbar>
+          <div @scroll="onScroll" class="maincontentscroll scroll">
+            <!-- @slot Slot for element in the main panel  -->
+            <slot name="body"></slot>
+          </div>
     </div>
   </div>
 </template>
@@ -108,7 +80,7 @@ import { RouterLink, useRouter } from "vue-router";
 import { renderIcon } from "../js/utils";
 import { LogOutOutline, LanguageOutline } from "@vicons/ionicons5";
 import { i18n, setLanguage } from "../i18n";
-import { workerController } from "../search-worker";
+import { workerController } from "../worker";
 import { useResponsive } from "../js/useResponsive";
 import "keyboard-css";
 import { api } from "../api";
@@ -121,10 +93,14 @@ const { onResize, cleanupUseResponsive, screenSize } = useResponsive();
 const collapsed = ref(true);
 const switchingLocale = ref(false);
 const props = withDefaults(
-  defineProps<{ showLoginButton?: boolean; leftPanelWidth?: number }>(),
+  defineProps<{
+    showLoginButton?: boolean; leftPanelWidth?: number;
+    leftPanelScroll?: boolean;
+  }>(),
   {
     showLoginButton: true,
     leftPanelWidth: 235,
+    leftPanelScroll: true
   }
 );
 const isSignedIn = ref(false);
@@ -153,7 +129,7 @@ const emit = defineEmits<{
   /**
    * Scroll within main panel
    */
-  (event: "scroll"): void;
+  (event: "scroll", data: Event): void;
 }>();
 // use this to try to make sure we dont watch the whole global object
 function getNavChildren() {
@@ -279,13 +255,19 @@ function onScroll(e: Event) {
 
 <style>
 .main-layout {
-  width: 100vw;
+  max-width: 100vw;
+  min-width: 100vw;
   max-height: 100vh;
   min-height: 100vh;
   overflow: hidden;
+  display: grid;
+  grid-template-rows: 42px fit-content(calc(100vh - 42px));
+  grid-template-columns: auto;
 }
 
 .header {
+  grid-column-start: 1;
+  grid-column-end: 3;
   display: flex;
   flex-direction: row;
   width: 100%;
@@ -302,7 +284,8 @@ function onScroll(e: Event) {
   background: white;
   padding-top: 1px;
 }
-.header > .left {
+
+.header>.left {
   display: flex;
   flex-direction: row;
   gap: 10px;
@@ -310,7 +293,8 @@ function onScroll(e: Event) {
   justify-content: flex-start;
   margin-left: 4px;
 }
-.header > .right {
+
+.header>.right {
   display: flex;
   flex-direction: row;
   gap: 10px;
@@ -318,6 +302,7 @@ function onScroll(e: Event) {
   justify-content: flex-end;
   margin-right: 4px;
 }
+
 .menutitle {
   display: flex;
   flex-direction: row;
@@ -326,6 +311,7 @@ function onScroll(e: Event) {
   cursor: pointer;
   padding: 2px;
 }
+
 .menuicon {
   width: 32px;
 }
@@ -343,21 +329,23 @@ nav {
 }
 
 .body {
-  display: flex;
-  max-height: calc(100vh - 42px);
-  height: calc(100vh - 42px);
-  max-width: 100vw;
-  width: 100vw;
-  overflow: hidden;
-  margin-top: 60px;
+  /* display: flex; */
+  margin-top: 15px;
+  grid-row-start: 2;
+  display: grid;
+  grid-template-columns: v-bind(leftWidth) auto;
+  grid-template-rows: calc(100vh - 42px);
+  grid-column-gap: 15px;
 }
+
 .left-panel {
   display: flex;
   flex-direction: column;
   gap: 10px;
   width: v-bind(leftWidth);
   min-width: v-bind(leftWidth);
-  overflow: hidden;
+  overflow: scroll;
+  max-height: 100%;
   align-items: center;
   justify-content: flex-start;
   margin-left: 5px;
@@ -379,18 +367,26 @@ nav {
   padding: 5px;
   z-index: 10;
 }
+
+.left-panel.noscroll {
+  overflow: hidden;
+}
+
 .n-drawer .n-drawer-content .n-drawer-body-content-wrapper {
   padding: 1px;
 }
-.scroll {
-  max-height: 100%;
-  max-width: calc(100vw - v-bind(leftWidth));
-  width: calc(100vw - v-bind(leftWidth));
-}
-.leftpanel > .n-scrollbar {
+
+.leftpanel>.n-scrollbar {
   max-height: 100vh;
 }
+
 .n-menu.n-menu--horizontal .n-menu-item-content {
   padding: 0px;
+}
+
+.maincontentscroll {
+  overflow: scroll;
+  padding-bottom: 10px;
+  padding-right: 10px;
 }
 </style>

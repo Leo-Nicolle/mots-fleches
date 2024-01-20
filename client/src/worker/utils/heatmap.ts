@@ -1,6 +1,7 @@
-import { Direction, Grid, CellProba, Vec, CellBest, Bounds } from "grid";
+import { Direction, Grid, CellProba, CellBest } from "grid";
 import { dico, ACode } from "./dico";
-import { Tree, Node, intersect, mapToWords, getPossibleParents } from './tree';
+import { Tree, Node, intersect, mapToWords } from './tree';
+import { cantor } from "./math";
 
 const trees = new Map<number, Tree>();
 const cachedResult = new Map<string, CellBest[][]>();
@@ -31,9 +32,6 @@ export function initCellMap(grid: Grid) {
   return res;
 }
 
-function cantor(x: number, y: number) {
-  return ((x + y) * (x + y + 1)) / 2 + y;
-}
 
 function intersection(cellMap: CellProba[][], cellBest?: CellBest[][]) {
   cellMap.forEach((row, y) => {
@@ -184,7 +182,10 @@ function filter(cell: CellA) {
     nodesV.delete(code);
   });
 }
-export function getCellProbasAccurate(grid: Grid, options?: BailOptions) {
+// TODO Maybe, maybe?? split this monstuosity into smaller functions
+// Maybe there is a more convinient intermediate data structure
+// cause we always repeat vertical and horizontal operations and it is a mess
+export function getCellProbasAccurate(grid: Grid) {
   const cellsA = grid.cells.reduce((acc: CellA[][], row, y) => {
     const r = row.map((cell, x) => {
       const { text } = cell;
@@ -472,11 +473,15 @@ export function getCellProbasAccurate(grid: Grid, options?: BailOptions) {
   };
 }
 
-export function getCellProbas(grid: Grid, options: BailOptions) {
+function getHash(grid: Grid) {
+  return grid.cells.reduce((acc, row) => acc + row.reduce((acc, cell) => acc + (cell.definition ? '#' : cell.text || ' '), '') + '\n', '');
+}
+
+export function getCellProbas(grid: Grid, useCache = true) {
   // console.time('getCellProbas');
 
-  const hash = grid.serialize();
-  if (cachedResult.has(hash)) {
+  const hash = getHash(grid);
+  if (cachedResult.has(hash) && useCache) {
     // console.timeEnd('getCellProbas');
     return { hasBailed: false, cellProbas: cachedResult.get(hash)! };
   }
@@ -487,14 +492,13 @@ export function getCellProbas(grid: Grid, options: BailOptions) {
       trees.set(i, new Tree(i));
     }
   }
-  const a = getCellProbasAccurate(grid, options);
+  const a = getCellProbasAccurate(grid);
   cachedResult.set(hash, a.cellProbas);
   hashes.push(hash);
-  if (hashes.length > 50) {
+  if (hashes.length > 250) {
     const hash = hashes.shift()!;
     cachedResult.delete(hash);
   }
-  // console.timeEnd('getCellProbas');
   return a;
 }
 

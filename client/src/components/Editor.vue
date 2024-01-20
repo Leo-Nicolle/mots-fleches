@@ -1,56 +1,32 @@
 <template>
-  <Layout @scroll="onScroll">
+  <Layout @scroll="onScroll" :left-panel-scroll="highlightMode !== 'autofill'">
     <template #left-panel>
       <span class="title">
         <h2>
           {{ grid.title ? grid.title : $t("buttons.newGrid") }}
         </h2>
-        <ModalOptions
-          :modelValue="grid"
-          @update-size="emit('size-update')"
-          @update:model-value="emit('update')"
-          @open="focus = nullCell"
-        />
+        <ModalOptions :modelValue="grid" @update-size="emit('size-update')" @update:model-value="emit('update')"
+          @open="focus = nullCell" />
       </span>
       <span>
         <n-button @click="onModeClick">
           {{ $t(`modes.${highlightMode}`) }}
         </n-button>
       </span>
-      <Suggestion
-        v-if="!focus.definition"
-        :point="focus"
-        :dir="dir"
-        :query="''"
-        :grid-id="grid.id"
-        :method="method"
-        :ordering="ordering"
-        :cellProbas="cellProbas"
-        :searchResult="searchResult"
-        :loading="isLoadingSuggestions"
-        @hover="onHover"
-        @click="onClick"
-        @dir="(d) => (dir = d)"
-        @mouseout="onMouseOut"
-        @methodswitch="
-          method =
-            methods[
-              (methods.findIndex((o) => o === method) + 1) % methods.length
-            ]
-        "
-        @orderswitch="
-          ordering =
-            orderings[
-              (orderings.findIndex((o) => o === ordering) + 1) %
-                orderings.length
-            ]
-        "
-      >
+      <Buttons v-model:dir="dir" v-model:method="method" v-model:ordering="ordering" :mode="highlightMode"></Buttons>
+      <Autofill v-if="highlightMode === 'autofill'" :grid="grid" />
+      <Suggestion v-else-if="!focus.definition" :point="focus" :dir="dir" :grid-id="grid.id" :method="method"
+        :ordering="ordering" :cellProbas="cellProbas" :searchResult="searchResult" :loading="isLoadingSuggestions"
+        @hover="onHover" @click="onClick" @mouseout="onMouseOut">
       </Suggestion>
+      <Definition v-else-if="focus.definition" :grid="grid" :focus="focus" :dir="dir" />
     </template>
     <template #body>
       <div class="container" ref="container">
         <div class="controls">
+          <n-button class="zoom-controls" @click="resetGrid">
+            Reset
+          </n-button>
           <span class="zoom-controls">
             Zoom
             <n-button @click="onZoomIn" circle>
@@ -65,47 +41,20 @@
             </n-button>
           </span>
         </div>
-        <SVGGrid
-          @focus="(cell) => (focus = cell)"
-          @hover="(cell) => (hoveredCell = cell)"
-          :grid="grid"
-          :focus="focus"
-          :dir="dir"
-          :style="style"
-          :zoom="1 / zoom"
-          :highlights="highlights"
-          class="svg-grid"
-          :export-options="{
-            ...defaultExportOptions,
-            texts: true,
-            highlight: true,
-          }"
-        ></SVGGrid>
-        <GridInput
-          :grid="grid"
-          :dir="dir"
-          :style="style"
-          :cell="focus"
-          :offset="offset"
-          :zoom="zoom"
-          @focus="(point) => (focus = point)"
-          @update="onGridUpdate()"
-          @keyup="onKeyUp"
-        >
-        </GridInput>
-        <GridHighlight
-          :grid="grid"
-          :style="style"
-          :cell="hoveredCell"
-          :validity="validity"
-          :cellProbas="cellProbas"
-          :zoom="zoom"
-          :mode="highlightMode"
-          :gridVersion="gridVersion"
-          :offset="offset"
-          :dir="dir"
-          @update="onGridUpdate()"
-        />
+        <div class="superpose">
+          <SVGGrid @focus="(cell) => (focus = cell)" @hover="(cell) => (hoveredCell = cell)" :grid="grid" :focus="focus"
+            :dir="dir" :style="style" :zoom="1 / zoom" :highlights="highlights" class="svg-grid" :export-options="{
+              ...defaultExportOptions,
+              texts: true,
+              highlight: true,
+            }"></SVGGrid>
+          <GridHighlight :grid="grid" :style="style" :cell="hoveredCell" :validity="validity" :cellProbas="cellProbas"
+            :zoom="zoom" :mode="highlightMode" :gridVersion="gridVersion" :offset="offset" :dir="dir"
+            @update="onGridUpdate()" />
+          <GridInput :grid="grid" :dir="dir" :style="style" :cell="focus" :offset="offset" :zoom="zoom"
+            @focus="(point) => (focus = point)" @update="onGridUpdate()" @keyup="onKeyUp">
+          </GridInput>
+        </div>
       </div>
     </template>
   </Layout>
@@ -126,7 +75,6 @@ import {
 import {
   AddCircleOutline,
   RemoveCircleOutline,
-  SwapVertical,
 } from "@vicons/ionicons5";
 import throttle from "lodash.throttle";
 import {
@@ -141,11 +89,14 @@ import {
 import Layout from "../layouts/Main.vue";
 import SVGGrid from "./svg-renderer/Grid.vue";
 import GridInput from "./svg-renderer/GridInput.vue";
-import { defaultExportOptions, Method, Ordering } from "../types";
+import { defaultExportOptions, Method, Mode, Ordering } from "../types";
 import ModalOptions from "./forms/ModalOptions.vue";
-import GridHighlight, { Mode } from "./svg-renderer/GridHighlight.vue";
-import Suggestion from "./Suggestion.vue";
-import { workerController } from "../search-worker/index";
+import Autofill from "./sidebars/Autofill.vue";
+import GridHighlight from "./svg-renderer/GridHighlight.vue";
+import Suggestion from "./sidebars/Suggestion.vue";
+import Definition from './sidebars/Definition.vue';
+import Buttons from './sidebars/Buttons.vue';
+import { workerController } from "../worker";
 /**
  * Component to edit a grid
  */
@@ -178,18 +129,28 @@ const gridVersion = ref(1);
 const container = ref(null as unknown as HTMLDivElement);
 const offset = ref<[number, number]>([-10, 0]);
 const method = ref<Method>("accurate");
-const methods = ref<Method[]>(["accurate", "simple"]);
 const ordering = ref<Ordering>("best");
 const orderings = ref<Ordering[]>(["best", "alpha", "inverse-alpha", "random"]);
 const zoom = ref(1);
 const highlights = ref(new Map());
-const highlightModes = ["normal", "check", "heatmap"] as Mode[];
+const highlightModes = ["normal", "check", "heatmap", 'autofill'] as Mode[];
 const highlightMode = ref<Mode>(highlightModes[2]);
 const cellProbas = ref<CellProba[][]>([]);
 const searchResult = ref<string[]>([]);
 const refreshingRun = ref(false);
 const refreshingSearch = ref(false);
 
+function resetGrid() {
+  props.grid.cells.forEach((row) => {
+    row.forEach((cell) => {
+      if (cell.definition) {
+        cell.arrows = ['none', 'none', 'none'];
+      }
+      // cell.text = '';
+    });
+  });
+  onGridUpdate();
+}
 function refreshCellProba() {
   refreshingRun.value = true;
   workerController.run(props.grid);
@@ -228,16 +189,8 @@ watchEffect(() => {
 });
 watch(method, () => {
   if (method.value === "accurate") {
-    if (ordering.value !== "best") {
-      ordering.value = "best";
-    }
-    orderings.value = ["best", "alpha", "inverse-alpha", "random"];
     return throttledRefresCellProba();
   }
-  if (ordering.value === "best") {
-    ordering.value = "alpha";
-  }
-  orderings.value = ["alpha", "inverse-alpha", "random"];
   throttledRefresSimpleSearch();
 });
 onMounted(() => {
@@ -247,7 +200,7 @@ onMounted(() => {
   throttledRefresValidity();
 });
 
-onBeforeUnmount(() => {});
+onBeforeUnmount(() => { });
 function onZoomIn() {
   zoom.value = zoom.value + 0.1;
 }
@@ -286,6 +239,7 @@ function onKeyUp(evt: KeyboardEvent) {
     dir.value = "horizontal";
     consumed = true;
   }
+  // TODO: check how to delegate this to Buttons.vue
   if (evt.key === ">" || evt.key === "<") {
     // ordering.value = ordering.value * -1;
     const ords = unref(orderings);
@@ -300,6 +254,8 @@ function onKeyUp(evt: KeyboardEvent) {
   // @ts-ignore
   evt.canceled = consumed;
 }
+watch([focus], () => {
+});
 watch([dir, validity, highlightMode], () => {
   if (highlightMode.value === "check" && validity.value) {
     const newMap = new Map();
@@ -351,15 +307,18 @@ const isLoadingSuggestions = computed(() => {
   box-sizing: border-box;
   margin-left: 10px;
 }
+
 .title {
   display: flex;
   justify-content: space-around;
   width: 100%;
 }
+
 .svg-grid {
   padding-right: 20px;
   padding-bottom: 20px;
 }
+
 .controls {
   position: fixed;
   bottom: 10px;
@@ -374,6 +333,7 @@ const isLoadingSuggestions = computed(() => {
   z-index: 100;
   pointer-events: none;
 }
+
 .zoom-controls {
   pointer-events: auto;
   background-color: #fff;
@@ -384,25 +344,23 @@ const isLoadingSuggestions = computed(() => {
   gap: 5px;
 }
 
-.unknown {
-  fill: rgba(252, 226, 42, 0.8);
-}
-.incomplete {
-  fill: rgba(214, 19, 85, 0.8);
-}
-.nodef {
-  fill: rgba(249, 74, 41, 0.8);
-}
-.noarrow {
-  fill: rgba(237, 43, 42, 0.8);
-}
 text.highlighted {
   fill: #000;
 }
+
 .text.suggested {
   fill: #777;
 }
-.text.highlighted > rect {
+
+.text.highlighted>rect {
   fill: #def;
+}
+
+.superpose {
+  display: grid;
+}
+
+.superpose>* {
+  grid-area: 1 / 1 / 1 / 1;
 }
 </style>
