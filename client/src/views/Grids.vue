@@ -30,7 +30,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
-import SVGGrid from "../components/svg-renderer/Grid.vue";
 import GridThumbnail from "../components/svg-renderer/GridThumbnail.vue";
 import ExportModal from "../components/ExportModal.vue";
 import ExportButton from "../components/ExportButton.vue";
@@ -145,5 +144,3 @@ onMounted(() => {
   max-height: 340px;
 }
 </style>
-
-../worker

@@ -1,4 +1,4 @@
-import { Direction, Grid, CellProba,  CellBest } from "grid";
+import { Direction, Grid, CellProba, CellBest } from "grid";
 import { dico, ACode } from "./dico";
 import { Tree, Node, intersect, mapToWords } from './tree';
 import { cantor } from "./math";
@@ -473,7 +473,7 @@ export function getCellProbasAccurate(grid: Grid) {
   };
 }
 
-function getHash(grid: Grid){
+function getHash(grid: Grid) {
   return grid.cells.reduce((acc, row) => acc + row.reduce((acc, cell) => acc + (cell.definition ? '#' : cell.text || ' '), '') + '\n', '');
 }
 

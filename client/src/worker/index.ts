@@ -129,9 +129,6 @@ class WorkerController extends EventEmitter<Events> {
   onMessage(workerId: number, event: MessageEvent) {
     const { type, data } = event.data;
     this.busy[workerId] = false;
-    // if (type === 'loaded') {
-    //   this.emit('locale-changed');
-    // }
     if (type === 'search-result') {
       this.emit('search-result', data);
     }
@@ -171,23 +168,18 @@ class WorkerController extends EventEmitter<Events> {
     this.removeAllListeners();
   }
 
-  private _fetchLocales() {
-    return fetch('/dico.zip')
+  private _fetchLocale(locale: string) {
+    return fetch(locale + '.zip')
       .then((response) => response.arrayBuffer())
-      .then((data) => new Promise<Record<string, string[]>>((resolve, reject) => {
+      .then((data) => new Promise<{ words: string[], definitions: string; }>((resolve, reject) => {
         fflate.unzip(new Uint8Array(data), (err, decompressed) => {
           if (err) {
             return reject(err);
           }
-          const locales = Object.entries(decompressed)
-            .reduce((acc, [path, value]) => {
-              const localName = path.split('/')[1];
-              if (!value.length || !localName.length) return acc;
-              if (!acc[localName]) { acc[localName] = []; }
-              acc[localName].push(new TextDecoder().decode(value).trim());
-              return acc;
-            }, {} as Record<string, string[]>);
-          resolve(locales);
+          return resolve({
+            words: new TextDecoder().decode(decompressed['dico.txt']).trim().split(','),
+            definitions: new TextDecoder().decode(decompressed['definitions.txt']).trim()
+          });
         });
       }));
   }
@@ -218,20 +210,14 @@ class WorkerController extends EventEmitter<Events> {
     this.locale = locale;
     this.emit('start-locale-change');
     this.loadingPromise = Promise.all([
-      this._fetchLocales(),
+      this._fetchLocale(locale),
       api.db.getWords() as Promise<string[]>,
       api.db.getBannedWords() as Promise<string[]>,
-      api.getDefinitions() as Promise<string>
     ])
-      .then(([locales, words, bannedWords, definitions]) => {
-        locales[locale]
-          .forEach(locale => {
-            const wordsInLocale = locale.split(',');
-            for (let i = 0; i < wordsInLocale.length; i++) {
-              words.push(wordsInLocale[i]);
-            }
-          });
-        // debugDico.load(words);
+      .then(([{ words, definitions }, userWords, bannedWords]) => {
+        for (let i = 0; i < userWords.length; i++) {
+          words.push(userWords[i]);
+        }
         return Promise.all([
           this.promisifiedCall({
             words, bannedWords
@@ -255,6 +241,7 @@ class WorkerController extends EventEmitter<Events> {
             return this.emit('locale-changed');
           })
           .catch((err) => {
+            this.emit('locale-changed');
             console.error(err);
           });
       });
