@@ -26,11 +26,9 @@
 import { defineProps, defineEmits, watch, ref, onMounted } from 'vue';
 import {
   ArrowDown,
-  ArrowUp,
   ArrowForward,
   Hammer,
   Flash,
-  ReturnUpBackOutline,
 } from "@vicons/ionicons5";
 import { Direction } from "grid";
 import { Method, Mode, Ordering } from "../../types";

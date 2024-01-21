@@ -5,7 +5,7 @@
     <template v-slot:left-panel>
       <div v-if="route.name === 'book'">
         <h3>{{ $t("nav.book") }}</h3>
-        <BookModal :bookId="route.hash" :style="style" :solutionsStyle="solutionsStyle" />
+        <BookModal :bookId="route.params.id as string" :style="style" :solutionsStyle="solutionsStyle" />
       </div>
       <h3>{{ $t("nav.grids") }}</h3>
       <ExportButton route="book-export" :query="exportQuery" />
