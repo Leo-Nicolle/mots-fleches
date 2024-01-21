@@ -139,11 +139,22 @@ function getNavChildren() {
         h(
           RouterLink,
           {
+            to: "/books",
+          },
+          { default: () => i18n.global.t("nav.books") }
+        ),
+      key: "go-to-books",
+    },
+    {
+      label: () =>
+        h(
+          RouterLink,
+          {
             to: "/grids",
           },
           { default: () => i18n.global.t("nav.grids") }
         ),
-      key: "go-back-home",
+      key: "go-to-grids",
     },
     {
       label: () =>

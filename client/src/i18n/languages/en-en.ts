@@ -7,7 +7,9 @@ export const lang = {
     solutions: "Solutions",
     words: "Words",
     about: "About",
-    fonts: "Fonts"
+    fonts: "Fonts",
+    book: "Book",
+    books: "Books",
   },
   buttons: {
     changeLanguage: "change language",
@@ -101,12 +103,17 @@ export const lang = {
     fontFamily: "Font family",
     fontWeight: "Font weight",
     offset: "Offset",
+    styles: "Styles",
+    solutionStyles: "Solution styles",
   },
   tooltips: {
     incomplete: "is incomplete",
     nodef: "has no definition",
     noarrow: "has no arrow",
     add: "Add {word} to dictionary",
+  },
+  modals: {
+    bookTitle: "Book",
   },
   alert: {
     wrongpassword: "Wrong password or email",

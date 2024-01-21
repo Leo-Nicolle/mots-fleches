@@ -7,7 +7,9 @@ export const lang = {
         solutions: "Solutions",
         words: "Mots",
         about: "A propos",
-        fonts: "Polices"
+        fonts: "Polices",
+        book: "Livre",
+        books: "Livres",
     },
     buttons: {
         changeLanguage: "Traduire",
@@ -28,7 +30,7 @@ export const lang = {
         uploadGrids: "Upload grilles",
         uploadWords: "Upload mots",
         dragdrop: "Drag & Drop vos fichiers ici (ou clickez)",
-        here: "ici", 
+        here: "ici",
     },
     suggestions: {
         results: "Résultats",
@@ -38,7 +40,7 @@ export const lang = {
         'no-vertical-arrow': 'Pas de flèche verticale ',
         'incomplete-word': 'Mot incomplet',
         'no-definition': 'Pas de définition',
-    },    
+    },
     titles: {
         newFont: "Nouvelle police",
     },
@@ -101,7 +103,8 @@ export const lang = {
         fontFamily: "Police",
         fontWeight: "Epaisseur",
         offset: "Décalage",
-
+        styles: "Styles",
+        solutionStyles: "Styles des solutions",
     },
     tooltips: {
         incomplete: "est incomplet",
@@ -111,6 +114,7 @@ export const lang = {
     },
     modals: {
         exportTitle: "Export",
+        bookTitle: "Livre",
     },
     alert: {
         wrongpassword: "Mot de passe ou email incorrect.",

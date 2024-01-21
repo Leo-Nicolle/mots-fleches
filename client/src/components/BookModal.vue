@@ -1,6 +1,6 @@
 <template>
   <n-button round @click="show">
-    {{ $t("buttons.bookModal") }}
+    {{ $t("forms.options") }}
   </n-button>
   <n-modal v-if="book && style && solutionsStyle" class="bookmodal" v-model:show="visible" preset="dialog" title="Book">
     <template #header>
@@ -14,7 +14,7 @@
         <n-form-item :label="$t('forms.styles')" path="book.styles">
           <n-select v-model:value="book.style" />
         </n-form-item>
-        <n-form-item :label="$t('forms.solutionStyle')" path="book.solutionStyle">
+        <n-form-item :label="$t('forms.solutionStyles')" path="book.solutionStyle">
           <n-select v-model:value="book.solutionStyle" />
         </n-form-item>
         <n-form-item :label="$t('forms.comment')" path="book.comment">

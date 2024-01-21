@@ -7,7 +7,9 @@ export const lang = {
         solutions: "Soluciones",
         words: "Palabras",
         about: "Acerca de",
-        fonts: "Fuentes"
+        fonts: "Fuentes",
+        book: "Libro",
+        books: "Libros",
     },
     buttons: {
         changeLanguage: "Cambiar idioma",
@@ -101,12 +103,17 @@ export const lang = {
         fontFamily: "Fuente",
         fontWeight: "Peso",
         offset: "Desplazamiento",
+        styles: 'Estilos',
+        solutionStyles: "Estilos de la solución",
     },
     tooltips: {
         incomplete: "esta incompleto",
         nodef: "no tiene definición",
         noarrow: "no tiene flecha",
         add: "Añadir {word} al diccionario",
+    },
+    modals: {
+        bookTitle: "Libro",
     },
     alert: {
         wrongpassword: "Contraseña incorrecta",
