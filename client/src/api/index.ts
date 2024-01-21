@@ -40,6 +40,39 @@ class API {
       .then((grid) => grid ? Grid.unserialize(JSON.stringify(grid)) : undefined);
   }
 
+  pushGridToBook(bookId: string, gridId: string) {
+    return this.db.getBook(bookId)
+      .then((book) => {
+        if (book) {
+          book.grids.push(gridId);
+          return this.db.updateBook(book);
+        }
+        return Promise.reject('book not found');
+      });
+  }
+
+  deleteGridFromBook(bookId: string, gridId: string) {
+    return this.db.getBook(bookId)
+      .then((book) => {
+        if (book) {
+          book.grids = book.grids.filter(id => id !== gridId);
+          return this.db.updateBook(book);
+        }
+        return Promise.reject('book not found');
+      });
+  }
+  deleteGridsFromBook(bookId: string, gridIds: string[]) {
+    return this.db.getBook(bookId)
+      .then((book) => {
+        if (book) {
+          const idsSet = new Set(gridIds);
+          book.grids = book.grids.filter(id => !idsSet.has(id));
+          return this.db.updateBook(book);
+        }
+        return Promise.reject('book not found');
+      });
+  }
+
   getUserDefinitions(gridids?: string[]) {
     const res = new Map<string, Set<string>>();
     const idsSet = new Set(gridids || []);

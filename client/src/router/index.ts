@@ -20,9 +20,19 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/Grids.vue')
   },
   {
+    path: '/books',
+    name: 'books',
+    component: () => import('../views/Books.vue')
+  },
+  {
     path: '/grid/:id',
     name: 'grid',
     component: () => import('../views/editors/GridEditor.vue')
+  },
+  {
+    path: '/book/:id',
+    name: 'book',
+    component: () => import('../views/Book.vue')
   },
   {
     path: '/grid-export/:id',
@@ -112,7 +122,7 @@ router.beforeEach(async (to, from) => {
     !isSignedin &&
     to.meta.requiresAuth !== false
   ) {
-    return { name: 'login', query: {redirect: to.name} };
+    return { name: 'login', query: { redirect: to.name } };
   }
 });
 

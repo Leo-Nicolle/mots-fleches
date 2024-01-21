@@ -3,6 +3,10 @@
     :onClick="(grid) => $router.push(`/grid/${grid.id}`)" @select="(s) => (selected = s)" :has-create-button="true"
     :has-delete-button="true">
     <template v-slot:left-panel>
+      <div v-if="route.name === 'book'">
+        <h3>{{ $t("nav.book") }}</h3>
+        <BookModal :bookId="route.hash" :style="style" :solutionsStyle="solutionsStyle" />
+      </div>
       <h3>{{ $t("nav.grids") }}</h3>
       <ExportButton route="book-export" :query="exportQuery" />
       <ExportModal :grids="selected.length ? selected : grids" :style="style" :solutionsStyle="solutionsStyle" />
@@ -29,13 +33,14 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import GridThumbnail from "../components/svg-renderer/GridThumbnail.vue";
 import ExportModal from "../components/ExportModal.vue";
+import BookModal from "../components/BookModal.vue";
 import ExportButton from "../components/ExportButton.vue";
 import Layout from "../layouts/GridLayout.vue";
 import UploadModal from "../components/UploadModal.vue";
-import { Grid, GridStyle, SolutionStyle } from "grid";
+import { Grid, GridState, GridStyle, SolutionStyle } from "grid";
 import generate from "../js/maze-generator";
 import { api } from "../api";
 import { workerController } from "../worker";
@@ -43,6 +48,8 @@ import { workerController } from "../worker";
  * View to display all grids in a grid layout
  */
 const router = useRouter();
+const route = useRoute();
+
 const grids = ref<Grid[]>([]);
 const style = ref<GridStyle>();
 const solutionsStyle = ref<SolutionStyle>();
@@ -54,6 +61,29 @@ const exportQuery = computed(() => {
   return { ids: selected.value.map((s) => s.id).join(",") };
 });
 function fetch() {
+  if (route.name === 'book') {
+    return api
+      .db.getBook(route.params.id as string)
+      .then((book) => Promise.all([
+        Promise.all(book!.grids.map(id => api.db.getGrid(id))),
+        api.db.getStyle(book!.style),
+        api.db.getStyle(book!.solutionStyle)
+      ]))
+      .then(([gds, sts, sls]) => {
+        grids.value = (gds as GridState[])
+          .map((g) => Grid.unserialize(JSON.stringify(g)))
+          .sort((a, b) => b.created - a.created);
+        style.value = sts!;
+        solutionsStyle.value = sls as SolutionStyle;
+        exporting.value = true;
+        exportingG.value = 0;
+        thumbnails.value = [];
+      })
+      .catch((e) => {
+        console.error("E", e);
+      });
+  }
+
   return api
     .getGrids()
     .then((gs) => {
@@ -80,9 +110,15 @@ function onExported(str: string) {
 }
 
 function onDelete() {
-  return Promise.all(
-    selected.value.map((grid) => api.db.deleteGrid(grid.id))
-  ).then(() => fetch());
+  const ids = selected.value.map((grid) => grid.id);
+  const promise = route.name === 'book'
+    ? api.deleteGridsFromBook(route.params.id as string, ids)
+    : Promise.resolve();
+  return promise
+    .then(() => Promise.all(
+      ids.map((id) => api.db.deleteGrid(id)))
+    )
+    .then(() => fetch());
 }
 function download() {
   const toDl = selected.value.length ? selected.value : grids.value;
@@ -113,6 +149,11 @@ function createGrid() {
       generate({ grid: newGrid, distribution });
     })
     .then(() => api.db.pushGrid(newGrid))
+    .then(gridId => {
+      if (route.name === 'book') {
+        return api.pushGridToBook(route.params.id as string, gridId);
+      }
+    })
     .then(() => fetch());
 }
 
