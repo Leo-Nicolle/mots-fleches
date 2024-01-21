@@ -9,7 +9,7 @@ import {
 } from 'grid';
 import { Database } from './db';
 import { mergeOptionsWithDefaults } from './utils';
-import { Font } from './types';
+import { Book, Font } from './types';
 
 export interface MotsFlexDB extends DBSchema {
   grids: {
@@ -37,11 +37,16 @@ export interface MotsFlexDB extends DBSchema {
     key: string;
     indexes: { 'by-word': string; };
   };
+  books: {
+    value: Book;
+    key: string;
+    indexes: { 'by-id': string; };
+  };
 }
 
 async function create() {
   let promise: Promise<unknown> = Promise.resolve();
-  const db = await openDB<MotsFlexDB>('mots-flex-db', 7, {
+  const db = await openDB<MotsFlexDB>('mots-flex-db', 8, {
     upgrade(db, old, _, transaction) {
       // @ts-ignore
       if (db.objectStoreNames.contains('style')) {
@@ -77,6 +82,12 @@ async function create() {
           keyPath: 'id',
         });
         gridStore.createIndex('by-word', 'id');
+      }
+      if (!db.objectStoreNames.contains('books')) {
+        const gridStore = db.createObjectStore('books', {
+          keyPath: 'id',
+        });
+        gridStore.createIndex('by-id', 'id');
       }
 
       // @ts-ignore
@@ -175,7 +186,6 @@ export class Idatabase extends Database {
     ).then((grid) => {
       return grid;
     });
-
   }
 
   async pushGrid(grid: Grid) {
@@ -199,6 +209,30 @@ export class Idatabase extends Database {
   async getGrid(gridId: string) {
     return await this.loadingPromise.then((db) =>
       db.get('grids', gridId)
+    );
+  }
+
+  async getBooks() {
+    return await this.loadingPromise.then((db) =>
+      db.getAllFromIndex('books', 'by-id')
+    );
+  }
+  async pushBook(book: Book) {
+    return await this.loadingPromise.then((db) =>
+      db.put('books', book)
+    );
+  }
+  async updateBook(book: Book) {
+    return this.pushBook(book);
+  }
+  async deleteBook(bookId: string) {
+    return await this.loadingPromise.then((db) =>
+      db.delete('books', bookId)
+    );
+  }
+  async getBook(bookId: string) {
+    return await this.loadingPromise.then((db) =>
+      db.get('books', bookId)
     );
   }
 
