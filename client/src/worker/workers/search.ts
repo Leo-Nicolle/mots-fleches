@@ -7,9 +7,7 @@ onmessage = function (e) {
   const { type, data } = e.data;
   if (e.data.words) {
     const { words, bannedWords } = e.data as { words: string[]; bannedWords: string[]; };
-    console.time('words-load');
     wordsSearch.load(words, bannedWords);
-    console.timeEnd('words-load');
     return this.postMessage({ type: 'loaded' });
   }
   if (type === 'distribution') {

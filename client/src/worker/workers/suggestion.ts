@@ -15,9 +15,7 @@ onmessage = function (e) {
       flags: ArrayBuffer;
     };
     options.sharedArray = new Int8Array(flags);
-    console.time('dico-load');
     dico.load(words, bannedWords);
-    console.timeEnd('dico-load');
     return this.postMessage({ type: 'loaded' });
   }
   if (type === 'run') {
