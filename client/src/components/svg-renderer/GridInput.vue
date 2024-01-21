@@ -204,6 +204,7 @@ function onKeyup(evt: KeyboardEvent) {
  * Updates the arrows of the cell
  */
 function setArrow(dir: ArrowDir, index: number) {
+  debugger;
   Grid.setArrow(props.cell, index, dir);
   container.value.querySelector("textarea")?.focus();
   emit("update");
