@@ -3,7 +3,6 @@ import { REMOTE_ADDRESS } from "./api-key.mjs";
 import { spawn } from 'child_process';
 
 function run(cmd) {
-  console.log(cmd);
   return new Promise(function (resolve, reject) {
     const [c, ...args] = cmd.split(' ');
     const sp = spawn(c, args);
@@ -23,7 +22,7 @@ Deploy utility script:
  -h --help: print help
  -w --fast -f deploy only .js,.css,.html files
  -a --all deploy everything
-`
+`;
 
 function main() {
 
@@ -41,12 +40,11 @@ function main() {
 
   let blob = [];
   if (action === 'help') {
-    return console.log(help)
+    return console.log(help);
   } else if (action === 'website') {
-    blob = ['dist/*.html', 'dist/*.js', 'dist/*.css']
-    // blob = `'./dist/*.{html,css,js}'`
+    blob = ['dist/public/index.html', 'dist/public/assets'];
   } else if (action === 'all') {
-    blob = [`dist/*`]
+    blob = [`dist`];
   }
 
   return Promise.all(blob.map(b => run(`scp -r ${b} ${REMOTE_ADDRESS}`)));
