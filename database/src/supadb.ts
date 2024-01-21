@@ -1,6 +1,6 @@
 import { Grid, GridStyle, GridState, defaultStyles, defaultSolutionStyle } from "grid";
 import { Database } from "./db";
-import { SupabaseClient, createClient } from '@supabase/supabase-js'
+import { SupabaseClient, createClient } from '@supabase/supabase-js';
 import { Font, SBSchema } from "./types";
 
 
@@ -22,7 +22,7 @@ export class SupaDB extends Database {
         persistSession: true,
         detectSessionInUrl: false,
       }
-    })
+    });
     this.supabase.auth.getSession()
       .then(({ data }) => {
         if (!data) return;
@@ -49,7 +49,7 @@ export class SupaDB extends Database {
 
   async getGrids() {
     const { data } = await this.supabase.from('Grids').select();
-    return data!.map(({ data }) => data)
+    return data!.map(({ data }) => data);
   }
 
   async pushGrid(g: Grid) {
@@ -173,34 +173,6 @@ export class SupaDB extends Database {
     });
   }
 
-  async getDefinitions() {
-    const { data } = await this.supabase.from('Definitions').select();
-    return data!.flatMap(({ data }) => data);
-  }
-
-  async getDefinition(id: string) {
-    const words = await this.getDefinitions();
-    return words.find(w => w === id);
-  }
-
-  async pushDefinition(word: string) {
-    const words = await this.getDefinitions();
-    words.push(word);
-    await this.supabase.from('Definitions').upsert({
-      userid: this.userid,
-      data: words,
-    });
-    return word;
-  }
-
-  async deleteDefinition(wordId: string) {
-    const words = (await this.getWords()).filter(w => w !== wordId);
-    await this.supabase.from('Words').upsert({
-      userid: this.userid,
-      data: words,
-    });
-  }
-
   async getFonts() {
     const { data } = await this.supabase.from('Fonts').select();
     return data!.flatMap(({ data }) => data);
@@ -230,7 +202,7 @@ export class SupaDB extends Database {
   }
 
   async isSignedIn() {
-    const { data } = await this.supabase.auth.getSession()
+    const { data } = await this.supabase.auth.getSession();
     if (!data) return false;
     return !!data.session && !!data.session.access_token;
   }

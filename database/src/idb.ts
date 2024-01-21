@@ -33,15 +33,10 @@ export interface MotsFlexDB extends DBSchema {
     indexes: { 'by-id': string; };
   },
   bannedwords: {
-    value: {id: string; };
+    value: { id: string; };
     key: string;
-    indexes: {'by-word': string};
-  }
-  definitions: {
-    value: {id: string; def: string };
-    key: string;
-    indexes: {'by-word': string};
-  }
+    indexes: { 'by-word': string; };
+  };
 }
 
 async function create() {
@@ -79,12 +74,6 @@ async function create() {
       }
       if (!db.objectStoreNames.contains('bannedwords')) {
         const gridStore = db.createObjectStore('bannedwords', {
-          keyPath: 'id',
-        });
-        gridStore.createIndex('by-word', 'id');
-      }
-      if (!db.objectStoreNames.contains('definitions')) {
-        const gridStore = db.createObjectStore('definitions', {
           keyPath: 'id',
         });
         gridStore.createIndex('by-word', 'id');
@@ -259,29 +248,6 @@ export class Idatabase extends Database {
       db.delete('bannedwords', wordId)
     );
   }
-  async getDefinitions() {
-    return await this.loadingPromise.then((db) =>
-      db.getAllFromIndex('definitions', 'by-word')
-    ).then((definitions) =>
-      definitions.map(({ id }) => id)
-    );
-  }
-  async getDefinition(wordId: string) {
-    return await this.loadingPromise.then((db) =>
-      db.get('definitions', wordId)
-    ).then((word) => word ? word.def : undefined);
-  }
-  async pushDefinition(word: string, def: string) {
-    return await this.loadingPromise.then((db) =>
-      db.put('definitions', { id: word, def })
-    );
-  }
-  async deleteDefinition(wordId: string) {
-    return await this.loadingPromise.then((db) =>
-      db.delete('definitions', wordId)
-    );
-  }
-  
   async getWords() {
     return await this.loadingPromise.then((db) =>
       db.getAllFromIndex('words', 'by-word')
