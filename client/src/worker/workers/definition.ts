@@ -3,11 +3,9 @@ import { definitionSearch } from '../utils/definition-search';
 
 onmessage = function (e) {
   const { type, data } = e.data;
-  if (e.data.definitions) {
+  if (e.data.definitions !== undefined) {
     const { definitions } = e.data as { definitions: string; };
-    console.time('definitions-load');
     definitionSearch.loadDefinitions(definitions);
-    console.timeEnd('definitions-load');
     return this.postMessage({ type: 'loaded' });
   }
   if (type === 'searchdefinition') {

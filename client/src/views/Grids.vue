@@ -15,10 +15,10 @@
       </span>
     </template>
     <template #card-body="{ elt, i }">
-      <div class="preview">
+      <a class="preview" :href="`#/grid/${elt.id}`">
         <img :src="thumbnails[i] || '/placeholder.png'" />
         {{ thumbnails[i] }}
-      </div>
+      </a>
       {{ elt.comment ? elt.comment : $t("buttons.newGrid") }}
     </template>
     <template v-slot:outside>
