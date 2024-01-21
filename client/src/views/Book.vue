@@ -3,10 +3,9 @@
     :onClick="(grid) => $router.push(`/grid/${grid.id}`)" @select="(s) => (selected = s)" :has-create-button="true"
     :has-delete-button="true">
     <template v-slot:left-panel>
-      <div v-if="route.name === 'book'">
-        <h3>{{ $t("nav.book") }}</h3>
-        <BookModal :bookId="route.params.id as string" :style="style" :solutionsStyle="solutionsStyle" />
-      </div>
+      <h3 v-if="route.name === 'book'">{{ $t("nav.book") }}</h3>
+      <BookModal v-if="route.name === 'book'" :bookId="route.params.id as string" :style="style"
+        :solutionsStyle="solutionsStyle" />
       <h3>{{ $t("nav.grids") }}</h3>
       <ExportButton route="book-export" :query="exportQuery" />
       <ExportModal :grids="selected.length ? selected : grids" :style="style" :solutionsStyle="solutionsStyle" />
