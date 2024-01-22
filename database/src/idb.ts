@@ -6,6 +6,7 @@ import {
   isSolutionStyle,
   Font as GridFont,
   defaultTextStyle,
+  defaultLineSpacings
 } from 'grid';
 import { Database } from './db';
 import { mergeOptionsWithDefaults } from './utils';
@@ -41,7 +42,7 @@ export interface MotsFlexDB extends DBSchema {
 
 async function create() {
   let promise: Promise<unknown> = Promise.resolve();
-  const db = await openDB<MotsFlexDB>('mots-flex-db', 7, {
+  const db = await openDB<MotsFlexDB>('mots-flex-db', 13, {
     upgrade(db, old, _, transaction) {
       // @ts-ignore
       if (db.objectStoreNames.contains('style')) {
@@ -131,15 +132,25 @@ async function create() {
       }
       if (old <= 6) {
         const styleStore = transaction.objectStore('styles');
-        db.deleteObjectStore('fonts');
-        const fontStore = db.createObjectStore('fonts', {
-          keyPath: 'family',
-        });
-        fontStore.createIndex('by-id', 'family');
         promise = promise
           .then(() => styleStore.getAll())
           .then(styles => Promise.all(styles.map(style => {
+            // @ts-ignore
             style.solutions = { ...defaultTextStyle, size: 1, top: 0 };
+            return styleStore.put(style as GridStyle);
+          })));
+      }
+      if (old <= 12) {
+        debugger;
+        const styleStore = transaction.objectStore('styles');
+        promise = promise
+          .then(() => styleStore.getAll())
+          .then(styles => Promise.all(styles.map(style => {
+            // @ts-ignore
+            delete style.solutions.top;
+            style.solutions.alignmentBaseline = 'middle';
+            style.solutions.offset = 0;
+            style.definition.lineSpacings = JSON.parse(JSON.stringify(defaultLineSpacings));
             return styleStore.put(style as GridStyle);
           })));
       }

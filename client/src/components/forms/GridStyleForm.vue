@@ -29,16 +29,12 @@
       </div>
       <h3>{{ $t("forms.solutions") }}</h3>
       <FontSelector v-model="value.solutions" role-prefix="solutions" />
-      <n-form-item :label="$t('forms.offset')" path="top">
-        <n-input-number v-model:value="value.solutions.top" :step="0.5" :precision="1" role="solutions-top" />
-      </n-form-item>
+      <AlignmentSelect v-model="value.solutions" prefix="solutions" />
       <div v-if="definition">
         <h3>{{ $t("forms.definitions") }}</h3>
         <FontSelector v-model="value.definition" rolePrefix="definition" />
-        <!-- <n-form-item :label="$t('forms.offset')" path="definition.offset"><n-form-item :label="$t('forms.offset')"
-            path="definition.offset">
-            <n-input-number v-model:value="value.definition.offset" :step="0.2" :precision="1" role="definitions-offset" />
-          </n-form-item> -->
+        <AlignmentSelect v-model="value.definition" prefix="definition" />
+        <LineSpacing v-model="value" />
         <n-form-item :label="$t('forms.backgroundColor')" path="definition.backgroundColor">
           <n-color-picker role="definition-background-color" v-model:value="value.definition.backgroundColor"
             :show-alpha="false" size="small" />
@@ -66,6 +62,8 @@ import { useModel } from "../../js/useModel";
 import { GridStyle } from "grid";
 import FormatPicker from "./FormatPicker.vue";
 import FontSelector from "../fonts/FontSelector.vue";
+import AlignmentSelect from "./AlignmentSelect.vue";
+import LineSpacing from "./LineSpacing.vue";
 /**
  * Form to modify GridStyle.
  */

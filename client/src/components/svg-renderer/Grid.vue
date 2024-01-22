@@ -16,12 +16,13 @@
             : 'none'
             " :class="highlights ? highlights.get(`${cell.y}-${cell.x}`) : ''" />
         <g v-if="cell.definition && exportOptions.definitions">
-          <text v-for="(sp, k) in lines(cell)" :key="k" :line-height="defSize" :font-size="defSize"
-            :font-family="defFontFamily" :font-weight="defFontWeight" :fill="defColor" v-bind="sp">
+          <text v-for="(sp, k) in lines(cell)" :key="k" :line-height="defSize" :font-size="defSize" :dy="offsetDef"
+            :alignment-baseline="alignBsDef" :font-family="defFontFamily" :font-weight="defFontWeight" :fill="defColor"
+            v-bind="sp">
             {{ sp.text }}
           </text>
         </g>
-        <text :x="xText(cell)" :y="yText(cell) + textSize / 2" alignment-baseline="central" dominant-baseline="center"
+        <text :x="xText(cell)" :y="yText(cell) + textSize / 2 + offset" :alignment-baseline="alignBs"
           :font-family="textFontFamily" :font-weight="textFontWeight" :fill="textFontColor" :font-size="textSize"
           v-else-if="!cell.definition && exportOptions.texts">
           {{ cell.text || cell.suggestion }}
@@ -139,6 +140,10 @@ const lineColor = computed(() => props.style.grid.borderColor);
 const spaceStroke = computed(() => props.style.grid.spaceSize);
 const outerLineStroke = computed(() => props.style.grid.outerBorderSize);
 const outerLineColor = computed(() => props.style.grid.outerBorderColor);
+const alignBs = computed(() => props.style.solutions.alignmentBaseline);
+const offset = computed(() => props.style.solutions.offset);
+const alignBsDef = computed(() => props.style.definition.alignmentBaseline);
+const offsetDef = computed(() => props.style.definition.offset);
 const defSize = computed(
   () => (props.style.grid.cellSize / 4) * props.style.definition.size
 );
@@ -151,7 +156,6 @@ const textSize = computed(() => {
 const textFontFamily = computed(() => props.style.solutions.family);
 const textFontWeight = computed(() => props.style.solutions.weight);
 const textFontColor = computed(() => props.style.solutions.color);
-const textTopOffset = computed(() => props.style.solutions.top);
 const defFontFamily = computed(() => `${props.style.definition.family}`);
 const defFontWeight = computed(() => `${props.style.definition.weight}`);
 

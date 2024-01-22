@@ -56,7 +56,23 @@ export type TextStyle<T = string> = Font & {
    * Text color
    */
   color: string;
+  /**
+   * Text alignment
+   */
 };
+export type AlignementBaseline = 'auto' | 'baseline' | 'before-edge' | 'text-before-edge' | 'middle' | 'central' | 'after-edge' | 'text-top' | 'text-after-edge' | 'ideographic' | 'alphabetic' | 'hanging' | 'mathematical' | 'top' | 'center' | 'bottom';
+export type LineSpacings = [
+  [number],
+  [number, number],
+  [number, number, number],
+  [number, number, number, number],
+  [number, number],
+  [number, number, number],
+  [number, number, number],
+  [number, number, number, number],
+  [number, number, number, number],
+  [number, number, number, number],
+];
 export type Cell = {
   /**
    * X position of the cell
@@ -175,12 +191,16 @@ export type GridStyle = {
    * Definition style
    */
   definition: TextStyle<number> & {
+    lineSpacings: LineSpacings;
     backgroundColor: string;
   };
   /**
   * Style of the solutions within the grid
   */
-  solutions: TextStyle<number> & { top: number; };
+  solutions: TextStyle<number> & {
+    offset: number;
+    alignmentBaseline: AlignementBaseline;
+  };
   /**
    * Arrow style
    */
@@ -243,6 +263,18 @@ export const defaultPaginationStyle: PaginationStyle = {
     left: '1rem',
   }
 };
+export const defaultLineSpacings: LineSpacings = [
+  [0],
+  [0, 0],
+  [0, 0, 0],
+  [0, 0, 0, 0],
+  [0, 0],
+  [0, 0, 0],
+  [0, 0, 0],
+  [0, 0, 0, 0],
+  [0, 0, 0, 0],
+  [0, 0, 0, 0],
+];
 
 export const defaultStyles: GridStyle = {
   id: 'default',
@@ -257,11 +289,13 @@ export const defaultStyles: GridStyle = {
   },
   solutions: {
     ...defaultTextStyle,
-    size: 1,
-    top: 0
+    alignmentBaseline: 'middle',
+    offset: 0,
+    size: 1
   },
   definition: {
     ...defaultTextStyle,
+    lineSpacings: defaultLineSpacings,
     size: 12,
     backgroundColor: "#ccc",
   },
