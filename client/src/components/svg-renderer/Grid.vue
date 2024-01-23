@@ -16,9 +16,8 @@
             : 'none'
             " :class="highlights ? highlights.get(`${cell.y}-${cell.x}`) : ''" />
         <g v-if="cell.definition && exportOptions.definitions">
-          <text v-for="(sp, k) in lines(cell)" :key="k" :line-height="defSize" :font-size="defSize" :dy="offsetDef"
-            :alignment-baseline="alignBsDef" :font-family="defFontFamily" :font-weight="defFontWeight" :fill="defColor"
-            v-bind="sp">
+          <text v-for="(sp, k) in lines(cell)" :key="k" :line-height="defSize" :font-size="defSize"
+            :font-family="defFontFamily" :font-weight="defFontWeight" :fill="defColor" v-bind="sp">
             {{ sp.text }}
           </text>
         </g>
@@ -82,9 +81,10 @@ import {
   ArrowDir,
   SolutionStyle,
   isSolutionStyle,
+  lineCases,
 } from "grid";
 import { ExportOptions } from "../../types";
-import { getCellClass } from "../../js/utils";
+import { getCellClass, getOffsetY } from "../../js/utils";
 /**
  * Component to render a grid as an SVG
  */
@@ -142,8 +142,6 @@ const outerLineStroke = computed(() => props.style.grid.outerBorderSize);
 const outerLineColor = computed(() => props.style.grid.outerBorderColor);
 const alignBs = computed(() => props.style.solutions.alignmentBaseline);
 const offset = computed(() => props.style.solutions.offset);
-const alignBsDef = computed(() => props.style.definition.alignmentBaseline);
-const offsetDef = computed(() => props.style.definition.offset);
 const defSize = computed(
   () => (props.style.grid.cellSize / 4) * props.style.definition.size
 );
@@ -299,9 +297,11 @@ function lines(cell: Cell) {
   const fourth = cellHeight / 4;
   const freeSpace = Math.max(0, cellHeight - (+splited * borderSize) - ln * fourth)
     / (ln + 1);
+  const oys = getOffsetY(cell.text, props.style.definition.lineSpacings);
   return lines.map((line, i, arr) => {
     const y =
       cell.y * cellAndBorderWidth(props.style)
+      + oys[i]
       + freeSpace * (i + 1)
       + i * fourth
       + (splited && i >= split) * (borderSize);

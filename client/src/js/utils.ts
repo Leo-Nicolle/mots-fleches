@@ -1,4 +1,4 @@
-import { Cell, Format } from "grid";
+import { Cell, Format, LineSpacings, lineCases } from "grid";
 import { NIcon } from "naive-ui";
 import { h, Component } from "vue";
 import { RouteLocationNormalizedLoaded } from "vue-router";
@@ -57,4 +57,9 @@ export function getSizeNoPadding(elt: HTMLDivElement) {
     height: elt.clientHeight - parseFloat(computedStyle.paddingTop) - parseFloat(computedStyle.paddingBottom),
     width: elt.clientWidth - parseFloat(computedStyle.paddingLeft) - parseFloat(computedStyle.paddingRight),
   };
+}
+const regs = lineCases
+  .map((c) => new RegExp(c.replaceAll('-', '[^\n]+')));
+export function getOffsetY(txt: string, spacings: LineSpacings) {
+  return spacings[regs.reduce((acc, e, i) => txt.match(e) ? i : acc, 0)];
 }

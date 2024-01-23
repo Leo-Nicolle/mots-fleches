@@ -28,7 +28,7 @@ export const lang = {
         uploadGrids: "Upload grilles",
         uploadWords: "Upload mots",
         dragdrop: "Drag & Drop vos fichiers ici (ou clickez)",
-        here: "ici", 
+        here: "ici",
     },
     suggestions: {
         results: "Résultats",
@@ -38,7 +38,7 @@ export const lang = {
         'no-vertical-arrow': 'Pas de flèche verticale ',
         'incomplete-word': 'Mot incomplet',
         'no-definition': 'Pas de définition',
-    },    
+    },
     titles: {
         newFont: "Nouvelle police",
     },
@@ -101,7 +101,10 @@ export const lang = {
         fontFamily: "Police",
         fontWeight: "Epaisseur",
         offset: "Décalage",
-
+        line: 'Ligne',
+        lineSpacing: "Interlignage",
+        baselineShift: 'Décalage',
+        alignmentBaseline: 'Alignement',
     },
     tooltips: {
         incomplete: "est incomplet",

@@ -60,7 +60,7 @@ export type TextStyle<T = string> = Font & {
    * Text alignment
    */
 };
-export type AlignementBaseline = 'auto' | 'baseline' | 'before-edge' | 'text-before-edge' | 'middle' | 'central' | 'after-edge' | 'text-top' | 'text-after-edge' | 'ideographic' | 'alphabetic' | 'hanging' | 'mathematical' | 'top' | 'center' | 'bottom';
+export type AlignementBaseline = "auto" | "baseline" | "before-edge" | "text-before-edge" | "middle" | "central" | "after-edge" | "text-after-edge" | "ideographic" | "alphabetic" | "hanging" | "mathematical" | "inherit";
 export type LineSpacings = [
   [number],
   [number, number],
@@ -263,6 +263,18 @@ export const defaultPaginationStyle: PaginationStyle = {
     left: '1rem',
   }
 };
+export const lineCases: string[] = [
+  '-',
+  '-\n-',
+  '-\n-\n-',
+  '-\n-\n-\n-',
+  '-\n\n-',
+  '-\n\n-\n-',
+  '-\n-\n\n-',
+  '-\n\n-\n-\n-',
+  '-\n-\n\n-\n-',
+  '-\n-\n-\n\n-',
+];
 export const defaultLineSpacings: LineSpacings = [
   [0],
   [0, 0],

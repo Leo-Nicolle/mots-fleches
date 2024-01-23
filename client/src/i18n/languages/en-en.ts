@@ -101,6 +101,9 @@ export const lang = {
     fontFamily: "Font family",
     fontWeight: "Font weight",
     offset: "Offset",
+    lineSpacing: "Line spacing",
+    baselineShift: 'Baseline',
+    alignmentBaseline: 'Alignment',
   },
   tooltips: {
     incomplete: "is incomplete",

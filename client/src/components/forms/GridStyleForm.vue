@@ -29,12 +29,13 @@
       </div>
       <h3>{{ $t("forms.solutions") }}</h3>
       <FontSelector v-model="value.solutions" role-prefix="solutions" />
-      <AlignmentSelect v-model="value.solutions" prefix="solutions" />
+      <AlignmentSelect v-model="value.solutions" role-prefix="solutions" />
       <div v-if="definition">
         <h3>{{ $t("forms.definitions") }}</h3>
         <FontSelector v-model="value.definition" rolePrefix="definition" />
-        <AlignmentSelect v-model="value.definition" prefix="definition" />
-        <LineSpacing v-model="value" />
+        <n-form-item :label="$t('forms.lineSpacing')" path="definition.lineSpacing">
+          <LineSpacing v-model="value.definition.lineSpacings" :style="value" />
+        </n-form-item>
         <n-form-item :label="$t('forms.backgroundColor')" path="definition.backgroundColor">
           <n-color-picker role="definition-background-color" v-model:value="value.definition.backgroundColor"
             :show-alpha="false" size="small" />

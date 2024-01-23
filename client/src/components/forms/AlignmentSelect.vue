@@ -7,21 +7,19 @@
   </n-form-item>
 </template>
 <script setup lang="ts">
-import { SVGTextStyle } from 'grid';
+import { GridStyle } from 'grid';
 import { ref } from 'vue';
 
 const alignmentBaselineOptions = ref([
-  'auto', 'baseline', 'before-edge',
-  'text-before-edge',
-  'middle', 'central', 'after-edge',
-  'text-top', 'text-after-edge', 'ideographic',
-  'alphabetic', 'hanging', 'mathematical',
-  'top', 'center', 'bottom'
+  "auto", "baseline", "before-edge", "text-before-edge",
+  "middle", "central", "after-edge", "text-after-edge",
+  "ideographic", "alphabetic", "hanging", "mathematical",
+  "inherit"
 ].map(e => ({ label: e, value: e })));
 
 const props = defineProps<{
   /** The format to edit */
-  modelValue: SVGTextStyle;
+  modelValue: GridStyle['solutions'];
   prefix: string;
 }>();
 

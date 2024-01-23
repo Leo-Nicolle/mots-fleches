@@ -42,7 +42,7 @@ export interface MotsFlexDB extends DBSchema {
 
 async function create() {
   let promise: Promise<unknown> = Promise.resolve();
-  const db = await openDB<MotsFlexDB>('mots-flex-db', 13, {
+  const db = await openDB<MotsFlexDB>('mots-flex-db', 8, {
     upgrade(db, old, _, transaction) {
       // @ts-ignore
       if (db.objectStoreNames.contains('style')) {
@@ -62,10 +62,10 @@ async function create() {
         wordStore.createIndex('by-word', 'id');
       }
       if (!db.objectStoreNames.contains('styles')) {
-        const optionStore = db.createObjectStore('styles', {
+        const stylesStore = db.createObjectStore('styles', {
           keyPath: 'id',
         });
-        optionStore.createIndex('by-id', 'id');
+        stylesStore.createIndex('by-id', 'id');
       }
       if (!db.objectStoreNames.contains('fonts')) {
         const fontStore = db.createObjectStore('fonts', {
@@ -74,10 +74,10 @@ async function create() {
         fontStore.createIndex('by-id', 'family');
       }
       if (!db.objectStoreNames.contains('bannedwords')) {
-        const gridStore = db.createObjectStore('bannedwords', {
+        const bannedWordsStore = db.createObjectStore('bannedwords', {
           keyPath: 'id',
         });
-        gridStore.createIndex('by-word', 'id');
+        bannedWordsStore.createIndex('by-word', 'id');
       }
 
       // @ts-ignore
@@ -140,8 +140,7 @@ async function create() {
             return styleStore.put(style as GridStyle);
           })));
       }
-      if (old <= 12) {
-        debugger;
+      if (old <= 8) {
         const styleStore = transaction.objectStore('styles');
         promise = promise
           .then(() => styleStore.getAll())
@@ -323,19 +322,21 @@ export function setDatabase(json: any, version: number) {
             const objstore = db.createObjectStore(key, {
               keyPath: 'id',
             });
-            if (key === 'words') {
+            if (key === 'words' || key === 'bannedwords') {
               // @ts-ignore
               objstore.createIndex('by-word', 'id');
             } else {
               // @ts-ignore
               objstore.createIndex('by-id', 'id');
             }
-            console.log('creating', key);
             // @ts-ignore
             const store = transaction.objectStore(key);
             promise = promise
               // @ts-ignore
-              .then(() => Promise.all(values.map((value: any) => store.put(value))));
+              .then(() => {
+                // @ts-ignore
+                return Promise.all(values.map((value: any) => store.put(value)));
+              });
           });
         }
       });
