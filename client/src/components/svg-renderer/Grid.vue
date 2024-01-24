@@ -81,10 +81,11 @@ import {
   ArrowDir,
   SolutionStyle,
   isSolutionStyle,
-  lineCases,
+  getOffsetY,
+  splitPosition
 } from "grid";
 import { ExportOptions } from "../../types";
-import { getCellClass, getOffsetY } from "../../js/utils";
+import { getCellClass } from "../../js/utils";
 /**
  * Component to render a grid as an SVG
  */
@@ -204,24 +205,7 @@ const splits = computed(() =>
     .flat()
     .filter((c) => c.definition && c.text.split("\n\n").length > 1)
     .map((cell) => {
-      const lines = getLines(cell).length;
-      const split = splitIndex(cell);
-      const ratio =
-        lines === 4
-          ? split === 2
-            ? 0.5
-            : split === 1
-              ? 1 / 4
-              : 3 / 4
-          : lines === 3
-            ? split === 1
-              ? 1 / 3
-              : 2 / 3
-            : lines === 2
-              ? split === 1
-                ? 0.5
-                : 0
-              : 0;
+      const ratio = splitPosition(cell);
       const y =
         cell.y * cellAndBorderWidth(props.style) +
         ratio * cellWidth(props.style);

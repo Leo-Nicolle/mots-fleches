@@ -287,7 +287,26 @@ export const defaultLineSpacings: LineSpacings = [
   [0, 0, 0, 0],
   [0, 0, 0, 0],
 ];
-
+export const splitPositions = [
+  0, 0, 0, 0,
+  0.5,
+  1 / 3, 2 / 3,
+  1 / 4,
+  0.5,
+  3 / 4
+];
+export const rightArrowYs = [
+  [0.5, -1],
+  [0.5, -1],
+  [0.5, -1],
+  [0.5, -1],
+  [0.25, 0.75],
+  [1 / 6, 2 / 3],
+  [1 / 3, 5 / 6],
+  [1 / 8, 5 / 8],
+  [0.25, 0.75],
+  [3 / 8, 7 / 8]
+];
 export const defaultStyles: GridStyle = {
   id: 'default',
   name: 'Default',
@@ -308,7 +327,7 @@ export const defaultStyles: GridStyle = {
   definition: {
     ...defaultTextStyle,
     lineSpacings: defaultLineSpacings,
-    size: 12,
+    size: 1,
     backgroundColor: "#ccc",
   },
   arrow: {

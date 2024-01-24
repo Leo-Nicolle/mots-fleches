@@ -58,8 +58,3 @@ export function getSizeNoPadding(elt: HTMLDivElement) {
     width: elt.clientWidth - parseFloat(computedStyle.paddingLeft) - parseFloat(computedStyle.paddingRight),
   };
 }
-const regs = lineCases
-  .map((c) => new RegExp(c.replaceAll('-', '[^\n]+')));
-export function getOffsetY(txt: string, spacings: LineSpacings) {
-  return spacings[regs.reduce((acc, e, i) => txt.match(e) ? i : acc, 0)];
-}

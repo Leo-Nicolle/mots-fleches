@@ -1,5 +1,5 @@
-import { Grid, isSplited } from "./Grid";
-import { Cell, defaultStyles, Direction, GridStyle, WordAndPosition, } from "./types";
+import { Grid } from "./Grid";
+import { Cell, defaultStyles, Direction, GridStyle, lineCases, LineSpacings, rightArrowYs, splitPositions, WordAndPosition, } from "./types";
 import { v4 as uuid } from "uuid";
 
 /**
@@ -101,32 +101,30 @@ export function splitIndex(cell: Cell) {
     ? split[0].split("\n").length
     : 0;
 }
+
+const regs = lineCases
+  .map((c) => new RegExp(c.replaceAll('-', '[^\n]+')));
+
+export function getLineCaseIndex(txt: string) {
+  return regs.reduce((acc, e, i) => txt.match(e) ? i : acc, 0);
+}
+export function getOffsetY(txt: string, spacings: LineSpacings) {
+  return spacings[getLineCaseIndex(txt)];
+}
 /**
  * From a definition cell, returns the position of the arrows
  * @param cell 
  * @returns 
  */
 export function arrowPositions(cell: Cell) {
-  const lines = getLines(cell).length;
-  const splited = isSplited(cell);
-  const index = splitIndex(cell);
-
-  const rightArrowYs = splited
-    ? lines === 4
-      ? index === 1
-        ? [1 / 8, 5 / 8]
-        : index === 2
-          ? [0.25, 0.75]
-          : [3 / 8, 7 / 8]
-      : lines === 3
-        ? index === 1
-          ? [1 / 6, 2 / 3]
-          : [1 / 3, 5 / 6]
-        : [0.25, 0.75]
-    : [0.5, 0.5];
-  return rightArrowYs.map(y => ({ x: 1, y })).concat({
-    x: 0.5, y: 1
-  });
+  return rightArrowYs[getLineCaseIndex(cell.text)]
+    .map(y => ({ x: 1, y }))
+    .concat({
+      x: 0.5, y: 1
+    });
+}
+export function splitPosition(cell: Cell) {
+  return splitPositions[getLineCaseIndex(cell.text)];
 }
 
 export const arrowDirs = [['right', 'rightdown'], ['right', 'rightdown'], ['down', 'downright']];
@@ -135,7 +133,7 @@ export function duplicate(style: GridStyle) {
   return {
     ...style,
     id: uuid(),
-  }
+  };
 }
 
 export function newStyle() {
@@ -168,8 +166,8 @@ export function getWords(grid: Grid) {
         words.add(word);
         wordsAndBounds.push({ word, start: bounds.start, direction });
       });
-    })
-  })
+    });
+  });
   return { words, wordsAndBounds };
 }
 /**
@@ -183,41 +181,41 @@ export function getAllWords(grids: Grid[]) {
   grids.forEach(grid => {
     const { words: gridWords } = getWords(grid);
     gridWords.forEach(word => words.add(word));
-  })
+  });
   return words;
 }
 
-export function getDefinitions(grid: Grid, defs?: Map<string, Set<string>>){
+export function getDefinitions(grid: Grid, defs?: Map<string, Set<string>>) {
   const definitions = defs || new Map<string, Set<string>>();
-  const {wordsAndBounds} = getWords(grid);
+  const { wordsAndBounds } = getWords(grid);
   const directions = {
     'horizontal': new Set(['right', 'downright']),
     'vertical': new Set(['down', 'rightdown']),
   };
-  wordsAndBounds.filter(({word}) => word.length > 1)
-  .forEach(({word, start, direction}) => {
-    const candidates = [
-      {x: start.x - 1, y: start.y}, 
-      {x: start.x, y: start.y-1}
-    ].filter(({x, y}) => {
-      if(!grid.isValid({x, y})) return false;
-      const {definition, arrows} = grid.cells[y][x];
-      if(!definition) return false;
-      if(!arrows.some(a  => directions[direction].has(a))) return false;
-      return true;
+  wordsAndBounds.filter(({ word }) => word.length > 1)
+    .forEach(({ word, start, direction }) => {
+      const candidates = [
+        { x: start.x - 1, y: start.y },
+        { x: start.x, y: start.y - 1 }
+      ].filter(({ x, y }) => {
+        if (!grid.isValid({ x, y })) return false;
+        const { definition, arrows } = grid.cells[y][x];
+        if (!definition) return false;
+        if (!arrows.some(a => directions[direction].has(a))) return false;
+        return true;
+      });
+
+      if (candidates.length !== 1) return;
+      const { x, y } = candidates[0];
+      const { text, arrows } = grid.cells[y][x];
+      const lines = text.split("\n\n").map(line => line.replace("\n", ' '));
+      const index = arrows.findIndex(a => directions[direction].has(a));
+      const line = index === 0 ? lines[0] : lines[lines.length - 1];
+      if (!line) return;
+
+      const set = definitions.get(word) || new Set<string>();
+      set.add(line);
+      definitions.set(word, set);
     });
-
-    if(candidates.length !== 1) return;
-    const {x, y} = candidates[0];
-    const {text, arrows} = grid.cells[y][x];
-    const lines = text.split("\n\n").map(line => line.replace("\n", ' '));
-    const index = arrows.findIndex(a => directions[direction].has(a));
-    const line = index === 0 ? lines[0] : lines[lines.length - 1];
-    if(!line) return;
-
-    const set = definitions.get(word) || new Set<string>();
-    set.add(line);
-    definitions.set(word, set);
-  });
   return definitions;
 }
