@@ -149,6 +149,7 @@ async function create() {
             delete style.solutions.top;
             style.solutions.alignmentBaseline = 'middle';
             style.solutions.offset = 0;
+            style.definition.size > 2 ? 1 : style.definition.size;
             style.definition.lineSpacings = JSON.parse(JSON.stringify(defaultLineSpacings));
             return styleStore.put(style as GridStyle);
           })));
