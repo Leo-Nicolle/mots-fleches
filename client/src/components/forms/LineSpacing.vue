@@ -2,7 +2,8 @@
   <n-button role="modal-options-button" @click="visible = true">
     {{ $t("forms.lineSpacing") }}
   </n-button>
-  <n-modal preset="dialog" :title="`${$t('forms.lineSpacing')}: ${row + 1}/10`" :showIcon="false" v-model:show="visible">
+  <n-modal class="modal-options" preset="dialog" :title="`${$t('forms.lineSpacing')}: ${row + 1}/10`" :showIcon="false"
+    v-model:show="visible">
     <template #action>
       <div class="body">
         <n-button circle @click="row = (row + 9) % 10">
@@ -15,19 +16,19 @@
         <div class="form">
           <SVGGrid :grid="grid" :style="style" :export-options="exportOptions" :focus="nullCell" :zoom="zoom" />
           <n-form :label-width="80">
-            <n-form-item v-for="(col, i) in  value[row]" :key="cantor(row, col)" :label="`${$t('forms.line')} ${i + 1}`"
+            <n-form-item v-for="(col, i) in  value[row]" :key="`${row};${i}`" :label="`${$t('forms.line')} ${i + 1}`"
               path="offset">
               <n-input-number v-model:value="value[row][i]" step="1" />
             </n-form-item>
           </n-form>
-          <span>
+          <span class="zoom">
             zoom
-            <n-button circle @click="zoom -= 0.1">
+            <n-button circle @click="zoom *= 0.9">
               <template #icon>
                 <AddCircleOutline />
               </template>
             </n-button>
-            <n-button circle @click="zoom += 0.1">
+            <n-button circle @click="zoom *= 1.1">
               <template #icon>
                 <RemoveCircleOutline />
               </template>
@@ -60,7 +61,6 @@ import {
   AddCircleOutline,
   RemoveCircleOutline,
 } from "@vicons/ionicons5";
-import { cantor } from '../../worker/utils/math';
 import { Grid, GridStyle, LineSpacings, nullCell } from "grid";
 import SVGGrid from "../svg-renderer/Grid.vue";
 import { ExportOptions } from "../../types";
@@ -80,7 +80,7 @@ const texts = [
   'test\ntest\ntest\n\ntest',
 ];
 const row = ref(0);
-const zoom = ref(1);
+const zoom = ref(0.2);
 const grid = ref<Grid>(new Grid(1, 1));
 const cell = grid.value.cells[0][0];
 cell.text = texts[0];
@@ -125,6 +125,10 @@ watch(row, () => {
   width: 100%;
 }
 
+.modal-options .n-dialog.n-modal {
+  width: fit-content;
+}
+
 .rowcols {
   display: flex;
   justify-content: space-between;
@@ -150,5 +154,13 @@ watch(row, () => {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 10px;
+}
+
+.zoom {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 </style>

@@ -1,8 +1,8 @@
 <template>
-  <n-form-item :label="$t('forms.alignmentBaseline')" :path="`${prefix}.alignmentBaseline`">
+  <n-form-item :label="$t('forms.alignmentBaseline')" :path="`${rolePrefix}.alignmentBaseline`">
     <n-select v-model:value="modelValue.alignmentBaseline" :options="alignmentBaselineOptions" />
   </n-form-item>
-  <n-form-item :label="$t('forms.baselineShift')" :path="`${prefix}.baselineShift`">
+  <n-form-item :label="$t('forms.baselineShift')" :path="`${rolePrefix}.baselineShift`">
     <n-input-number role="format-baselineShift" v-model:value="modelValue.offset" />
   </n-form-item>
 </template>
@@ -20,7 +20,7 @@ const alignmentBaselineOptions = ref([
 const props = defineProps<{
   /** The format to edit */
   modelValue: GridStyle['solutions'];
-  prefix: string;
+  rolePrefix: string;
 }>();
 
 
