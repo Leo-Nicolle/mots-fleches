@@ -20,7 +20,11 @@
               path="offset">
               <n-input-number v-model:value="value[row][i]" step="1" />
             </n-form-item>
+            <n-form-item :label="$t('forms.texts')" path="texts">
+              <n-input type="text" v-model:value="text" />
+            </n-form-item>
           </n-form>
+
           <span class="zoom">
             zoom
             <n-button circle @click="zoom *= 0.9">
@@ -61,29 +65,21 @@ import {
   AddCircleOutline,
   RemoveCircleOutline,
 } from "@vicons/ionicons5";
-import { Grid, GridStyle, LineSpacings, nullCell } from "grid";
+import { Grid, GridStyle, LineSpacings, lineCases, nullCell } from "grid";
 import SVGGrid from "../svg-renderer/Grid.vue";
 import { ExportOptions } from "../../types";
 import { useModel } from '../../js/useModel';
 
-
-const texts = [
-  'test',
-  'test\ntest',
-  'test\ntest\ntest',
-  'test\ntest\ntest\ntest',
-  'test\n\ntest',
-  'test\n\ntest\ntest',
-  'test\ntest\n\ntest',
-  'test\n\ntest\ntest\ntest',
-  'test\ntest\n\ntest\ntest',
-  'test\ntest\ntest\n\ntest',
-];
+const text = ref('test');
+const texts = computed(() => {
+  const t = text.value;
+  return lineCases.map(e => e.replaceAll('-', t));
+});
 const row = ref(0);
 const zoom = ref(0.2);
 const grid = ref<Grid>(new Grid(1, 1));
 const cell = grid.value.cells[0][0];
-cell.text = texts[0];
+cell.text = texts.value[0];
 cell.definition = true;
 const exportOptions = ref<ExportOptions>({
   arrows: true,
@@ -115,8 +111,8 @@ const cols = computed(() => {
   console.log('res', res);
   return res;
 });
-watch(row, () => {
-  cell.text = texts[row.value];
+watch([row, text], () => {
+  cell.text = texts.value[row.value];
 });
 </script>
 

@@ -34,7 +34,6 @@
         </n-button>
       </span>
     </div>
-
     <div class="body">
       <div :class="`left-panel ${leftPanelScroll ? 'scroll' : 'noscroll'}`" v-if="screenSize !== 'phone'">
         <slot name="left-panel">
@@ -388,5 +387,9 @@ nav {
   overflow: scroll;
   padding-bottom: 10px;
   padding-right: 10px;
+}
+
+#outside {
+  transform: translate(100vw, 100vh);
 }
 </style>

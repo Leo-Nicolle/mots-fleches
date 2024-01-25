@@ -285,7 +285,7 @@ function lines(cell: Cell) {
   return lines.map((line, i, arr) => {
     const y =
       cell.y * cellAndBorderWidth(props.style)
-      + oys[i]
+      + (oys[i] || 0)
       + freeSpace * (i + 1)
       + i * fourth
       + (splited && i >= split) * (borderSize);

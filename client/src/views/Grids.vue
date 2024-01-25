@@ -16,15 +16,17 @@
     </template>
     <template #card-body="{ elt, i }">
       <a class="preview" :href="`#/grid/${elt.id}`">
-        <img :src="thumbnails[i] || '/placeholder.png'" />
-        {{ thumbnails[i] }}
+        <span v-if="thumbnails[i]" v-html="thumbnails[i]"></span>
+        <img v-else src="/placeholder.png" />
       </a>
       {{ elt.comment ? elt.comment : $t("buttons.newGrid") }}
     </template>
-    <template v-slot:outside>
-      <GridThumbnail v-if="grids[exportingG]" :grid="grids[exportingG]" :style="style" @update="onExported" />
-    </template>
   </Layout>
+  <Teleport to="#outside">
+    <div>
+      <GridThumbnail v-if="style && grids" :grids="grids" :style="style" @update="onExported" />
+    </div>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
@@ -47,8 +49,6 @@ const grids = ref<Grid[]>([]);
 const style = ref<GridStyle>();
 const solutionsStyle = ref<SolutionStyle>();
 const selected = ref<Grid[]>([]);
-const exporting = ref(false);
-const exportingG = ref<number>(0);
 const thumbnails = ref<string[]>([]);
 const exportQuery = computed(() => {
   return { ids: selected.value.map((s) => s.id).join(",") };
@@ -65,8 +65,6 @@ function fetch() {
     .then((opts) => {
       style.value = opts[0] as GridStyle;
       solutionsStyle.value = opts[1] as SolutionStyle;
-      exporting.value = true;
-      exportingG.value = 0;
       thumbnails.value = [];
     })
     .catch((e) => {
@@ -74,9 +72,8 @@ function fetch() {
     });
 }
 
-function onExported(str: string) {
-  thumbnails.value.push(str);
-  exportingG.value = exportingG.value + 1;
+function onExported(str: string[]) {
+  thumbnails.value = str;
 }
 
 function onDelete() {

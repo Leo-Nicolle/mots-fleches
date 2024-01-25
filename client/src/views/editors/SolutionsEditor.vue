@@ -6,9 +6,9 @@
       </OptionsForm>
     </template>
     <template #body>
-      <WordsIndex :grids="grids" v-if="grids.length && style" class="paper"
+      <!-- <WordsIndex :grids="grids" v-if="grids.length && style" class="paper"
         @page-count="solutionFirstPage = $event + indexFirstPage" :export-options="exportOptions" :solutionStyle="style"
-        :page="indexFirstPage" />
+        :page="indexFirstPage" /> -->
       <NoGrid v-else />
       <SolutionsPaper :grids="grids" v-if="grids.length && style" class="paper" :solutionStyle="style"
         :export-options="exportOptions" :page="solutionFirstPage" />

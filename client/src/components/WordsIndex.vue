@@ -2,35 +2,21 @@
   <div v-if="grids && solutionStyle">
     <FontLoader :value="solutionStyle.grids.gridN" />
     <FontLoader :value="solutionStyle.words" />
-    <Paper
-      v-for="(words, i) in layout.wordsPerPage"
-      :key="i"
-      :format="solutionStyle.paper"
-      :showMargins="exportOptions.margins"
-      :showPagination="exportOptions.pagination"
-      :pageNumber="page + i"
-      :pagination="solutionStyle.pagination"
-      bodyClass="body-index"
-    >
+    <Paper v-for="(words, i) in layout.wordsPerPage" :key="i" :format="solutionStyle.paper"
+      :showMargins="exportOptions.margins" :showPagination="exportOptions.pagination" :pageNumber="page + i"
+      :pagination="solutionStyle.pagination" bodyClass="body-index">
       <span class="words" ref="wordsContainer">
-        <span
-          v-for="(word, j) in words"
-          :class="typeof word === 'number' ? 'size' : 'word'"
-          :key="word"
-        >
+        <span v-for="(word, j) in words" :class="typeof word === 'number' ? 'size' : 'word'" :key="word">
           {{ word }}
         </span>
       </span>
     </Paper>
-    <Paper
-      class="paper ruler"
-      :format="solutionStyle.paper"
-      :showMargins="false"
-      :showPagination="exportOptions.pagination"
-      :pageNumber="0"
-    >
-      <span class="words ruler" ref="ruler"> </span>
-    </Paper>
+    <Teleport to="#outside">
+      <Paper class="paper ruler" :format="solutionStyle.paper" :showMargins="false"
+        :showPagination="exportOptions.pagination" :pageNumber="0">
+        <span class="words ruler" ref="ruler"> </span>
+      </Paper>
+    </Teleport>
   </div>
 </template>
 
@@ -45,7 +31,7 @@ import { getFont } from "../js/useFont";
 /**
  * Component to render the list of words used in an array of grids
  */
-type WordMap = { [key: number]: string[] };
+type WordMap = { [key: number]: string[]; };
 const ruler = ref(null);
 const props = defineProps<{
   /**
@@ -71,7 +57,7 @@ const wordFont = computed(() => getFont(props.solutionStyle.words));
 const wordsColor = computed(() => props.solutionStyle.words.color);
 const sizeFont = computed(() => getFont(props.solutionStyle.size));
 const sizeColor = computed(() => props.solutionStyle.size.color);
-const layout = ref<{ wordsPerPage: (number | string)[][]; heights: string[] }>({
+const layout = ref<{ wordsPerPage: (number | string)[][]; heights: string[]; }>({
   wordsPerPage: [],
   heights: [],
 });
@@ -151,6 +137,7 @@ watch([props.grids, ruler, wordFont, sizeFont, props], () => {
     display: none;
   }
 }
+
 .words {
   max-width: 100%;
   max-height: 100%;
@@ -166,32 +153,39 @@ watch([props.grids, ruler, wordFont, sizeFont, props], () => {
   gap: 10px;
   flex: 2;
 }
-.words > span {
+
+.words>span {
   page-break-after: auto;
 }
+
 .paper.ruler {
   position: absolute;
   top: 1000%;
   left: 0;
   z-index: 1000;
 }
+
 .words.ruler {
   background: red;
 }
+
 .size {
   font: v-bind(sizeFont);
   color: v-bind(sizeColor);
   font-weight: bold;
   text-align: center;
 }
+
 .word {
   font: v-bind(wordFont);
   color: v-bind(wordsColor);
   text-align: center;
 }
+
 .body.body-index {
   align-content: flex-start;
 }
+
 .pushup {
   flex: 1;
 }

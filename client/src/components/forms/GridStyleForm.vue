@@ -98,9 +98,6 @@ const emit = defineEmits<{
   (event: "update:modelValue", value: GridStyle): void;
 }>();
 const value = useModel<GridStyle>(props, emit);
-watch(value.value, () => {
-  emit("update:modelValue", value.value);
-});
 </script>
 
 <style scoped>

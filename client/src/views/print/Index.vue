@@ -1,5 +1,5 @@
 <template>
-  <WordsIndex v-if="grids && style" :grids="grids" class="paper" :export-options="exportOptions" :solutionStyle="style" />
+  <!-- <WordsIndex v-if="grids && style" :grids="grids" class="paper" :export-options="exportOptions" :solutionStyle="style" /> -->
 </template>
 
 <script setup lang="ts">

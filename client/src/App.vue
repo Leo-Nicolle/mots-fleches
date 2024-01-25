@@ -1,4 +1,5 @@
 <template>
+  <div id="outside"></div>
   <router-view />
 </template>
 
@@ -59,5 +60,9 @@ onMounted(async () => {
 
 h2 {
   margin-top: 0;
+}
+
+body {
+  overflow: hidden;
 }
 </style>
