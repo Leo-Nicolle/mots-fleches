@@ -2,8 +2,8 @@
   <div class="book" v-if="grids && style && solutionStyle">
     <GridPaper v-for="(grid, i) in grids" :key="grid.id" :grid="grid" :style="style" :exportOptions="gridExport"
       :pagination="solutionStyle.pagination" :page="solutionStyle.pagination.startIdx + i" />
-    <!-- <IndexPaper :grids="grids" :solutionStyle="solutionStyle" :exportOptions="solutionExport" -->
-    <!-- :page="solutionStyle.pagination.startIdx + grids.length" @pageCount="evt => indexPages = evt" /> -->
+    <IndexPaper :grids="grids" :solutionStyle="solutionStyle" :exportOptions="solutionExport"
+      :page="solutionStyle.pagination.startIdx + grids.length" @pageCount="evt => indexPages = evt" />
     <SolutionPaper :grids="grids" :solutionStyle="solutionStyle" :exportOptions="solutionExport"
       :page="solutionStyle.pagination.startIdx + grids.length + indexPages" />
   </div>
