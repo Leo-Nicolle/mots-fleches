@@ -1,42 +1,17 @@
 <template>
   <div :version="version">
     <n-form-item :label="$t('forms.fontFamily')" path="font-family">
-      <n-select
-        v-model:value="fontIndex"
-        :options="options"
-        :style="style"
-        filterable
-        @update:value="onChange"
-      />
+      <n-select v-model:value="fontIndex" :options="options" :style="style" filterable @update:value="onChange" />
     </n-form-item>
     <n-form-item :label="$t('forms.fontWeight')" path="font-weight">
-      <n-select
-        v-model:value="value.weight"
-        :options="weightOptions"
-        filterable
-      />
+      <n-select v-model:value="value.weight" :options="weightOptions" filterable />
     </n-form-item>
     <n-form-item :label="$t('forms.size')" path="size">
-      <Sizeinput
-        v-if="typeof value.size === 'string'"
-        :role="`${rolePrefix}-size`"
-        v-model="value.size"
-      />
-      <n-input-number
-        v-else
-        :role="`${rolePrefix}-size`"
-        v-model:value="value.size"
-        :precision="2"
-        :step="0.1"
-      />
+      <Sizeinput v-if="typeof value.size === 'string'" :role="`${rolePrefix}-size`" v-model="value.size" />
+      <n-input-number v-else :role="`${rolePrefix}-size`" v-model:value="value.size" :precision="2" :step="0.1" />
     </n-form-item>
     <n-form-item :label="$t('forms.color')" path="color">
-      <n-color-picker
-        :role="`${rolePrefix}-color`"
-        v-model:value="value.color"
-        :show-alpha="false"
-        size="small"
-      />
+      <n-color-picker :role="`${rolePrefix}-color`" v-model:value="value.color" :show-alpha="false" size="small" />
     </n-form-item>
     <FontLoader :value="value" />
   </div>
@@ -45,7 +20,7 @@
 <script setup lang="ts">
 import { computed, onMounted, defineProps, ref, defineEmits } from "vue";
 import { api } from "../../api";
-import { TextSyle, Font } from "grid";
+import { TextStyle, Font } from "grid";
 import FontLoader from "./FontLoader.vue";
 import Sizeinput from "../forms/Sizeinput.vue";
 
@@ -55,7 +30,7 @@ const props = defineProps<{
   /**
    * The TextStyle to edit
    */
-  modelValue: TextSyle;
+  modelValue: TextStyle<number | string>;
   rolePrefix: string;
 }>();
 const emit = defineEmits<{
@@ -67,7 +42,7 @@ const emit = defineEmits<{
 const fontIndex = ref(0);
 const version = ref(0);
 const fonts = ref<Font[]>([]);
-const value = useModel<TextSyle>(props, emit);
+const value = useModel<TextStyle>(props, emit);
 
 const options = computed(() =>
   fonts.value.map((f, i) => ({
@@ -106,13 +81,9 @@ onMounted(() => {
 
 function onChange(e) {
   const selectedFont = fonts.value[e];
-  value.value = {
-    ...value.value,
-    family: selectedFont.family,
-    isGoogle: selectedFont.isGoogle,
-  };
+  value.value.family = selectedFont.family;
+  value.value.isGoogle = selectedFont.isGoogle;
 }
 </script>
 
-<style lang="less">
-</style>
+<style lang="less"></style>
