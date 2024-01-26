@@ -65,4 +65,10 @@ h2 {
 body {
   overflow: hidden;
 }
+
+@media print {
+  #outisde {
+    display: none;
+  }
+}
 </style>

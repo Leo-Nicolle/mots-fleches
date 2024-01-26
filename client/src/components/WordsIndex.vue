@@ -12,8 +12,7 @@
       </span>
     </Paper>
     <Teleport to="#outside">
-      <Paper class="paper ruler" :format="solutionStyle.paper" :showMargins="false"
-        :showPagination="exportOptions.pagination" :pageNumber="0">
+      <Paper class="paper ruler" :format="solutionStyle.paper" :showMargins="true" :showPagination="true" :pageNumber="1">
         <span class="words ruler" ref="ruler"> </span>
       </Paper>
     </Teleport>
@@ -61,20 +60,40 @@ const layout = ref<{ wordsPerPage: (number | string)[][]; heights: string[]; }>(
   wordsPerPage: [],
   heights: [],
 });
+const columnGap = 10;
+const gap = computed(() => `${columnGap}px`);
 const tolerance = 2;
-watch([props.grids, ruler, wordFont, sizeFont, props], () => {
+function nodesBSStart(
+  nodes: HTMLDivElement[], start: number, end: number, query: number
+) {
+  while (start <= end) {
+    const middle = (start + end) >>> 1;
+    const node = nodes[middle];
+    if (!node) break;
+    const { x, width } = node.getBoundingClientRect();
+    const right = x + width;
+    if (isNaN(right) || right < query) start = middle + 1;
+    else end = middle - 1;
+  }
+  return start;
+}
+
+watch([props.grids, ruler, wordFont, sizeFont, props.solutionStyle,
+props.exportOptions], () => {
   if (!props.grids || !ruler.value) {
     layout.value = { wordsPerPage: [], heights: [] };
     return;
   }
   const words = Array.from(getAllWords(props.grids))
-    .sort((a, b) => a.length - b.length)
+    .sort((a, b) => {
+      const l = a.length - b.length;
+      return l === 0 ? a.localeCompare(b) : l;
+    })
     .filter((w) => w.length > 1);
   const r = ruler.value as HTMLDivElement;
   r.innerHTML = "";
-  let bb = r.getBoundingClientRect();
-  const maxX = bb.x + bb.width;
 
+  const { x: startX, width: W, height: H } = r.parentElement!.getBoundingClientRect();
   const wordsMap = words.reduce((acc, word) => {
     if (acc[word.length]) {
       acc[word.length].push(word);
@@ -83,56 +102,50 @@ watch([props.grids, ruler, wordFont, sizeFont, props], () => {
     }
     return acc;
   }, {} as WordMap);
+  const allTexts: (string | number)[] = [];
+  Object.entries(wordsMap)
+    .forEach(([size, words]) => {
+      allTexts.push(+size);
+      const span = document.createElement("span");
+      span.classList.add("size");
+      span.innerHTML = size.toString();
+      r.appendChild(span);
+      words.forEach((word) => {
+        const span = document.createElement("span");
+        span.classList.add("word");
+        span.innerHTML = word;
+        r.appendChild(span);
+        allTexts.push(word);
+      });
+    });
 
-  let wordsOnCurrentPage: (string | number)[] = [];
-  const heights: string[] = [];
-  // cut the list into multiple pages using the ruler. When a word overflows the ruler => pagebreak
-  const res = Object.entries(wordsMap).reduce(
-    (wordsPerPage, [size, words], i, arr) => {
-      [+size, ...words.sort((a, b) => a.localeCompare(b))].forEach(
-        (word, j, arr1) => {
-          const span = document.createElement("span");
-          span.innerHTML = `${word}`;
-          span.classList.add(typeof word === "number" ? "size" : "word");
-          r.appendChild(span);
-          const { x, y, width, height } = span.getBoundingClientRect();
-          if (x + width > maxX - tolerance) {
-            r.innerHTML = "";
-            r.appendChild(span);
-            wordsPerPage.push(wordsOnCurrentPage);
-            wordsOnCurrentPage = [word];
-            heights.push("100%");
-          } else {
-            wordsOnCurrentPage.push(word);
-          }
-        }
-      );
-      return wordsPerPage;
-    },
-    [] as (string | number)[][]
-  );
-  res.push(wordsOnCurrentPage);
-  bb = r.getBoundingClientRect();
-  // TODO: this is not working properly
-  // attempt to make the page take the less height possible
-  // see https://stackoverflow.com/questions/75994487/css-how-to-make-flex-column-layout-grow-on-x-axis-first?noredirect=1#comment134032653_75994487
-  const { x, y, width, height } = r.lastChild
-    ? r.lastChild.getBoundingClientRect()
-    : { x: 0, y: 0, width: 0, height: 0 };
-  const area =
-    (x - bb.x + width) * (y - bb.y + height) +
-    (bb.height - y + bb.y) * (x - bb.x);
-  const totalArea = bb.width * bb.height;
-  const ratio = area / totalArea;
-  heights.push(ratio * 100 + "%");
-  emit("pageCount", res.length);
-  layout.value = { wordsPerPage: res, heights: heights };
-  return;
+  // find the first node outside boundaries: 
+  const nodes = Array.from(r.children) as HTMLDivElement[];
+  const maxX = nodes[nodes.length - 1].getBoundingClientRect().x;
+  const pages = Math.ceil(maxX / W);
+  const indexes = [0];
+  const wordsPerPage = [];
+  for (let i = 0; i < pages; i++) {
+    indexes.push(nodesBSStart(nodes, 0, nodes.length - 1, startX + (i + 1) * W - tolerance));
+    wordsPerPage.push(allTexts.slice(indexes[i], indexes[i + 1]));
+  }
+  if (indexes[indexes.length - 1] < allTexts.length - 1) {
+    wordsPerPage.push(wordsPerPage.slice(indexes.length - 1));
+  }
+  r.innerHTML = "";
+  layout.value = {
+    wordsPerPage,
+    heights: ['100%']
+  };
+  emit('pageCount', wordsPerPage.length);
+
 });
 </script>
 
 <style lang="less">
 @media print {
+
+  #outisde,
   .ruler {
     display: none;
   }
@@ -150,7 +163,7 @@ watch([props.grids, ruler, wordFont, sizeFont, props], () => {
   justify-content: flex-start;
   align-items: center;
   page-break-inside: auto;
-  gap: 10px;
+  gap: v-bind(gap);
   flex: 2;
 }
 
@@ -184,6 +197,7 @@ watch([props.grids, ruler, wordFont, sizeFont, props], () => {
 
 .body.body-index {
   align-content: flex-start;
+  margin: 0;
 }
 
 .pushup {

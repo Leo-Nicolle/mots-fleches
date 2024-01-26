@@ -1,7 +1,7 @@
 <template>
   <Layout>
-    <template #left-panel v-if="grids.length && style">
-      <OptionsForm v-model="style" grid format>
+    <template #left-panel>
+      <OptionsForm v-if="style" v-model="style" grid format>
         <SolutionsForm v-model="style" />
       </OptionsForm>
     </template>

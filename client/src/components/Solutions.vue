@@ -2,7 +2,7 @@
   <div v-if="grids && solutionStyle">
     <FontLoader :value="solutionStyle.grids.gridN" />
     <Paper v-for="(gs, i) in gridsPerPage" :key="i" :format="solutionStyle.paper" :showMargins="exportOptions.margins"
-      :page-number="page" :showPagination="exportOptions.pagination" :pagination="solutionStyle.pagination">
+      :page-number="page + i" :showPagination="exportOptions.pagination" :pagination="solutionStyle.pagination">
       <div class="grids">
         <div v-for="(grid, j) in gs" :key="j" class="grid-c">
           <span class="gridN">{{ j + solutionStyle.pagination.startIdx }}</span>

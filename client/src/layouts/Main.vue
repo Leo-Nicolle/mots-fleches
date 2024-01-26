@@ -390,6 +390,7 @@ nav {
 }
 
 #outside {
+  position: absolute;
   transform: translate(100vw, 100vh);
 }
 </style>

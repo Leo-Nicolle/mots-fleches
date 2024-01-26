@@ -51,7 +51,8 @@ const solutionsStyle = ref<SolutionStyle>();
 const selected = ref<Grid[]>([]);
 const thumbnails = ref<string[]>([]);
 const exportQuery = computed(() => {
-  return { ids: selected.value.map((s) => s.id).join(",") };
+  const res = { ids: selected.value.map((s) => s.id).join(",") };
+  return res;
 });
 function fetch() {
   return api
@@ -104,6 +105,7 @@ function onUpload(filesContents: [string, string][]) {
 function createGrid() {
   const newGrid = new Grid(10, 10);
   newGrid.title = "Nouvelle Grille";
+  console.log('LA');
   workerController
     .getDistribution()
     .then((distribution) => {
