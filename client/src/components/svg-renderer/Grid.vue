@@ -173,7 +173,7 @@ const arrows = computed(
       .filter((c) => c.definition && c.arrows.length > 0)
       .map((cell) => {
         return arrowPositions(cell).map(({ x, y }, i) => {
-          return cell.arrows[i] === "none"
+          return cell.arrows[i] === "none" || y < 0
             ? null
             : {
               dir: cell.arrows[i],
