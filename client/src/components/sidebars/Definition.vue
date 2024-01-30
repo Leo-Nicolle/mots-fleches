@@ -6,7 +6,7 @@
     <n-button v-else-if="busy" class="loading" :loading="true"></n-button>
     <div v-else v-for="{ title, user, dico } in results" :key="title">
       <h3>{{ title }}</h3>
-      <ul v-if="user">
+      <ul v-if="user && user.length" class="user-defs">
         <li v-for="text in user" :key="text" @click="onSetDefinition($event, text)">{{ text }}</li>
       </ul>
       <ul v-if="dico">
@@ -129,6 +129,10 @@ onMounted(() => {
 </script>
 
 <style>
+.user-defs>li {
+  font-weight: 600;
+}
+
 .definition {
   margin: 10px 0;
   gap: 5px;
