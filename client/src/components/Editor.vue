@@ -43,14 +43,13 @@
         </div>
         <div class="superpose">
           <SVGGrid @focus="(cell) => (focus = cell)" @hover="(cell) => (hoveredCell = cell)" :grid="grid" :focus="focus"
-            :dir="dir" :style="style" :zoom="1 / zoom" :highlights="highlights" class="svg-grid" :export-options="{
+            :dir="dir" :style="style" :zoom="1 / zoom" class="svg-grid" :export-options="{
               ...defaultExportOptions,
               texts: true,
               highlight: true,
             }"></SVGGrid>
-          <GridHighlight :grid="grid" :style="style" :cell="hoveredCell" :validity="validity" :cellProbas="cellProbas"
-            :zoom="zoom" :mode="highlightMode" :gridVersion="gridVersion" :offset="offset" :dir="dir"
-            @update="onGridUpdate()" />
+          <GridHighlight :grid="grid" :style="style" :cell="hoveredCell" :cellProbas="cellProbas" :zoom="zoom"
+            :mode="highlightMode" :gridVersion="gridVersion" :offset="offset" :dir="dir" @update="onGridUpdate()" />
           <GridInput :grid="grid" :dir="dir" :style="style" :cell="focus" :offset="offset" :zoom="zoom"
             @focus="(point) => (focus = point)" @update="onGridUpdate()" @keyup="onKeyUp">
           </GridInput>
@@ -83,7 +82,6 @@ import {
   Direction,
   nullCell,
   GridStyle,
-  GridValidity,
   CellProba,
 } from "grid";
 import Layout from "../layouts/Main.vue";
@@ -124,7 +122,6 @@ const emit = defineEmits<{
 const dir = ref<Direction>("horizontal");
 const focus = ref<Cell>(nullCell);
 const hoveredCell = ref<Cell>(nullCell);
-const validity = ref<GridValidity>();
 const gridVersion = ref(1);
 const container = ref(null as unknown as HTMLDivElement);
 const offset = ref<[number, number]>([-10, 0]);
@@ -132,9 +129,8 @@ const method = ref<Method>("accurate");
 const ordering = ref<Ordering>("best");
 const orderings = ref<Ordering[]>(["best", "alpha", "inverse-alpha", "random"]);
 const zoom = ref(1);
-const highlights = ref(new Map());
 const highlightModes = ["normal", "check", "heatmap"] as Mode[];
-const highlightMode = ref<Mode>(highlightModes[2]);
+const highlightMode = ref<Mode>(highlightModes[1]);
 const cellProbas = ref<CellProba[][]>([]);
 const searchResult = ref<string[]>([]);
 const refreshingRun = ref(false);
@@ -159,17 +155,12 @@ function refreshSimpleSearch() {
   refreshingSearch.value = true;
   workerController.search(props.grid, focus.value, dir.value);
 }
-function refreshValidity() {
-  workerController.checkGrid(props.grid);
-}
 const throttledRefresCellProba = throttle(refreshCellProba, 200);
 const throttledRefresSimpleSearch = throttle(refreshSimpleSearch, 60);
-const throttledRefresValidity = throttle(refreshValidity, 60);
 function onGridUpdate() {
   //refresh the children components that need it.
   gridVersion.value = gridVersion.value + 1;
   throttledRefresCellProba();
-  throttledRefresValidity();
   emit("update");
 }
 function computeOffset(e) {
@@ -197,7 +188,6 @@ onMounted(() => {
   computeOffset(null);
   workerController.checkGrid(props.grid);
   throttledRefresCellProba();
-  throttledRefresValidity();
 });
 
 onBeforeUnmount(() => { });
@@ -255,20 +245,6 @@ function onKeyUp(evt: KeyboardEvent) {
   evt.canceled = consumed;
 }
 watch([focus], () => {
-});
-watch([dir, validity, highlightMode], () => {
-  if (highlightMode.value === "check" && validity.value) {
-    const newMap = new Map();
-    Object.values(validity.value[dir.value]).forEach(({ cells, problem }) => {
-      cells.forEach(({ x, y }) => newMap.set(`${y}-${x}`, problem));
-    });
-    highlights.value = newMap;
-  } else {
-    highlights.value = new Map();
-  }
-});
-workerController.on("check-result", (data) => {
-  validity.value = data;
 });
 workerController.on("run-result", (data) => {
   cellProbas.value = data;

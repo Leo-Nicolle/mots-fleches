@@ -14,7 +14,7 @@
           :height="cellWidth(style)" :fill="exportOptions.fills && cell.definition
             ? defBackgroundColor
             : 'none'
-            " :class="highlights ? highlights.get(`${cell.y}-${cell.x}`) : ''" />
+            " />
         <g v-if="cell.definition && exportOptions.definitions">
           <text v-for="(sp, k) in lines(cell)" :key="k" :line-height="defSize" :font-size="defSize"
             :font-family="defFontFamily" :font-weight="defFontWeight" :fill="defColor" v-bind="sp">
@@ -107,10 +107,6 @@ const props = defineProps<{
    * What to display or not (arrows, definitions, etc.)
    */
   exportOptions: Partial<ExportOptions>;
-  /**
-   * Highlighted cells
-   */
-  highlights?: Map<string, string>;
   /**
    * The zoom level
    */

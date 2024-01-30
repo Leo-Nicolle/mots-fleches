@@ -110,6 +110,7 @@ export const lang = {
         incomplete: "est incomplet",
         nodef: "n'a pas de définition",
         noarrow: "n'a pas de flèche",
+        toomanyarrows: "a trop de flèches",
         add: "Ajouter {word} au dictionnaire",
     },
     modals: {

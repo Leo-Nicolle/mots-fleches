@@ -109,6 +109,7 @@ export const lang = {
         incomplete: "esta incompleto",
         nodef: "no tiene definición",
         noarrow: "no tiene flecha",
+        toomanyarrows: "tiene demasiadas flechas",
         add: "Añadir {word} al diccionario",
     },
     alert: {

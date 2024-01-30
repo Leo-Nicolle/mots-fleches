@@ -109,6 +109,7 @@ export const lang = {
     incomplete: "is incomplete",
     nodef: "has no definition",
     noarrow: "has no arrow",
+    toomanyarrows: 'has too many arrows',
     add: "Add {word} to dictionary",
   },
   alert: {
