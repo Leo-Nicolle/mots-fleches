@@ -32,10 +32,11 @@ jobs:
       - name: Determine Deployment Type
         id: deployment_type
         run: |
-          echo "${{ github.event.pull_request.labels.*.name }}"
-          echo "DEPLOY_ASSETS=${{ contains(github.event.pull_request.labels.*.name, 'deploy:assets') }}" >> $GITHUB_ENV
-          echo "DEPLOY_SERVER=${{ contains(github.event.pull_request.labels.*.name, 'deploy:server') }}" >> $GITHUB_ENV
-          echo "DEPLOY_CLIENT=${{ contains(github.event.pull_request.labels.*.name, 'deploy:client') }}" >> $GITHUB_ENV
+          echo "${{ toJson(github.event.pull_request.labels.*.name) }}"
+
+          echo "DEPLOY_ASSETS=${{ contains(toJson(github.event.pull_request.labels.*.name), 'deploy:assets') }}" >> $GITHUB_ENV
+          echo "DEPLOY_SERVER=${{ contains(toJson(github.event.pull_request.labels.*.name), 'deploy:server') }}" >> $GITHUB_ENV
+          echo "DEPLOY_CLIENT=${{ contains(toJson(github.event.pull_request.labels.*.name), 'deploy:client') }}" >> $GITHUB_ENV
 
       - name: Deploy
         if: github.event_name == 'pull_request'
