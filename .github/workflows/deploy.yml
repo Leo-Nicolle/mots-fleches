@@ -34,7 +34,8 @@ jobs:
           echo "DEPLOY_SERVER=${{ contains(env.LABELS, 'deploy:server') }}" >> $GITHUB_ENV
           echo "DEPLOY_CLIENT=${{ contains(env.LABELS, 'deploy:client') }}" >> $GITHUB_ENV
           if [[ "${{ env.DEPLOY_ASSETS }}" == 'false' ]]; then
-            core.setFailed("Nothing to deploy");
+            echo "Nothing to deploy"
+            exit 1
           fi
 
       - name: Install Dependencies
