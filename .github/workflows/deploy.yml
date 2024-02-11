@@ -33,7 +33,7 @@ jobs:
           echo "DEPLOY_ASSETS=${{ contains(env.LABELS, 'deploy:assets') }}" >> $GITHUB_ENV
           echo "DEPLOY_SERVER=${{ contains(env.LABELS, 'deploy:server') }}" >> $GITHUB_ENV
           echo "DEPLOY_CLIENT=${{ contains(env.LABELS, 'deploy:client') }}" >> $GITHUB_ENV
-          if [[ "${{ env.DEPLOY_ASSETS }} " == 'false' ]]; then
+          if [[ "${{ env.DEPLOY_ASSETS }}" == 'false' ]]; then
             core.setFailed("Nothing to deploy");
           fi
 
@@ -48,7 +48,6 @@ jobs:
       - name: Deploy
         if: ${{ success() }}
         run: |
-          echo "Github ref: $GITHUB_REF"
           if [[ "${{ env.DEPLOY_ASSETS }}" == 'true' ]]; then
             echo "Deploying JS assets"
             ssh $SSH_TARGET "rm -rf $ASSETS && mkdir -p $ASSETS"
