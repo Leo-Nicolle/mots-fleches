@@ -35,27 +35,27 @@ jobs:
       - name: Determine Deployment Type
         id: deployment_type
         run: |
-          echo "::set-output name=deploy_assets::${{ contains(github.event.pull_request.labels.*.name, 'deploy:assets') }}"
-          echo "::set-output name=deploy_server::${{ contains(github.event.pull_request.labels.*.name, 'deploy:server') }}"
-          echo "::set-output name=deploy_client::${{ contains(github.event.pull_request.labels.*.name, 'deploy:client') }}"
+          echo "DEPLOY_ASSETS=${{ contains(github.event.pull_request.labels.*.name, 'deploy:assets') }}" >> $GITHUB_ENV
+          echo "DEPLOY_SERVER=${{ contains(github.event.pull_request.labels.*.name, 'deploy:server') }}" >> $GITHUB_ENV
+          echo "DEPLOY_CLIENT=${{ contains(github.event.pull_request.labels.*.name, 'deploy:client') }}" >> $GITHUB_ENV
 
       - name: Deploy
         if: github.event_name == 'pull_request'
         run: |
           echo "Github ref: $GITHUB_REF"
-          if [[ "${{ steps.deployment_type.outputs.deploy_assets }}" == 'true' ]]; then
+          if [[ "${{ env.DEPLOY_ASSETS }}" == 'true' ]]; then
             echo "Deploying JS assets"
             ssh $SSH_TARGET "rm -rf $ASSETS && mkdir -p $ASSETS"
             scp -r dist/public/assets $SSH_TARGET:$ASSETS
             scp -r dist/public/index.html $SSH_TARGET:$INDEX_HTML
           fi
-          if [[ "${{ steps.deployment_type.outputs.deploy_client }}" == 'true' ]]; then
+          if [[ "${{ env.DEPLOY_CLIENT }}" == 'true' ]]; then
             echo "Deploying full client"
             ssh $SSH_TARGET "rm -rf $PUBLIC && mkdir -p $PUBLIC"
             scp -r dist/public $SSH_TARGET:$PUBLIC
             ssh $SSH_TARGET "cp $DICOS/*.zip $ASSETS"
           fi
-          if [[ "${{ steps.deployment_type.outputs.deploy_server }}" == 'true' ]]; then
+          if [[ "${{ env.DEPLOY_SERVER }}" == 'true' ]]; then
             echo "Deploying server code"
             scp -r dist/server.js $SSH_TARGET:$SERVER
           fi
