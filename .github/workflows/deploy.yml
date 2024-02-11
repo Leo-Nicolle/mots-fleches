@@ -33,7 +33,7 @@ jobs:
         run: npm run build
 
       - name: Determine Deployment Type
-        if: steps.install_dependencies.outcome == 'success' && steps.build.outcome == 'success'
+        if: ${{ success() }}
         run: |
           echo "LABELS=${{ toJson(github.event.pull_request.labels.*.name) }}" >> $GITHUB_ENV
           echo "DEPLOY_ASSETS=${{ contains(env.LABELS, 'deploy:assets') }}" >> $GITHUB_ENV
@@ -41,7 +41,6 @@ jobs:
           echo "DEPLOY_CLIENT=${{ contains(env.LABELS, 'deploy:client') }}" >> $GITHUB_ENV
 
       - name: Deploy
-        if: github.event_name == 'pull_request'
         run: |
           echo "Github ref: $GITHUB_REF"
           if [[ "${{ env.DEPLOY_ASSETS }}" == 'true' ]]; then
