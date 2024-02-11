@@ -23,7 +23,7 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
         script: |
-          cd /tmp
+          cd /tmp/mots-fleches
           git pull origin develop
           git status
           npm install
