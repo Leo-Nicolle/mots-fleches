@@ -5,9 +5,6 @@ on:
     branches:
       - develop
 
-env:
-  SERVER: "~/motsflex-save/server.js"
-  SSH_TARGET: ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}
 
 jobs:
   deploy:
@@ -29,7 +26,6 @@ jobs:
           echo "DEPLOY_SERVER=${{ contains(toJson(github.event.pull_request.labels.*.name), 'deploy:server') }}" >> $GITHUB_ENV
           echo "DEPLOY_CLIENT=${{ contains(toJson(github.event.pull_request.labels.*.name), 'deploy:client') }}" >> $GITHUB_ENV
 
-      steps:       
       - name: Deploy
         uses: appleboy/ssh-action@master
          env:
@@ -40,13 +36,14 @@ jobs:
             ASSETS: "$PUBLIC/assets"
             INDEX_HTML: "$PUBLIC/index.html"
             DICOS: "~/dicos"
+            SERVER: "~/motsflex-save/server.js"
 
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
-          envs: DEPLOY_ASSETS,DEPLOY_SERVER,DEPLOY_CLIENT,PUBLIC,ASSETS,INDEX_HTML,DICOS
+          envs: DEPLOY_ASSETS,DEPLOY_SERVER,DEPLOY_CLIENT,PUBLIC,ASSETS,INDEX_HTML,DICOS,SERVER
           script: |
             cd /tmp/mots-fleches
             git pull origin develop
