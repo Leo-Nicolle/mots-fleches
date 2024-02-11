@@ -50,7 +50,7 @@ jobs:
             npm run build
             if [ "$DEPLOY_ASSETS" = 'true' ]; then
               echo "Deploying JS assets"
-              rm -rf $ASSETS && mkdir -p $ASSETS"
+              rm -rf $ASSETS && mkdir -p $ASSETS
               cp -r dist/public/assets $ASSETS
               cp -r dist/public/index.html $INDEX_HTML
             fi
