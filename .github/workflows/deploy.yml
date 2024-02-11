@@ -4,10 +4,6 @@ on:
   pull_request:
     branches:
       - develop
-    types:
-      - closed
-      - opened
-      - edited
 
 env:
   PUBLIC: "~/motsflex/public"
