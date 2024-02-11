@@ -34,13 +34,6 @@ jobs:
           echo "DEPLOY_SERVER=${{ contains(env.LABELS, 'deploy:server') }}" >> $GITHUB_ENV
           echo "DEPLOY_CLIENT=${{ contains(env.LABELS, 'deploy:client') }}" >> $GITHUB_ENV
 
-      - name: Check something to deploy
-        run: |
-          if [[ "${{ env.DEPLOY_ASSETS }}" == 'false' ]]; then
-            echo "Nothing to deploy"
-            exit 1
-          fi
-
       - name: Install Dependencies
         if: ${{ success() }}
         run: npm install
