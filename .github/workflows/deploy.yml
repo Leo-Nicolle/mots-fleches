@@ -33,7 +33,7 @@ jobs:
         run: npm run build
 
       - name: Determine Deployment Type
-        id: deployment_type
+        if: success() && steps.install_dependencies.outcome == 'success' && steps.build.outcome == 'success'
         run: |
           LABELS=$(toJson(github.event.pull_request.labels.*.name))
           echo "DEPLOY_ASSETS=${{ contains(LABELS, 'deploy:assets') }}" >> $GITHUB_ENV
