@@ -44,7 +44,7 @@ jobs:
           port: 22
           envs: DEPLOY_ASSETS,DEPLOY_SERVER,DEPLOY_CLIENT,PUBLIC,ASSETS,INDEX_HTML,DICOS,SERVER
           script: |
-            cd /tmp/mots-fleches
+            cd ~/tmp/mots-fleches
             git pull origin develop
             npm install
             npm run build
