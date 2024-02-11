@@ -158,7 +158,7 @@ watchEffect(() => {
 });
 
 const highlights = computed(() => {
-  if (!validity.value) return [];
+  if (!validity.value || props.mode !== 'check') return [];
   const res = Object.entries(validity.value[props.dir])
     .map(([key, { problem }]) => {
       const [y, x] = key.split("-").map(Number);
