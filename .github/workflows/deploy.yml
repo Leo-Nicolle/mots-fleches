@@ -6,6 +6,8 @@ on:
       - develop
     types:
       - closed
+      - opened
+      - edited
 
 env:
   PUBLIC: "~/motsflex/public"
