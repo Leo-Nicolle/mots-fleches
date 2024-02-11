@@ -6,11 +6,11 @@ on:
       - develop
 
 env:
-  PUBLIC: "~/motsflex/public"
+  PUBLIC: "~/motsflex-save/public"
   ASSETS: "$PUBLIC/assets"
   INDEX_HTML: "$PUBLIC/index.html"
   DICOS: "~/dicos"
-  SERVER: "~/motsflex/server.js"
+  SERVER: "~/motsflex-save/server.js"
   SSH_TARGET: ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}
 
 jobs:
@@ -42,7 +42,7 @@ jobs:
         run: npm run build
 
       - name: Deploy
-        if: ${{ success() }}
+        if: ${{ false && success() }}
         run: |
           if [[ "${{ env.DEPLOY_ASSETS }}" == 'true' ]]; then
             echo "Deploying JS assets"
