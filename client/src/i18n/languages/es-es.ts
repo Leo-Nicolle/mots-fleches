@@ -101,11 +101,15 @@ export const lang = {
         fontFamily: "Fuente",
         fontWeight: "Peso",
         offset: "Desplazamiento",
+        lineSpacing: "Espaciado de línea",
+        baselineShift: 'Desplazamiento',
+        alignmentBaseline: 'Alineación',
     },
     tooltips: {
         incomplete: "esta incompleto",
         nodef: "no tiene definición",
         noarrow: "no tiene flecha",
+        toomanyarrows: "tiene demasiadas flechas",
         add: "Añadir {word} al diccionario",
     },
     alert: {

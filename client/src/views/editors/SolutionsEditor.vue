@@ -1,8 +1,8 @@
 <template>
   <Layout>
-    <template #left-panel v-if="grids.length && style">
-      <OptionsForm v-model="style" @update:modelValue="save" grid format>
-        <SolutionsForm v-model="style" @update:modelValue="save" />
+    <template #left-panel>
+      <OptionsForm v-if="style" v-model="style" grid format>
+        <SolutionsForm v-model="style" />
       </OptionsForm>
     </template>
     <template #body>
@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, toRaw } from "vue";
+import { ref, onMounted, toRaw, watch } from "vue";
 import { useRoute } from "vue-router";
 import Layout from "../../layouts/Main.vue";
 import OptionsForm from "../../components/forms/GridStyleForm.vue";
@@ -75,6 +75,7 @@ function save() {
     api.db.pushStyle(toRaw(style.value) as unknown as SolutionStyle);
   }, 100);
 }
+watch(style, save, { deep: true });
 
 onMounted(() => {
   fetch();

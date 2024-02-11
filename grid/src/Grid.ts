@@ -451,6 +451,15 @@ export class Grid {
         .reduce((acc, bounds) => {
           if (bounds.length < 2) return acc;
           const text = bounds.cells.map((c) => c.text).join('');
+          const myArrows = arrows[i].reduce((sum, { x, y, arrow }) => {
+            const pos = { x: bounds.start.x + x, y: bounds.start.y + y };
+            if (!this.isValid(pos)) return sum;
+            const cell = this.cells[pos.y][pos.x];
+            if (!cell || !this.isDefinition(cell)) return sum;
+            const matches = cell.arrows.reduce((acc, a) => acc + (a === arrow ? 1 : 0), 0);
+            return sum + matches;
+          }, 0);
+
           if (text.length !== bounds.length) {
             acc[`${bounds.start.y}-${bounds.start.x}`] = {
               ...bounds,
@@ -461,17 +470,19 @@ export class Grid {
               ...bounds,
               problem: 'unknown'
             };
-          } else if (!arrows[i].some(({ x, y, arrow }) => {
-            const pos = { x: bounds.start.x + x, y: bounds.start.y + y };
-            if (!this.isValid(pos)) return false;
-            const cell = this.cells[pos.y][pos.x];
-            return cell && this.isDefinition(cell) && cell.arrows.includes(arrow);
-          })) {
+          } else if (myArrows === 0) {
             acc[`${bounds.start.y}-${bounds.start.x}`] = {
               ...bounds,
               problem: 'noarrow'
             };
-          } else if (arrows[i].some(({ x, y, arrow }) => {
+          }
+          else if (myArrows > 1) {
+            acc[`${bounds.start.y}-${bounds.start.x}`] = {
+              ...bounds,
+              problem: 'too-many-arrows'
+            };
+          }
+          else if (arrows[i].some(({ x, y, arrow }) => {
             const pos = { x: bounds.start.x + x, y: bounds.start.y + y };
             if (!this.isValid(pos)) return false;
             const cell = this.cells[pos.y][pos.x];

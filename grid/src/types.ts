@@ -56,7 +56,23 @@ export type TextStyle<T = string> = Font & {
    * Text color
    */
   color: string;
+  /**
+   * Text alignment
+   */
 };
+export type AlignementBaseline = "auto" | "baseline" | "before-edge" | "text-before-edge" | "middle" | "central" | "after-edge" | "text-after-edge" | "ideographic" | "alphabetic" | "hanging" | "mathematical" | "inherit";
+export type LineSpacings = [
+  [number],
+  [number, number],
+  [number, number, number],
+  [number, number, number, number],
+  [number, number],
+  [number, number, number],
+  [number, number, number],
+  [number, number, number, number],
+  [number, number, number, number],
+  [number, number, number, number],
+];
 export type Cell = {
   /**
    * X position of the cell
@@ -175,12 +191,16 @@ export type GridStyle = {
    * Definition style
    */
   definition: TextStyle<number> & {
+    lineSpacings: LineSpacings;
     backgroundColor: string;
   };
   /**
   * Style of the solutions within the grid
   */
-  solutions: TextStyle<number> & { top: number; };
+  solutions: TextStyle<number> & {
+    offset: number;
+    alignmentBaseline: AlignementBaseline;
+  };
   /**
    * Arrow style
    */
@@ -243,7 +263,50 @@ export const defaultPaginationStyle: PaginationStyle = {
     left: '1rem',
   }
 };
-
+export const lineCases: string[] = [
+  '-',
+  '-\n-',
+  '-\n-\n-',
+  '-\n-\n-\n-',
+  '-\n\n-',
+  '-\n\n-\n-',
+  '-\n-\n\n-',
+  '-\n\n-\n-\n-',
+  '-\n-\n\n-\n-',
+  '-\n-\n-\n\n-',
+];
+export const defaultLineSpacings: LineSpacings = [
+  [0],
+  [0, 0],
+  [0, 0, 0],
+  [0, 0, 0, 0],
+  [0, 0],
+  [0, 0, 0],
+  [0, 0, 0],
+  [0, 0, 0, 0],
+  [0, 0, 0, 0],
+  [0, 0, 0, 0],
+];
+export const splitPositions = [
+  0, 0, 0, 0,
+  0.5,
+  1 / 3, 2 / 3,
+  1 / 4,
+  0.5,
+  3 / 4
+];
+export const rightArrowYs = [
+  [0.5, -1],
+  [0.5, -1],
+  [0.5, -1],
+  [0.5, -1],
+  [0.25, 0.75],
+  [1 / 6, 2 / 3],
+  [1 / 3, 5 / 6],
+  [1 / 8, 5 / 8],
+  [0.25, 0.75],
+  [3 / 8, 7 / 8]
+];
 export const defaultStyles: GridStyle = {
   id: 'default',
   name: 'Default',
@@ -257,12 +320,14 @@ export const defaultStyles: GridStyle = {
   },
   solutions: {
     ...defaultTextStyle,
-    size: 1,
-    top: 0
+    alignmentBaseline: 'middle',
+    offset: 0,
+    size: 1
   },
   definition: {
     ...defaultTextStyle,
-    size: 12,
+    lineSpacings: defaultLineSpacings,
+    size: 1,
     backgroundColor: "#ccc",
   },
   arrow: {

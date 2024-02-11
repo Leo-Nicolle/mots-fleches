@@ -1,26 +1,13 @@
 <template>
   <div v-if="grids && solutionStyle">
     <FontLoader :value="solutionStyle.grids.gridN" />
-    <Paper
-      v-for="(gs, i) in gridsPerPage"
-      :key="i"
-      :format="solutionStyle.paper"
-      :showMargins="exportOptions.margins"
-      :page-number="page"
-      :showPagination="exportOptions.pagination"
-      :pagination="solutionStyle.pagination"
-    >
+    <Paper v-for="(gs, i) in gridsPerPage" :key="i" :format="solutionStyle.paper" :showMargins="exportOptions.margins"
+      :page-number="page + i" :showPagination="exportOptions.pagination" :pagination="solutionStyle.pagination">
       <div class="grids">
         <div v-for="(grid, j) in gs" :key="j" class="grid-c">
           <span class="gridN">{{ j + solutionStyle.pagination.startIdx }}</span>
-          <SVGGrid
-            :grid="grid"
-            :focus="nullCell"
-            dir="horizontal"
-            :style="solutionStyle"
-            :export-options="exportOptions"
-            :export-style="exportOptions"
-          />
+          <SVGGrid :grid="grid" :focus="nullCell" dir="horizontal" :style="solutionStyle" :export-options="exportOptions"
+            :export-style="exportOptions" />
         </div>
       </div>
     </Paper>
@@ -38,7 +25,6 @@ import { ExportOptions } from "../types";
 import { getFont } from "../js/useFont";
 
 const emit = defineEmits<{
-  pageCount: number;
   (event: "pageCount", value: number): void;
 }>();
 
@@ -98,11 +84,13 @@ const gridsPerPage = computed(() => {
   flex-direction: column;
   align-items: center;
 }
+
 .gridN {
   font: v-bind(gridNFont);
   margin-bottom: v-bind(gridNMargin);
   color: v-bind(gridNColor);
 }
+
 .grids {
   display: grid;
   align-content: space-around;

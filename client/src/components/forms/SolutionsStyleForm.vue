@@ -1,13 +1,13 @@
 <template>
   <h3>{{ $t("forms.gridNum") }}</h3>
-  <FontSelector v-model="value.grids.gridN" role-prefix="gridN"/>
-  <MarginForm v-model="value.grids.gridN.margin" margin-label role-prefix="margin"/>
+  <FontSelector v-model="value.grids.gridN" role-prefix="gridN" />
+  <MarginForm v-model="value.grids.gridN.margin" margin-label role-prefix="margin" />
   <h3>{{ $t("forms.wordIndex") }}</h3>
-  <FontSelector v-model="value.words" role-prefix="wordIndex"/>
+  <FontSelector v-model="value.words" role-prefix="wordIndex" />
   <h3>{{ $t("forms.wordLength") }}</h3>
-  <FontSelector v-model="value.size" role-prefix="wordLength"/>
+  <FontSelector v-model="value.size" role-prefix="wordLength" />
   <h3>{{ $t("forms.pagination") }}</h3>
-  <PaginationStyle v-model="value.pagination" role-prefix="pagination"/>
+  <PaginationStyle v-model="value.pagination" role-prefix="pagination" />
   <h3>{{ $t("forms.solutionsGrid") }}</h3>
   <n-form-item :label="$t('forms.rows')" path="rows">
     <n-input-number role="rows" v-model:value="value.grids.rows" />
@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, watch, ref } from "vue";
+import { defineProps, defineEmits, watch, toRaw } from "vue";
 import FontSelector from "../fonts/FontSelector.vue";
 import PaginationStyle from "./PaginationStyle.vue";
 import MarginForm from "./MarginForm.vue";
@@ -42,15 +42,13 @@ const emit = defineEmits<{
 }>();
 const value = useModel<SolutionStyle>(props, emit);
 
-watch(value.value, () => {
-  emit("update:modelValue", value.value);
-});
 </script>
 
 <style scoped>
 .n-form {
   flex-direction: column;
 }
+
 .n-color-picker {
   width: 150px;
 }

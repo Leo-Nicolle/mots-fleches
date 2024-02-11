@@ -1,17 +1,9 @@
 <template>
   <n-form-item :label="$t('forms.align')" path="align">
-    <n-select
-      :role="`${rolePrefix}-align`"
-      v-model:value="value.align"
-      :options="alignOptions"
-      placeholder="center"
-    />
+    <n-select :role="`${rolePrefix}-align`" v-model:value="value.align" :options="alignOptions" placeholder="center" />
   </n-form-item>
   <n-form-item :label="$t('forms.startIndex')" path="startIdx">
-    <n-input-number
-      :role="`${rolePrefix}-startIdx`"
-      v-model:value="value.startIdx"
-    />
+    <n-input-number :role="`${rolePrefix}-startIdx`" v-model:value="value.startIdx" />
   </n-form-item>
   <FontSelector v-model="value" :role-prefix="`${rolePrefix}-font`" />
   <MarginForm v-model="value.margin" margin-label :role-prefix="`${rolePrefix}-margin`" />
@@ -54,7 +46,7 @@ const alignOptions = ref([
 
 const value = useModel<PaginationStyle>(props, emit);
 
-watch(value.value, () => {
-  emit("update:modelValue", value.value);
-});
+// watch(value.value, () => {
+//   emit("update:modelValue", value.value);
+// });
 </script>

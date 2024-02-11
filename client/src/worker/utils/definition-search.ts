@@ -27,12 +27,13 @@ export class WordsSearch {
   }
 
   getDefinitions(words: string[]) {
-    return words.reduce((acc, word) => {
-      const res = this.minisearch.search(word, { fuzzy: 0.2, fields: ['title'] })
-        .slice(0, 40);
-      acc.push(...res.map(({ title, text }) => ({ title, text })));
-      return acc;
-    }, [] as { title: string, text: string; }[]);
+    const query = words.length === 1 ? words[0] : {
+      combineWith: 'OR',
+      queries: words
+    };
+    return this.minisearch.search(query, { fuzzy: 0.2, fields: ['title'] })
+      .slice(0, 40)
+      .map(({ title, text }) => ({ title, text }));
   }
 
   setUserDefinitions(userDefinitions: [string, string[]][]) {

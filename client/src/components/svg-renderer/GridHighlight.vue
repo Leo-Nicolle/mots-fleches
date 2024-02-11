@@ -18,7 +18,9 @@
     <span class="heatmap" v-if="mode === 'heatmap'">
       <canvas ref="heatmapref" />
     </span>
-    <span class="gridhighlight" v-if="visible">
+    <span v-for="({ style, key, problem }, i) in highlights" :class="`problem ${problem}`" :key="key" :style="style">
+    </span>
+    <span class="gridhighlight" v-if="visible && tooltip">
       <span class="highlight"> </span>
       <span class="tooltip" @mouseenter="hovered = true" @mouseleave="hovered = false" @mousemove="onMouseMove">
         <span v-if="tooltip === 'unknown'">
@@ -32,6 +34,8 @@
           {{ word }} {{ $t("tooltips.nodef") }}</span>
         <span v-if="tooltip === 'noarrow'">
           {{ word }} {{ $t("tooltips.noarrow") }}</span>
+        <span v-if="tooltip === 'too-many-arrows'">
+          {{ word }} {{ $t("tooltips.toomanyarrows") }}</span>
         <span v-if="tooltip === 'heatmap' && (hotLetters.length || cellHeat.length)">
           {{ hotLetters }}
         </span>
@@ -47,6 +51,7 @@ import {
   defineProps,
   ref,
   toRaw,
+  watch,
   watchEffect,
 } from "vue";
 import {
@@ -58,6 +63,7 @@ import {
   GridValidity,
   nullCell,
 } from "grid";
+import throttle from "lodash.throttle";
 import {
   cellAndBorderSize,
   useTransform,
@@ -65,6 +71,8 @@ import {
 import chroma from "chroma-js";
 import { api } from "../../api";
 import { Mode } from "../../types";
+import { workerController } from "../../worker";
+import { onMounted } from "vue";
 
 
 /**
@@ -83,7 +91,6 @@ const props = defineProps<{
   zoom: number;
   offset: [number, number];
   dir: Direction;
-  validity?: GridValidity;
 }>();
 const emit = defineEmits<{
   /**
@@ -99,12 +106,21 @@ const hovered = ref(false);
 const hotLetters = ref("");
 const cellHeat = ref("");
 const width = ref<string | number>(0);
+const validity = ref<GridValidity>();
 const height = ref<string | number>(0);
 const visible = computed(() => {
   return !Grid.equal(props.cell, nullCell) && !props.cell.definition;
 });
 const cellWidth = ref(0);
 const tooltip = ref<string>("");
+function refreshValidity() {
+  workerController.checkGrid(props.grid);
+}
+const throttledRefresValidity = throttle(refreshValidity, 60);
+workerController.on("check-result", (data) => {
+  validity.value = data;
+});
+
 watchEffect(() => {
   if (hovered.value) return;
   if (props.mode === "heatmap") {
@@ -118,10 +134,11 @@ watchEffect(() => {
     return;
   }
   const bounds = props.grid.getBounds(props.cell, props.dir);
-  if (!bounds || !bounds.length || bounds.length === 1 || !props.validity) {
+  if (!bounds || !bounds.length || bounds.length === 1 || !validity.value) {
     transform.value = "";
     width.value = 0;
     height.value = 0;
+    tooltip.value = "";
     return;
   }
   const { cells, length } = bounds;
@@ -135,9 +152,34 @@ watchEffect(() => {
     props.dir === "horizontal" ? 1 : length
   );
   transform.value = useTransform(props, cells[0]);
-  const validity =
-    props.validity[props.dir][`${bounds.start.y}-${bounds.start.x}`];
-  tooltip.value = validity ? validity.problem : "";
+  const cellVal =
+    validity.value[props.dir][`${bounds.start.y}-${bounds.start.x}`];
+  tooltip.value = cellVal ? cellVal.problem : "";
+});
+
+const highlights = computed(() => {
+  if (!validity.value || props.mode !== 'check') return [];
+  const res = Object.entries(validity.value[props.dir])
+    .map(([key, { problem }]) => {
+      const [y, x] = key.split("-").map(Number);
+      const bounds = props.grid.getBounds({ x, y }, props.dir);
+      return {
+        key,
+        style: {
+          width: cellAndBorderSize(
+            props,
+            props.dir === "horizontal" ? bounds.length : 1
+          ),
+          height: cellAndBorderSize(
+            props,
+            props.dir === "horizontal" ? 1 : bounds.length
+          ),
+          transform: useTransform(props, bounds.cells[0])
+        },
+        problem,
+      };
+    });
+  return res;
 });
 
 function getLetters(cell: Cell, heatmapLetters: CellProba[][]) {
@@ -210,8 +252,13 @@ async function refreshHeatmap() {
 
 watchEffect(() => {
   hotLetters.value = getLetters(props.cell, props.cellProbas);
-  // cellHeat.value = getHeat(props.cell, props.cellProbas);
   refreshHeatmap();
+});
+watch([props.mode, props.grid], () => {
+  throttledRefresValidity();
+});
+onMounted(() => {
+  throttledRefresValidity();
 });
 function onMouseMove(evt: MouseEvent) { }
 function add() {
@@ -220,6 +267,14 @@ function add() {
     emit("update");
   });
 }
+/*
+"rgba(255, 107, 107, 0.8)",
+"rgba(255, 209, 102, 0.8)",
+"rgba(6, 214, 160, 0.8)",
+"rgba(17, 138, 178, 0.8)",
+"rgba(255, 127, 80, 0.8)",
+"rgba(94, 96, 206, 0.8)"
+*/
 </script>
 
 <style>
@@ -299,15 +354,23 @@ function add() {
   opacity: 0.5;
 }
 
+.problem {
+  z-index: -1;
+}
+
 .incomplete {
-  fill: rgba(255, 107, 107, 0.8);
+  background-color: rgba(255, 107, 107, 0.8);
 }
 
 .nodef {
-  fill: rgba(17, 138, 178, 0.8);
+  background-color: rgba(17, 138, 178, 0.8);
 }
 
 .noarrow {
-  fill: rgba(255, 209, 102, 0.8);
+  background-color: rgba(255, 209, 102, 0.8);
+}
+
+.too-many-arrows {
+  background-color: rgba(6, 214, 160, 0.8);
 }
 </style>
