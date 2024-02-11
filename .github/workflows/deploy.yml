@@ -5,7 +5,6 @@ on:
     branches:
       - develop
 
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -28,15 +27,15 @@ jobs:
 
       - name: Deploy
         uses: appleboy/ssh-action@master
-         env:
-            DEPLOY_ASSETS: "${{ env.DEPLOY_ASSETS }}"
-            DEPLOY_SERVER: "${{ env.DEPLOY_SERVER }}"
-            DEPLOY_CLIENT: "${{ env.DEPLOY_CLIENT }}"
-            PUBLIC: "~/motsflex-save/public"
-            ASSETS: "$PUBLIC/assets"
-            INDEX_HTML: "$PUBLIC/index.html"
-            DICOS: "~/dicos"
-            SERVER: "~/motsflex-save/server.js"
+        env:
+          DEPLOY_ASSETS: "${{ env.DEPLOY_ASSETS }}"
+          DEPLOY_SERVER: "${{ env.DEPLOY_SERVER }}"
+          DEPLOY_CLIENT: "${{ env.DEPLOY_CLIENT }}"
+          PUBLIC: "~/motsflex-save/public"
+          ASSETS: "$PUBLIC/assets"
+          INDEX_HTML: "$PUBLIC/index.html"
+          DICOS: "~/dicos"
+          SERVER: "~/motsflex-save/server.js"
 
         with:
           host: ${{ secrets.SERVER_HOST }}
