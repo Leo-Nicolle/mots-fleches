@@ -4,6 +4,8 @@ on:
   pull_request:
     branches:
       - develop
+    types:
+      - closed
 
 env:
   PUBLIC: "~/motsflex/public"
@@ -16,7 +18,7 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -26,12 +28,6 @@ jobs:
         with:
           node-version: "16"
 
-      - name: Install Dependencies
-        run: npm install
-
-      - name: Build
-        run: npm run build
-
       - name: Determine Deployment Type
         if: ${{ success() }}
         run: |
@@ -39,8 +35,20 @@ jobs:
           echo "DEPLOY_ASSETS=${{ contains(env.LABELS, 'deploy:assets') }}" >> $GITHUB_ENV
           echo "DEPLOY_SERVER=${{ contains(env.LABELS, 'deploy:server') }}" >> $GITHUB_ENV
           echo "DEPLOY_CLIENT=${{ contains(env.LABELS, 'deploy:client') }}" >> $GITHUB_ENV
+          if [[ "${{ env.DEPLOY_ASSETS || env.DEPLOY_SERVER || env.DEPLOY_CLIENT }} " == 'false' ]]; then
+            core.setFailed("Nothing to deploy");
+          fi
+
+      - name: Install Dependencies
+        if: ${{ success() }}
+        run: npm install
+
+      - name: Build
+        if: ${{ success() }}
+        run: npm run build
 
       - name: Deploy
+        if: ${{ success() }}
         run: |
           echo "Github ref: $GITHUB_REF"
           if [[ "${{ env.DEPLOY_ASSETS }}" == 'true' ]]; then
