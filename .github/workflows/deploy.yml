@@ -29,6 +29,7 @@ jobs:
       - name: Determine Deployment Type
         if: ${{ success() }}
         run: |
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
           echo "LABELS=${{ toJson(github.event.pull_request.labels.*.name) }}" >> $GITHUB_ENV
           echo "DEPLOY_ASSETS=${{ contains(env.LABELS, 'deploy:assets') }}" >> $GITHUB_ENV
           echo "DEPLOY_SERVER=${{ contains(env.LABELS, 'deploy:server') }}" >> $GITHUB_ENV
