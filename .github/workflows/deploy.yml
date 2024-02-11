@@ -1,6 +1,9 @@
 name: Deploy
 
 on:
+  push:
+    branches:
+      - "*"
   pull_request:
     branches:
       - develop
