@@ -33,7 +33,7 @@ jobs:
           echo "DEPLOY_ASSETS=${{ contains(env.LABELS, 'deploy:assets') }}" >> $GITHUB_ENV
           echo "DEPLOY_SERVER=${{ contains(env.LABELS, 'deploy:server') }}" >> $GITHUB_ENV
           echo "DEPLOY_CLIENT=${{ contains(env.LABELS, 'deploy:client') }}" >> $GITHUB_ENV
-          if [[ "${{ env.DEPLOY_ASSETS || env.DEPLOY_SERVER || env.DEPLOY_CLIENT }} " == 'false' ]]; then
+          if [[ "${{ env.DEPLOY_ASSETS }} " == 'false' ]]; then
             core.setFailed("Nothing to deploy");
           fi
 
