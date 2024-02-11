@@ -6,10 +6,6 @@ on:
       - develop
 
 env:
-  PUBLIC: "~/motsflex-save/public"
-  ASSETS: "$PUBLIC/assets"
-  INDEX_HTML: "$PUBLIC/index.html"
-  DICOS: "~/dicos"
   SERVER: "~/motsflex-save/server.js"
   SSH_TARGET: ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}
 
@@ -33,30 +29,42 @@ jobs:
           echo "DEPLOY_SERVER=${{ contains(toJson(github.event.pull_request.labels.*.name), 'deploy:server') }}" >> $GITHUB_ENV
           echo "DEPLOY_CLIENT=${{ contains(toJson(github.event.pull_request.labels.*.name), 'deploy:client') }}" >> $GITHUB_ENV
 
-      # - name: Install Dependencies
-      #   if: ${{ success() }}
-      #   run: npm install
-
-      # - name: Build
-      #   if: ${{ success() }}
-      #   run: npm run build
-
+      steps:       
       - name: Deploy
-        if: ${{ success() }}
-        run: |
-          if [[ "${{ env.DEPLOY_ASSETS }}" == 'true' ]]; then
-            echo "Deploying JS assets"
-            ssh ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} "rm -rf $ASSETS && mkdir -p $ASSETS"
-            # scp -r dist/public/assets $SSH_TARGET:$ASSETS
-            # scp -r dist/public/index.html $SSH_TARGET:$INDEX_HTML
-          fi
-          # if [[ "${{ env.DEPLOY_CLIENT }}" == 'true' ]]; then
-          #   echo "Deploying full client"
-          #   ssh $SSH_TARGET "rm -rf $PUBLIC && mkdir -p $PUBLIC"
-          #   scp -r dist/public $SSH_TARGET:$PUBLIC
-          #   ssh $SSH_TARGET "cp $DICOS/*.zip $ASSETS"
-          # fi
-          # if [[ "${{ env.DEPLOY_SERVER }}" == 'true' ]]; then
-          #   echo "Deploying server code"
-          #   scp -r dist/server.js $SSH_TARGET:$SERVER
-          # fi
+        uses: appleboy/ssh-action@master
+         env:
+            DEPLOY_ASSETS: "${{ env.DEPLOY_ASSETS }}"
+            DEPLOY_SERVER: "${{ env.DEPLOY_SERVER }}"
+            DEPLOY_CLIENT: "${{ env.DEPLOY_CLIENT }}"
+            PUBLIC: "~/motsflex-save/public"
+            ASSETS: "$PUBLIC/assets"
+            INDEX_HTML: "$PUBLIC/index.html"
+            DICOS: "~/dicos"
+
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          envs: DEPLOY_ASSETS,DEPLOY_SERVER,DEPLOY_CLIENT,PUBLIC,ASSETS,INDEX_HTML,DICOS
+          script: |
+            cd /tmp/mots-fleches
+            git pull origin develop
+            npm install
+            npm run build
+            if [ "$DEPLOY_ASSETS" = 'true' ]; then
+              echo "Deploying JS assets"
+              rm -rf $ASSETS && mkdir -p $ASSETS"
+              cp -r dist/public/assets $ASSETS
+              cp -r dist/public/index.html $INDEX_HTML
+            fi
+            if [ "$DEPLOY_CLIENT" = 'true' ]; then
+              echo "Deploying full client"
+              rm -rf $PUBLIC && mkdir -p $PUBLIC
+              cp -r dist/public $PUBLIC
+              cp $DICOS/*.zip $ASSETS
+            fi
+            if [ "$DEPLOY_SERVER" = 'true' ]; then
+              echo "Deploying server code"
+              cp -r dist/server.js $SERVER
+            fi
