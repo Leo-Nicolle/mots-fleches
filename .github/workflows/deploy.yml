@@ -16,7 +16,9 @@ jobs:
     if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+        with:
+          ref: develop
       - name: Setup ssh
         run: |
           mkdir -p ~/.ssh/ && touch ~/.ssh/known_hosts
