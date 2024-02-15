@@ -2,8 +2,10 @@ name: Deploy
 
 on:
   pull_request:
-    types: [closed]
+    types:
+      - closed
     merged: true
+    open: false
     branches:
       - master
 
