@@ -13,11 +13,6 @@ jobs:
       KEY: /tmp/private-key
       DIR: ~/motsflex-save
       DICOS: ~/dicos
-      PUBLIC: ${DIR}/public
-      SERVER: ${DIR}/server.js
-      ASSETS: ${PUBLIC}/assets
-      INDEX_HTML: ${PUBLIC}/index.html
-
     # if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
     steps:
       - name: Checkout Repository
@@ -55,6 +50,11 @@ jobs:
       - name: Deploy
         if: ${{ success() }}
         run: |
+          echo "PUBLIC=$DIR/public" >> $GITHUB_ENV
+          echo "SERVER=$DIR/server.js" >> $GITHUB_ENV
+          echo "ASSETS=$PUBLIC/assets" >> $GITHUB_ENV
+          echo "INDEX_HTML=$PUBLIC/index.html" >> $GITHUB_ENV
+
           if [ "$DEPLOY_ASSETS" = 'true' ]; then
             echo "Deploying JS assets"
             ssh -i $KEY $TARGET "rm -rf $ASSETS && mkdir -p $ASSETS"
