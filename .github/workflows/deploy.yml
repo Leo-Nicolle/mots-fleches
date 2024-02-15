@@ -11,9 +11,12 @@ jobs:
     env:
       TARGET: ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}
       KEY: /tmp/private-key
-      PUBLIC: "~/motsflex-save/public"
+      DIR: "~/motsflex-save"
       DICOS: "~/dicos"
-      SERVER: "~/motsflex-save/server.js"
+      PUBLIC: "$DIR/public"
+      SERVER: "$DIR/server.js"
+      ASSETS: "$PUBLIC/assets"
+      INDEX_HTML: "$PUBLIC/index.html"
 
     # if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
     steps:
@@ -43,24 +46,20 @@ jobs:
 
       - name: Install Dependencies
         if: ${{ success() }}
-        run: npm install
+        run: npm ci
 
       - name: Build
         if: ${{ success() }}
         run: npm run build
 
       - name: Deploy
-        env:
-          ASSETS: "$PUBLIC/assets"
-          INDEX_HTML: "$PUBLIC/index.html"
-
         if: ${{ success() }}
         run: |
           if [ "$DEPLOY_ASSETS" = 'true' ]; then
             echo "Deploying JS assets"
-            ssh -i $KEY $TARGET "rm -rf $ASSETS && mkdir -p $ASSETS"
-            scp -i $KEY -r dist/public/assets $TARGET:$ASSETS
-            scp -i $KEY -r dist/public/index.html $TARGET:$INDEX_HTML
+            ssh -i $KEY $TARGET "rm -rf ${{ env.ASSETS }} && mkdir -p ${{ env.ASSETS }}"
+            scp -i $KEY -r dist/public/assets $TARGET:${{ ASSETS }}
+            scp -i $KEY -r dist/public/index.html $TARGET:${{$ INDEX_HTML }}
 
             # scp "${{ env.SSH }} "
             # rm -rf $PUBLIC/assets && mkdir -p $PUBLIC/assets
