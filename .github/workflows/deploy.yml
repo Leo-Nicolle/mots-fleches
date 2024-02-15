@@ -13,7 +13,7 @@ jobs:
       KEY: /tmp/private-key
       DIR: ~/motsflex-save
       DICOS: ~/dicos
-    # if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -39,9 +39,9 @@ jobs:
           echo "SERVER=${{ env.DIR }}/server.js" >> $GITHUB_ENV
           echo "ASSETS=${{ env.DIR }}/public/assets" >> $GITHUB_ENV
           echo "INDEX_HTML=${{ env.DIR }}/public/index.html" >> $GITHUB_ENV
-          # if [[ ${{env.DEPLOY_ASSETS}} ='false' && ${{env.DEPLOY_SERVER}} ='false' && ${{env.DEPLOY_CLIENT}} ='false' ]]; then
-            # exit 1;
-          # fi
+          if [[ ${{env.DEPLOY_ASSETS}} ='false' && ${{env.DEPLOY_SERVER}} ='false' && ${{env.DEPLOY_CLIENT}} ='false' ]]; then
+            exit 1;
+          fi
 
       - name: Install Dependencies
         if: ${{ success() }}
