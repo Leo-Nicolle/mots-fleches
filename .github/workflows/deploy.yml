@@ -11,7 +11,7 @@ jobs:
     env:
       TARGET: ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}
       KEY: /tmp/private-key
-      DIR: ~/motsflex-save
+      DIR: ~/motsflex
       DICOS: ~/dicos
     if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
     steps:
