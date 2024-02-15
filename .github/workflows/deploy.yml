@@ -50,10 +50,10 @@ jobs:
       - name: Deploy
         if: ${{ success() }}
         run: |
-          echo "PUBLIC=$DIR/public" >> $GITHUB_ENV
-          echo "SERVER=$DIR/server.js" >> $GITHUB_ENV
-          echo "ASSETS=$PUBLIC/assets" >> $GITHUB_ENV
-          echo "INDEX_HTML=$PUBLIC/index.html" >> $GITHUB_ENV
+          echo "PUBLIC=${{ env.DIR }}/public" >> $GITHUB_ENV
+          echo "SERVER=${{ env.DIR }}/server.js" >> $GITHUB_ENV
+          echo "ASSETS=${{ env.PUBLIC }}/assets" >> $GITHUB_ENV
+          echo "INDEX_HTML=${{ env.PUBLIC }}/index.html" >> $GITHUB_ENV
 
           if [ "$DEPLOY_ASSETS" = 'true' ]; then
             echo "Deploying JS assets"
