@@ -41,10 +41,14 @@ jobs:
           echo "ASSETS=${{ env.DIR }}/public/assets" >> $GITHUB_ENV
           echo "INDEX_HTML=${{ env.DIR }}/public/index.html" >> $GITHUB_ENV
 <<<<<<< HEAD
+<<<<<<< HEAD
           if [[ ${{env.DEPLOY_ASSETS}} ='false' && ${{env.DEPLOY_SERVER}} ='false' && ${{env.DEPLOY_CLIENT}} ='false' ]]; then
 =======
           if [[ $DEPLOY_ASSETS == 'false' && $DEPLOY_SERVER == 'false' && $DEPLOY_CLIENT == 'false' ]]; then
 >>>>>>> @{-1}
+=======
+          if [[ $DEPLOY_ASSETS == 'false' && $DEPLOY_SERVER == 'false' && $DEPLOY_CLIENT == 'false' ]]; then
+>>>>>>> a4921900da1ee53b45ab80cbc2c5e314377eacaf
             exit 1;
           fi
 
