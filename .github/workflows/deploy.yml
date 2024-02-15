@@ -41,7 +41,7 @@ jobs:
           echo "SERVER=${{ env.DIR }}/server.js" >> $GITHUB_ENV
           echo "ASSETS=${{ env.DIR }}/public/assets" >> $GITHUB_ENV
           echo "INDEX_HTML=${{ env.DIR }}/public/index.html" >> $GITHUB_ENV
-          if [[ $DEPLOY_ASSETS ='false' && $DEPLOY_SERVER ='false' && $DEPLOY_CLIENT ='false' ]]; then
+          if [[ $DEPLOY_ASSETS == 'false' && $DEPLOY_SERVER == 'false' && $DEPLOY_CLIENT == 'false' ]]; then
             exit 1;
           fi
 
