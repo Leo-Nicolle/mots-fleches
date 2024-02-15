@@ -21,8 +21,10 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
-      - name: Setup ssh key
+      - name: Setup ssh
         run: |
+          mkdir -p ~/.ssh/ && touch ~/.ssh/known_hosts
+          ssh-keyscan ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > $KEY
 
       - name: Setup Node.js
@@ -74,7 +76,7 @@ jobs:
           #   cp -r dist/server.js $SERVER
           # fi
       - name: Cleanup
-        run: "rm -f $KEY"
+        run: "rm -f $KEY && rm -rf ~/.ssh"
 
       # - name: Deploy
       #   uses: appleboy/ssh-action@master
