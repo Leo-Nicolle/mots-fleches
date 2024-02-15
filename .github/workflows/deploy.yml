@@ -39,13 +39,13 @@ jobs:
             # exit 1;
           # fi
 
-      - name: Install Dependencies
-        if: ${{ success() }}
-        run: npm ci
+      # - name: Install Dependencies
+      #   if: ${{ success() }}
+      #   run: npm ci
 
-      - name: Build
-        if: ${{ success() }}
-        run: npm run build
+      # - name: Build
+      #   if: ${{ success() }}
+      #   run: npm run build
 
       - name: Deploy
         if: ${{ success() }}
@@ -54,12 +54,12 @@ jobs:
           echo "SERVER=${{ env.DIR }}/server.js" >> $GITHUB_ENV
           echo "ASSETS=${{ env.PUBLIC }}/assets" >> $GITHUB_ENV
           echo "INDEX_HTML=${{ env.PUBLIC }}/index.html" >> $GITHUB_ENV
-
+          echo " assets $ASSETS public $PUBLIC server $SERVER"
           if [ "$DEPLOY_ASSETS" = 'true' ]; then
             echo "Deploying JS assets"
-            ssh -i $KEY $TARGET "rm -rf $ASSETS && mkdir -p $ASSETS"
-            scp -i $KEY -r dist/public/assets "$TARGET:$ASSETS"
-            scp -i $KEY -r dist/public/index.html "$TARGET:$INDEX_HTML"
+            # ssh -i $KEY $TARGET "rm -rf $ASSETS && mkdir -p $ASSETS"
+            # scp -i $KEY -r dist/public/assets "$TARGET:$ASSETS"
+            # scp -i $KEY -r dist/public/index.html "$TARGET:$INDEX_HTML"
 
             # scp "${{ env.SSH }} "
             # rm -rf $PUBLIC/assets && mkdir -p $PUBLIC/assets
