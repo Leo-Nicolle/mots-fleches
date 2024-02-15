@@ -12,8 +12,6 @@ jobs:
       TARGET: ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}
       KEY: /tmp/private-key
       PUBLIC: "~/motsflex-save/public"
-      ASSETS: "${{ env.PUBLIC }}/assets"
-      INDEX_HTML: "${{ env.PUBLIC }}/index.html"
       DICOS: "~/dicos"
       SERVER: "~/motsflex-save/server.js"
 
@@ -52,6 +50,10 @@ jobs:
         run: npm run build
 
       - name: Deploy
+        env:
+          ASSETS: "$PUBLIC/assets"
+          INDEX_HTML: "$PUBLIC/index.html"
+
         if: ${{ success() }}
         run: |
           if [ "$DEPLOY_ASSETS" = 'true' ]; then
