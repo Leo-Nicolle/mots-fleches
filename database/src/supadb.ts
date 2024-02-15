@@ -1,7 +1,7 @@
-import { Grid, GridOptions, GridState, defaultOptions, defaultSolutionOptions } from "grid";
+import { Grid, GridStyle, GridState, defaultStyles, defaultSolutionStyle } from "grid";
 import { Database } from "./db";
-import { SupabaseClient, createClient } from '@supabase/supabase-js'
-import { SBSchema } from "./types";
+import { SupabaseClient, createClient } from '@supabase/supabase-js';
+import { Font, SBSchema } from "./types";
 
 
 export class SupaDB extends Database {
@@ -22,7 +22,7 @@ export class SupaDB extends Database {
         persistSession: true,
         detectSessionInUrl: false,
       }
-    })
+    });
     this.supabase.auth.getSession()
       .then(({ data }) => {
         if (!data) return;
@@ -36,20 +36,20 @@ export class SupaDB extends Database {
         return;
       }
       this.userid = session.user.id;
-      const opts = await this.getOption(defaultOptions.id);
+      const opts = await this.getStyle(defaultStyles.id);
       if (!opts) {
-        await this.pushOption(defaultOptions);
+        await this.pushStyle(defaultStyles);
       }
-      const sOpts = await this.getOption(defaultSolutionOptions.id);
+      const sOpts = await this.getStyle(defaultSolutionStyle.id);
       if (!sOpts) {
-        await this.pushOption(defaultSolutionOptions);
+        await this.pushStyle(defaultSolutionStyle);
       }
     });
   }
 
   async getGrids() {
     const { data } = await this.supabase.from('Grids').select();
-    return data!.map(({ data }) => data)
+    return data!.map(({ data }) => data);
   }
 
   async pushGrid(g: Grid) {
@@ -80,38 +80,39 @@ export class SupaDB extends Database {
     return data && data.length ? data[0].data : undefined;
   }
 
-  async getOptions() {
+  async getStyles() {
     const { data, error } = await this.supabase.from('Options').select();
     if (!error && data && !data.length) {
-      // create default options
-      await this.pushOption(defaultOptions);
-      await this.pushOption(defaultSolutionOptions);
+      // create default style
+      await this.pushStyle(defaultStyles);
+      await this.pushStyle(defaultSolutionStyle);
     }
     return data!.flatMap(({ data }) => data);
   }
 
-  async getOption(id: string) {
+  async getStyle(id: string) {
     const { data } = await this.supabase.from('Options')
       .select('id, data')
       .eq('id', id);
-    return data && data.length ? data[0].data : undefined;
+    const option = data && data.length ? data[0].data : undefined;
+    return option;
   }
 
-  async pushOption(options: GridOptions) {
+  async pushStyle(style: GridStyle) {
     await this.supabase.from('Options').upsert({
-      id: options.id,
+      id: style.id,
       created: new Date(Date.now()).toISOString(),
-      data: options,
+      data: style,
       userid: this.userid,
     });
-    return options.id;
+    return style.id;
   }
 
-  async updateOption(option: GridOptions) {
-    return await this.pushOption(option);
+  async updateOption(option: GridStyle) {
+    return await this.pushStyle(option);
   }
 
-  async deleteOption(optionId: string) {
+  async deleteStyle(optionId: string) {
     await this.supabase.from('Options').delete()
       .eq('id', optionId);
   }
@@ -144,8 +145,64 @@ export class SupaDB extends Database {
     });
   }
 
+  async getBannedWords() {
+    const { data } = await this.supabase.from('BannedWords').select();
+    return data!.flatMap(({ data }) => data);
+  }
+
+  async getBannedWord(id: string) {
+    const words = await this.getBannedWords();
+    return words.find(w => w === id);
+  }
+
+  async pushBannedWord(word: string) {
+    const words = await this.getBannedWords();
+    words.push(word);
+    await this.supabase.from('BannedWords').upsert({
+      userid: this.userid,
+      data: words,
+    });
+    return word;
+  }
+
+  async deleteBannedWord(wordId: string) {
+    const words = (await this.getWords()).filter(w => w !== wordId);
+    await this.supabase.from('Words').upsert({
+      userid: this.userid,
+      data: words,
+    });
+  }
+
+  async getFonts() {
+    const { data } = await this.supabase.from('Fonts').select();
+    return data!.flatMap(({ data }) => data);
+  }
+
+  async getFont(id: string) {
+    const fonts = await this.getFonts();
+    return fonts.find(f => f.id === id);
+  }
+
+  async pushFont(font: Font) {
+    const fonts = await this.getFonts();
+    fonts.push(font);
+    await this.supabase.from('Fonts').upsert({
+      userid: this.userid,
+      data: fonts,
+    });
+    return font.family;
+  }
+
+  async deleteFont(fontId: string) {
+    const fonts = (await this.getFonts()).filter(f => f.id !== fontId);
+    await this.supabase.from('Fonts').upsert({
+      userid: this.userid,
+      data: fonts,
+    });
+  }
+
   async isSignedIn() {
-    const { data } = await this.supabase.auth.getSession()
+    const { data } = await this.supabase.auth.getSession();
     if (!data) return false;
     return !!data.session && !!data.session.access_token;
   }

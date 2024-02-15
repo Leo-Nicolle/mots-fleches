@@ -1,10 +1,13 @@
 import { computed } from 'vue';
 
-export function useModel(props: any, emit: any) {
+type modValProp<T> = {
+  modelValue: T;
+};
+export function useModel<T = any>(props: modValProp<T>, emit: any) {
   return computed({
     get: () => props.modelValue,
     set: (value) => {
-      return emit('update:modelValue', value);
+      return emit('update:modelValue', value as T);
     }
   });
 }

@@ -10,6 +10,13 @@ export function createApp() {
   app.use(cors());
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json());
+  app.use((req, res, next) => {
+    res.append("Access-Control-Allow-Origin", ["*"]);
+    res.append("Cross-Origin-Opener-Policy", "same-origin");
+    res.append("Cross-Origin-Embedder-Policy", "require-corp");
+    next();
+  });
+
   if (existsSync(resolve(__dirname, "public"))) {
     console.log("public folder", resolve(__dirname, "public"));
     app.use(express.static(resolve(__dirname, "public")));

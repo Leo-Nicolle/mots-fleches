@@ -61,11 +61,11 @@ export class Grid {
    */
   public created: number;
   /**
-   * Id of the options(db)
-   * @see GridOptions
+   * Id of the style(db)
+   * @see GridStyle
    * Might be removed soon with books
    */
-  public optionsId: string;
+  public styleId: string;
 
   /**
    * Grid constructor
@@ -78,7 +78,7 @@ export class Grid {
     this.rows = rows;
     this.comment = '';
     this.title = '';
-    this.optionsId = 'default';
+    this.styleId = 'default';
     this.id = id || uuid();
     this.created = Date.now();
     this.cells = new Array(rows)
@@ -180,9 +180,6 @@ export class Grid {
   static setArrow(cell: Cell, index: number, direction: ArrowDir): void {
     if (!cell.arrows) {
       cell.arrows = ['none', 'none', 'none'];
-    }
-    if (!isSplited(cell)) {
-      cell.arrows[1] = 'none';
     }
     cell.arrows[index] = direction;
   }
@@ -362,7 +359,7 @@ export class Grid {
       comment: this.comment,
       created: this.created,
       title: this.title,
-      optionsId: this.optionsId
+      styleId: this.styleId
     };
     return JSON.stringify(gridState);
   }
@@ -372,7 +369,7 @@ export class Grid {
    * @returns A new grid
    */
   static unserialize(s: string) {
-    const { rows, cols, comment, title, id, cells, created, optionsId } = JSON.parse(s) as GridState
+    const { rows, cols, comment, title, id, cells, created, styleId } = JSON.parse(s) as GridState;
     const res = new Grid(rows, cols, id);
     cells.forEach((row, i) => {
       row.forEach((cell, j) => {
@@ -384,8 +381,19 @@ export class Grid {
     res.title = title;
     res.comment = comment;
     res.created = created;
-    res.optionsId = optionsId;
+    res.styleId = styleId;
     return res;
+  }
+
+  copyFrom(grid: Grid) {
+    this.rows = grid.rows;
+    this.cols = grid.cols;
+    this.comment = grid.comment;
+    this.title = grid.title;
+    this.styleId = grid.styleId;
+    this.id = grid.id;
+    this.created = grid.created;
+    this.cells = grid.cells.map(row => row.map(cell => ({ ...cell })));
   }
   /**
    * Creates a new cell
@@ -427,7 +435,7 @@ export class Grid {
   }
 
   check(words: Map<string, number>): GridValidity {
-    const arrows: { x: number; y: number; arrow: ArrowDir }[][] = [
+    const arrows: { x: number; y: number; arrow: ArrowDir; }[][] = [
       [
         { x: -1, y: 0, arrow: 'right' },
         { x: 0, y: -1, arrow: 'downright' },
@@ -438,12 +446,20 @@ export class Grid {
       ]
     ];
 
-
     const [horizontal, vertical] = [this.getWords('horizontal'), this.getWords('vertical')]
       .map((boundsVH, i) => boundsVH
         .reduce((acc, bounds) => {
           if (bounds.length < 2) return acc;
           const text = bounds.cells.map((c) => c.text).join('');
+          const myArrows = arrows[i].reduce((sum, { x, y, arrow }) => {
+            const pos = { x: bounds.start.x + x, y: bounds.start.y + y };
+            if (!this.isValid(pos)) return sum;
+            const cell = this.cells[pos.y][pos.x];
+            if (!cell || !this.isDefinition(cell)) return sum;
+            const matches = cell.arrows.reduce((acc, a) => acc + (a === arrow ? 1 : 0), 0);
+            return sum + matches;
+          }, 0);
+
           if (text.length !== bounds.length) {
             acc[`${bounds.start.y}-${bounds.start.x}`] = {
               ...bounds,
@@ -454,17 +470,19 @@ export class Grid {
               ...bounds,
               problem: 'unknown'
             };
-          } else if (!arrows[i].some(({ x, y, arrow }) => {
-            const pos = { x: bounds.start.x + x, y: bounds.start.y + y };
-            if (!this.isValid(pos)) return false;
-            const cell = this.cells[pos.y][pos.x];
-            return cell && this.isDefinition(cell) && cell.arrows.includes(arrow);
-          })) {
+          } else if (myArrows === 0) {
             acc[`${bounds.start.y}-${bounds.start.x}`] = {
               ...bounds,
               problem: 'noarrow'
             };
-          } else if (arrows[i].some(({ x, y, arrow }) => {
+          }
+          else if (myArrows > 1) {
+            acc[`${bounds.start.y}-${bounds.start.x}`] = {
+              ...bounds,
+              problem: 'too-many-arrows'
+            };
+          }
+          else if (arrows[i].some(({ x, y, arrow }) => {
             const pos = { x: bounds.start.x + x, y: bounds.start.y + y };
             if (!this.isValid(pos)) return false;
             const cell = this.cells[pos.y][pos.x];
@@ -473,7 +491,8 @@ export class Grid {
             if (arrowIndex < 0) return false;
             const lines = cell.text.split('\n\n');
             const lineIndex = arrowIndex === 2 ? 1 : 0;
-            return !lines[lineIndex] || !lines[lineIndex].length;
+            return !lines[lineIndex] || !lines[lineIndex].length
+              || lines[lineIndex].match(/^\s+$/);
           })) {
             acc[`${bounds.start.y}-${bounds.start.x}`] = {
               ...bounds,

@@ -9,7 +9,12 @@ const onMessage = (event: MessageEvent) => {
 export const usePrintMessage = () => {
   window.addEventListener("message", onMessage);
 };
-
+export const sendReadyMessage = () => {
+  window.parent.postMessage("print-ready", location.origin);
+};
+export const sendDoneMessage = () => {
+  window.parent.postMessage("print-done", location.origin);
+};
 export const cleanupPrintMessage = () => {
   window.removeEventListener("message", onMessage);
 };

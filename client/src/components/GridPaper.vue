@@ -1,11 +1,17 @@
 <template>
-  <Paper :format="options.paper" :showMargins="exportOptions.margins">
+  <Paper
+    :format="style.paper"
+    :showMargins="exportOptions.margins"
+    :showPagination="!!exportOptions.pagination"
+    :pagination="pagination"
+    :pageNumber="page"
+  >
     <SVGGrid
-      v-if="grid && options"
+      v-if="grid && style"
       :grid="grid"
       :focus="nullCell"
       dir="horizontal"
-      :options="options"
+      :style="style"
       :export-options="exportOptions"
     />
   </Paper>
@@ -15,7 +21,7 @@
 import { defineProps } from "vue";
 import SVGGrid from "./svg-renderer/Grid.vue";
 import Paper from "./Paper.vue";
-import { Grid, GridOptions, nullCell } from "grid";
+import { Grid, GridStyle, nullCell, PaginationStyle } from "grid";
 import { ExportOptions } from "../types";
 /**
  * Component to render a grid (for printing)
@@ -28,11 +34,13 @@ const props = defineProps<{
   /**
    * The styles to render the grid
    */
-  options: GridOptions;
+  style: GridStyle;
   /**
    * What to export
    */
   exportOptions: ExportOptions;
+  pagination?: PaginationStyle;
+  page?: number;
 }>();
 </script>
 

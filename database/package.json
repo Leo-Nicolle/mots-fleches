@@ -1,29 +1,27 @@
 {
   "name": "database",
   "version": "1.0.0",
-  "description": "",
+  "description": "Database package for MotsFlex",
   "type": "module",
   "main": "dist/clientdb.js",
   "types": "dist/types/index-client.d.ts",
   "browser": "./dist/clientdb.js",
   "scripts": {
     "prebuild": "rm -rf dist",
-    "build:server": "vite build -c vite.config-server.js",
-    "build:client": "vite build -c vite.config-client.js",
-    "dev:server": "vite build -c vite.config-server.js -w",
-    "dev:client": "vite build -c vite.config-client.js -w",
-    "build": "npm run build:client && npm run build:server",
+    "build": "vite build -c vite.config.js",
+    "dev": "vite build -c vite.config.js -w",
     "postbuild": "npm run types",
     "types": "tsc --d -emitDeclarationOnly --outDir dist/types",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Leo Nicolle",
+  "license": "MIT",
   "dependencies": {
     "@supabase/supabase-js": "^2.22.0",
     "axios": "^1.4.0",
     "grid": "file:../grid",
-    "idb": "^7.1.1"
+    "idb": "^7.1.1",
+    "merge": "^2.1.1"
   },
   "devDependencies": {
     "rollup-plugin-node": "^0.2.1",

@@ -12,6 +12,7 @@ export type ExportOptions = {
   margins: boolean;
   spaces: boolean;
   fills: boolean;
+  pagination: boolean;
 }
 
 export const defaultExportOptions: ExportOptions = {
@@ -25,6 +26,7 @@ export const defaultExportOptions: ExportOptions = {
   margins: true,
   spaces: true,
   fills: true,
+  pagination: true,
 };
 
 export type Rect = {
@@ -41,3 +43,4 @@ export type Handle = {
 }
 export type Ordering = 'best' | 'alpha' | 'inverse-alpha' | 'random';
 export type Method = 'simple' | 'accurate';
+export type Mode = "normal" | "check" | "heatmap" | "autofill";

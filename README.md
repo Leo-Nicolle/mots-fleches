@@ -1,6 +1,8 @@
-# MotsFLex
+# MotsFlex
 
-![MotsFlex logo](./client/public/icon.svg | width=100)
+<a href="https://motsflex.com">
+  <img alt="Logo" align="center" src="./client/public/icon.svg" width="20%" />
+</a>
 
 **Generateur de mots fléchés. Crosswords generator. Generator de Crucigramas.**
 

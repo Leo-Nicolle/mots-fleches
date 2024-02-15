@@ -1,45 +1,24 @@
 <template>
   <div class="grid-input" ref="container">
-    <textarea
-      @input="onChange($event)"
-      @keyup="onKeyup($event)"
-      @keydown="onKeydown($event)"
-      :value="
-        cell.text.length
-          ? cell.text
-          : cell.suggestion.length
+    <textarea @input="onChange($event)" @focusout="onLooseFocus($event)" @keyup="onKeyup($event)"
+      @keydown="onKeydown($event)" :value="cell.text.length
+        ? cell.text
+        : cell.suggestion.length
           ? cell.suggestion
           : ''
-      "
-      :rows="cell.definition ? 5 : 1"
-      :class="getCellClass(cell, cell)"
-    />
+        " :rows="cell.definition ? 5 : 1" :class="getCellClass(cell, cell)" />
     <div class="handles" v-if="cell.definition">
       <n-popover v-for="(handle, k) in handles" :key="k" trigger="hover">
         <template #trigger>
-          <n-button
-            class="handle"
-            :style="{
-              top: handle.top,
-              left: handle.left,
-            }"
-          ></n-button>
+          <n-button class="handle" :style="{
+            top: handle.top,
+            left: handle.left,
+          }"></n-button>
         </template>
-        <n-button
-          icon-placement="right"
-          v-for="(dir, l) in handle.dirs"
-          @click="setArrow(dir, handle.index)"
-          :key="l"
-        >
+        <n-button icon-placement="right" v-for="(dir, l) in handle.dirs" @click="setArrow(dir, handle.index)" :key="l">
           <template #icon>
-            <svg
-              viewBox="0 -35 110 150"
-              fill="none"
-              stroke="black"
-              stroke-width="10"
-              stroke-linecap="round"
-              xmlns="http://www.w3.org/2000/svg"
-            >
+            <svg viewBox="0 -35 110 150" fill="none" stroke="black" stroke-width="10" stroke-linecap="round"
+              xmlns="http://www.w3.org/2000/svg">
               <path :class="dir" :d="getD(dir)"></path>
             </svg>
           </template>
@@ -57,7 +36,7 @@ import {
   cellAndBorderWidth,
   cellWidth,
   Direction,
-  GridOptions,
+  GridStyle,
   nullCell,
   isSplited,
   parse,
@@ -99,7 +78,7 @@ const props = defineProps<{
   /**
    * The style of the grid
    */
-  options: GridOptions;
+  style: GridStyle;
   /**
    * Typing direction
    */
@@ -113,7 +92,11 @@ const props = defineProps<{
    */
   zoom: number;
 }>();
-const { cellSize, textSize, textFont, defSize, defFont } = useSvgSizes(props);
+const { cellSize, textSize, textFont, defSize, defSizePx, defFont } = useSvgSizes(props);
+const defSizeZoom = computed(() => `${defSize.value * props.zoom}px`);
+const defBackgroundColor = computed(
+  () => props.style.definition.backgroundColor
+);
 const transform = computed(() => useTransform(props, props.cell));
 function onChange(evt: Event) {
   const { x, y } = props.cell;
@@ -230,19 +213,25 @@ const handleW = 4;
  * Computes the position of the dots to add arrows
  */
 const handles = computed<Handle[]>(() => {
-  const w = cellAndBorderWidth(props.options) * props.zoom;
-  return arrowPositions(props.cell).map(({ x, y }, i) => {
-    return {
-      top: `${y * w - handleW}px`,
-      left: `${x * w - handleW}px`,
-      index: x === 1 ? i : 2,
-      dirs:
-        x === 1
-          ? ["right", "rightdown", "none"]
-          : ["down", "downright", "none"],
-    };
-  });
+  const w = cellAndBorderWidth(props.style) * props.zoom;
+  return arrowPositions(props.cell)
+    .filter(({ y }) => y > 0)
+    .map(({ x, y }, i) => {
+      return {
+        top: `${y * w - handleW}px`,
+        left: `${x * w - handleW}px`,
+        index: x === 1 ? i : 2,
+        dirs:
+          x === 1
+            ? ["right", "rightdown", "none"]
+            : ["down", "downright", "none"],
+      };
+    });
 });
+function onLooseFocus(evt: FocusEvent) {
+  if (Grid.equal(props.cell, nullCell)) return;
+  evt.target.focus();
+}
 
 watchEffect(() => {
   if (props.cell === nullCell || !container.value) return;
@@ -252,17 +241,23 @@ watchEffect(() => {
 
 <style scoped>
 .grid-input {
-  position: absolute;
   top: 0;
   left: 0;
   padding: 0;
   margin: 0;
+  pointer-events: none;
   transform: v-bind(transform);
 }
+
+.definition {
+  font: v-bind(defFont);
+}
+
 textarea {
   overflow: hidden;
   resize: none;
   padding: 0;
+  margin: 0;
   width: v-bind(cellSize);
   height: v-bind(cellSize);
   text-align: center;
@@ -275,26 +270,32 @@ textarea:focus {
   resize: none;
   border: none;
 }
+
 textarea:focus-visible {
   overflow: hidden;
   resize: none;
   border: none;
 }
+
 .text {
   font: v-bind(textFont);
   background: #acf;
 }
+
 .text.suggested {
   color: #777;
 }
+
 .definition {
-  line-height: v-bind(defSize);
-  font-size: v-bind(defSize);
-  font: v-bind(defFont);
+  font: v - bind(defFont);
+  line-height: v-bind(defSizePx);
+  background-color: v-bind(defBackgroundColor);
+  text-wrap: nowrap;
   background: #aaa;
 }
 
 .handle {
+  pointer-events: initial;
   position: absolute;
   cursor: pointer;
   padding: 4px;
@@ -309,15 +310,19 @@ textarea:focus-visible {
 .rightdown {
   transform: rotate(180deg) scale(-1, -1);
 }
+
 .right {
   transform: translate(0, 30px) rotate(180deg) scale(-1, -1);
 }
+
 .downright {
   transform: translate(8px, 0) scale(-1, 1) rotate(90deg);
 }
+
 .down {
   transform: translate(50px, 0) scale(-1, 1) rotate(90deg);
 }
+
 .none {
   transform: translate(10px, 0);
 }

@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
+import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import { api } from '../api';
 
 const routes: Array<RouteRecordRaw> = [
@@ -22,7 +22,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/grid/:id',
     name: 'grid',
-    component: () => import('../views/editors/Grid-Editor.vue')
+    component: () => import('../views/editors/GridEditor.vue')
   },
   {
     path: '/grid-export/:id',
@@ -30,14 +30,14 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/print/Grid.vue')
   },
   {
-    path: '/options',
-    name: 'optionsList',
-    component: () => import('../views/OptionsList.vue')
+    path: '/styles',
+    name: 'stylesList',
+    component: () => import('../views/editors/StyleEditor.vue')
   },
   {
-    path: '/options/:id',
-    name: 'options',
-    component: () => import('../views/editors/Options.vue')
+    path: '/styles/:id',
+    name: 'style',
+    component: () => import('../views/editors/StyleEditor.vue')
   },
   {
     path: '/solutions',
@@ -94,10 +94,15 @@ const routes: Array<RouteRecordRaw> = [
     name: 'words',
     component: () => import('../views/Words.vue')
   },
+  {
+    path: '/fonts',
+    name: 'fonts',
+    component: () => import('../views/Fonts.vue')
+  },
 ];
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(''),
   routes
 });
 
@@ -107,7 +112,7 @@ router.beforeEach(async (to, from) => {
     !isSignedin &&
     to.meta.requiresAuth !== false
   ) {
-    return { name: 'login' };
+    return { name: 'login', query: {redirect: to.name} };
   }
 });
 

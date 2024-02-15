@@ -17,15 +17,15 @@
           v-model:value="password"
         ></n-input>
       </n-form-item>
-      <span class="forgot-password" @click="onForgotPassword">
+      <span class="forgot-password hidden" @click="onForgotPassword">
         {{ $t("login.forgotPassword") }}
       </span>
     </template>
     <template #footer>
-      <n-button class="login-btn" type="primary" @click="emailLogin">{{
+      <n-button class="login-btn" disabled type="primary" @click="emailLogin">{{
         $t("login.login")
       }}</n-button>
-      <n-button class="login-btn" type="info" @click="createAccount">{{
+      <n-button class="login-btn" disabled type="info" @click="createAccount">{{
         $t("login.register")
       }}</n-button>
       <n-button class="login-btn" type="primary" @click="localMode">{{
@@ -34,14 +34,14 @@
     </template>
 
     <template #action>
-      {{ $t("login.githubLogin") }}
+      <!-- {{ $t("login.githubLogin") }}
       <div class="third-parties">
         <n-button circle @click="() => login('github')">
           <n-icon size="2em">
             <LogoGithub />
           </n-icon>
         </n-button>
-      </div>
+      </div> -->
     </template>
   </Layout>
 </template>
@@ -58,6 +58,9 @@ const email = ref<string>("");
 const password = ref<string>("");
 const { alert, setAlert } = useAlert();
 const route = useRoute();
+function redirect(){
+  return router.push(route.query.redirect as string ||  "/");
+}
 async function login(method: string) {
   const { data, error } = api.supadb.supabase.auth.signInWithOAuth({
     provider: method,
@@ -66,7 +69,7 @@ async function login(method: string) {
     return setAlert("error", "wrongpassword");
   }
   api.mode = "supadb";
-  router.push("/");
+  redirect();
 }
 async function emailLogin() {
   const { data, error } = await api.supadb.supabase.auth.signInWithPassword({
@@ -80,7 +83,7 @@ async function emailLogin() {
     }, 3000);
   } else {
     api.mode = "supadb";
-    router.push("/");
+    redirect();
   }
 }
 async function onForgotPassword() {
@@ -99,7 +102,7 @@ function createAccount() {
 
 async function localMode() {
   api.mode = "idb";
-  router.push("/");
+  redirect();
 }
 </script>
 
@@ -119,6 +122,9 @@ async function localMode() {
 .forgot-password:hover {
   color: #000;
   text-decoration: underline;
+}
+.hidden{
+  display: none;
 }
 </style>
 

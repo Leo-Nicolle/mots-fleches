@@ -4,32 +4,33 @@
       <div class="left-panel">
         <!-- @slot Slot to add elements within left panel  -->
         <slot name="left-panel"></slot>
-        <n-button
-          v-if="hasDeleteButton"
-          @click="deleteVisible = true"
-          type="warning"
-          round
-        >
-          {{ $t("buttons.delete") }}</n-button
-        >
+        <n-button v-if="hasDeleteButton" @click="deleteVisible = true" type="warning" round>
+          {{ $t("buttons.delete") }}</n-button>
       </div>
     </template>
     <template v-slot:body>
       <div class="wrapper">
+        <n-card v-if="hasCreateButton" @click="onCreate" :title="$t('buttons.create')">
+          <template #default>
+            <div class="card-body">
+              <n-button class="add preview" round>
+                <n-icon>
+                  <AddIcon />
+                </n-icon>
+              </n-button>
+            </div>
+          </template>
+        </n-card>
         <n-card v-for="(elt, i) in eltList" :key="i" :hoverable="true">
           <template #header>
             <span class="card-title">
               <!-- @slot Slot for element title  -->
               <slot name="card-title" :elt="elt" :i="i"> </slot>
-              <n-checkbox
-                @click="
-                  (evt) => {
-                    evt.preventDefault();
-                    evt.stopPropagation();
-                  }
-                "
-                v-model:checked="selected[i]"
-              >
+              <n-checkbox @click="(evt) => {
+                evt.preventDefault();
+                evt.stopPropagation();
+              }
+                " v-model:checked="selected[i]">
               </n-checkbox>
             </span>
           </template>
@@ -41,33 +42,12 @@
             </div>
           </template>
         </n-card>
-        <n-card
-          v-if="hasCreateButton"
-          @click="onCreate"
-          :title="$t('buttons.create')"
-        >
-          <template #default>
-            <div class="card-body">
-              <n-button class="add preview" round>
-                <n-icon>
-                  <AddIcon />
-                </n-icon>
-              </n-button>
-            </div>
-          </template>
-        </n-card>
-
-        <n-modal
-          preset="dialog"
-          :title="`${$t('buttons.delete')} ?`"
-          :showIcon="false"
-          v-model:show="deleteVisible"
-        >
+        <n-modal preset="dialog" :title="`${$t('buttons.delete')} ?`" :showIcon="false" v-model:show="deleteVisible">
           <template #action>
             <n-button @click="deleteVisible = false">{{
               $t("buttons.no")
             }}</n-button>
-            <n-button @click="onDelete(selectedElements)" type="warning">{{
+            <n-button @click="onDel" type="warning">{{
               $t("buttons.yes")
             }}</n-button>
           </template>
@@ -109,15 +89,15 @@ const props = defineProps<{
   /**
    * Callback to create a new element
    */
-  onCreate: () => void;
+  onCreate?: () => void;
   /**
    * Callback to delete selected elements
    */
-  onDelete: (selected: any[]) => void;
+  onDelete: (selected: any[]) => Promise<unknown>;
   /**
    * Callback when an element is clicked
    */
-  onClick: (elt: any) => void;
+  onClick?: (elt: any) => void;
 }>();
 const selected = ref<boolean[]>([]);
 const selectedElements = computed(() =>
@@ -127,7 +107,11 @@ const deleteVisible = ref<boolean>(false);
 const emit = defineEmits<{
   (event: "select", value: any[]): void;
 }>();
-
+function onDel() {
+  props.onDelete(selectedElements.value).then(() => {
+    deleteVisible.value = false;
+  });
+}
 watchEffect(() => {
   selected.value = props.eltList.map(() => false);
 });
@@ -138,37 +122,38 @@ watch(selectedElements, () => {
 
 <style>
 .left-panel {
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   gap: 10px;
   margin-left: 10px;
-  justify-content: space-evenly;
+  justify-content: flex-start;
   align-items: center;
   align-content: space-around;
 }
+
 .n-scrollbar-container:has(> .n-scrollbar-content > .wrapper) {
   border-left: 1px solid black;
 }
+
 .n-grid {
   margin: 0 10px;
 }
+
 .card-title {
   display: flex;
 }
-.card-title > div {
+
+.card-title>div {
   margin-left: auto;
 }
-.options > div {
-  /* width: 100vw; */
-  /* height: calc(100vh - 55px); */
-  display: grid;
-  grid-template-columns: 300px auto;
-}
+
 .wrapper {
   justify-content: center;
   gap: 8px 12px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 300px));
+  padding-bottom: 12px;
   width: 100%;
 }
 
@@ -176,6 +161,7 @@ watch(selectedElements, () => {
   box-shadow: 4px 4px 7px #ddd;
   height: 350px;
 }
+
 .card-body {
   height: 100%;
   display: flex;
@@ -185,13 +171,15 @@ watch(selectedElements, () => {
   align-content: space-around;
   justify-content: space-around;
 }
-.card-body > pre {
+
+.card-body>pre {
   padding: 0;
   margin: 0;
   overflow: hidden;
   max-height: 275px;
   max-width: 295px;
 }
+
 .n-card__content {
   display: flex;
   flex-direction: column;
@@ -205,6 +193,7 @@ watch(selectedElements, () => {
   align-items: center;
   justify-content: space-around;
 }
+
 .n-dialog .n-dialog__action {
   display: flex;
   flex-direction: row;
@@ -212,6 +201,7 @@ watch(selectedElements, () => {
   justify-content: space-between;
   width: 100%;
 }
+
 .preview {
   width: 170px;
   height: 170px;
@@ -219,6 +209,7 @@ watch(selectedElements, () => {
   max-height: 170px;
   overflow: hidden;
 }
+
 .add svg {
   transform: scale(5);
 }

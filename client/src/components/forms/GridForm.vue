@@ -1,6 +1,6 @@
 <template>
   <n-form :label-width="80" :model="value">
-    <h3>{{ $t("forms.grid") }}</h3>
+    <h3>{{ $t("forms.gridSize") }}</h3>
     <n-form-item :label="$t('forms.rows')" path="rows">
       <n-input-number v-model:value="value.rows" />
     </n-form-item>
@@ -31,10 +31,7 @@ const emit = defineEmits<{
    */
   (event: "update:modelValue", value: Grid): void;
 }>();
-const value = useModel(props, emit);
-watch(value.value, () => {
-  emit("update:modelValue", value.value);
-});
+const value = useModel<Grid>(props, emit);
 </script>
 
 <style scoped>

@@ -1,24 +1,19 @@
 <template>
-  <SolutionsPaper
-    v-if="grids && options"
-    :grids="grids"
-    :solutionOptions="options"
-    class="paper"
-    :export-options="exportOptions"
-  />
+  <SolutionsPaper v-if="grids && style" :grids="grids" :page="1" :solutionStyle="style" class="paper"
+    :export-options="exportOptions" />
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import SolutionsPaper from "../../components/Solutions.vue";
-import { Grid, SolutionOptions } from "grid";
+import { Grid, SolutionStyle } from "grid";
 import { defaultExportOptions, ExportOptions } from "../../types";
 import { api } from "../../api";
 /**
  * View to print solutions
  */
 const grids = ref<Grid[]>([]);
-const options = ref<SolutionOptions>();
+const style = ref<SolutionStyle>();
 const exportOptions = ref<ExportOptions>({
   ...defaultExportOptions,
   arrows: false,
@@ -32,9 +27,9 @@ function fetch() {
     .then((gs) => {
       grids.value = gs as Grid[];
     })
-    .then(() => api.db.getOption("solution"))
-    .then((opts) => {
-      options.value = opts as SolutionOptions;
+    .then(() => api.db.getStyle("solution"))
+    .then((s) => {
+      style.value = s as SolutionStyle;
     })
     .catch((e) => {
       console.error("E", e);
@@ -45,6 +40,5 @@ onMounted(() => {
 });
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>
 

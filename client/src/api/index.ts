@@ -1,11 +1,13 @@
-import { Grid } from 'grid';
-import { Idatabase, SupaDB } from 'database';
-
+import { Grid, getDefinitions } from 'grid';
+import { Idatabase, SupaDB, setDatabase } from 'database';
+import axios from 'axios';
+const debugMigration = true;
 class API {
   public idb: Idatabase;
   public supadb: SupaDB;
   public _mode: string;
   constructor(mode: string = 'unknown') {
+    // axios.get('/debug-db.json').then(({ data }) => setDatabase(data, 7));
     this.idb = new Idatabase();
     this.supadb = new SupaDB('https://tnvxmrqhkdlynhtdzmpw.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRudnhtcnFoa2RseW5odGR6bXB3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODIyNTM0MTEsImV4cCI6MTk5NzgyOTQxMX0.4PczPPAxbkwBvig7NTHNbR8JumuwPPqfyS_kGnkxP5I');
     this._mode = mode;
@@ -39,6 +41,20 @@ class API {
       .then((grid) => grid ? Grid.unserialize(JSON.stringify(grid)) : undefined);
   }
 
+  getUserDefinitions(gridids?: string[]) {
+    const res = new Map<string, Set<string>>();
+    const idsSet = new Set(gridids || []);
+    return this.getGrids()
+      .then((grids) => {
+        grids
+          .filter(grid => gridids && gridids.length ? idsSet.has(grid.id) : true)
+          .forEach(grid => {
+            getDefinitions(grid, res);
+          });
+        return res;
+      });
+  }
+
   isSignedIn() {
     return localStorage.getItem('db-mode') === 'idb' ?
       Promise.resolve(true) :
@@ -47,7 +63,7 @@ class API {
         : Promise.resolve(false);
   }
   signout() {
-    console.log('signout')
+    console.log('signout');
     localStorage.removeItem('db-mode');
     if (this.mode === 'supadb') {
       return this.supadb.supabase.auth.signOut();

@@ -1,5 +1,3 @@
-
-
 import { expect, afterAll, beforeAll, describe, test } from 'vitest';
 import { preview } from 'vite';
 import type { PreviewServer } from 'vite';
@@ -19,7 +17,6 @@ const tests = [
   { link: 'split-test?texts=false', name: 'no-texts' },
   { link: 'split-test?definitions=false', name: 'no-definitions' },
   { link: 'split-test?arrows=false', name: 'no-arrows' },
-
 ];
 
 describe('Grid-view', async () => {

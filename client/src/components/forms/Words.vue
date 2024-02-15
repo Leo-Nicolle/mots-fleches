@@ -2,31 +2,17 @@
   <section>
     <n-form inline>
       <n-form-item :label="$t('forms.add')" path="add">
-        <n-auto-complete
-          v-model:value="value"
-          :input-props="{
-            autocomplete: 'enabled',
-          }"
-          :options="options"
-          :placeholder="$t('forms.addWord')"
-          @keyup="onAddKeyup"
-        />
+        <n-input v-model:value="value" :placeholder="$t('forms.addWord')" @keyup="onAddKeyup" />
       </n-form-item>
       <n-form-item :label="$t('forms.delete')" path="delete">
-        <n-auto-complete
-          v-model:value="value"
-          :input-props="{
-            autocomplete: 'enabled',
-          }"
-          :options="options"
-          :placeholder="$t('forms.deleteWord')"
-          @keyup="onDeleteKeyup"
-        />
+        <n-auto-complete v-model:value="value" :input-props="{
+          autocomplete: 'enabled',
+        }" :options="options" :placeholder="$t('forms.deleteWord')" @keyup="onDeleteKeyup" />
       </n-form-item>
     </n-form>
     <h3>{{ $t("forms.myWords") }}</h3>
     <div class="words">
-      <span v-for="word in words" :key="word">
+      <span v-for="word in words" :key="word" @click="() => deleteWord(word)">
         {{ word }}
       </span>
     </div>
@@ -34,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, toRaw } from "vue";
+import { computed, defineProps, onMounted, ref, toRaw, watch } from "vue";
 import { api } from "../../api";
 /**
  * Component to add and delete words
@@ -42,9 +28,18 @@ import { api } from "../../api";
  */
 const value = ref<string>("");
 const words = ref<string[]>([]);
+const props = defineProps<{
+  version?: number;
+}>();
 onMounted(() => {
   getWords();
 });
+watch(
+  () => props.version,
+  () => {
+    getWords();
+  }
+);
 function getWords() {
   api.db.getWords().then((ws) => {
     words.value = ws.sort((a, b) => a.localeCompare(b));
@@ -62,6 +57,11 @@ function onDeleteKeyup(evt: KeyboardEvent) {
     getWords();
   });
 }
+function deleteWord(word: string) {
+  api.db.deleteWord(word).then(() => {
+    getWords();
+  });
+}
 
 const options = computed(() => {
   return words.value
@@ -75,10 +75,11 @@ const options = computed(() => {
 });
 </script>
 
-<style>
+<style scoped>
 .input {
   text-transform: uppercase;
 }
+
 .words {
   display: flex;
   flex-wrap: wrap;
@@ -87,5 +88,13 @@ const options = computed(() => {
   gap: 10px;
   text-transform: uppercase;
   font-size: 1em;
+}
+
+.words>span {
+  cursor: pointer;
+}
+
+.words>span:hover {
+  text-decoration: underline;
 }
 </style>

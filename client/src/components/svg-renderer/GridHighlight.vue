@@ -1,16 +1,28 @@
 <template>
-  <div>
+  <div class="gridhighlightcontainer">
+    <span v-if="false" class="lines">
+      <span style="top: 102.5px; background-color: blue" />
+
+      <span style="top: 56.6px" />
+      <span style="top: 136px" />
+    </span>
+    <span v-if="false" class="v-lines">
+      <span />
+      <span style="transform: translate(10px,29px);" />
+      <span style="transform: translate(20px,58px);" />
+      <span style="transform: translate(30px,87px);" />
+      <span style="transform: translate(40px,116px);" />
+      <span style="transform: translate(50px,145px);" />
+      <span style="transform: translate(60px,174px);" />
+    </span>
     <span class="heatmap" v-if="mode === 'heatmap'">
       <canvas ref="heatmapref" />
     </span>
-    <span class="gridhighlight" v-if="visible">
+    <span v-for="({ style, key, problem }, i) in highlights" :class="`problem ${problem}`" :key="key" :style="style">
+    </span>
+    <span class="gridhighlight" v-if="visible && tooltip">
       <span class="highlight"> </span>
-      <span
-        class="tooltip"
-        @mouseenter="hovered = true"
-        @mouseleave="hovered = false"
-        @mousemove="onMouseMove"
-      >
+      <span class="tooltip" @mouseenter="hovered = true" @mouseleave="hovered = false" @mousemove="onMouseMove">
         <span v-if="tooltip === 'unknown'">
           <n-button @click="add" circle> + </n-button>
           {{ $t("tooltips.add", { word }) }}
@@ -19,14 +31,12 @@
           {{ word }} {{ $t("tooltips.incomplete") }}
         </span>
         <span v-if="tooltip === 'nodef'">
-          {{ word }} {{ $t("tooltips.nodef") }}</span
-        >
+          {{ word }} {{ $t("tooltips.nodef") }}</span>
         <span v-if="tooltip === 'noarrow'">
-          {{ word }} {{ $t("tooltips.noarrow") }}</span
-        >
-        <span
-          v-if="tooltip === 'heatmap' && (hotLetters.length || cellHeat.length)"
-        >
+          {{ word }} {{ $t("tooltips.noarrow") }}</span>
+        <span v-if="tooltip === 'too-many-arrows'">
+          {{ word }} {{ $t("tooltips.toomanyarrows") }}</span>
+        <span v-if="tooltip === 'heatmap' && (hotLetters.length || cellHeat.length)">
           {{ hotLetters }}
         </span>
       </span>
@@ -41,6 +51,7 @@ import {
   defineProps,
   ref,
   toRaw,
+  watch,
   watchEffect,
 } from "vue";
 import {
@@ -48,19 +59,21 @@ import {
   CellProba,
   Direction,
   Grid,
-  GridOptions,
+  GridStyle,
   GridValidity,
   nullCell,
 } from "grid";
+import throttle from "lodash.throttle";
 import {
   cellAndBorderSize,
   useTransform,
 } from "./utils";
 import chroma from "chroma-js";
-import { dico } from "../../search-worker/dico";
 import { api } from "../../api";
+import { Mode } from "../../types";
+import { workerController } from "../../worker";
+import { onMounted } from "vue";
 
-export type Mode = "normal" | "check" | "heatmap";
 
 /**
  * Button to add words from the grid to the dictionnary
@@ -74,11 +87,10 @@ const props = defineProps<{
   mode: Mode;
   grid: Grid;
   gridVersion: number;
-  options: GridOptions;
+  style: GridStyle;
   zoom: number;
   offset: [number, number];
   dir: Direction;
-  validity?: GridValidity;
 }>();
 const emit = defineEmits<{
   /**
@@ -94,12 +106,21 @@ const hovered = ref(false);
 const hotLetters = ref("");
 const cellHeat = ref("");
 const width = ref<string | number>(0);
+const validity = ref<GridValidity>();
 const height = ref<string | number>(0);
 const visible = computed(() => {
   return !Grid.equal(props.cell, nullCell) && !props.cell.definition;
 });
 const cellWidth = ref(0);
 const tooltip = ref<string>("");
+function refreshValidity() {
+  workerController.checkGrid(props.grid);
+}
+const throttledRefresValidity = throttle(refreshValidity, 60);
+workerController.on("check-result", (data) => {
+  validity.value = data;
+});
+
 watchEffect(() => {
   if (hovered.value) return;
   if (props.mode === "heatmap") {
@@ -113,10 +134,11 @@ watchEffect(() => {
     return;
   }
   const bounds = props.grid.getBounds(props.cell, props.dir);
-  if (!bounds || !bounds.length || bounds.length === 1 || !props.validity) {
+  if (!bounds || !bounds.length || bounds.length === 1 || !validity.value) {
     transform.value = "";
     width.value = 0;
     height.value = 0;
+    tooltip.value = "";
     return;
   }
   const { cells, length } = bounds;
@@ -130,9 +152,34 @@ watchEffect(() => {
     props.dir === "horizontal" ? 1 : length
   );
   transform.value = useTransform(props, cells[0]);
-  const validity =
-    props.validity[props.dir][`${bounds.start.y}-${bounds.start.x}`];
-  tooltip.value = validity ? validity.problem : "";
+  const cellVal =
+    validity.value[props.dir][`${bounds.start.y}-${bounds.start.x}`];
+  tooltip.value = cellVal ? cellVal.problem : "";
+});
+
+const highlights = computed(() => {
+  if (!validity.value || props.mode !== 'check') return [];
+  const res = Object.entries(validity.value[props.dir])
+    .map(([key, { problem }]) => {
+      const [y, x] = key.split("-").map(Number);
+      const bounds = props.grid.getBounds({ x, y }, props.dir);
+      return {
+        key,
+        style: {
+          width: cellAndBorderSize(
+            props,
+            props.dir === "horizontal" ? bounds.length : 1
+          ),
+          height: cellAndBorderSize(
+            props,
+            props.dir === "horizontal" ? 1 : bounds.length
+          ),
+          transform: useTransform(props, bounds.cells[0])
+        },
+        problem,
+      };
+    });
+  return res;
 });
 
 function getLetters(cell: Cell, heatmapLetters: CellProba[][]) {
@@ -149,37 +196,6 @@ function getLetters(cell: Cell, heatmapLetters: CellProba[][]) {
     .filter(([_, proba]) => proba > 0.01)
     .map(([l, proba]) => `${l}: ${proba}`)
     .join(", ");
-}
-
-function getHeat(cell: Cell, heatmapLetters: CellProba[][]) {
-  if (!heatmapLetters || !cell) return "";
-  const row = heatmapLetters[cell.y];
-  if (!row) return "";
-  const cellHeatmap = row[cell.x];
-  if (!cellHeatmap) return "";
-  const {
-    horizontal,
-    vertical,
-    validH,
-    validV,
-    empty,
-    bestWordsH,
-    bestWordsV,
-  } = cellHeatmap;
-  const bestWords = (
-    (props.dir === "horizontal" ? bestWordsH : bestWordsV) || []
-  )
-    .slice(0, 5)
-    .reduce((acc, index) => {
-      acc.push(dico.words[dico.sorted[index]]);
-      return acc;
-    }, []);
-  if ((!validH && !validV) || !empty) return "";
-  return bestWords.join(", ");
-  // if (validH && validV)
-  //   return `Horizontal: ${horizontal}, Vertical: ${vertical}`;
-  // if (!validV) return `Horizontal: ${horizontal}`;
-  // if (!validH) return `Vertical: ${vertical}`;
 }
 
 const colorScale = chroma.scale(["red", "#22C", "#014"]).mode("lab");
@@ -222,7 +238,9 @@ async function refreshHeatmap() {
     if (!ctx) return;
     colors.forEach((row, i) => {
       row.forEach((color, j) => {
-        if (!props.cellProbas[i][j].empty || !color) return;
+        if (!props.cellProbas[i][j].empty
+          || props.grid.cells[i][j].definition
+          || !color) return;
         const [r, g, b, a] = color;
         ctx.fillStyle = `rgba(${r},${g},${b},${a})`;
 
@@ -234,21 +252,42 @@ async function refreshHeatmap() {
 
 watchEffect(() => {
   hotLetters.value = getLetters(props.cell, props.cellProbas);
-  // cellHeat.value = getHeat(props.cell, props.cellProbas);
   refreshHeatmap();
 });
-function onMouseMove(evt: MouseEvent) {}
+watch([props.mode, props.grid], () => {
+  throttledRefresValidity();
+});
+onMounted(() => {
+  throttledRefresValidity();
+});
+function onMouseMove(evt: MouseEvent) { }
 function add() {
   api.db.pushWord(toRaw(word.value)).then(() => {
     tooltip.value = "";
     emit("update");
   });
 }
+/*
+"rgba(255, 107, 107, 0.8)",
+"rgba(255, 209, 102, 0.8)",
+"rgba(6, 214, 160, 0.8)",
+"rgba(17, 138, 178, 0.8)",
+"rgba(255, 127, 80, 0.8)",
+"rgba(94, 96, 206, 0.8)"
+*/
 </script>
 
-<style scoped>
-.gridhighlight {
-  position: absolute;
+<style>
+.gridhighlightcontainer {
+  pointer-events: none;
+  display: grid;
+}
+
+.gridhighlightcontainer>* {
+  grid-area: 1 / 1 / 1 / 1;
+}
+
+.gridhighlightcontainer>.gridhighlight {
   top: 0;
   left: 0;
   padding: 0;
@@ -258,15 +297,18 @@ function add() {
   transform: v-bind(transform);
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  gap: 10px;
   pointer-events: none;
 }
-.highlight {
+
+.gridhighlightcontainer>.gridhighlight>.highlight {
   width: v-bind(width);
   height: v-bind(height);
   box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.5);
 }
-.gridhighlight > .tooltip {
+
+.gridhighlightcontainer>.gridhighlight>.tooltip {
   pointer-events: visible;
   padding: 4px;
   background-color: white;
@@ -279,11 +321,56 @@ function add() {
   align-items: center;
   gap: 4px;
 }
-.heatmap {
-  position: absolute;
+
+.gridhighlightcontainer>.heatmap {
+  position: relative;
   top: 0;
   left: 0;
   transform: v-bind(heatmapTransform);
   pointer-events: none;
+}
+
+.gridhighlightcontainer>.lines {
+  position: relative;
+}
+
+.gridhighlightcontainer>.lines>span {
+  width: 1500px;
+  height: 1px;
+  background-color: red;
+  position: absolute;
+}
+
+.gridhighlightcontainer>.v-lines {
+  position: relative;
+}
+
+.gridhighlightcontainer>.v-lines>span {
+  left: 204px;
+  width: 102px;
+  height: 29px;
+  background-color: red;
+  position: absolute;
+  opacity: 0.5;
+}
+
+.problem {
+  z-index: -1;
+}
+
+.incomplete {
+  background-color: rgba(255, 107, 107, 0.8);
+}
+
+.nodef {
+  background-color: rgba(17, 138, 178, 0.8);
+}
+
+.noarrow {
+  background-color: rgba(255, 209, 102, 0.8);
+}
+
+.too-many-arrows {
+  background-color: rgba(6, 214, 160, 0.8);
 }
 </style>

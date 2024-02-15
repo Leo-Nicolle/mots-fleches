@@ -1,42 +1,36 @@
 <template>
-  <div v-if="grids && solutionOptions">
-    <Paper
-      v-for="(words, i) in layout.wordsPerPage"
-      :key="i"
-      :format="solutionOptions.paper"
-      :showMargins="exportOptions.margins"
-      bodyClass="body-index"
-    >
+  <div v-if="grids && solutionStyle">
+    <FontLoader :value="solutionStyle.grids.gridN" />
+    <FontLoader :value="solutionStyle.words" />
+    <Paper v-for="(words, i) in layout.wordsPerPage" :key="i" :format="solutionStyle.paper"
+      :showMargins="exportOptions.margins" :showPagination="exportOptions.pagination" :pageNumber="page + i"
+      :pagination="solutionStyle.pagination" bodyClass="body-index">
       <span class="words" ref="wordsContainer">
-        <span
-          v-for="(word, j) in words"
-          :class="typeof word === 'number' ? 'size' : 'word'"
-          :key="word"
-        >
+        <span v-for="(word, j) in words" :class="typeof word === 'number' ? 'size' : 'word'" :key="word">
           {{ word }}
         </span>
       </span>
     </Paper>
-    <Paper
-      class="paper ruler"
-      :format="solutionOptions.paper"
-      :showMargins="false"
-    >
-      <span class="words ruler" ref="ruler"> </span>
-    </Paper>
+    <Teleport to="#outside">
+      <Paper class="paper ruler" :format="solutionStyle.paper" :showMargins="true" :showPagination="true" :pageNumber="1">
+        <span class="words ruler" ref="ruler"> </span>
+      </Paper>
+    </Teleport>
   </div>
 </template>
 
 <script setup lang="ts">
-import { defineProps, ref } from "vue";
-import Paper from "./Paper.vue";
-import { Grid, GridOptions, getAllWords, SolutionOptions } from "grid";
+import { defineProps, ref, defineEmits, watch } from "vue";
+import { Grid, getAllWords, SolutionStyle } from "grid";
 import { computed } from "vue";
+import Paper from "./Paper.vue";
+import FontLoader from "./fonts/FontLoader.vue";
 import { ExportOptions } from "../types";
+import { getFont } from "../js/useFont";
 /**
  * Component to render the list of words used in an array of grids
  */
-type WordMap = { [key: number]: string[] };
+type WordMap = { [key: number]: string[]; };
 const ruler = ref(null);
 const props = defineProps<{
   /**
@@ -50,29 +44,56 @@ const props = defineProps<{
   /**
    * The styles to render list
    */
-  solutionOptions: SolutionOptions;
+  solutionStyle: SolutionStyle;
+  page: number;
 }>();
-const wordFont = computed(
-  () =>
-    `${props.solutionOptions.words.size} ${props.solutionOptions.words.font}`
-);
-const wordsColor = computed(() => props.solutionOptions.words.color);
-const sizeFont = computed(
-  () => `${props.solutionOptions.size.size} ${props.solutionOptions.size.font}`
-);
-const sizeColor = computed(() => props.solutionOptions.size.color);
 
+const emit = defineEmits<{
+  (event: "pageCount", value: number): void;
+}>();
+
+const wordFont = computed(() => getFont(props.solutionStyle.words));
+const wordsColor = computed(() => props.solutionStyle.words.color);
+const sizeFont = computed(() => getFont(props.solutionStyle.size));
+const sizeColor = computed(() => props.solutionStyle.size.color);
+const layout = ref<{ wordsPerPage: (number | string)[][]; heights: string[]; }>({
+  wordsPerPage: [],
+  heights: [],
+});
+const columnGap = 10;
+const gap = computed(() => `${columnGap}px`);
 const tolerance = 2;
-const layout = computed(() => {
-  if (!props.grids || !ruler.value || !ruler.value)
-    return { wordsPerPage: [], heights: [] };
+function nodesBSStart(
+  nodes: HTMLDivElement[], start: number, end: number, query: number
+) {
+  while (start <= end) {
+    const middle = (start + end) >>> 1;
+    const node = nodes[middle];
+    if (!node) break;
+    const { x, width } = node.getBoundingClientRect();
+    const right = x + width;
+    if (isNaN(right) || right < query) start = middle + 1;
+    else end = middle - 1;
+  }
+  return start;
+}
+
+watch([props.grids, ruler, wordFont, sizeFont, props.solutionStyle,
+props.exportOptions], () => {
+  if (!props.grids || !ruler.value) {
+    layout.value = { wordsPerPage: [], heights: [] };
+    return;
+  }
   const words = Array.from(getAllWords(props.grids))
-    .sort((a, b) => a.length - b.length)
+    .sort((a, b) => {
+      const l = a.length - b.length;
+      return l === 0 ? a.localeCompare(b) : l;
+    })
     .filter((w) => w.length > 1);
   const r = ruler.value as HTMLDivElement;
-  let bb = r.getBoundingClientRect();
-  const maxX = bb.x + bb.width;
+  r.innerHTML = "";
 
+  const { x: startX, width: W, height: H } = r.parentElement!.getBoundingClientRect();
   const wordsMap = words.reduce((acc, word) => {
     if (acc[word.length]) {
       acc[word.length].push(word);
@@ -81,59 +102,55 @@ const layout = computed(() => {
     }
     return acc;
   }, {} as WordMap);
+  const allTexts: (string | number)[] = [];
+  Object.entries(wordsMap)
+    .forEach(([size, words]) => {
+      allTexts.push(+size);
+      const span = document.createElement("span");
+      span.classList.add("size");
+      span.innerHTML = size.toString();
+      r.appendChild(span);
+      words.forEach((word) => {
+        const span = document.createElement("span");
+        span.classList.add("word");
+        span.innerHTML = word;
+        r.appendChild(span);
+        allTexts.push(word);
+      });
+    });
 
-  let wordsOnCurrentPage: (string | number)[] = [];
-  const heights: string[] = [];
-  // cut the list into multiple pages using the ruler. When a word overflows the ruler => pagebreak
-  const res = Object.entries(wordsMap).reduce(
-    (wordsPerPage, [size, words], i, arr) => {
-      [+size, ...words.sort((a, b) => a.localeCompare(b))].forEach(
-        (word, j, arr1) => {
-          const span = document.createElement("span");
-          span.innerHTML = `${word}`;
-          span.classList.add(typeof word === "number" ? "size" : "word");
-          r.appendChild(span);
-          const { x, y, width, height } = span.getBoundingClientRect();
-          if (x + width > maxX - tolerance) {
-            r.innerHTML = "";
-            r.appendChild(span);
-            wordsPerPage.push(wordsOnCurrentPage);
-            wordsOnCurrentPage = [word];
-            heights.push("100%");
-          } else {
-            wordsOnCurrentPage.push(word);
-          }
-        }
-      );
-      return wordsPerPage;
-    },
-    [] as (string | number)[][]
-  );
-  res.push(wordsOnCurrentPage);
-  bb = r.getBoundingClientRect();
-  // TODO: this is not working properly
-  // attempt to make the page take the less height possible
-  // see https://stackoverflow.com/questions/75994487/css-how-to-make-flex-column-layout-grow-on-x-axis-first?noredirect=1#comment134032653_75994487
-  const { x, y, width, height } = r.lastChild
-    ? r.lastChild.getBoundingClientRect()
-    : { x: 0, y: 0, width: 0, height: 0 };
-  const area =
-    (x - bb.x + width) * (y - bb.y + height) +
-    (bb.height - y + bb.y) * (x - bb.x);
-  const totalArea = bb.width * bb.height;
-  const ratio = area / totalArea;
-  heights.push(ratio * 100 + "%");
+  // find the first node outside boundaries: 
+  const nodes = Array.from(r.children) as HTMLDivElement[];
+  const maxX = nodes[nodes.length - 1].getBoundingClientRect().x;
+  const pages = Math.ceil(maxX / W);
+  const indexes = [0];
+  const wordsPerPage = [];
+  for (let i = 0; i < pages; i++) {
+    indexes.push(nodesBSStart(nodes, 0, nodes.length - 1, startX + (i + 1) * W - tolerance));
+    wordsPerPage.push(allTexts.slice(indexes[i], indexes[i + 1]));
+  }
+  if (indexes[indexes.length - 1] < allTexts.length - 1) {
+    wordsPerPage.push(wordsPerPage.slice(indexes.length - 1));
+  }
+  r.innerHTML = "";
+  layout.value = {
+    wordsPerPage,
+    heights: ['100%']
+  };
+  emit('pageCount', wordsPerPage.length);
 
-  return { wordsPerPage: res.reverse(), heights: heights.reverse() };
 });
 </script>
 
 <style lang="less">
 @media print {
+
+  #outisde,
   .ruler {
     display: none;
   }
 }
+
 .words {
   max-width: 100%;
   max-height: 100%;
@@ -146,34 +163,43 @@ const layout = computed(() => {
   justify-content: flex-start;
   align-items: center;
   page-break-inside: auto;
-  gap: 10px;
+  gap: v-bind(gap);
+  flex: 2;
 }
-.words > span {
+
+.words>span {
   page-break-after: auto;
 }
+
 .paper.ruler {
   position: absolute;
   top: 1000%;
   left: 0;
   z-index: 1000;
 }
+
 .words.ruler {
   background: red;
 }
+
 .size {
   font: v-bind(sizeFont);
   color: v-bind(sizeColor);
   font-weight: bold;
   text-align: center;
 }
+
 .word {
   font: v-bind(wordFont);
   color: v-bind(wordsColor);
   text-align: center;
 }
+
 .body.body-index {
   align-content: flex-start;
+  margin: 0;
 }
+
 .pushup {
   flex: 1;
 }
