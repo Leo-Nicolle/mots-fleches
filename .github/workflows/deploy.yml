@@ -58,8 +58,8 @@ jobs:
           if [ "$DEPLOY_ASSETS" = 'true' ]; then
             echo "Deploying JS assets"
             ssh -i $KEY $TARGET "rm -rf ${{ env.ASSETS }} && mkdir -p ${{ env.ASSETS }}"
-            scp -i $KEY -r dist/public/assets "$TARGET:${{ env.ASSETS }}"
-            scp -i $KEY -r dist/public/index.html "$TARGET:${{$ env.INDEX_HTML }}"
+            # scp -i $KEY -r dist/public/assets "$TARGET:${{ env.ASSETS }}"
+            # scp -i $KEY -r dist/public/index.html "$TARGET:${{$ env.INDEX_HTML }}"
 
             # scp "${{ env.SSH }} "
             # rm -rf $PUBLIC/assets && mkdir -p $PUBLIC/assets
