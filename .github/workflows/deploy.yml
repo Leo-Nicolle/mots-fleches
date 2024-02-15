@@ -5,57 +5,70 @@ on:
     branches:
       - develop
 
-env:
-  PUBLIC: "~/motsflex/public"
-  ASSETS: "$PUBLIC/assets"
-  INDEX_HTML: "$PUBLIC/index.html"
-  DICOS: "~/dicos"
-  SERVER: "~/motsflex/server.js"
-  SSH_TARGET: ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+    env:
+      TARGET: ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}
+      KEY: /tmp/private-key
+      DIR: ~/motsflex
+      DICOS: ~/dicos
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
+      - name: Setup ssh
+        run: |
+          mkdir -p ~/.ssh/ && touch ~/.ssh/known_hosts
+          ssh-keyscan ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > $KEY
+          chmod 600 $KEY
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "16"
+          node-version: "18"
+
+      - name: Determine Deployment Type
+        if: ${{ success() }}
+        run: |
+          echo "DEPLOY_ASSETS=${{ contains(toJson(github.event.pull_request.labels.*.name), 'deploy:assets') }}" >> $GITHUB_ENV
+          echo "DEPLOY_SERVER=${{ contains(toJson(github.event.pull_request.labels.*.name), 'deploy:server') }}" >> $GITHUB_ENV
+          echo "DEPLOY_CLIENT=${{ contains(toJson(github.event.pull_request.labels.*.name), 'deploy:client') }}" >> $GITHUB_ENV
+          echo "PUBLIC=$DIR/public" >> $GITHUB_ENV
+          echo "SERVER=${{ env.DIR }}/server.js" >> $GITHUB_ENV
+          echo "ASSETS=${{ env.DIR }}/public/assets" >> $GITHUB_ENV
+          echo "INDEX_HTML=${{ env.DIR }}/public/index.html" >> $GITHUB_ENV
+          if [[ ${{env.DEPLOY_ASSETS}} ='false' && ${{env.DEPLOY_SERVER}} ='false' && ${{env.DEPLOY_CLIENT}} ='false' ]]; then
+            exit 1;
+          fi
 
       - name: Install Dependencies
-        run: npm install
+        if: ${{ success() }}
+        run: npm ci
 
       - name: Build
+        if: ${{ success() }}
         run: npm run build
 
-      - name: Check deployement type
-        id: deployment_type
-        run: |
-        echo "::set-output name=deploy_assets::${{ contains(github.event.pull_request.labels.*.name, 'deploy:assets') }}"
-        echo "::set-output name=deploy_server::${{ contains(github.event.pull_request.labels.*.name, 'deploy:server') }}"
-        echo "::set-output name=deploy_client::${{ contains(github.event.pull_request.labels.*.name, 'deploy:client') }}"
-
       - name: Deploy
-        if: steps.determine_deployment.outputs.deployment_type == 'tags'
+        if: ${{ success() }}
         run: |
-          echo "Github resfs: $GITHUB_REF"
-          if [[ steps.deployment_type.outputs.deploy_assets == 'true' ]]; then
+          if [ "$DEPLOY_ASSETS" = 'true' ]; then
             echo "Deploying JS assets"
-            ssh $SSH_TARGET "rm -rf $ASSETS && mkdir -p $ASSETS"
-            scp -r dist/public/assets $SSH_TARGET:$ASSETS
-            scp -r dist/public/index.html $SSH_TARGET:$INDEX_HTML
+            ssh -i $KEY $TARGET "rm -rf $ASSETS && mkdir -p $ASSETS"
+            scp -i $KEY -r dist/public/assets/* "$TARGET:$ASSETS"
+            scp -i $KEY -r dist/public/index.html "$TARGET:$INDEX_HTML"
           fi
-          if [[ steps.deployment_type.outputs.deploy_client == 'true' ]]; then
+          if [ "$DEPLOY_CLIENT" = 'true' ]; then
             echo "Deploying full client"
-            ssh $SSH_TARGET "rm -rf $PUBLIC && mkdir -p $PUBLIC"
-            scp -r dist/public $SSH_TARGET:$PUBLIC
-            ssh $SSH_TARGET "cp $DICOS/*.zip $ASSETS"
+            ssh -i $KEY $TARGET "rm -rf $PUBLIC && mkdir -p $PUBLIC"
+            scp -i $KEY -r dist/public/* "$TARGET:$PUBLIC"
+            ssh -i $KEY $TARGET "cp $DICOS/*.zip $PUBLIC/assets"
           fi
-          if [[ steps.deployment_type.outputs.deploy_server == 'true' ]]; then
+          if [ "$DEPLOY_SERVER" = 'true' ]; then
             echo "Deploying server code"
-            scp -r dist/server.js $SSH_TARGET:$SERVER
+            scp -i $KEY -r dist/server.js "$TARGET:$SERVER"
           fi
+      - name: Cleanup
+        run: "rm -f $KEY && rm -rf ~/.ssh"
