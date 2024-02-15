@@ -7,18 +7,18 @@ on:
 
 jobs:
   deploy:
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     env:
       TARGET: ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}
       KEY: /tmp/private-key
       DIR: ~/motsflex
       DICOS: ~/dicos
-    # if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          ref: develop
+          ref: ${{ github.event.pull_request.head.sha }}
       - name: Setup ssh
         run: |
           mkdir -p ~/.ssh/ && touch ~/.ssh/known_hosts
