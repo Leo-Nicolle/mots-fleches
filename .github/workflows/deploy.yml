@@ -15,8 +15,8 @@ jobs:
       DICOS: "~/dicos"
       PUBLIC: "~/motsflex-save/public"
       SERVER: "~/motsflex-save/server.js"
-      ASSETS: "$PUBLIC/assets"
-      INDEX_HTML: "$PUBLIC/index.html"
+      ASSETS: "${{ env.PUBLIC }}/assets"
+      INDEX_HTML: "${{ env.PUBLIC }}/index.html"
 
     # if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
     steps:
