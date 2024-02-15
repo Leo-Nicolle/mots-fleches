@@ -35,6 +35,10 @@ jobs:
           echo "DEPLOY_ASSETS=${{ contains(toJson(github.event.pull_request.labels.*.name), 'deploy:assets') }}" >> $GITHUB_ENV
           echo "DEPLOY_SERVER=${{ contains(toJson(github.event.pull_request.labels.*.name), 'deploy:server') }}" >> $GITHUB_ENV
           echo "DEPLOY_CLIENT=${{ contains(toJson(github.event.pull_request.labels.*.name), 'deploy:client') }}" >> $GITHUB_ENV
+          echo "PUBLIC=$DIR/public" >> $GITHUB_ENV
+          echo "SERVER=${{ env.DIR }}/server.js" >> $GITHUB_ENV
+          echo "ASSETS=${{ env.PUBLIC }}/assets" >> $GITHUB_ENV
+          echo "INDEX_HTML=${{ env.PUBLIC }}/index.html" >> $GITHUB_ENV
           # if [[ ${{env.DEPLOY_ASSETS}} ='false' && ${{env.DEPLOY_SERVER}} ='false' && ${{env.DEPLOY_CLIENT}} ='false' ]]; then
             # exit 1;
           # fi
@@ -50,10 +54,6 @@ jobs:
       - name: Deploy
         if: ${{ success() }}
         run: |
-          echo "PUBLIC=$DIR/public" >> $GITHUB_ENV
-          echo "SERVER=${{ env.DIR }}/server.js" >> $GITHUB_ENV
-          echo "ASSETS=${{ env.PUBLIC }}/assets" >> $GITHUB_ENV
-          echo "INDEX_HTML=${{ env.PUBLIC }}/index.html" >> $GITHUB_ENV
           echo "assets 1 $DIR/public/assets 2 $PUBLIC 3 ${{env.PUBLIC}} 4"
           if [ "$DEPLOY_ASSETS" = 'true' ]; then
             echo "Deploying JS assets"
