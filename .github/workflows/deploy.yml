@@ -57,7 +57,12 @@ jobs:
           echo "assets 1 $DIR/public/assets 2 $PUBLIC 3 ${{env.PUBLIC}} 4"
           if [ "$DEPLOY_ASSETS" = 'true' ]; then
             echo "Deploying JS assets"
-            ssh -i $KEY $TARGET "mkdir -p $ASSETS"
+            # ssh -i $KEY $TARGET "rm -rf $ASSETS && mkdir -p $ASSETS"
+            ssh -i $KEY $TARGET "echo $ASSETS"
+            ssh -i $KEY $TARGET "echo $PUBLIC"
+            ssh -i $KEY $TARGET "echo $SERVER"
+            ssh -i $KEY $TARGET "echo $DIR"
+
             # scp -i $KEY -r dist/public/assets "$TARGET:$ASSETS"
             # scp -i $KEY -r dist/public/index.html "$TARGET:$INDEX_HTML"
 
