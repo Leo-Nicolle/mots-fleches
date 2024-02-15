@@ -2,23 +2,22 @@ name: Deploy
 
 on:
   pull_request:
-    branches:
-      - develop
+    types: [closed]
 
 jobs:
   deploy:
+    if: github.event.pull_request.merged == true || github.ref_name == 'master'
     runs-on: ubuntu-latest
     env:
       TARGET: ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}
       KEY: /tmp/private-key
       DIR: ~/motsflex
       DICOS: ~/dicos
-    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
         with:
-          ref: develop
+          ref: "develop"
       - name: Setup ssh
         run: |
           mkdir -p ~/.ssh/ && touch ~/.ssh/known_hosts
@@ -41,7 +40,11 @@ jobs:
           echo "SERVER=${{ env.DIR }}/server.js" >> $GITHUB_ENV
           echo "ASSETS=${{ env.DIR }}/public/assets" >> $GITHUB_ENV
           echo "INDEX_HTML=${{ env.DIR }}/public/index.html" >> $GITHUB_ENV
+<<<<<<< HEAD
           if [[ ${{env.DEPLOY_ASSETS}} ='false' && ${{env.DEPLOY_SERVER}} ='false' && ${{env.DEPLOY_CLIENT}} ='false' ]]; then
+=======
+          if [[ $DEPLOY_ASSETS == 'false' && $DEPLOY_SERVER == 'false' && $DEPLOY_CLIENT == 'false' ]]; then
+>>>>>>> @{-1}
             exit 1;
           fi
 
