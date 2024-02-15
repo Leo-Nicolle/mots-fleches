@@ -13,10 +13,10 @@ jobs:
       KEY: /tmp/private-key
       DIR: ~/motsflex-save
       DICOS: ~/dicos
-      PUBLIC: ${{ DIR }}/public
-      SERVER: ${{ DIR }}/server.js
-      ASSETS: ${{ PUBLIC }}/assets
-      INDEX_HTML: ${{ PUBLIC }}/index.html
+      PUBLIC: ${DIR}/public
+      SERVER: ${DIR}/server.js
+      ASSETS: ${PUBLIC}/assets
+      INDEX_HTML: ${PUBLIC}/index.html
 
     # if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
     steps:
