@@ -8,10 +8,22 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      TARGET: ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}
+      KEY: /tmp/private-key
+      PUBLIC: "~/motsflex-save/public"
+      ASSETS: "$PUBLIC/assets"
+      INDEX_HTML: "$PUBLIC/index.html"
+      DICOS: "~/dicos"
+      SERVER: "~/motsflex-save/server.js"
+
     # if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
+      - name: Setup ssh key
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > $KEY
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -24,43 +36,77 @@ jobs:
           echo "DEPLOY_ASSETS=${{ contains(toJson(github.event.pull_request.labels.*.name), 'deploy:assets') }}" >> $GITHUB_ENV
           echo "DEPLOY_SERVER=${{ contains(toJson(github.event.pull_request.labels.*.name), 'deploy:server') }}" >> $GITHUB_ENV
           echo "DEPLOY_CLIENT=${{ contains(toJson(github.event.pull_request.labels.*.name), 'deploy:client') }}" >> $GITHUB_ENV
+          # if [[ ${{env.DEPLOY_ASSETS}} ='false' && ${{env.DEPLOY_SERVER}} ='false' && ${{env.DEPLOY_CLIENT}} ='false' ]]; then
+            # exit 1;
+          # fi
+
+      # - name: Install Dependencies
+      #   if: ${{ success() }}
+      #   run: npm install
+
+      # - name: Build
+      #   if: ${{ success() }}
+      #   run: npm run build
 
       - name: Deploy
-        uses: appleboy/ssh-action@master
-        env:
-          DEPLOY_ASSETS: "${{ env.DEPLOY_ASSETS }}"
-          DEPLOY_SERVER: "${{ env.DEPLOY_SERVER }}"
-          DEPLOY_CLIENT: "${{ env.DEPLOY_CLIENT }}"
-          PUBLIC: "~/motsflex-save/public"
-          ASSETS: "$PUBLIC/assets"
-          INDEX_HTML: "$PUBLIC/index.html"
-          DICOS: "~/dicos"
-          SERVER: "~/motsflex-save/server.js"
+        if: ${{ success() }}
+        run: |
+          if [ "$DEPLOY_ASSETS" = 'true' ]; then
+            echo "Deploying JS assets"
+            ssh -i $KEY $TARGET "echo Coucou"
+            # ssh -i $KEY $TARGET "rm -rf $ASSETS && mkdir -p $ASSETS"
+            # scp -i $KEY -r dist/public/assets $TARGET:$ASSETS
+            # scp -i $KEY -r dist/public/index.html $TARGET:$INDEX_HTML
 
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22
-          envs: DEPLOY_ASSETS,DEPLOY_SERVER,DEPLOY_CLIENT,PUBLIC,ASSETS,INDEX_HTML,DICOS,SERVER
-          script: |
-            cd ~/tmp/mots-fleches
-            git pull origin develop
-            npm install
-            npm run build
-            if [ "$DEPLOY_ASSETS" = 'true' ]; then
-              echo "Deploying JS assets"
-              rm -rf $ASSETS && mkdir -p $ASSETS
-              cp -r dist/public/assets $ASSETS
-              cp -r dist/public/index.html $INDEX_HTML
-            fi
-            if [ "$DEPLOY_CLIENT" = 'true' ]; then
-              echo "Deploying full client"
-              rm -rf $PUBLIC && mkdir -p $PUBLIC
-              cp -r dist/public $PUBLIC
-              cp $DICOS/*.zip $ASSETS
-            fi
-            if [ "$DEPLOY_SERVER" = 'true' ]; then
-              echo "Deploying server code"
-              cp -r dist/server.js $SERVER
-            fi
+            # scp "${{ env.SSH }} "
+            # rm -rf $PUBLIC/assets && mkdir -p $PUBLIC/assets
+            # cp -r dist/public/assets $PUBLIC/assets
+            # cp -r dist/public/index.html $PUBLIC/index.html
+          fi
+          # if [ "$DEPLOY_CLIENT" = 'true' ]; then
+          #   echo "Deploying full client"
+          #   rm -rf $PUBLIC && mkdir -p $PUBLIC
+          #   cp -r dist/public $PUBLIC
+          #   cp $DICOS/*.zip $PUBLIC/assets
+          # fi
+          # if [ "$DEPLOY_SERVER" = 'true' ]; then
+          #   echo "Deploying server code"
+          #   cp -r dist/server.js $SERVER
+          # fi
+      - name: Cleanup
+        run: "rm -f $KEY"
+
+      # - name: Deploy
+      #   uses: appleboy/ssh-action@master
+      #   env:
+      #     DEPLOY_ASSETS: "${{ env.DEPLOY_ASSETS }}"
+      #     DEPLOY_SERVER: "${{ env.DEPLOY_SERVER }}"
+      #     DEPLOY_CLIENT: "${{ env.DEPLOY_CLIENT }}"
+
+      #   with:
+      #     host: ${{ secrets.SERVER_HOST }}
+      #     username: ${{ secrets.SERVER_USERNAME }}
+      #     key: ${{ secrets.SSH_PRIVATE_KEY }}
+      #     port: 22
+      #     envs: DEPLOY_ASSETS,DEPLOY_SERVER,DEPLOY_CLIENT,PUBLIC,ASSETS,INDEX_HTML,DICOS,SERVER
+      #     script: |
+      #       cd ~/tmp/mots-fleches
+      #       git pull origin develop
+      #       npm install
+      #       npm run build
+      #       if [ "$DEPLOY_ASSETS" = 'true' ]; then
+      #         echo "Deploying JS assets"
+      #         rm -rf $ASSETS && mkdir -p $ASSETS
+      #         cp -r dist/public/assets $ASSETS
+      #         cp -r dist/public/index.html $INDEX_HTML
+      #       fi
+      #       if [ "$DEPLOY_CLIENT" = 'true' ]; then
+      #         echo "Deploying full client"
+      #         rm -rf $PUBLIC && mkdir -p $PUBLIC
+      #         cp -r dist/public $PUBLIC
+      #         cp $DICOS/*.zip $ASSETS
+      #       fi
+      #       if [ "$DEPLOY_SERVER" = 'true' ]; then
+      #         echo "Deploying server code"
+      #         cp -r dist/server.js $SERVER
+      #       fi
