@@ -64,11 +64,11 @@ jobs:
             echo "Deploying full client"
             ssh -i $KEY $TARGET "rm -rf $PUBLIC && mkdir -p $PUBLIC"
             scp -i $KEY -r dist/public/* "$TARGET:$PUBLIC"
-            ssh -i $KEY $TARGET "CP $DICOS/*.zip $PUBLIC/assets"
+            ssh -i $KEY $TARGET "cp $DICOS/*.zip $PUBLIC/assets"
           fi
-          # if [ "$DEPLOY_SERVER" = 'true' ]; then
-          #   echo "Deploying server code"
-          #   cp -r dist/server.js $SERVER
-          # fi
+          if [ "$DEPLOY_SERVER" = 'true' ]; then
+            echo "Deploying server code"
+            scp -i $KEY -r dist/server.js "$TARGET:$SERVER"
+          fi
       - name: Cleanup
         run: "rm -f $KEY && rm -rf ~/.ssh"
