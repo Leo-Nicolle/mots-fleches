@@ -57,14 +57,14 @@ jobs:
           if [ "$DEPLOY_ASSETS" = 'true' ]; then
             echo "Deploying JS assets"
             ssh -i $KEY $TARGET "rm -rf $ASSETS && mkdir -p $ASSETS"
-            scp -i $KEY -r dist/public/assets "$TARGET:$PUBLIC"
+            scp -i $KEY -r dist/public/assets/* "$TARGET:$ASSETS"
             scp -i $KEY -r dist/public/index.html "$TARGET:$INDEX_HTML"
           fi
           if [ "$DEPLOY_CLIENT" = 'true' ]; then
             echo "Deploying full client"
-            rm -rf $PUBLIC && mkdir -p $PUBLIC
-            cp -r dist/public/* $PUBLIC
-            cp $DICOS/*.zip $PUBLIC/assets
+            ssh -i $KEY $TARGET "rm -rf $PUBLIC && mkdir -p $PUBLIC"
+            scp -i $KEY -r dist/public/* "$TARGET:$PUBLIC"
+            ssh -i $KEY $TARGET "CP $DICOS/*.zip $PUBLIC/assets"
           fi
           # if [ "$DEPLOY_SERVER" = 'true' ]; then
           #   echo "Deploying server code"
