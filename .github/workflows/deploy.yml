@@ -3,10 +3,12 @@ name: Deploy
 on:
   pull_request:
     types: [closed]
+    merged: true
+    branches:
+      - master
 
 jobs:
   deploy:
-    if: github.event.pull_request.merged == true || github.ref_name == 'master'
     runs-on: ubuntu-latest
     env:
       TARGET: ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}
@@ -16,8 +18,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
-        with:
-          ref: "develop"
       - name: Setup ssh
         run: |
           mkdir -p ~/.ssh/ && touch ~/.ssh/known_hosts
