@@ -1,12 +1,12 @@
 name: Deploy
 
 on:
-  pull_request:
-    types: [closed]
+  push:
+    branches:
+      - master
 
 jobs:
   deploy:
-    if: github.event.pull_request.merged == true || github.ref_name == 'master'
     runs-on: ubuntu-latest
     env:
       TARGET: ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}
@@ -16,8 +16,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
-        with:
-          ref: "develop"
       - name: Setup ssh
         run: |
           mkdir -p ~/.ssh/ && touch ~/.ssh/known_hosts
@@ -30,19 +28,19 @@ jobs:
         with:
           node-version: "18"
 
-      - name: Determine Deployment Type
-        if: ${{ success() }}
-        run: |
-          echo "DEPLOY_ASSETS=${{ contains(toJson(github.event.pull_request.labels.*.name), 'deploy:assets') }}" >> $GITHUB_ENV
-          echo "DEPLOY_SERVER=${{ contains(toJson(github.event.pull_request.labels.*.name), 'deploy:server') }}" >> $GITHUB_ENV
-          echo "DEPLOY_CLIENT=${{ contains(toJson(github.event.pull_request.labels.*.name), 'deploy:client') }}" >> $GITHUB_ENV
-          echo "PUBLIC=$DIR/public" >> $GITHUB_ENV
-          echo "SERVER=${{ env.DIR }}/server.js" >> $GITHUB_ENV
-          echo "ASSETS=${{ env.DIR }}/public/assets" >> $GITHUB_ENV
-          echo "INDEX_HTML=${{ env.DIR }}/public/index.html" >> $GITHUB_ENV
-          if [[ $DEPLOY_ASSETS == 'false' && $DEPLOY_SERVER == 'false' && $DEPLOY_CLIENT == 'false' ]]; then
-            exit 1;
-          fi
+      # - name: Determine Deployment Type
+      #   if: ${{ success() }}
+      #   run: |
+      #     echo "DEPLOY_ASSETS=${{ contains(toJson(github.event.pull_request.labels.*.name), 'deploy:assets') }}" >> $GITHUB_ENV
+      #     echo "DEPLOY_SERVER=${{ contains(toJson(github.event.pull_request.labels.*.name), 'deploy:server') }}" >> $GITHUB_ENV
+      #     echo "DEPLOY_CLIENT=${{ contains(toJson(github.event.pull_request.labels.*.name), 'deploy:client') }}" >> $GITHUB_ENV
+      #     echo "PUBLIC=$DIR/public" >> $GITHUB_ENV
+      #     echo "SERVER=${{ env.DIR }}/server.js" >> $GITHUB_ENV
+      #     echo "ASSETS=${{ env.DIR }}/public/assets" >> $GITHUB_ENV
+      #     echo "INDEX_HTML=${{ env.DIR }}/public/index.html" >> $GITHUB_ENV
+      #     if [[ $DEPLOY_ASSETS == 'false' && $DEPLOY_SERVER == 'false' && $DEPLOY_CLIENT == 'false' ]]; then
+      #       exit 1;
+      #     fi
 
       - name: Install Dependencies
         if: ${{ success() }}
@@ -55,21 +53,21 @@ jobs:
       - name: Deploy
         if: ${{ success() }}
         run: |
-          if [ "$DEPLOY_ASSETS" = 'true' ]; then
-            echo "Deploying JS assets"
-            ssh -i $KEY $TARGET "rm -rf $ASSETS && mkdir -p $ASSETS"
-            scp -i $KEY -r dist/public/assets/* "$TARGET:$ASSETS"
-            scp -i $KEY -r dist/public/index.html "$TARGET:$INDEX_HTML"
-          fi
-          if [ "$DEPLOY_CLIENT" = 'true' ]; then
-            echo "Deploying full client"
-            ssh -i $KEY $TARGET "rm -rf $PUBLIC && mkdir -p $PUBLIC"
-            scp -i $KEY -r dist/public/* "$TARGET:$PUBLIC"
-            ssh -i $KEY $TARGET "cp $DICOS/*.zip $PUBLIC/assets"
-          fi
-          if [ "$DEPLOY_SERVER" = 'true' ]; then
-            echo "Deploying server code"
-            scp -i $KEY -r dist/server.js "$TARGET:$SERVER"
-          fi
+          # if [ "$DEPLOY_ASSETS" = 'true' ]; then
+          #   echo "Deploying JS assets"
+          #   ssh -i $KEY $TARGET "rm -rf $ASSETS && mkdir -p $ASSETS"
+          #   scp -i $KEY -r dist/public/assets/* "$TARGET:$ASSETS"
+          #   scp -i $KEY -r dist/public/index.html "$TARGET:$INDEX_HTML"
+          # fi
+          # if [ "$DEPLOY_CLIENT" = 'true' ]; then
+          echo "Deploying full client"
+          ssh -i $KEY $TARGET "rm -rf $PUBLIC && mkdir -p $PUBLIC"
+          scp -i $KEY -r dist/public/* "$TARGET:$PUBLIC"
+          ssh -i $KEY $TARGET "cp $DICOS/*.zip $PUBLIC/assets"
+          # fi
+          # if [ "$DEPLOY_SERVER" = 'true' ]; then
+          echo "Deploying server code"
+          scp -i $KEY -r dist/server.js "$TARGET:$SERVER"
+          # fi
       - name: Cleanup
         run: "rm -f $KEY && rm -rf ~/.ssh"

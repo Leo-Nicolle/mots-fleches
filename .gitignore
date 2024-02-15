@@ -15,3 +15,4 @@ dist/
 docs/.vuepress/.cache
 docs/.vuepress/.temp
 scripts/api-key.mjs
+scripts/plausible-key
