@@ -37,8 +37,8 @@ jobs:
           echo "DEPLOY_CLIENT=${{ contains(toJson(github.event.pull_request.labels.*.name), 'deploy:client') }}" >> $GITHUB_ENV
           echo "PUBLIC=$DIR/public" >> $GITHUB_ENV
           echo "SERVER=${{ env.DIR }}/server.js" >> $GITHUB_ENV
-          echo "ASSETS=${{ env.PUBLIC }}/assets" >> $GITHUB_ENV
-          echo "INDEX_HTML=${{ env.PUBLIC }}/index.html" >> $GITHUB_ENV
+          echo "ASSETS=${{ env.DIR }}/public/assets" >> $GITHUB_ENV
+          echo "INDEX_HTML=${{ env.DIR }}/public/index.html" >> $GITHUB_ENV
           # if [[ ${{env.DEPLOY_ASSETS}} ='false' && ${{env.DEPLOY_SERVER}} ='false' && ${{env.DEPLOY_CLIENT}} ='false' ]]; then
             # exit 1;
           # fi
@@ -57,19 +57,9 @@ jobs:
           echo "assets 1 $DIR/public/assets 2 $PUBLIC 3 ${{env.PUBLIC}} 4"
           if [ "$DEPLOY_ASSETS" = 'true' ]; then
             echo "Deploying JS assets"
-            # ssh -i $KEY $TARGET "rm -rf $ASSETS && mkdir -p $ASSETS"
-            ssh -i $KEY $TARGET "echo $ASSETS"
-            ssh -i $KEY $TARGET "echo $PUBLIC"
-            ssh -i $KEY $TARGET "echo $SERVER"
-            ssh -i $KEY $TARGET "echo $DIR"
-
-            # scp -i $KEY -r dist/public/assets "$TARGET:$ASSETS"
-            # scp -i $KEY -r dist/public/index.html "$TARGET:$INDEX_HTML"
-
-            # scp "${{ env.SSH }} "
-            # rm -rf $PUBLIC/assets && mkdir -p $PUBLIC/assets
-            # cp -r dist/public/assets $PUBLIC/assets
-            # cp -r dist/public/index.html $PUBLIC/index.html
+            ssh -i $KEY $TARGET "rm -rf $ASSETS && mkdir -p $ASSETS"
+            scp -i $KEY -r dist/public/assets "$TARGET:$ASSETS"
+            scp -i $KEY -r dist/public/index.html "$TARGET:$INDEX_HTML"
           fi
           # if [ "$DEPLOY_CLIENT" = 'true' ]; then
           #   echo "Deploying full client"
@@ -83,38 +73,3 @@ jobs:
           # fi
       - name: Cleanup
         run: "rm -f $KEY && rm -rf ~/.ssh"
-
-      # - name: Deploy
-      #   uses: appleboy/ssh-action@master
-      #   env:
-      #     DEPLOY_ASSETS: "${{ env.DEPLOY_ASSETS }}"
-      #     DEPLOY_SERVER: "${{ env.DEPLOY_SERVER }}"
-      #     DEPLOY_CLIENT: "${{ env.DEPLOY_CLIENT }}"
-
-      #   with:
-      #     host: ${{ secrets.SERVER_HOST }}
-      #     username: ${{ secrets.SERVER_USERNAME }}
-      #     key: ${{ secrets.SSH_PRIVATE_KEY }}
-      #     port: 22
-      #     envs: DEPLOY_ASSETS,DEPLOY_SERVER,DEPLOY_CLIENT,PUBLIC,ASSETS,INDEX_HTML,DICOS,SERVER
-      #     script: |
-      #       cd ~/tmp/mots-fleches
-      #       git pull origin develop
-      #       npm install
-      #       npm run build
-      #       if [ "$DEPLOY_ASSETS" = 'true' ]; then
-      #         echo "Deploying JS assets"
-      #         rm -rf $ASSETS && mkdir -p $ASSETS
-      #         cp -r dist/public/assets $ASSETS
-      #         cp -r dist/public/index.html $INDEX_HTML
-      #       fi
-      #       if [ "$DEPLOY_CLIENT" = 'true' ]; then
-      #         echo "Deploying full client"
-      #         rm -rf $PUBLIC && mkdir -p $PUBLIC
-      #         cp -r dist/public $PUBLIC
-      #         cp $DICOS/*.zip $ASSETS
-      #       fi
-      #       if [ "$DEPLOY_SERVER" = 'true' ]; then
-      #         echo "Deploying server code"
-      #         cp -r dist/server.js $SERVER
-      #       fi
