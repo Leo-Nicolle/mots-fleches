@@ -54,7 +54,7 @@ jobs:
           echo "SERVER=${{ env.DIR }}/server.js" >> $GITHUB_ENV
           echo "ASSETS=${{ env.PUBLIC }}/assets" >> $GITHUB_ENV
           echo "INDEX_HTML=${{ env.PUBLIC }}/index.html" >> $GITHUB_ENV
-          echo "assets $DIR/public/assets $PUBLIC ${{env.PUBLIC}}"
+          echo "assets 1 $DIR/public/assets 2 $PUBLIC 3 ${{env.PUBLIC}} 4"
           if [ "$DEPLOY_ASSETS" = 'true' ]; then
             echo "Deploying JS assets"
             # ssh -i $KEY $TARGET "rm -rf $ASSETS && mkdir -p $ASSETS"
