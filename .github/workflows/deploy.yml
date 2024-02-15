@@ -43,13 +43,13 @@ jobs:
             # exit 1;
           # fi
 
-      # - name: Install Dependencies
-      #   if: ${{ success() }}
-      #   run: npm ci
+      - name: Install Dependencies
+        if: ${{ success() }}
+        run: npm ci
 
-      # - name: Build
-      #   if: ${{ success() }}
-      #   run: npm run build
+      - name: Build
+        if: ${{ success() }}
+        run: npm run build
 
       - name: Deploy
         if: ${{ success() }}
@@ -57,7 +57,7 @@ jobs:
           echo "assets 1 $DIR/public/assets 2 $PUBLIC 3 ${{env.PUBLIC}} 4"
           if [ "$DEPLOY_ASSETS" = 'true' ]; then
             echo "Deploying JS assets"
-            # ssh -i $KEY $TARGET "rm -rf $ASSETS && mkdir -p $ASSETS"
+            ssh -i $KEY $TARGET "rm -rf $ASSETS && mkdir -p $ASSETS"
             # scp -i $KEY -r dist/public/assets "$TARGET:$ASSETS"
             # scp -i $KEY -r dist/public/index.html "$TARGET:$INDEX_HTML"
 
