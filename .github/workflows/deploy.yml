@@ -54,11 +54,10 @@ jobs:
       - name: Deploy
         if: ${{ success() }}
         run: |
-          echo "assets 1 $DIR/public/assets 2 $PUBLIC 3 ${{env.PUBLIC}} 4"
           if [ "$DEPLOY_ASSETS" = 'true' ]; then
             echo "Deploying JS assets"
             ssh -i $KEY $TARGET "rm -rf $ASSETS && mkdir -p $ASSETS"
-            scp -i $KEY -r dist/public/assets "$TARGET:$ASSETS"
+            scp -i $KEY -r dist/public/assets "$TARGET:$PUBLIC"
             scp -i $KEY -r dist/public/index.html "$TARGET:$INDEX_HTML"
           fi
           # if [ "$DEPLOY_CLIENT" = 'true' ]; then
