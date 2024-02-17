@@ -14,14 +14,14 @@
           :height="cellWidth(style)" :fill="exportOptions.fills && cell.definition
             ? defBackgroundColor
             : 'none'
-            " :class="highlights ? highlights.get(`${cell.y}-${cell.x}`) : ''" />
+            " />
         <g v-if="cell.definition && exportOptions.definitions">
           <text v-for="(sp, k) in lines(cell)" :key="k" :line-height="defSize" :font-size="defSize"
             :font-family="defFontFamily" :font-weight="defFontWeight" :fill="defColor" v-bind="sp">
             {{ sp.text }}
           </text>
         </g>
-        <text :x="xText(cell)" :y="yText(cell) + textSize / 2" alignment-baseline="central" dominant-baseline="center"
+        <text :x="xText(cell)" :y="yText(cell) + textSize / 2 + offset" :alignment-baseline="alignBs"
           :font-family="textFontFamily" :font-weight="textFontWeight" :fill="textFontColor" :font-size="textSize"
           v-else-if="!cell.definition && exportOptions.texts">
           {{ cell.text || cell.suggestion }}
@@ -81,6 +81,8 @@ import {
   ArrowDir,
   SolutionStyle,
   isSolutionStyle,
+  getOffsetY,
+  splitPosition
 } from "grid";
 import { ExportOptions } from "../../types";
 import { getCellClass } from "../../js/utils";
@@ -105,10 +107,6 @@ const props = defineProps<{
    * What to display or not (arrows, definitions, etc.)
    */
   exportOptions: Partial<ExportOptions>;
-  /**
-   * Highlighted cells
-   */
-  highlights?: Map<string, string>;
   /**
    * The zoom level
    */
@@ -139,6 +137,8 @@ const lineColor = computed(() => props.style.grid.borderColor);
 const spaceStroke = computed(() => props.style.grid.spaceSize);
 const outerLineStroke = computed(() => props.style.grid.outerBorderSize);
 const outerLineColor = computed(() => props.style.grid.outerBorderColor);
+const alignBs = computed(() => props.style.solutions.alignmentBaseline);
+const offset = computed(() => props.style.solutions.offset);
 const defSize = computed(
   () => (props.style.grid.cellSize / 4) * props.style.definition.size
 );
@@ -151,7 +151,6 @@ const textSize = computed(() => {
 const textFontFamily = computed(() => props.style.solutions.family);
 const textFontWeight = computed(() => props.style.solutions.weight);
 const textFontColor = computed(() => props.style.solutions.color);
-const textTopOffset = computed(() => props.style.solutions.top);
 const defFontFamily = computed(() => `${props.style.definition.family}`);
 const defFontWeight = computed(() => `${props.style.definition.weight}`);
 
@@ -170,7 +169,7 @@ const arrows = computed(
       .filter((c) => c.definition && c.arrows.length > 0)
       .map((cell) => {
         return arrowPositions(cell).map(({ x, y }, i) => {
-          return cell.arrows[i] === "none"
+          return cell.arrows[i] === "none" || y < 0
             ? null
             : {
               dir: cell.arrows[i],
@@ -202,24 +201,7 @@ const splits = computed(() =>
     .flat()
     .filter((c) => c.definition && c.text.split("\n\n").length > 1)
     .map((cell) => {
-      const lines = getLines(cell).length;
-      const split = splitIndex(cell);
-      const ratio =
-        lines === 4
-          ? split === 2
-            ? 0.5
-            : split === 1
-              ? 1 / 4
-              : 3 / 4
-          : lines === 3
-            ? split === 1
-              ? 1 / 3
-              : 2 / 3
-            : lines === 2
-              ? split === 1
-                ? 0.5
-                : 0
-              : 0;
+      const ratio = splitPosition(cell);
       const y =
         cell.y * cellAndBorderWidth(props.style) +
         ratio * cellWidth(props.style);
@@ -295,9 +277,11 @@ function lines(cell: Cell) {
   const fourth = cellHeight / 4;
   const freeSpace = Math.max(0, cellHeight - (+splited * borderSize) - ln * fourth)
     / (ln + 1);
+  const oys = getOffsetY(cell.text, props.style.definition.lineSpacings);
   return lines.map((line, i, arr) => {
     const y =
       cell.y * cellAndBorderWidth(props.style)
+      + (oys[i] || 0)
       + freeSpace * (i + 1)
       + i * fourth
       + (splited && i >= split) * (borderSize);

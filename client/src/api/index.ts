@@ -7,6 +7,7 @@ class API {
   public supadb: SupaDB;
   public _mode: string;
   constructor(mode: string = 'unknown') {
+    // axios.get('/debug-db.json').then(({ data }) => setDatabase(data, 7));
     this.idb = new Idatabase();
     this.supadb = new SupaDB('https://tnvxmrqhkdlynhtdzmpw.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRudnhtcnFoa2RseW5odGR6bXB3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODIyNTM0MTEsImV4cCI6MTk5NzgyOTQxMX0.4PczPPAxbkwBvig7NTHNbR8JumuwPPqfyS_kGnkxP5I');
     this._mode = mode;

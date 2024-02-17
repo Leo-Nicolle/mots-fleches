@@ -204,7 +204,6 @@ function onKeyup(evt: KeyboardEvent) {
  * Updates the arrows of the cell
  */
 function setArrow(dir: ArrowDir, index: number) {
-  debugger;
   Grid.setArrow(props.cell, index, dir);
   container.value.querySelector("textarea")?.focus();
   emit("update");
@@ -215,17 +214,19 @@ const handleW = 4;
  */
 const handles = computed<Handle[]>(() => {
   const w = cellAndBorderWidth(props.style) * props.zoom;
-  return arrowPositions(props.cell).map(({ x, y }, i) => {
-    return {
-      top: `${y * w - handleW}px`,
-      left: `${x * w - handleW}px`,
-      index: x === 1 ? i : 2,
-      dirs:
-        x === 1
-          ? ["right", "rightdown", "none"]
-          : ["down", "downright", "none"],
-    };
-  });
+  return arrowPositions(props.cell)
+    .filter(({ y }) => y > 0)
+    .map(({ x, y }, i) => {
+      return {
+        top: `${y * w - handleW}px`,
+        left: `${x * w - handleW}px`,
+        index: x === 1 ? i : 2,
+        dirs:
+          x === 1
+            ? ["right", "rightdown", "none"]
+            : ["down", "downright", "none"],
+      };
+    });
 });
 function onLooseFocus(evt: FocusEvent) {
   if (Grid.equal(props.cell, nullCell)) return;

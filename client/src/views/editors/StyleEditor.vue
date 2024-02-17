@@ -2,7 +2,7 @@
   <Layout>
     <template v-slot:left-panel v-if="style && grid">
       <GridForm :model-value="grid" />
-      <OptionsForm v-model="style" @update:modelValue="onUpdate" grid definition arrows format />
+      <GridStyleForm v-model="style" grid definition arrows format />
     </template>
     <template v-slot:body>
       <GridPaper v-if="grid && style" class="paper" :grid="grid" :export-options="{
@@ -17,7 +17,7 @@
 
 <script setup lang="ts">
 import GridPaper from "../../components/GridPaper.vue";
-import OptionsForm from "../../components/forms/GridStyleForm.vue";
+import GridStyleForm from "../../components/forms/GridStyleForm.vue";
 import GridForm from "../../components/forms/GridForm.vue";
 import Layout from "../../layouts/Main.vue";
 import NoGrid from "../../components/NoGrid.vue";
@@ -26,6 +26,7 @@ import { Grid, GridStyle } from "grid";
 import { ref, onMounted, unref, toRaw } from "vue";
 import { useRoute } from "vue-router";
 import { api } from "../../api";
+import { watch } from "vue";
 /**
  * View to edit a grid style
  */
@@ -51,6 +52,8 @@ function onUpdate() {
     api.db.pushStyle(toRaw(style.value) as unknown as GridStyle);
   }, 100);
 }
+
+watch(style, onUpdate, { deep: true });
 
 onMounted(() => {
   fetch();

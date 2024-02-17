@@ -1,4 +1,4 @@
-import { Cell, Format } from "grid";
+import { Cell, Format, LineSpacings, lineCases } from "grid";
 import { NIcon } from "naive-ui";
 import { h, Component } from "vue";
 import { RouteLocationNormalizedLoaded } from "vue-router";

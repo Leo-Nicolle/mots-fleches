@@ -1,11 +1,6 @@
 <template>
-  <SolutionsPaper
-    v-if="grids && style"
-    :grids="grids"
-    :solutionStyle="style"
-    class="paper"
-    :export-options="exportOptions"
-  />
+  <SolutionsPaper v-if="grids && style" :grids="grids" :page="1" :solutionStyle="style" class="paper"
+    :export-options="exportOptions" />
 </template>
 
 <script setup lang="ts">
@@ -45,6 +40,5 @@ onMounted(() => {
 });
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>
 

@@ -105,11 +105,15 @@ export const lang = {
     offset: "Offset",
     styles: "Styles",
     solutionStyles: "Solution styles",
+    lineSpacing: "Line spacing",
+    baselineShift: 'Baseline',
+    alignmentBaseline: 'Alignment',
   },
   tooltips: {
     incomplete: "is incomplete",
     nodef: "has no definition",
     noarrow: "has no arrow",
+    toomanyarrows: 'has too many arrows',
     add: "Add {word} to dictionary",
   },
   modals: {

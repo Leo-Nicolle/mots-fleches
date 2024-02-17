@@ -105,11 +105,16 @@ export const lang = {
         offset: "Décalage",
         styles: "Styles",
         solutionStyles: "Styles des solutions",
+        line: 'Ligne',
+        lineSpacing: "Interlignage",
+        baselineShift: 'Décalage',
+        alignmentBaseline: 'Alignement',
     },
     tooltips: {
         incomplete: "est incomplet",
         nodef: "n'a pas de définition",
         noarrow: "n'a pas de flèche",
+        toomanyarrows: "a trop de flèches",
         add: "Ajouter {word} au dictionnaire",
     },
     modals: {

@@ -53,10 +53,6 @@
           </template>
         </n-modal>
       </div>
-      <div class="outside">
-        <!-- @slot Slot for element outside the main layout  -->
-        <slot name="outside"> </slot>
-      </div>
     </template>
   </Layout>
 </template>
@@ -212,12 +208,6 @@ watch(selectedElements, () => {
   max-width: 170px;
   max-height: 170px;
   overflow: hidden;
-}
-
-.outside {
-  position: absolute;
-  bottom: 100%;
-  right: 100%;
 }
 
 .add svg {
