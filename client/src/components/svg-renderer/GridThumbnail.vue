@@ -11,7 +11,6 @@ import {
   onMounted,
   watch,
   ref,
-  watchEffect,
 } from "vue";
 import SVGGrid from "./Grid.vue";
 import {
@@ -20,6 +19,7 @@ import {
   nullCell
 } from "grid";
 import { defaultExportOptions } from "../../types";
+import { useModel } from "../../js/useModel";
 
 /**
  * Button to add words from the grid to the dictionnary
@@ -30,43 +30,40 @@ const props = defineProps<{
    */
   grids: Grid[];
   style: GridStyle;
+  modelValue: string[];
 }>();
+
+
 const exportingGrid = ref<Grid>(new Grid(3, 3, 'exporting-grid'));
 const emit = defineEmits<{
   /**
    * The grid has been updated
    */
-  (event: "update", value: string[]): void;
+  (event: "update:modelValue", value: string[]): void;
 }>();
+const value = useModel(props, emit);
 const thumbnail = ref();
-const urls = ref<string[]>([]);
-const index = ref(0);
 const canvas = document.createElement("canvas");
 canvas.width = 170;
 canvas.height = 170;
-const ctx = canvas.getContext("2d")!;
-function exportSvg() {
-  if (!props.grids[index.value]) {
-    return emit("update", urls.value);
+function exportSvg(index = 0) {
+  if (!props.grids[index]) {
+    return;
   }
   exportingGrid.value.cells.forEach((row, i) => {
     row.forEach((cell, j) => {
-      exportingGrid.value.cells[i][j] = { ...props.grids[index.value].cells[i][j] };
+      exportingGrid.value.cells[i][j] = { ...props.grids[index].cells[i][j] };
     });
   });
   nextTick(() => {
-    urls.value.push(new XMLSerializer().serializeToString(thumbnail.value.$el));
+    value.value.push(new XMLSerializer().serializeToString(thumbnail.value.$el));
     setTimeout(() => {
-      index.value++;
+      exportSvg(index + 1);
     }, 100);
   });
 }
 
-watch(props.grids, () => {
-  index.value = 0;
-  urls.value = [];
-});
-watch(index, () => {
+watch(() => [props.modelValue, props.grids], () => {
   exportSvg();
 });
 onMounted(() => {

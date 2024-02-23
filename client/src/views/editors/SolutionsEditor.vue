@@ -47,17 +47,18 @@ const indexFirstPage = ref(0);
 const solutionFirstPage = ref(0);
 const saveTimeout = ref(0);
 function fetch() {
-  const promise = route.query.ids
-    ? Promise.all(
-      (route.query.ids as string).split(",").map((id) => api.getGrid(id))
-    ).then((gs) => {
-      grids.value = gs.filter((e) => e) as Grid[];
-    })
+  const id = route.params.id as string || 'solution';
+  const bookId = route.params.bookId as string | undefined;
+  const promise = bookId
+    ? api.getBookGrids(bookId)
+      .then((gs) => {
+        grids.value = gs.filter((e) => e) as Grid[];
+      })
     : api.getGrids().then((gs) => {
       grids.value = gs;
     });
   return promise
-    .then(() => api.db.getStyle("solution"))
+    .then(() => api.db.getStyle(id))
     .then((s) => {
       style.value = s as SolutionStyle;
       indexFirstPage.value =

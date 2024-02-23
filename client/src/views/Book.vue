@@ -3,9 +3,13 @@
     :onClick="(grid) => $router.push(`/grid/${grid.id}`)" @select="(s) => (selected = s)" :has-create-button="true"
     :has-delete-button="true">
     <template v-slot:left-panel>
-      <h3 v-if="route.name === 'book'">{{ $t("nav.book") }}</h3>
-      <BookModal v-if="route.name === 'book'" :bookId="route.params.id as string" :style="style"
-        :solutionsStyle="solutionsStyle" />
+      <h3 v-if="isBook">{{ $t("nav.book") }}</h3>
+      <BookModal v-if="isBook" :bookId="route.params.id as string" :style="style" :solutionsStyle="solutionsStyle"
+        @update="onUpdate" />
+      <h3 v-if="isBook">{{ $t("nav.styles") }}</h3>
+      <n-button round @click="() => $router.push(`/styles/${style!.id}`)">Styles</n-button>
+      <n-button round @click="goToSlutions">Solution Styles</n-button>
+
       <h3>{{ $t("nav.grids") }}</h3>
       <ExportButton route="book-export" :query="exportQuery" />
       <ExportModal :grids="selected.length ? selected : grids" :style="style" :solutionsStyle="solutionsStyle" />
@@ -27,7 +31,7 @@
   </Layout>
   <Teleport to="#outside">
     <div>
-      <GridThumbnail v-if="style && grids" :grids="grids" :style="style" @update="onExported" />
+      <GridThumbnail v-if="style && grids" :grids="grids" :style="style" v-model="thumbnails" />
     </div>
   </Teleport>
 </template>
@@ -48,9 +52,8 @@ import { workerController } from "../worker";
 /**
  * View to display all grids in a grid layout
  */
-const router = useRouter();
 const route = useRoute();
-
+const router = useRouter();
 const grids = ref<Grid[]>([]);
 const style = ref<GridStyle>();
 const solutionsStyle = ref<SolutionStyle>();
@@ -60,8 +63,9 @@ const exportQuery = computed(() => {
   const res = { ids: selected.value.map((s) => s.id).join(",") };
   return res;
 });
+const isBook = computed(() => route.name === 'book');
 function fetch() {
-  if (route.name === 'book') {
+  if (isBook.value) {
     return api
       .db.getBook(route.params.id as string)
       .then((book) => Promise.all([
@@ -75,8 +79,6 @@ function fetch() {
           .sort((a, b) => b.created - a.created);
         style.value = sts!;
         solutionsStyle.value = sls as SolutionStyle;
-        exporting.value = true;
-        exportingG.value = 0;
         thumbnails.value = [];
       })
       .catch((e) => {
@@ -102,13 +104,16 @@ function fetch() {
     });
 }
 
-function onExported(str: string[]) {
-  thumbnails.value = str;
+function goToSlutions() {
+  return router.push(`/solutions/${solutionsStyle.value!.id}/${route.params.id}`);
 }
 
+function onUpdate() {
+  fetch();
+}
 function onDelete() {
   const ids = selected.value.map((grid) => grid.id);
-  const promise = route.name === 'book'
+  const promise = isBook.value
     ? api.deleteGridsFromBook(route.params.id as string, ids)
     : Promise.resolve();
   return promise
@@ -148,7 +153,7 @@ function createGrid() {
     })
     .then(() => api.db.pushGrid(newGrid))
     .then(gridId => {
-      if (route.name === 'book') {
+      if (isBook.value) {
         return api.pushGridToBook(route.params.id as string, gridId);
       }
     })
@@ -156,8 +161,6 @@ function createGrid() {
 }
 
 onMounted(() => {
-  api.getUserDefinitions()
-    .then(defs => { });
   fetch();
 });
 </script>

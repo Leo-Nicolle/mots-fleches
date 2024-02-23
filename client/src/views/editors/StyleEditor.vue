@@ -35,7 +35,8 @@ const style = ref<GridStyle>();
 const saveTimeout = ref(0);
 const route = useRoute();
 function fetch() {
-  return Promise.all([api.getGrids(), api.db.getStyle("default")])
+  const id = route.params.id as string || 'default';
+  return Promise.all([api.getGrids(), api.db.getStyle(id)])
     .then(([grids, opts]) => {
       grid.value = grids[0];
       style.value = opts;

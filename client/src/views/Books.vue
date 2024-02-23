@@ -17,7 +17,6 @@
       {{ elt.comment ? elt.comment : $t("buttons.newBook") }}
     </template>
     <template v-slot:outside>
-      <!-- <GridThumbnail v-if="grids[exportingG]" :grid="grids[exportingG]" :style="style" @update="onExported" /> -->
     </template>
   </Layout>
 </template>
@@ -32,7 +31,6 @@ import {
 import { v4 as uuid } from "uuid";
 import { api } from "../api";
 import { Book } from "database";
-import { defaultSolutionStyle, defaultStyles } from "grid";
 /**
  * View to display all grids in a grid layout
  */
@@ -82,6 +80,7 @@ onMounted(() => {
   max-width: 170px;
   max-height: 170px;
   overflow: hidden;
+  color: var(--n-title-text-color);
 }
 
 .card-body {

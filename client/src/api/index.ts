@@ -41,6 +41,13 @@ class API {
       .then((grid) => grid ? Grid.unserialize(JSON.stringify(grid)) : undefined);
   }
 
+  getBookGrids(bookId: string) {
+    return this.db.getBook(bookId)
+      .then((book) => book
+        ? Promise.all(book.grids.map(id => this.db.getGrid(id)))
+        : [] as Grid[]);
+  }
+
   pushGridToBook(bookId: string, gridId: string) {
     return this.db.getBook(bookId)
       .then((book) => {
@@ -86,6 +93,29 @@ class API {
           });
         return res;
       });
+  }
+
+  deleteStyles(ids: string[]) {
+    const set = new Set(ids);
+    set.delete('default');
+    set.delete('solution');
+    return this.db.getBooks()
+      .then(books => Promise.all(books.map(book => {
+        let shouldSave = false;
+        if (set.has(book.style)) {
+          shouldSave = true;
+          book.style = 'default';
+        }
+        if (set.has(book.solutionStyle)) {
+          shouldSave = true;
+          book.solutionStyle = 'solution';
+        }
+        if (shouldSave) {
+          return this.db.updateBook(book);
+        }
+        return Promise.resolve();
+      })))
+      .then(() => Promise.all([...ids].map(id => this.db.deleteStyle(id))));
   }
 
   isSignedIn() {

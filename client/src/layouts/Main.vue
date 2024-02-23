@@ -171,17 +171,6 @@ function getNavChildren() {
         h(
           RouterLink,
           {
-            to: "/solutions",
-          },
-          { default: () => i18n.global.t("nav.solutions") }
-        ),
-      key: "go-to-solutions",
-    },
-    {
-      label: () =>
-        h(
-          RouterLink,
-          {
             to: "/words",
           },
           { default: () => i18n.global.t("nav.words") }
