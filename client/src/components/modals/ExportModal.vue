@@ -26,7 +26,7 @@
       </div>
     </div>
     <template #action>
-      <n-button>{{ $t("buttons.cancel") }}</n-button>
+      <n-button @click="visible = false">{{ $t("buttons.cancel") }}</n-button>
       <n-button type="primary" @click="print()">Ok</n-button>
     </template>
   </n-modal>

@@ -3,7 +3,8 @@
     :onClick="(grid) => $router.push(`/grid/${grid.id}`)" @select="(s) => (selected = s)" :has-create-button="true"
     :has-delete-button="true">
     <template v-slot:left-panel>
-      <BookButtons v-if="isBook" :style="style" :solutions-style="solutionsStyle" @update="fetch" />
+      <BookButtons v-if="isBook" :style="style" :solutions-style="solutionsStyle" :selected="selectedIds"
+        @update="fetch" />
       <h3>{{ $t("nav.grids") }}</h3>
       <ExportButton route="book-export" :query="exportQuery" />
       <ExportModal :grids="selected.length ? selected : grids" :style="style" :solutionsStyle="solutionsStyle" />
@@ -58,6 +59,7 @@ const exportQuery = computed(() => {
   return res;
 });
 const isBook = computed(() => route.name === 'book');
+const selectedIds = computed(() => selected.value.map(s => s.id));
 function fetch() {
   if (isBook.value) {
     return api

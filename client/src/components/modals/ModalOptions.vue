@@ -116,10 +116,6 @@ watchEffect(() => {
   if (!visible.value) return;
   emit("open");
 });
-// watch(value.value, () => {
-//   if (!visible.value) return;
-//   emit("update:modelValue", value.value);
-// });
 const defaultSelectOpt = computed(() => {
   if (!props.modelValue) return "default";
   return opts.value.find((opt) => opt.value === props.modelValue.styleId)

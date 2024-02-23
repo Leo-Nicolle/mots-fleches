@@ -29,7 +29,6 @@
       </n-form>
     </div>
     <template #action>
-      <n-button>{{ $t("buttons.cancel") }}</n-button>
       <n-button type="primary" @click="save()">Ok</n-button>
     </template>
   </n-modal>
