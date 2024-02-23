@@ -1,5 +1,6 @@
 import { Grid, getDefinitions } from 'grid';
 import { Idatabase, SupaDB, setDatabase } from 'database';
+import { v4 as uuid } from 'uuid';
 import axios from 'axios';
 const debugMigration = true;
 class API {
@@ -33,12 +34,12 @@ class API {
 
   getGrids() {
     return this.db.getGrids()
-      .then((grids) => grids.map(grid => Grid.unserialize(JSON.stringify(grid))));
+      .then((grids) => grids.map(grid => Grid.unserialize(grid)));
   }
 
   getGrid(id: string): Promise<Grid | undefined> {
     return this.db.getGrid(id)
-      .then((grid) => grid ? Grid.unserialize(JSON.stringify(grid)) : undefined);
+      .then((grid) => grid ? Grid.unserialize(grid) : undefined);
   }
 
   getBookGrids(bookId: string) {
@@ -48,36 +49,82 @@ class API {
         : [] as Grid[]);
   }
 
+  duplicateGrids(ids: string[], bookId: string) {
+    return Promise.all(ids.map(id => this.db.getGrid(id)))
+      .then(grids => {
+        grids
+          .filter(g => g)
+          .forEach(grid => {
+            grid!.id = uuid();
+          });
+
+        return Promise.all(grids.map(g => this.db.pushGrid(g)));
+      })
+      .then(grids => {
+        this.db.getBook(bookId)
+          .then((book) => {
+            if (!book) {
+              // TODO: cleanup the grids
+              return Promise.reject('Book not found');
+            }
+            book.grids.push(...grids);
+            return this.db.pushBook(book);
+          });
+      });
+  }
+
+  moveGrids(grids: string[], sourceBook: string, targetBook: string) {
+    const set = new Set(grids);
+    return Promise.all([sourceBook, targetBook].map(id => this.db.getBook(id)))
+      .then(([source, target]) => {
+        if (!source || !target) return Promise.reject('Book not found');
+        source.grids.filter(id => !set.has(id));
+        const targetSet = new Set(target.grids);
+        grids.filter(id => !targetSet.has(id)).forEach(id => target.grids.push(id));
+        return Promise.all([source, target].map(book => this.db.pushBook(book)));
+      });
+  }
+
+  reuseGrids(grids: string[], targetBook: string) {
+    this.db.getBook(targetBook)
+      .then(book => {
+        if (!book) return Promise.reject('Book not found');
+        const targetSet = new Set(book.grids);
+        grids.filter(id => !targetSet.has(id)).forEach(id => book.grids.push(id));
+        return this.db.pushBook(book);
+      });
+  }
+
   pushGridToBook(bookId: string, gridId: string) {
     return this.db.getBook(bookId)
       .then((book) => {
-        if (book) {
-          book.grids.push(gridId);
-          return this.db.updateBook(book);
+        if (!book) {
+          return Promise.reject('book not found');
         }
-        return Promise.reject('book not found');
+        book.grids.push(gridId);
+        return this.db.updateBook(book);
       });
   }
 
   deleteGridFromBook(bookId: string, gridId: string) {
     return this.db.getBook(bookId)
       .then((book) => {
-        if (book) {
-          book.grids = book.grids.filter(id => id !== gridId);
-          return this.db.updateBook(book);
+        if (!book) {
+          return Promise.reject('book not found');
         }
-        return Promise.reject('book not found');
+        book.grids = book.grids.filter(id => id !== gridId);
+        return this.db.updateBook(book);
       });
   }
   deleteGridsFromBook(bookId: string, gridIds: string[]) {
     return this.db.getBook(bookId)
       .then((book) => {
-        if (book) {
-          const idsSet = new Set(gridIds);
-          book.grids = book.grids.filter(id => !idsSet.has(id));
-          return this.db.updateBook(book);
+        if (!book) {
+          return Promise.reject('book not found');
         }
-        return Promise.reject('book not found');
+        const idsSet = new Set(gridIds);
+        book.grids = book.grids.filter(id => !idsSet.has(id));
+        return this.db.updateBook(book);
       });
   }
 

@@ -37,7 +37,7 @@
 
 <script setup lang="ts">
 import { Book } from 'database';
-import { api } from '../api';
+import { api } from '../../api';
 import { GridStyle, SolutionStyle, isSolutionStyle } from "grid";
 import { ref, defineProps, toRaw, defineEmits } from "vue";
 import { SelectOption } from 'naive-ui';

@@ -1,20 +1,9 @@
 <template>
-  <Layout
-    v-if="fonts"
-    :eltList="fonts"
-    :onDelete="onDelete"
-    @select="(s) => (selected = s)"
-    :has-create-button="false"
-    :has-delete-button="true"
-  >
+  <Layout v-if="fonts" :eltList="fonts" :onDelete="onDelete" @select="(s) => (selected = s)" :has-create-button="false"
+    :has-delete-button="true">
     <template v-slot:left-panel>
-      <UploadModal
-        :title="$t('titles.newFont')"
-        :buttonText="$t('buttons.create')"
-        :readAsDataURL="true"
-        :single="true"
-        @ok="onUpload"
-      />
+      <UploadModal :title="$t('titles.newFont')" :buttonText="$t('buttons.create')" :readAsDataURL="true" :single="true"
+        @ok="onUpload" />
     </template>
     <template #card-title="{ elt }">
       <FontLoader :value="elt" />
@@ -28,7 +17,7 @@
 
 <script setup lang="ts">
 import Layout from "../layouts/GridLayout.vue";
-import UploadModal from "../components/UploadModal.vue";
+import UploadModal from "../components/modals/UploadModal.vue";
 import FontLoader from "../components/fonts/FontLoader.vue";
 
 import { v4 as uuid } from "uuid";
@@ -76,6 +65,7 @@ function onDelete() {
 .n-card:has(.font-body) {
   height: 75px;
 }
+
 .font-body {
   text-align: center;
 }

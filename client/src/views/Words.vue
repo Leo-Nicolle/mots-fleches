@@ -21,7 +21,7 @@
 import Layout from "../layouts/Main.vue";
 import Words from "../components/forms/Words.vue";
 import BannedWords from "../components/forms/BannedWords.vue";
-import UploadModal from "../components/UploadModal.vue";
+import UploadModal from "../components/modals/UploadModal.vue";
 import { api } from "../api";
 import { computed, ref } from "vue";
 const modes = ['words', 'bannedwords'];

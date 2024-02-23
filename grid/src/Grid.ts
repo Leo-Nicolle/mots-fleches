@@ -368,8 +368,14 @@ export class Grid {
    * @param s GridState JSON string
    * @returns A new grid
    */
-  static unserialize(s: string) {
-    const { rows, cols, comment, title, id, cells, created, styleId } = JSON.parse(s) as GridState;
+  static unserialize(s: string | GridState) {
+    let state: GridState;
+    if (typeof s === 'string') {
+      state = JSON.parse(s) as GridState;
+    } else {
+      state = s;
+    }
+    const { rows, cols, comment, title, id, cells, created, styleId } = state;
     const res = new Grid(rows, cols, id);
     cells.forEach((row, i) => {
       row.forEach((cell, j) => {

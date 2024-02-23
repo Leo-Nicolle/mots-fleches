@@ -3,13 +3,7 @@
     :onClick="(grid) => $router.push(`/grid/${grid.id}`)" @select="(s) => (selected = s)" :has-create-button="true"
     :has-delete-button="true">
     <template v-slot:left-panel>
-      <h3 v-if="isBook">{{ $t("nav.book") }}</h3>
-      <BookModal v-if="isBook" :bookId="route.params.id as string" :style="style" :solutionsStyle="solutionsStyle"
-        @update="onUpdate" />
-      <h3 v-if="isBook">{{ $t("nav.styles") }}</h3>
-      <n-button round @click="() => $router.push(`/styles/${style!.id}`)">Styles</n-button>
-      <n-button round @click="goToSlutions">Solution Styles</n-button>
-
+      <BookButtons v-if="isBook" :style="style" :solutions-style="solutionsStyle" @update="fetch" />
       <h3>{{ $t("nav.grids") }}</h3>
       <ExportButton route="book-export" :query="exportQuery" />
       <ExportModal :grids="selected.length ? selected : grids" :style="style" :solutionsStyle="solutionsStyle" />
@@ -40,15 +34,15 @@
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import GridThumbnail from "../components/svg-renderer/GridThumbnail.vue";
-import ExportModal from "../components/ExportModal.vue";
-import BookModal from "../components/BookModal.vue";
+import ExportModal from "../components/modals/ExportModal.vue";
 import ExportButton from "../components/ExportButton.vue";
 import Layout from "../layouts/GridLayout.vue";
-import UploadModal from "../components/UploadModal.vue";
+import UploadModal from "../components/modals/UploadModal.vue";
 import { Grid, GridState, GridStyle, SolutionStyle } from "grid";
 import generate from "../js/maze-generator";
 import { api } from "../api";
 import { workerController } from "../worker";
+import BookButtons from "../components/sidebars/BookButtons.vue";
 /**
  * View to display all grids in a grid layout
  */
@@ -75,7 +69,7 @@ function fetch() {
       ]))
       .then(([gds, sts, sls]) => {
         grids.value = (gds as GridState[])
-          .map((g) => Grid.unserialize(JSON.stringify(g)))
+          .map((g) => Grid.unserialize(g))
           .sort((a, b) => b.created - a.created);
         style.value = sts!;
         solutionsStyle.value = sls as SolutionStyle;
@@ -104,13 +98,6 @@ function fetch() {
     });
 }
 
-function goToSlutions() {
-  return router.push(`/solutions/${solutionsStyle.value!.id}/${route.params.id}`);
-}
-
-function onUpdate() {
-  fetch();
-}
 function onDelete() {
   const ids = selected.value.map((grid) => grid.id);
   const promise = isBook.value
@@ -136,7 +123,7 @@ function onUpload(filesContents: [string, string][]) {
     filesContents.map(([filename, json]) => {
       return Promise.all(
         JSON.parse(json).map((grid) =>
-          api.db.pushGrid(Grid.unserialize(JSON.stringify(grid)))
+          api.db.pushGrid(Grid.unserialize(grid))
         )
       );
     })

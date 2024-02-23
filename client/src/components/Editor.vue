@@ -88,7 +88,7 @@ import Layout from "../layouts/Main.vue";
 import SVGGrid from "./svg-renderer/Grid.vue";
 import GridInput from "./svg-renderer/GridInput.vue";
 import { defaultExportOptions, Method, Mode, Ordering } from "../types";
-import ModalOptions from "./forms/ModalOptions.vue";
+import ModalOptions from "./modals/ModalOptions.vue";
 import Autofill from "./sidebars/Autofill.vue";
 import GridHighlight from "./svg-renderer/GridHighlight.vue";
 import Suggestion from "./sidebars/Suggestion.vue";

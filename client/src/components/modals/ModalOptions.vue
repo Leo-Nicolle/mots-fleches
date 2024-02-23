@@ -57,7 +57,6 @@ import {
   nextTick,
   onMounted,
   ref,
-  watch,
   watchEffect,
 } from "vue";
 import { CogOutline as CogIcon } from "@vicons/ionicons5";
