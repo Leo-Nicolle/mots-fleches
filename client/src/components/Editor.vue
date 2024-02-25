@@ -5,8 +5,7 @@
         <h2>
           {{ grid.title ? grid.title : $t("buttons.newGrid") }}
         </h2>
-        <ModalOptions :modelValue="grid" @update-size="emit('size-update')" @update:model-value="emit('update')"
-          @open="focus = nullCell" />
+        <GridModal v-model:grid="grid" @open="focus = nullCell" @update="() => emit('update')" />
       </span>
       <span>
         <n-button @click="onModeClick">
@@ -49,9 +48,9 @@
               highlight: true,
             }"></SVGGrid>
           <GridHighlight :grid="grid" :style="style" :cell="hoveredCell" :cellProbas="cellProbas" :zoom="zoom"
-            :mode="highlightMode" :gridVersion="gridVersion" :offset="offset" :dir="dir" @update="onGridUpdate()" />
+            :mode="highlightMode" :offset="offset" :dir="dir" @update="onGridUpdate" />
           <GridInput :grid="grid" :dir="dir" :style="style" :cell="focus" :offset="offset" :zoom="zoom"
-            @focus="(point) => (focus = point)" @update="onGridUpdate()" @keyup="onKeyUp">
+            @focus="(point) => (focus = point)" @update="onGridUpdate" @keyup="onKeyUp">
           </GridInput>
         </div>
       </div>
@@ -70,6 +69,7 @@ import {
   onBeforeUnmount,
   watch,
   unref,
+  defineModel
 } from "vue";
 import {
   AddCircleOutline,
@@ -88,7 +88,7 @@ import Layout from "../layouts/Main.vue";
 import SVGGrid from "./svg-renderer/Grid.vue";
 import GridInput from "./svg-renderer/GridInput.vue";
 import { defaultExportOptions, Method, Mode, Ordering } from "../types";
-import ModalOptions from "./modals/ModalOptions.vue";
+import GridModal from "./modals/GridModal.vue";
 import Autofill from "./sidebars/Autofill.vue";
 import GridHighlight from "./svg-renderer/GridHighlight.vue";
 import Suggestion from "./sidebars/Suggestion.vue";
@@ -100,29 +100,17 @@ import { workerController } from "../worker";
  */
 const props = defineProps<{
   /**
-   * The grid to edit
-   */
-  grid: Grid;
-  /**
    * The grid style
    */
   style: GridStyle;
 }>();
 const emit = defineEmits<{
-  /**
-   * The grid has been updated
-   */
-  (event: "update"): string;
-  /**
-   * The grid cols/rows changed
-   */
-  (event: "size-update"): void;
+  (event: "update"): void;
 }>();
-
+const grid = defineModel<Grid>({ required: true });
 const dir = ref<Direction>("horizontal");
 const focus = ref<Cell>(nullCell);
 const hoveredCell = ref<Cell>(nullCell);
-const gridVersion = ref(1);
 const container = ref(null as unknown as HTMLDivElement);
 const offset = ref<[number, number]>([-10, 0]);
 const method = ref<Method>("accurate");
@@ -135,9 +123,8 @@ const cellProbas = ref<CellProba[][]>([]);
 const searchResult = ref<string[]>([]);
 const refreshingRun = ref(false);
 const refreshingSearch = ref(false);
-
 function resetGrid() {
-  props.grid.cells.forEach((row) => {
+  grid.value.cells.forEach((row) => {
     row.forEach((cell) => {
       if (cell.definition) {
         cell.arrows = ['none', 'none', 'none'];
@@ -149,17 +136,15 @@ function resetGrid() {
 }
 function refreshCellProba() {
   refreshingRun.value = true;
-  workerController.run(props.grid);
+  workerController.run(grid.value);
 }
 function refreshSimpleSearch() {
   refreshingSearch.value = true;
-  workerController.search(props.grid, focus.value, dir.value);
+  workerController.search(grid.value, focus.value, dir.value);
 }
 const throttledRefresCellProba = throttle(refreshCellProba, 200);
 const throttledRefresSimpleSearch = throttle(refreshSimpleSearch, 60);
 function onGridUpdate() {
-  //refresh the children components that need it.
-  gridVersion.value = gridVersion.value + 1;
   throttledRefresCellProba();
   emit("update");
 }
@@ -176,7 +161,7 @@ function onScroll(e) {
   computeOffset(e);
 }
 watchEffect(() => {
-  props.grid.highlight(props.grid.getBounds(focus.value, dir.value).cells);
+  grid.value.highlight(grid.value.getBounds(focus.value, dir.value).cells);
 });
 watch(method, () => {
   if (method.value === "accurate") {
@@ -186,7 +171,7 @@ watch(method, () => {
 });
 onMounted(() => {
   computeOffset(null);
-  workerController.checkGrid(props.grid);
+  workerController.checkGrid(grid.value);
   throttledRefresCellProba();
 });
 
@@ -205,17 +190,17 @@ function onModeClick() {
 }
 
 function onHover(value: string) {
-  const cells = props.grid.getBounds(focus.value, dir.value).cells;
+  const cells = grid.value.getBounds(focus.value, dir.value).cells;
   if (!cells || !cells.length) return;
-  props.grid.suggest([value], [cells[0]], [dir.value]);
+  grid.value.suggest([value], [cells[0]], [dir.value]);
 }
 function onMouseOut(value: string) {
-  props.grid.suggest([], [], []);
+  grid.value.suggest([], [], []);
 }
 function onClick(value: string) {
-  const cells = props.grid.getBounds(focus.value, dir.value).cells;
+  const cells = grid.value.getBounds(focus.value, dir.value).cells;
   if (!cells || !cells.length) return;
-  props.grid.setWord(value, cells[0], dir.value);
+  grid.value.setWord(value, cells[0], dir.value);
   onGridUpdate();
 }
 function onKeyUp(evt: KeyboardEvent) {
@@ -244,8 +229,6 @@ function onKeyUp(evt: KeyboardEvent) {
   // @ts-ignore
   evt.canceled = consumed;
 }
-watch([focus], () => {
-});
 workerController.on("run-result", (data) => {
   cellProbas.value = data;
   refreshingRun.value = false;

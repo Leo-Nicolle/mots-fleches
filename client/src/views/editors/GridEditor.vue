@@ -1,13 +1,13 @@
 <template>
   <div id="Grid">
-    <Editor v-if="grid && style" :grid="grid" @update="onUpdate" @size-update="onSizeUpdate" :style="style"></Editor>
+    <Editor v-if="grid && style" v-model="grid" :style="style" />
   </div>
 </template>
 
 <script setup lang="ts">
 import Editor from "../../components/Editor.vue";
 import { Grid, GridStyle } from "grid";
-import { ref, onMounted, toRaw } from "vue";
+import { ref, onMounted, toRaw, watch } from "vue";
 import { useRoute } from "vue-router";
 import { api } from "../../api";
 import { workerController } from '../../worker';
@@ -15,17 +15,16 @@ import { workerController } from '../../worker';
  * Route to edit a grid
  * Uses the route query to get the grid id
  */
-const grid = ref<Grid>();
+const grid = ref<Grid>(); //useGrid(new Grid(1, 1));
 const style = ref<GridStyle>();
-
-const saveTimeout = ref(0);
+let saveTimeout = 0;
 const route = useRoute();
 function fetch() {
   return api
     .getGrid(route.params.id as string)
     .then((g) => {
-      grid.value = g as Grid;
-      return api.db.getStyle(grid.value.styleId);
+      grid.value = g!;
+      return api.db.getStyle(grid.value!.styleId);
     })
     .then((opts) => {
       style.value = opts;
@@ -42,22 +41,18 @@ function fetch() {
       console.error("E", e);
     });
 }
-function onUpdate() {
-  clearTimeout(saveTimeout.value);
-  saveTimeout.value = setTimeout(() => {
-    if (!grid.value) return;
-    api.db.pushGrid(toRaw(grid.value));
+function save(grid: Grid) {
+  clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(() => {
+    api.db.pushGrid(grid);
   }, 50);
 }
+watch(() => grid, () => {
+  if (!grid.value) return;
+  save(toRaw(grid.value));
+}, { deep: true });
 
-function onSizeUpdate() {
-  grid.value.resize(grid.value.rows, grid.value.cols);
-  clearTimeout(saveTimeout.value);
-  saveTimeout.value = setTimeout(() => {
-    if (!grid.value) return;
-    api.db.pushGrid(toRaw(grid.value));
-  }, 50);
-}
+
 onMounted(() => {
   fetch();
 });

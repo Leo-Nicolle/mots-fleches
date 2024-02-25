@@ -124,8 +124,8 @@ function onUpload(filesContents: [string, string][]) {
   return Promise.all(
     filesContents.map(([filename, json]) => {
       return Promise.all(
-        JSON.parse(json).map((grid) =>
-          api.db.pushGrid(Grid.unserialize(grid))
+        (JSON.parse(json) as GridState[]).map((grid) =>
+          api.db.pushGrid(grid)
         )
       );
     })

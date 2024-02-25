@@ -7,22 +7,22 @@
     </n-button>
     <n-modal preset="dialog" :title="$t('forms.options')" :showIcon="false" v-model:show="visible">
       <template #header>
-        {{ value.title }}
+        {{ grid.title }}
       </template>
       <template #action>
-        <n-form :label-width="80" :model="value">
+        <n-form :label-width="80">
           <n-form-item :label="$t('forms.title')" path="title">
-            <n-input role="title" type="text" placeholder="Nouvelle Grille" v-model:value="value.title" />
+            <n-input role="title" type="text" placeholder="Nouvelle Grille" v-model:value="grid.title" />
           </n-form-item>
           <n-form-item :label="$t('forms.comment')" path="description">
             <n-input role="comment" type="textarea" :placeholder="`${$t('forms.comment')}...`"
-              v-model:value="value.comment" :autosize="{
+              v-model:value="grid.comment" :autosize="{
                 minRows: 3,
               }" />
           </n-form-item>
           <span class="rowcols">
             <n-form-item :label="$t('forms.rows')" path="rows">
-              <n-input-number role="rows" v-model:value="value.rows" :on-update:value="(v) => onUpdate('rows', v)" />
+              <n-input-number role="rows" v-model:value="grid.rows" />
             </n-form-item>
             <n-form-item path="randomize">
               <n-button role="randomize" @click="randomConfirmVisible = true; generating = false;" type="warning">
@@ -30,7 +30,7 @@
               </n-button>
             </n-form-item>
             <n-form-item :label="$t('forms.cols')" path="grid.cols">
-              <n-input-number role="cols" v-model:value="value.cols" :on-update:value="(v) => onUpdate('cols', v)" />
+              <n-input-number role="cols" v-model:value="grid.cols" />
             </n-form-item>
           </span>
         </n-form>
@@ -51,63 +51,43 @@
 
 <script setup lang="ts">
 import {
-  computed,
   defineEmits,
-  defineProps,
   nextTick,
   onMounted,
   ref,
   watchEffect,
+  defineModel
 } from "vue";
 import { CogOutline as CogIcon } from "@vicons/ionicons5";
 import { Grid } from "grid";
-import { useModel } from "../../js/useModel";
 import generate from "../../js/maze-generator";
 import { api } from "../../api";
 import { workerController } from "../../worker";
 
-/**
- * Form to edit grid metadata: rows, cols. title, comment and options
- */
-const props = defineProps<{
-  /**
-   * The grid to edit
-   */
-  modelValue: Grid;
-}>();
+const grid = defineModel<Grid>('grid', {
+  required: true, set(value) {
+    if (value.rows !== grid.value.rows || value.cols !== grid.value.cols) {
+      value.resize(value.rows, value.cols);
+    }
+    return value;
+  }
+});
 const opts = ref<{ label: string; value: string; }[]>([]);
 const randomConfirmVisible = ref(false);
 const visible = ref(false);
 const generating = ref(false);
 const emit = defineEmits<{
   /**
-   * v-model event
-   * @param value The new grid
-   */
-  (event: "update:modelValue", value: Grid): void;
-  /**
-   * Grid size changed
-   */
-  (event: "update-size", value: Grid): void;
-  /**
    * Modal open
    */
   (event: "open"): void;
 }>();
-const value = useModel<Grid>(props, emit);
-function onUpdate(path: string, newvalue: string | number) {
-  value.value[path] = newvalue;
-  nextTick(() => {
-    emit("update-size", value.value);
-  });
-}
 function onRandomize() {
   generating.value = true;
   nextTick()
     .then(() => workerController.getDistribution())
     .then((distribution) => {
-      generate({ grid: value.value, distribution });
-      emit("update-size", value.value);
+      generate({ grid: grid.value, distribution });
       randomConfirmVisible.value = false;
       generating.value = false;
     });
@@ -115,11 +95,6 @@ function onRandomize() {
 watchEffect(() => {
   if (!visible.value) return;
   emit("open");
-});
-const defaultSelectOpt = computed(() => {
-  if (!props.modelValue) return "default";
-  return opts.value.find((opt) => opt.value === props.modelValue.styleId)
-    ?.label;
 });
 onMounted(() => {
   api.db

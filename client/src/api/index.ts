@@ -1,5 +1,5 @@
-import { Grid, getDefinitions } from 'grid';
-import { Idatabase, SupaDB, setDatabase } from 'database';
+import { Grid, GridState, getDefinitions } from 'grid';
+import { Database, Idatabase, SupaDB } from 'database';
 import { v4 as uuid } from 'uuid';
 import axios from 'axios';
 const debugMigration = true;
@@ -14,7 +14,7 @@ class API {
     this._mode = mode;
   }
 
-  get db() {
+  get db(): Database {
     if (this.mode === 'idb') {
       return this.idb;
     } else if (this.mode === 'supadb') {
@@ -52,13 +52,14 @@ class API {
   duplicateGrids(ids: string[], bookId: string) {
     return Promise.all(ids.map(id => this.db.getGrid(id)))
       .then(grids => {
-        grids
+        const newGrids = grids
           .filter(g => g)
-          .forEach(grid => {
+          .map(grid => {
             grid!.id = uuid();
-          });
+            return grid;
+          }) as GridState[];
 
-        return Promise.all(grids.map(g => this.db.pushGrid(g)));
+        return Promise.all(newGrids.map(g => this.db.pushGrid(g)));
       })
       .then(grids => {
         this.db.getBook(bookId)
