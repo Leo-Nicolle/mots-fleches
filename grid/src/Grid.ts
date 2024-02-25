@@ -346,6 +346,7 @@ export class Grid {
       cells
     };
   }
+
   /**
    * Converts the grid to a sreialized string
    * @returns GridState JSON string
@@ -361,7 +362,7 @@ export class Grid {
       title: this.title,
       styleId: this.styleId
     };
-    return JSON.stringify(gridState);
+    return gridState;
   }
   /**
    * Creates a grid from a serialized string

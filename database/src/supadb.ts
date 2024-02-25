@@ -1,4 +1,4 @@
-import { Grid, GridStyle, GridState, defaultStyles, defaultSolutionStyle } from "grid";
+import { GridStyle, GridState, defaultStyles, defaultSolutionStyle } from "grid";
 import { Database } from "./db";
 import { SupabaseClient, createClient } from '@supabase/supabase-js';
 import { Book, Font, SBSchema } from "./types";
@@ -52,8 +52,7 @@ export class SupaDB extends Database {
     return data!.map(({ data }) => data);
   }
 
-  async pushGrid(g: Grid) {
-    const grid = JSON.parse(g.serialize()) as GridState;
+  async pushGrid(grid: GridState) {
     await this.supabase.from('Grids').upsert({
       id: grid.id,
       created: new Date(grid.created).toISOString(),
@@ -63,7 +62,7 @@ export class SupaDB extends Database {
     return grid.id;
   }
 
-  async updateGrid(grid: Grid) {
+  async updateGrid(grid: GridState) {
     // things with same id are overwritten
     return this.pushGrid(grid);
   }

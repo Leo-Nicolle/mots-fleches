@@ -1,6 +1,6 @@
 import { openDB, DBSchema } from 'idb';
 import {
-  Grid, GridStyle, GridState,
+  GridStyle, GridState,
   defaultStyles,
   defaultSolutionStyle,
   isSolutionStyle,
@@ -199,14 +199,13 @@ export class Idatabase extends Database {
     });
   }
 
-  async pushGrid(grid: Grid) {
-    const g = JSON.parse(grid.serialize());
+  async pushGrid(grid: GridState) {
     return await this.loadingPromise.then((db) =>
-      db.put('grids', g)
+      db.put('grids', grid)
     );
   }
 
-  async updateGrid(grid: Grid) {
+  async updateGrid(grid: GridState) {
     // things with same id are overwritten
     return this.pushGrid(grid);
   }
