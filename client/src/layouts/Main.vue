@@ -49,7 +49,6 @@
       <n-button v-if="screenSize === 'phone' && leftPanelWidth > 0" class="left-panel-toggle"
         :type="showLeftDrawer ? 'primary' : 'warning'" icon-placement="right" @click="showLeftDrawer = !showLeftDrawer">
         {{ showLeftDrawer ? "<" : ">" }} </n-button>
-
           <div @scroll="onScroll" class="maincontentscroll scroll">
             <!-- @slot Slot for element in the main panel  -->
             <slot name="body"></slot>
@@ -343,7 +342,7 @@ nav {
   gap: 10px;
   width: v-bind(leftWidth);
   min-width: v-bind(leftWidth);
-  overflow: scroll;
+  overflow-y: scroll;
   max-height: 100%;
   align-items: center;
   justify-content: flex-start;

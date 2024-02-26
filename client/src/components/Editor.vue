@@ -5,7 +5,7 @@
         <h2>
           {{ grid.title ? grid.title : $t("buttons.newGrid") }}
         </h2>
-        <GridModal v-model:grid="grid" @open="focus = nullCell" @update="() => emit('update')" />
+        <GridModal v-model:grid="grid" @open="focus = nullCell" />
       </span>
       <span>
         <n-button @click="onModeClick">

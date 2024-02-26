@@ -1,13 +1,23 @@
 <template>
-  <n-button round @click="show">
-    {{ buttonText }}
+  <n-button round @click="show" :disabled="!gridIds.length">
+    {{ $t('forms.copy') }}...
   </n-button>
   <n-modal class="gridCopyModal" v-model:show="visible" preset="dialog" title="Book" :show-icon="false">
     <template #header>
-      <div>{{ title }}</div>
+      <div>{{ $t(`modals.copyTitle`) }}</div>
     </template>
     <div class="modalbody">
       <n-form label-placement="top">
+        <n-form-item :label="$t('forms.mode')" path="copy.mode">
+          <n-select v-model:value="mode" :options="modeOptions" :loading="loading" filterable />
+          <InfoPopup>
+            <div class="gridcopyinfo">
+              <span v-for="action in actions" :key="action"><b>{{ $t(`forms.${action}`) }}</b>: {{
+                $t(`help.${action}grid`)
+              }}<br /></span>
+            </div>
+          </InfoPopup>
+        </n-form-item>
         <n-form-item :label="$t('forms.target')" path="copy.target">
           <n-select v-model:value="targetBook" :options="options" :loading="loading" filterable />
         </n-form-item>
@@ -22,31 +32,38 @@
 
 <script setup lang="ts">
 import { api } from '../../api';
-import { ref, defineProps, defineEmits } from "vue";
+import { useI18n } from "vue-i18n";
+import { ref, defineProps, defineEmits, computed } from "vue";
 import { useRoute } from 'vue-router';
+import InfoPopup from '../InfoPopup.vue';
 const props = defineProps<{
-  buttonText: string;
-  title: string;
+  isBook: boolean;
   gridIds: string[];
-  mode: 'copy' | 'move';
 }>();
 const route = useRoute();
+const i18n = useI18n();
 const emit = defineEmits(['update']);
 const visible = ref(false);
 const loading = ref(false);
+const mode = ref<'copy' | 'reuse' | 'move'>('copy');
 const options = ref<any[]>([]);
 const targetBook = ref<string>('');
 
+const actions = computed(() => props.isBook ? ['copy', 'move', 'reuse'] : ['copy', 'reuse']);
+const modeOptions = computed(() => actions.value.map(a => ({
+  label: i18n.t(`forms.${a}`),
+  value: a
+})));
+
 function fetch() {
   loading.value = true;
-  const currentBook = route.params.id;
+  const currentBook = route.params.id || '';
   return api.db.getBooks()
     .then(books => {
       options.value = books
         .map(({ id: value, title: label }) => ({
           label, value, disabled: value === currentBook
         }));
-      console.log(options.value);
       loading.value = false;
     });
 }
@@ -61,16 +78,21 @@ function show() {
 function save() {
   if (!targetBook.value) {
     visible.value = false;
-    return;
+    return Promise.resolve();
   }
-  if (props.mode === 'copy') {
-    return api.duplicateGrids(props.gridIds, targetBook.value)
-      .finally(() => {
-        visible.value = false;
-      });
-  }
-  const currentBook = route.params.id;
-  return api.moveGrids(props.gridIds, currentBook as string, targetBook.value)
+
+  return Promise.resolve()
+    .then(() => {
+      if (mode.value === 'copy') {
+        return api.duplicateGrids(props.gridIds, targetBook.value);
+      }
+      if (mode.value === 'reuse') {
+        return api.reuseGrids(props.gridIds, targetBook.value);
+      }
+      const currentBook = route.params.id;
+      return api.moveGrids(props.gridIds, currentBook as string, targetBook.value);
+    })
+    .then(() => emit('update'))
     .finally(() => {
       visible.value = false;
     });
@@ -88,6 +110,21 @@ function save() {
   align-items: center;
   height: 100%;
   width: 100%;
+}
+
+.modalbody .n-form-item-blank {
+  gap: 5px;
+}
+
+.gridcopyinfo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  flex-direction: column;
+}
+
+.gridcopyinfo span {
+  max-width: 350px;
 }
 
 /* make modalbody min width 400px on small screens */

@@ -17,7 +17,6 @@ import { workerController } from '../../worker';
  */
 const grid = ref<Grid>(); //useGrid(new Grid(1, 1));
 const style = ref<GridStyle>();
-let saveTimeout = 0;
 const route = useRoute();
 function fetch() {
   return api
@@ -41,15 +40,9 @@ function fetch() {
       console.error("E", e);
     });
 }
-function save(grid: Grid) {
-  clearTimeout(saveTimeout);
-  saveTimeout = setTimeout(() => {
-    api.db.pushGrid(grid);
-  }, 50);
-}
 watch(() => grid, () => {
   if (!grid.value) return;
-  save(toRaw(grid.value));
+  api.saveGrid(toRaw(grid.value));
 }, { deep: true });
 
 

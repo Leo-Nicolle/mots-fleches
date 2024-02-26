@@ -108,6 +108,12 @@ export const lang = {
         lineSpacing: "Espaciado de línea",
         baselineShift: 'Desplazamiento',
         alignmentBaseline: 'Alineación',
+        copy: "Copiar",
+        reuse: "Reutilizar",
+        move: "Mover",
+        mode: 'Modo',
+        target: "Objetivo Cuadrícula",
+        addWords: 'Añadir palabras',
     },
     tooltips: {
         incomplete: "esta incompleto",
@@ -118,6 +124,8 @@ export const lang = {
     },
     modals: {
         bookTitle: "Libro",
+        copyTitle: "Copiar cuadrículas",
+        style: "Ajustes del Estilo",
     },
     alert: {
         wrongpassword: "Contraseña incorrecta",
@@ -160,6 +168,11 @@ export const lang = {
         normal: "Libre",
         check: "Verification",
         heatmap: "Probabilidad",
+    },
+    help: {
+        copygrid: "Copiar la cuadrícula en otra cuadrícula",
+        movegrid: "Mover la cuadrícula en otro libro",
+        reusegrid: "Reutilizar la cuadrícula en otro libro (editar en un libro editará en el otro)",
     },
     home: {
         nav: {

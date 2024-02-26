@@ -2,18 +2,16 @@
   <Layout v-if="styles.length" :eltList="elements" :onCreate="createStyle" :onDelete="onDelete" :has-create-button="true"
     :has-delete-button="true" :onClick="onClick" @select="(s) => (selected = s)">
     <template v-slot:left-panel>
-      <h3>{{ mode === 'style' ? $t("nav.styles") : $t("nav.solutions") }}</h3>
-      <n-button round @click="switchMode">
-        {{ mode === 'style' ? $t("nav.solutions") : $t("nav.styles") }}
-      </n-button>
+      <n-tabs v-model:value="mode" type="card">
+        <n-tab-pane name="style" :tab="$t('nav.styles')">
+        </n-tab-pane>
+        <n-tab-pane name="solution" :tab="$t('nav.solutions')">
+        </n-tab-pane>
+      </n-tabs>
     </template>
     <template v-slot:card-title="{ elt }">
+      <StyleModal v-model="(elt as GridStyle)" />
       <span>
-        <n-button circle @click="editing = elt">
-          <n-icon>
-            <SettingsOutline />
-          </n-icon>
-        </n-button>
         {{ elt.name ? elt.name : $t("buttons.newStyle") }}
       </span>
     </template>
@@ -23,23 +21,6 @@
       </pre>
     </template>
   </Layout>
-  <Teleport to="#outside">
-    <n-modal v-if="editing" v-model:show="editing" preset="dialog" title="Settings" :show-icon="false">
-      <template #header>
-        <!-- <div>{{ $t("modals.s") }}</div> -->
-      </template>
-      <div class="modalbody">
-        <n-form label-placement="top">
-          <n-form-item :label="$t('forms.name')" path="book.name">
-            <n-input v-model:value="editing.name" />
-          </n-form-item>
-        </n-form>
-      </div>
-      <template #action>
-        <n-button type="primary" @click="save">Ok</n-button>
-      </template>
-    </n-modal>
-  </Teleport>
 </template>
 
 <script setup lang="ts">
@@ -47,9 +28,7 @@ import { ref, onMounted, toRaw } from "vue";
 import "highlight.js/styles/monokai.css";
 import Layout from "../layouts/GridLayout.vue";
 import { GridStyle, SolutionStyle, isSolutionStyle, defaultStyles, defaultSolutionStyle } from "grid";
-import {
-  SettingsOutline
-} from "@vicons/ionicons5";
+import StyleModal from "../components/modals/StyleModal.vue";
 import { api } from "../api";
 import { computed } from "vue";
 import { v4 as uuid } from "uuid";
@@ -65,10 +44,6 @@ const elements = computed(() => mode.value === 'style' ? styles.value : solution
 const mode = ref<'style' | 'solution'>('style');
 const router = useRouter();
 
-function switchMode() {
-  mode.value = mode.value === 'style' ? 'solution' : 'style';
-  console.log('click', mode.value);
-}
 
 function fetch() {
   return api.db

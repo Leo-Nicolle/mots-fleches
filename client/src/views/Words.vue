@@ -1,18 +1,22 @@
 <template>
-  <Layout>
-    <template #body>
-      <Words v-if="mode === 'words'" :version="version" />
-      <BannedWords v-else-if="mode === 'bannedwords'" :version="version" />
-    </template>
+  <Layout :left-panel-width="300">
     <template v-slot:left-panel>
-      <h3>
-        <n-button @click="nextMode">
-          {{ mode === 'words' ? $t('forms.myWords') : $t('forms.bannedwords') }}
-        </n-button>
-      </h3>
-      <n-button v-if="buttons.includes('download')" round @click="download"> {{ $t('buttons.download') }} </n-button>
-      <UploadModal v-if="buttons.includes('uploadWords')" :title="$t('buttons.uploadWords')"
-        :buttonText="$t('buttons.uploadWords')" @ok="onUpload" />
+      <n-tabs v-model:value="mode" type="card">
+        <n-tab-pane name="words" :tab="$t('forms.myWords')">
+          <div class="left-panel">
+            <n-button round @click="download"> {{ $t('buttons.download') }} </n-button>
+            <UploadModal :title="$t('buttons.uploadWords')" :buttonText="$t('buttons.uploadWords')" @ok="onUpload" />
+          </div>
+        </n-tab-pane>
+        <n-tab-pane name="bannedWords" :tab="$t('forms.bannedwords')">
+        </n-tab-pane>
+      </n-tabs>
+    </template>
+    <template #body>
+      <div class="words-wrapper">
+        <Words v-if="mode === 'words'" :version="version" />
+        <BannedWords v-else-if="mode === 'bannedWords'" :version="version" />
+      </div>
     </template>
   </Layout>
 </template>
@@ -23,15 +27,9 @@ import Words from "../components/forms/Words.vue";
 import BannedWords from "../components/forms/BannedWords.vue";
 import UploadModal from "../components/modals/UploadModal.vue";
 import { api } from "../api";
-import { computed, ref } from "vue";
-const modes = ['words', 'bannedwords'];
-const mode = ref(modes[1]);
+import { ref } from "vue";
+const mode = ref<'words' | 'bannedWords'>('words');
 const version = ref(0);
-const buttons = computed(() => {
-  return mode.value === 'words'
-    ? ['download', 'uploadWords']
-    : '';
-});
 function download() {
   api.db.getWords().then((words) => {
     const a = document.createElement("a");
@@ -40,10 +38,6 @@ function download() {
     a.download = "words.json";
     a.click();
   });
-}
-function nextMode() {
-  const index = modes.indexOf(mode.value);
-  mode.value = modes[(index + 1) % modes.length];
 }
 function onUpload(filesContents: [string, string][]) {
   return Promise.all(
@@ -57,5 +51,9 @@ function onUpload(filesContents: [string, string][]) {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.words-wrapper {
+  margin: 1em 0 0 1em;
+}
+</style>
 

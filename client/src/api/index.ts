@@ -1,8 +1,10 @@
-import { Grid, GridState, getDefinitions } from 'grid';
+import { Grid, GridState, GridStyle, SolutionStyle, getDefinitions } from 'grid';
 import { Database, Idatabase, SupaDB } from 'database';
 import { v4 as uuid } from 'uuid';
+import throttle from 'lodash.throttle';
 import axios from 'axios';
 const debugMigration = true;
+
 class API {
   public idb: Idatabase;
   public supadb: SupaDB;
@@ -79,7 +81,7 @@ class API {
     return Promise.all([sourceBook, targetBook].map(id => this.db.getBook(id)))
       .then(([source, target]) => {
         if (!source || !target) return Promise.reject('Book not found');
-        source.grids.filter(id => !set.has(id));
+        source.grids = source.grids.filter(id => !set.has(id));
         const targetSet = new Set(target.grids);
         grids.filter(id => !targetSet.has(id)).forEach(id => target.grids.push(id));
         return Promise.all([source, target].map(book => this.db.pushBook(book)));
@@ -166,6 +168,32 @@ class API {
       .then(() => Promise.all([...ids].map(id => this.db.deleteStyle(id))));
   }
 
+  deleteGrids(ids: string[]) {
+    const idsSet = new Set(ids);
+    return this.db.getBooks()
+      .then(books =>
+        Promise.all(books.map(book => {
+          const l = book.grids.length;
+          book.grids = book.grids.filter(g => !idsSet.has(g));
+          if (l === book.grids.length) return;
+          return this.db.updateBook(book);
+        })))
+      .then(() => Promise.all(ids.map(id => this.db.deleteGrid(id))));
+  }
+
+  _saveGrid(grid: Grid) {
+    return this.db.pushGrid(grid.serialize());
+  }
+  saveGrid(grid: Grid) {
+    return this._saveGrid(grid);
+  }
+  _saveStyle(style: GridStyle | SolutionStyle) {
+    return this.db.pushStyle(style);
+  }
+  saveStyle(style: GridStyle | SolutionStyle) {
+    return this._saveStyle(style);
+  }
+
   isSignedIn() {
     return localStorage.getItem('db-mode') === 'idb' ?
       Promise.resolve(true) :
@@ -184,3 +212,6 @@ class API {
 }
 
 export const api = new API(localStorage.getItem('db-mode') || 'idb');
+// add throttled saveGrid function to the api
+api.saveGrid = throttle(api._saveGrid, 50);
+api.saveStyle = throttle(api._saveStyle, 50);

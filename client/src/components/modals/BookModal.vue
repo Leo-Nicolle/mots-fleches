@@ -1,9 +1,13 @@
 <template>
-  <n-button round @click="show">
+  <n-button v-if="mode === 'icon'" circle @click="show">
+    <n-icon>
+      <SettingsOutline />
+    </n-icon>
+  </n-button>
+  <n-button v-else round @click="show">
     {{ $t("forms.options") }}
   </n-button>
-  <n-modal v-if="book && style && solutionsStyle" class="bookmodal" v-model:show="visible" preset="dialog" title="Book"
-    :show-icon="false">
+  <n-modal v-if="book" class="bookmodal" v-model:show="visible" preset="dialog" title="Book" :show-icon="false">
     <template #header>
       <div>{{ $t("modals.bookTitle") }}</div>
     </template>
@@ -13,11 +17,12 @@
           <n-input v-model:value="book.title" />
         </n-form-item>
         <n-form-item :label="$t('forms.styles')" path="book.styles">
-          <n-select v-model:value="book.style" :options="styles" :loading="loading" :defaultValue="style.id" filterable />
+          <n-select v-model:value="book.style" :options="styles" :loading="loading" :defaultValue="book.style"
+            filterable />
         </n-form-item>
         <n-form-item :label="$t('forms.solutionStyles')" path="book.solutionStyle">
           <n-select v-model:value="book.solutionStyle" :options="solutionStyles" :loading="loading"
-            :defaultValue="solutionsStyle.id" filterable />
+            :defaultValue="book.solutionStyle" filterable />
           />
         </n-form-item>
         <n-form-item :label="$t('forms.comment')" path="book.comment">
@@ -36,18 +41,22 @@
 
 <script setup lang="ts">
 import { Book } from 'database';
+import { SettingsOutline } from '@vicons/ionicons5';
 import { api } from '../../api';
-import { GridStyle, SolutionStyle, isSolutionStyle } from "grid";
-import { ref, defineProps, toRaw, defineEmits } from "vue";
+import { isSolutionStyle } from "grid";
+import { ref, toRaw, defineEmits } from "vue";
 import { SelectOption } from 'naive-ui';
+const book = defineModel({
+  type: Object as () => Book,
+  default: null
+});
+const props = withDefaults(defineProps<{
+  mode: 'icon' | 'text';
+}>(), {
+  mode: 'text'
+});
 const styles = ref<any[]>([]);
 const solutionStyles = ref<any[]>([]);
-const book = ref<Book>();
-const props = defineProps<{
-  bookId: string;
-  style: GridStyle;
-  solutionsStyle: SolutionStyle;
-}>();
 const emit = defineEmits(['update']);
 const visible = ref(false);
 const loading = ref(false);
@@ -67,12 +76,8 @@ function fetch() {
     });
     styles.value = styleOptions;
     solutionStyles.value = solutionOptions;
-    return api.db.getBook(props.bookId);
-  })
-    .then((b) => {
-      loading.value = false;
-      book.value = b;
-    });
+    loading.value = false;
+  });
 }
 
 function show() {

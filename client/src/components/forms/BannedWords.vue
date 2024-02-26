@@ -1,7 +1,8 @@
 <template>
   <section>
+    <h3>{{ $t('forms.ban') }}</h3>
     <n-form inline>
-      <n-form-item :label="$t('forms.ban')" path="delete">
+      <n-form-item path="delete">
         <n-auto-complete v-model:value="value" :input-props="{
           autocomplete: 'enabled',
         }" :options="options" :placeholder="$t('forms.banword')" @keyup="onAddKeyup" />

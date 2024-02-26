@@ -109,6 +109,12 @@ export const lang = {
         lineSpacing: "Interlignage",
         baselineShift: 'Décalage',
         alignmentBaseline: 'Alignement',
+        copy: "Copier",
+        reuse: 'Réutiliser',
+        move: "Déplacer",
+        mode: 'Mode',
+        target: "Livre Cible",
+        addWords: 'Ajouter des mots',
     },
     tooltips: {
         incomplete: "est incomplet",
@@ -119,7 +125,9 @@ export const lang = {
     },
     modals: {
         exportTitle: "Export",
+        copyTitle: "Copier les grilles",
         bookTitle: "Livre",
+        style: "Paramètres du style",
     },
     alert: {
         wrongpassword: "Mot de passe ou email incorrect.",
@@ -161,6 +169,11 @@ export const lang = {
         normal: "Libre",
         check: "Verification",
         heatmap: "Probabilités",
+    },
+    help: {
+        copygrid: 'Duplique la grille dans un autre livre',
+        movegrid: 'Déplace la grille dans un autre livre',
+        reusegrid: 'Réutilise la grille dans un autre livre (modifier dans un livre modifie dans l\'autre)',
     },
     home: {
         nav: {

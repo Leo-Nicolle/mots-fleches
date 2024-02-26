@@ -6,6 +6,7 @@
       <h3>{{ $t("nav.books") }}</h3>
     </template>
     <template #card-title="{ elt }">
+      <BookModal v-model="(elt as Book)" mode="icon" />
       <span>
         {{ elt.title ? elt.title : $t("buttons.newBook") }}
       </span>
@@ -25,6 +26,7 @@
 import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import Layout from "../layouts/GridLayout.vue";
+import BookModal from "../components/modals/BookModal.vue";
 import {
   BookOutline
 } from "@vicons/ionicons5";

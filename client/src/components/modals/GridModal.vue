@@ -1,52 +1,50 @@
 <template>
-  <span>
-    <n-button role="modal-options-button" @click="visible = true">
-      <n-icon>
-        <CogIcon />
-      </n-icon>
-    </n-button>
-    <n-modal preset="dialog" :title="$t('forms.options')" :showIcon="false" v-model:show="visible">
-      <template #header>
-        {{ grid.title }}
-      </template>
-      <template #action>
-        <n-form :label-width="80">
-          <n-form-item :label="$t('forms.title')" path="title">
-            <n-input role="title" type="text" placeholder="Nouvelle Grille" v-model:value="grid.title" />
+  <n-button role="modal-options-button" circle @click="visible = true">
+    <n-icon>
+      <CogIcon />
+    </n-icon>
+  </n-button>
+  <n-modal preset="dialog" :title="$t('forms.options')" :showIcon="false" v-model:show="visible">
+    <template #header>
+      {{ grid.title }}
+    </template>
+    <template #action>
+      <n-form :label-width="80">
+        <n-form-item :label="$t('forms.title')" path="title">
+          <n-input role="title" type="text" placeholder="Nouvelle Grille" v-model:value="grid.title" />
+        </n-form-item>
+        <n-form-item :label="$t('forms.comment')" path="description">
+          <n-input role="comment" type="textarea" :placeholder="`${$t('forms.comment')}...`" v-model:value="grid.comment"
+            :autosize="{
+              minRows: 3,
+            }" />
+        </n-form-item>
+        <span class="rowcols">
+          <n-form-item :label="$t('forms.rows')" path="rows">
+            <n-input-number role="rows" v-model:value="grid.rows" />
           </n-form-item>
-          <n-form-item :label="$t('forms.comment')" path="description">
-            <n-input role="comment" type="textarea" :placeholder="`${$t('forms.comment')}...`"
-              v-model:value="grid.comment" :autosize="{
-                minRows: 3,
-              }" />
+          <n-form-item path="randomize">
+            <n-button role="randomize" @click="randomConfirmVisible = true; generating = false;" type="warning">
+              {{ $t("forms.randomize") }}
+            </n-button>
           </n-form-item>
-          <span class="rowcols">
-            <n-form-item :label="$t('forms.rows')" path="rows">
-              <n-input-number role="rows" v-model:value="grid.rows" />
-            </n-form-item>
-            <n-form-item path="randomize">
-              <n-button role="randomize" @click="randomConfirmVisible = true; generating = false;" type="warning">
-                {{ $t("forms.randomize") }}
-              </n-button>
-            </n-form-item>
-            <n-form-item :label="$t('forms.cols')" path="grid.cols">
-              <n-input-number role="cols" v-model:value="grid.cols" />
-            </n-form-item>
-          </span>
-        </n-form>
-      </template>
-    </n-modal>
-    <n-modal preset="dialog" :title="`${$t('forms.randomize')} ?`" :showIcon="false" v-model:show="randomConfirmVisible">
-      <template #action>
-        <n-button :disabled="generating" @click="randomConfirmVisible = false">{{
-          $t("buttons.no")
-        }}</n-button>
-        <n-button :disabled="generating" @click="onRandomize()" type="warning">{{
-          $t("buttons.yes")
-        }}</n-button>
-      </template>
-    </n-modal>
-  </span>
+          <n-form-item :label="$t('forms.cols')" path="grid.cols">
+            <n-input-number role="cols" v-model:value="grid.cols" />
+          </n-form-item>
+        </span>
+      </n-form>
+    </template>
+  </n-modal>
+  <n-modal preset="dialog" :title="`${$t('forms.randomize')} ?`" :showIcon="false" v-model:show="randomConfirmVisible">
+    <template #action>
+      <n-button :disabled="generating" @click="randomConfirmVisible = false">{{
+        $t("buttons.no")
+      }}</n-button>
+      <n-button :disabled="generating" @click="onRandomize()" type="warning">{{
+        $t("buttons.yes")
+      }}</n-button>
+    </template>
+  </n-modal>
 </template>
 
 <script setup lang="ts">
@@ -56,22 +54,16 @@ import {
   onMounted,
   ref,
   watchEffect,
-  defineModel
+  defineModel,
+  watch,
+  toRaw
 } from "vue";
 import { CogOutline as CogIcon } from "@vicons/ionicons5";
 import { Grid } from "grid";
 import generate from "../../js/maze-generator";
 import { api } from "../../api";
 import { workerController } from "../../worker";
-
-const grid = defineModel<Grid>('grid', {
-  required: true, set(value) {
-    if (value.rows !== grid.value.rows || value.cols !== grid.value.cols) {
-      value.resize(value.rows, value.cols);
-    }
-    return value;
-  }
-});
+const grid = defineModel<Grid>('grid', { required: true });
 const opts = ref<{ label: string; value: string; }[]>([]);
 const randomConfirmVisible = ref(false);
 const visible = ref(false);
@@ -108,6 +100,14 @@ onMounted(() => {
       console.error(err);
     });
 });
+
+watch(grid, (n, o) => {
+  if (!n) return;
+  if (n.rows !== o.rows || n.cols !== o.cols) {
+    n.resize(n.rows, n.cols);
+  }
+  api.saveGrid(toRaw(grid.value));
+}, { deep: true });
 </script>
 
 <style scoped>

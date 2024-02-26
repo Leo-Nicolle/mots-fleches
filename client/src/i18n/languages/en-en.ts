@@ -108,6 +108,12 @@ export const lang = {
     lineSpacing: "Line spacing",
     baselineShift: 'Baseline',
     alignmentBaseline: 'Alignment',
+    copy: "Copy",
+    reuse: 'Reuse',
+    move: "Move",
+    mode: 'Mode',
+    target: "Target Book",
+    addWords: 'Add words',
   },
   tooltips: {
     incomplete: "is incomplete",
@@ -118,6 +124,8 @@ export const lang = {
   },
   modals: {
     bookTitle: "Book",
+    copyTitle: "Copy grids",
+    style: "Style Settings",
   },
   alert: {
     wrongpassword: "Wrong password or email",
@@ -160,6 +168,11 @@ export const lang = {
     check: "Check",
     heatmap: "Heatmap",
 
+  },
+  help: {
+    copygrid: "Duplicate the grid into annother grid",
+    movegrid: "Move the grid into annother book",
+    reusegrid: "Reuse the grid into annother book (editing in one book will edit in the other)",
   },
   home: {
     nav: {

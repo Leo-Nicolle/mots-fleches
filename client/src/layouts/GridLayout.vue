@@ -26,7 +26,7 @@
             <span class="card-title">
               <!-- @slot Slot for element title  -->
               <slot name="card-title" :elt="elt" :i="i"> </slot>
-              <n-checkbox @click="(evt) => {
+              <n-checkbox class="checkbox" @click="(evt) => {
                 evt.preventDefault();
                 evt.stopPropagation();
               }
@@ -141,7 +141,13 @@ watch(selectedElements, () => {
 }
 
 .card-title {
-  display: flex;
+  display: grid;
+  grid-template-columns: 40px auto 40px;
+  justify-items: center;
+}
+
+.card-title>div {
+  grid-column-start: 3;
 }
 
 .card-title>div {
