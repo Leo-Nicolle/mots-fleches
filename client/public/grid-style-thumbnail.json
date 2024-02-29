@@ -1,0 +1,128 @@
+{
+  "id": "grid-style-thumbnail",
+  "rows": 3,
+  "cols": 3,
+  "cells": [
+    [
+      {
+        "x": 0,
+        "y": 0,
+        "definition": true,
+        "highlighted": false,
+        "spaceV": false,
+        "spaceH": false,
+        "arrows": [
+          "rightdown",
+          "none",
+          "downright"
+        ],
+        "suggestion": "",
+        "text": "Definition\n\nDefinition"
+      },
+      {
+        "x": 1,
+        "y": 0,
+        "definition": false,
+        "highlighted": false,
+        "spaceV": false,
+        "spaceH": false,
+        "arrows": [],
+        "suggestion": "",
+        "text": "M"
+      },
+      {
+        "x": 2,
+        "y": 0,
+        "definition": false,
+        "highlighted": false,
+        "spaceV": false,
+        "spaceH": false,
+        "arrows": [],
+        "suggestion": "",
+        "text": "O"
+      }
+    ],
+    [
+      {
+        "x": 0,
+        "y": 1,
+        "definition": false,
+        "highlighted": true,
+        "spaceV": false,
+        "spaceH": false,
+        "arrows": [],
+        "suggestion": "",
+        "text": "M"
+      },
+      {
+        "x": 1,
+        "y": 1,
+        "definition": false,
+        "highlighted": true,
+        "spaceV": false,
+        "spaceH": false,
+        "arrows": [],
+        "suggestion": "",
+        "text": "O"
+      },
+      {
+        "x": 2,
+        "y": 1,
+        "definition": false,
+        "highlighted": true,
+        "spaceV": false,
+        "spaceH": false,
+        "arrows": [],
+        "suggestion": "",
+        "text": "T"
+      }
+    ],
+    [
+      {
+        "x": 0,
+        "y": 2,
+        "definition": true,
+        "highlighted": false,
+        "spaceV": false,
+        "spaceH": false,
+        "arrows": [
+          "right",
+          "none",
+          "none"
+        ],
+        "suggestion": "",
+        "text": "Definition"
+      },
+      {
+        "x": 1,
+        "y": 2,
+        "definition": false,
+        "highlighted": false,
+        "spaceV": false,
+        "spaceH": false,
+        "arrows": [],
+        "suggestion": "",
+        "text": "T"
+      },
+      {
+        "x": 2,
+        "y": 2,
+        "definition": true,
+        "highlighted": false,
+        "spaceV": false,
+        "spaceH": false,
+        "arrows": [
+          "none",
+          "none",
+          "none"
+        ],
+        "suggestion": "",
+        "text": "Def\nDef\n\nDef"
+      }
+    ]
+  ],
+  "comment": "",
+  "created": 1709055181108,
+  "title": "grid-style-thumbnail",
+  "styleId": "default"
+}
