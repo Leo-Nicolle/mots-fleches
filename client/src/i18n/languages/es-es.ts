@@ -121,6 +121,7 @@ export const lang = {
         noarrow: "no tiene flecha",
         toomanyarrows: "tiene demasiadas flechas",
         add: "Añadir {word} al diccionario",
+        loading: "Cargando...",
     },
     modals: {
         bookTitle: "Libro",

@@ -21,7 +21,7 @@
         </n-form-item>
         <span class="rowcols">
           <n-form-item :label="$t('forms.rows')" path="rows">
-            <n-input-number role="rows" v-model:value="grid.rows" />
+            <n-input-number role="rows" v-model:value="grid.rows" :on-change="v => resize(v, grid.cols)" />
           </n-form-item>
           <n-form-item path="randomize">
             <n-button role="randomize" @click="randomConfirmVisible = true; generating = false;" type="warning">
@@ -29,7 +29,7 @@
             </n-button>
           </n-form-item>
           <n-form-item :label="$t('forms.cols')" path="grid.cols">
-            <n-input-number role="cols" v-model:value="grid.cols" />
+            <n-input-number role="cols" v-model:value="grid.cols" :on-change="v => resize(grid.rows, v)" />
           </n-form-item>
         </span>
       </n-form>
@@ -101,12 +101,20 @@ onMounted(() => {
     });
 });
 
+function resize(rows: number, cols: number) {
+  nextTick(() => {
+    const g = toRaw(grid.value);
+    g.resize(rows, cols);
+    grid.value = g;
+    api.saveGrid(g);
+  });
+}
+
 watch(grid, (n, o) => {
   if (!n) return;
-  if (n.rows !== o.rows || n.cols !== o.cols) {
-    n.resize(n.rows, n.cols);
-  }
-  api.saveGrid(toRaw(grid.value));
+  nextTick(() => {
+    api.saveGrid(toRaw(grid.value));
+  });
 }, { deep: true });
 </script>
 

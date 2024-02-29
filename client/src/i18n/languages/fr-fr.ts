@@ -122,6 +122,7 @@ export const lang = {
         noarrow: "n'a pas de flèche",
         toomanyarrows: "a trop de flèches",
         add: "Ajouter {word} au dictionnaire",
+        loading: "Chargement...",
     },
     modals: {
         exportTitle: "Export",

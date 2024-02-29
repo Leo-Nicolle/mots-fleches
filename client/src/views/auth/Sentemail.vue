@@ -2,7 +2,7 @@
   <Layout :title="$t('sentemail.title')">
     <template #default>
       <p>
-        {{ $t("sentemail.message", {email}) }}
+        {{ $t("sentemail.message", { email }) }}
       </p>
     </template>
     <template #footer>
@@ -29,6 +29,5 @@ function redirect() {
 }
 </script>
 
-<style>
-</style>
+<style></style>
 

@@ -121,6 +121,7 @@ export const lang = {
     noarrow: "has no arrow",
     toomanyarrows: 'has too many arrows',
     add: "Add {word} to dictionary",
+    loading: 'Loading...',
   },
   modals: {
     bookTitle: "Book",

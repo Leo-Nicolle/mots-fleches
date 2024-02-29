@@ -181,10 +181,10 @@ class API {
       .then(() => Promise.all(ids.map(id => this.db.deleteGrid(id))));
   }
 
-  _saveGrid(grid: Grid) {
-    return this.db.pushGrid(grid.serialize());
+  _saveGrid(grid: Grid | GridState) {
+    return this.db.pushGrid(grid instanceof Grid ? grid.serialize() : grid);
   }
-  saveGrid(grid: Grid) {
+  saveGrid(grid: Grid | GridState) {
     return this._saveGrid(grid);
   }
   _saveStyle(style: GridStyle | SolutionStyle) {

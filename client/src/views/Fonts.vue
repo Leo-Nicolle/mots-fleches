@@ -67,6 +67,7 @@ function onDelete() {
 }
 
 .font-body {
+  grid-column: 1 / 3;
   text-align: center;
 }
 </style>

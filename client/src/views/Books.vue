@@ -1,7 +1,6 @@
 <template>
-  <Layout :eltList="books" :onCreate="createBook" :onDelete="onDelete"
-    :onClick="(book) => $router.push(`/book/${book.id}`)" @select="(s) => (selected = s)" :has-create-button="true"
-    :has-delete-button="true">
+  <Layout :eltList="books" :onCreate="createBook" :onDelete="onDelete" :getLink="(book) => `/book/${book.id}`"
+    @select="(s) => (selected = s)" :has-create-button="true" :has-delete-button="true">
     <template v-slot:left-panel>
       <h3>{{ $t("nav.books") }}</h3>
     </template>
@@ -12,9 +11,7 @@
       </span>
     </template>
     <template #card-body="{ elt, i }">
-      <a class="preview" :href="`#/book/${elt.id}`">
-        <BookOutline />
-      </a>
+      <BookOutline />
       {{ elt.comment ? elt.comment : $t("buttons.newBook") }}
     </template>
     <template v-slot:outside>

@@ -1,6 +1,6 @@
 <template>
   <Layout v-if="styles.length" :eltList="elements" :onCreate="createStyle" :onDelete="onDelete" :has-create-button="true"
-    :has-delete-button="true" :onClick="onClick" @select="(s) => (selected = s)">
+    :has-delete-button="true" :getLink="getLink" @select="(s) => (selected = s)">
     <template v-slot:left-panel>
       <n-tabs v-model:value="mode" type="card">
         <n-tab-pane name="style" :tab="$t('nav.styles')">
@@ -15,35 +15,38 @@
         {{ elt.name ? elt.name : $t("buttons.newStyle") }}
       </span>
     </template>
-    <template #card-body="{ elt }">
-      <pre v-highlightjs>
-        <code class="JSON">{{ JSON.stringify(elt, 0, 2) }}</code>
-      </pre>
+    <template #card-body="{ elt, i }">
+      <span v-if="thumbnails[i]" v-html="thumbnails[i]"></span>
+      <img v-else src="/placeholder.png" />
     </template>
   </Layout>
+  <Teleport to="#outside">
+    <div>
+      <StyleThumbnail v-if="elements" :styles="elements" v-model="thumbnails" />
+    </div>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, toRaw } from "vue";
+import { ref, onMounted } from "vue";
 import "highlight.js/styles/monokai.css";
 import Layout from "../layouts/GridLayout.vue";
+import StyleThumbnail from "../components/svg-renderer/StyleThumbnail.vue";
 import { GridStyle, SolutionStyle, isSolutionStyle, defaultStyles, defaultSolutionStyle } from "grid";
 import StyleModal from "../components/modals/StyleModal.vue";
 import { api } from "../api";
 import { computed } from "vue";
 import { v4 as uuid } from "uuid";
-import { useRouter } from "vue-router";
 /**
  * View to display all styles in a grid layout
  */
 const styles = ref<GridStyle[]>([]);
 const solutions = ref<SolutionStyle[]>([]);
 const selected = ref<GridStyle[]>([]);
-const editing = ref<GridStyle | SolutionStyle | undefined>();
+const thumbnails = ref<string[]>([]);
+// const editing = ref<GridStyle | SolutionStyle | undefined>();
 const elements = computed(() => mode.value === 'style' ? styles.value : solutions.value);
 const mode = ref<'style' | 'solution'>('style');
-const router = useRouter();
-
 
 function fetch() {
   return api.db
@@ -68,15 +71,11 @@ function fetch() {
 function onDelete() {
   return api.deleteStyles(selected.value.map((style) => style.id)).then(() => fetch());
 }
-function onClick(style: GridStyle | SolutionStyle) {
+function getLink(style: GridStyle | SolutionStyle) {
   if (isSolutionStyle(style)) {
-    return router.push(`/solutions/${style.id}`);
+    return `/solutions/${style.id}/none`;
   }
-  return router.push(`/styles/${style.id}`);
-}
-function save() {
-  api.db.pushStyle(toRaw(editing.value as GridStyle)).then(() => fetch());
-  editing.value = undefined;
+  return `/styles/${style.id}`;
 }
 
 function createStyle() {

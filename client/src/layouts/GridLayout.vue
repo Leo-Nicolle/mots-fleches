@@ -36,9 +36,11 @@
           </template>
 
           <template #default>
-            <div class="card-body" @click="() => onClick(elt)">
-              <!-- @slot Slot for element body  -->
-              <slot name="card-body" :elt="elt" :i="i"> </slot>
+            <div class="card-body">
+              <slot v-if="!getLink" name="card-body" :elt="elt" :i="i"> </slot>
+              <router-link v-else :to="getLink(elt)">
+                <slot name="card-body" :elt="elt" :i="i"> </slot>
+              </router-link>
             </div>
           </template>
         </n-card>
@@ -95,9 +97,9 @@ const props = defineProps<{
    */
   onDelete: (selected: any[]) => Promise<unknown>;
   /**
-   * Callback when an element is clicked
+   * link to open when element is clicked
    */
-  onClick?: (elt: any) => void;
+  getLink?: (elt: any) => string;
 }>();
 const selected = ref<boolean[]>([]);
 const selectedElements = computed(() =>

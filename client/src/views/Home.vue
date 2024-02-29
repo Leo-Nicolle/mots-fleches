@@ -1,22 +1,11 @@
 <template>
   <Layout :left-panel-width="350">
     <template #left-panel>
-      <n-anchor
-        class="left-menu"
-        :show-rail="false"
-        :show-background="true"
-        :affix="false"
-      >
+      <n-anchor class="left-menu" :show-rail="false" :show-background="true" :affix="false">
         <n-anchor-link title="Welcome" href="#top" />
         <n-anchor-link :title="$t('home.nav.wcid')" href="#wcid">
-          <n-anchor-link
-            :title="$t('home.nav.gridfilling')"
-            href="#grid-filling"
-          />
-          <n-anchor-link
-            :title="$t('home.nav.definitionediting')"
-            href="#definition-editing"
-          />
+          <n-anchor-link :title="$t('home.nav.gridfilling')" href="#grid-filling" />
+          <n-anchor-link :title="$t('home.nav.definitionediting')" href="#definition-editing" />
           <n-anchor-link :title="$t('home.nav.checkmode')" href="#check-mode" />
           <n-anchor-link :title="$t('home.nav.styling')" href="#styling" />
           <n-anchor-link :title="$t('home.nav.printing')" href="#printing" />
@@ -24,39 +13,21 @@
 
         <n-anchor-link :title="$t('home.nav.howtouse')" href="#manual">
           <n-anchor-link :title="$t('home.nav.account')" href="#account" />
-          <n-anchor-link
-            :title="$t('home.nav.grideditor')"
-            href="#grid-editor"
-          />
+          <n-anchor-link :title="$t('home.nav.grideditor')" href="#grid-editor" />
           <n-anchor-link :title="$t('home.nav.resize')" href="#resize" />
-          <n-anchor-link
-            :title="$t('home.nav.customwords')"
-            href="#customwords"
-          />
-          <n-anchor-link
-            :title="$t('home.nav.suggestions')"
-            href="#suggestions"
-          />
+          <n-anchor-link :title="$t('home.nav.customwords')" href="#customwords" />
+          <n-anchor-link :title="$t('home.nav.suggestions')" href="#suggestions" />
           <n-anchor-link :title="$t('home.nav.heatmap')" href="#heatmap" />
         </n-anchor-link>
 
         <n-anchor-link :title="$t('home.nav.languages')" href="#languages">
-          <n-anchor-link
-            :title="$t('home.nav.langsupport')"
-            href="#langsupport"
-          />
-          <n-anchor-link
-            :title="$t('home.nav.langswitch')"
-            href="#langswitch"
-          />
+          <n-anchor-link :title="$t('home.nav.langsupport')" href="#langsupport" />
+          <n-anchor-link :title="$t('home.nav.langswitch')" href="#langswitch" />
         </n-anchor-link>
         <n-anchor-link :title="$t('home.nav.about')" href="#about">
           <n-anchor-link :title="$t('home.nav.why')" href="#why" />
           <n-anchor-link :title="$t('home.nav.who')" href="#who" />
-          <n-anchor-link
-            :title="$t('home.nav.contribute')"
-            href="#contribute"
-          />
+          <n-anchor-link :title="$t('home.nav.contribute')" href="#contribute" />
           <n-anchor-link :title="$t('home.nav.support')" href="#support" />
         </n-anchor-link>
       </n-anchor>
@@ -146,7 +117,9 @@
                 <Hammer />
               </n-icon>
               {{ $t("home.suggestions.two") }}
-              <n-icon :size="'1.5em'"> <Flash /> </n-icon>.
+              <n-icon :size="'1.5em'">
+                <Flash />
+              </n-icon>.
               {{ $t("home.suggestions.three") }}
             </p>
           </section>
@@ -154,11 +127,11 @@
             <h3>{{ $t("home.nav.heatmap") }}</h3>
             <p v-html="$t('home.heatmap')"></p>
           </section>
-          <section id="languages">
+          <section id="langsupport">
             <h3>{{ $t("home.nav.languages") }}</h3>
             <p v-html="$t('home.languages')"></p>
           </section>
-          <section id="languages">
+          <section id="langswitch">
             <h3>{{ $t("home.nav.langswitch") }}</h3>
             <p>
               {{ $t("home.langswitch.one") }}
@@ -211,6 +184,7 @@ import {
 h1 {
   font-size: 2em;
 }
+
 div.content {
   max-width: 100%;
   padding: 0 10px;
@@ -221,31 +195,38 @@ div.content {
   text-align: justify;
 
 }
-div.content > article {
+
+div.content>article {
   width: 100%;
   box-sizing: border-box;
   max-width: 740px;
   padding: 0;
   margin: 30px 0;
 }
+
 .left-menu {
   margin-top: 20px;
 }
+
 a.n-anchor-link__title {
   font-size: 1.3em;
 }
+
 .hero {
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
+
 .icontext {
   font-size: 1.5em;
 }
+
 #heroimage {
   width: 25%;
 }
+
 video {
   width: 100%;
 }

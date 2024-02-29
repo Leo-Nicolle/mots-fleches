@@ -1,6 +1,6 @@
 <template>
   <Layout v-if="style && solutionsStyle" :eltList="grids" :onCreate="createGrid" :onDelete="onDelete"
-    :onClick="(grid) => $router.push(`/grid/${grid.id}`)" @select="(s) => (selected = s)" :has-create-button="true"
+    :getLink="(grid) => `/grid/${grid.id}`" @select="(s) => (selected = s)" :has-create-button="true"
     :has-delete-button="true">
     <template v-slot:left-panel>
       <BookButtons v-if="isBook && book" :style="style" :solutions-style="solutionsStyle" :selected="selectedIds"
@@ -13,17 +13,16 @@
       <UploadModal :title="$t('buttons.uploadGrids')" :buttonText="$t('buttons.uploadGrids')" @ok="onUpload" />
     </template>
     <template #card-title="{ elt }">
-      <GridModal v-model:grid="(elt as Grid)" @update:grid="() => console.log('ici')" />
+      <GridModal v-model:grid="(elt as Grid)" />
       <span>
         {{ elt.title ? elt.title : $t("buttons.newGrid") }}
       </span>
     </template>
     <template #card-body="{ elt, i }">
-      <a class="preview" :href="`#/grid/${elt.id}`">
+      <div class="preview">
         <span v-if="thumbnails[i]" v-html="thumbnails[i]"></span>
         <img v-else src="/placeholder.png" />
-      </a>
-      {{ elt.comment ? elt.comment : $t("buttons.newGrid") }}
+      </div>
     </template>
   </Layout>
   <Teleport to="#outside">
@@ -136,7 +135,6 @@ function onUpload(filesContents: [string, string][]) {
 function createGrid() {
   const newGrid = new Grid(10, 10);
   newGrid.title = "Nouvelle Grille";
-  console.log('LA');
   workerController
     .getDistribution()
     .then((distribution) => {

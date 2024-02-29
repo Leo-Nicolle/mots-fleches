@@ -15,7 +15,7 @@ import { workerController } from '../../worker';
  * Route to edit a grid
  * Uses the route query to get the grid id
  */
-const grid = ref<Grid>(); //useGrid(new Grid(1, 1));
+const grid = ref<Grid>();
 const style = ref<GridStyle>();
 const route = useRoute();
 function fetch() {
