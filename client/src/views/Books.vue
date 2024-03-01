@@ -11,8 +11,7 @@
       </span>
     </template>
     <template #card-body="{ elt, i }">
-      <BookOutline />
-      {{ elt.comment ? elt.comment : $t("buttons.newBook") }}
+      <BookOutline class="preview" />
     </template>
     <template v-slot:outside>
     </template>
@@ -89,7 +88,7 @@ onMounted(() => {
 }
 
 .card-body>svg {
-  max-width: 340px;
-  max-height: 340px;
+  width: 340px;
+  height: 340px;
 }
 </style>

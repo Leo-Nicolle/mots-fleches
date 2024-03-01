@@ -1,12 +1,10 @@
 <template>
   <Layout>
     <template v-slot:left-panel>
-      <div class="left-panel">
-        <!-- @slot Slot to add elements within left panel  -->
-        <slot name="left-panel"></slot>
-        <n-button v-if="hasDeleteButton" @click="deleteVisible = true" type="warning" round>
-          {{ $t("buttons.delete") }}</n-button>
-      </div>
+      <!-- @slot Slot to add elements within left panel  -->
+      <slot name="left-panel"></slot>
+      <n-button v-if="hasDeleteButton" @click="deleteVisible = true" type="warning" round>
+        {{ $t("buttons.delete") }}</n-button>
     </template>
     <template v-slot:body>
       <div class="wrapper">

@@ -1,8 +1,9 @@
 <template>
   <Layout>
     <template #left-panel>
-      <OptionsForm v-if="style" v-model="style" grid format>
+      <OptionsForm v-if="style" v-model="style" grid format defbgcolor>
         <SolutionsForm v-model="style" />
+
       </OptionsForm>
     </template>
     <template #body>
