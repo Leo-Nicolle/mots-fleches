@@ -3,7 +3,6 @@
     <template #left-panel>
       <OptionsForm v-if="style" v-model="style" grid format defbgcolor>
         <SolutionsForm v-model="style" />
-
       </OptionsForm>
     </template>
     <template #body>
@@ -57,7 +56,7 @@ function fetch() {
   const promise = bookId && bookId !== 'none'
     ? api.getBookGrids(bookId)
       .then((gs) => {
-        grids.value = gs.filter((e) => e) as Grid[];
+        grids.value = gs.filter((e) => e).map(g => Grid.unserialize(g!));
       })
     : api.getGrids().then((gs) => {
       grids.value = gs;

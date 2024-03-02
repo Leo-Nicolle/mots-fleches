@@ -3,6 +3,7 @@ import { Database, Idatabase, SupaDB } from 'database';
 import { v4 as uuid } from 'uuid';
 import throttle from 'lodash.throttle';
 import axios from 'axios';
+import { setDatabase } from 'database';
 const debugMigration = true;
 
 class API {
