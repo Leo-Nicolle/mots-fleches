@@ -14,4 +14,3 @@ const app = createApp(App)
   .use(i18n);
 
 app.mount('#app');
-plausible.enableAutoPageviews();
