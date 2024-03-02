@@ -3,7 +3,7 @@
     :getLink="(grid) => `/grid/${grid.id}`" @select="(s) => (selected = s)" :has-create-button="true"
     :has-delete-button="true">
     <template v-slot:left-panel>
-      <BookButtons v-if="isBook && book" :style="style" :solutions-style="solutionsStyle" :selected="selectedIds"
+      <BookButtons v-if="isBook && book" :style="style" :solutionsStyle="solutionsStyle" :selected="selectedIds"
         v-model="book" @update="fetch" />
       <h3>{{ $t("nav.grids") }}</h3>
       <GridCopyModal :isBook="isBook" :gridIds="selectedIds" />

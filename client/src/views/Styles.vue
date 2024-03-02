@@ -28,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import "highlight.js/styles/monokai.css";
 import Layout from "../layouts/GridLayout.vue";
 import StyleThumbnail from "../components/svg-renderer/StyleThumbnail.vue";
@@ -45,8 +45,8 @@ const solutions = ref<SolutionStyle[]>([]);
 const selected = ref<GridStyle[]>([]);
 const thumbnails = ref<string[]>([]);
 // const editing = ref<GridStyle | SolutionStyle | undefined>();
-const elements = computed(() => mode.value === 'style' ? styles.value : solutions.value);
 const mode = ref<'style' | 'solution'>('style');
+const elements = computed(() => mode.value === 'style' ? styles.value : solutions.value);
 
 function fetch() {
   return api.db
@@ -86,7 +86,6 @@ function createStyle() {
   newStyle.name = mode.value === 'style' ? 'New Style' : 'New Solution Style';
   return api.db.pushStyle(newStyle).then(() => fetch());
 }
-
 onMounted(() => {
   fetch();
 });

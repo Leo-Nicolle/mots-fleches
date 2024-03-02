@@ -1,6 +1,6 @@
 <template>
   <h3>{{ book.title }}</h3>
-  <BookModal v-model="book" :style="style" :solutionsStyle="solutionsStyle" />
+  <BookModal v-model="book" @update="$emit('update')" />
   <h3>{{ $t("nav.styles") }}</h3>
   <n-button round @click="goToStyles">Styles</n-button>
   <n-button round @click="goToSlutions">Solution Styles</n-button>

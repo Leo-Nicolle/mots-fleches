@@ -1,6 +1,6 @@
 <template>
-  <SVGGrid v-if="exportingStyle" ref="thumbnail" :grid="exportingGrid" :style="exportingStyle" :zoom="1" :focus="nullCell"
-    dir="horizontal" :export-options="{ ...defaultExportOptions, definitions: true, texts: true, highlight: true, }">
+  <SVGGrid v-if="exportingStyle && exportingGrid" ref="thumbnail" :grid="exportingGrid" :style="exportingStyle" :zoom="1"
+    :focus="nullCell" dir="horizontal" :export-options="exportOptions">
   </SVGGrid>
 </template>
 
@@ -12,11 +12,13 @@ import {
   onMounted,
   watch,
   ref,
+  computed,
 } from "vue";
 import SVGGrid from "./Grid.vue";
 import {
   Grid,
   GridStyle,
+  isSolutionStyle,
   nullCell
 } from "grid";
 import { defaultExportOptions } from "../../types";
@@ -37,7 +39,29 @@ const props = defineProps<{
 
 const exportingGrid = ref<Grid>();
 const exportingStyle = ref<GridStyle>();
+const exportOptions = computed(() => {
+  if (!exportingStyle.value) {
+    return {};
+  }
+  if (!isSolutionStyle(exportingStyle.value)) {
+    return {
+      ...defaultExportOptions,
+      definitions: true,
+      splits: true,
+      texts: true,
+      highlight: true,
+    };
+  }
+  return {
+    ...defaultExportOptions,
+    definitions: false,
+    splits: false,
+    texts: true,
+    arrows: false,
+    highlight: true,
+  };
 
+});
 const emit = defineEmits<{
   /**
    * The grid has been updated
@@ -67,14 +91,19 @@ function fetch() {
       exportingGrid.value = Grid.unserialize(data);
     });
 }
-watch(() => [props.modelValue, props.styles], () => {
+watch(() => [props.styles], () => {
   fetch()
-    .then(() => exportSvg());
-
+    .then(() => {
+      value.value = [];
+      exportSvg();
+    });
+});
+watch(props.modelValue, () => {
+  exportSvg(value.value.length);
 });
 onMounted(() => {
   fetch()
-    .then(() => exportSvg());
+    .then(() => value.value = []);
 })
 
 </script>
