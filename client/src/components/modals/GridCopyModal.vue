@@ -81,6 +81,8 @@ function save() {
     return Promise.resolve();
   }
 
+  Vue.$plausible.trackEvent('download', { props: { method: 'HTTP' } });
+
   return Promise.resolve()
     .then(() => {
       if (mode.value === 'copy') {
