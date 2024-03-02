@@ -4,6 +4,12 @@
   "type": "module",
   "main": "dist/grid.js",
   "types": "dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/grid.js",
+      "types": "./dist/types/index.d.ts"
+    }
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",

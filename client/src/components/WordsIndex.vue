@@ -1,5 +1,6 @@
 <template>
   <div v-if="grids && solutionStyle">
+
     <FontLoader :value="solutionStyle.grids.gridN" />
     <FontLoader :value="solutionStyle.words" />
     <Paper v-for="(words, i) in layout.wordsPerPage" :key="i" :format="solutionStyle.paper"
@@ -27,6 +28,7 @@ import Paper from "./Paper.vue";
 import FontLoader from "./fonts/FontLoader.vue";
 import { ExportOptions } from "../types";
 import { getFont } from "../js/useFont";
+import { onMounted } from "vue";
 /**
  * Component to render the list of words used in an array of grids
  */
@@ -78,8 +80,7 @@ function nodesBSStart(
   return start;
 }
 
-watch([props.grids, ruler, wordFont, sizeFont, props.solutionStyle,
-props.exportOptions], () => {
+function refresh() {
   if (!props.grids || !ruler.value) {
     layout.value = { wordsPerPage: [], heights: [] };
     return;
@@ -92,7 +93,6 @@ props.exportOptions], () => {
     .filter((w) => w.length > 1);
   const r = ruler.value as HTMLDivElement;
   r.innerHTML = "";
-
   const { x: startX, width: W, height: H } = r.parentElement!.getBoundingClientRect();
   const wordsMap = words.reduce((acc, word) => {
     if (acc[word.length]) {
@@ -132,13 +132,23 @@ props.exportOptions], () => {
   if (indexes[indexes.length - 1] < allTexts.length - 1) {
     wordsPerPage.push(wordsPerPage.slice(indexes.length - 1));
   }
-  r.innerHTML = "";
+  // r.innerHTML = "";
   layout.value = {
     wordsPerPage,
     heights: ['100%']
   };
   emit('pageCount', wordsPerPage.length);
+}
+onMounted(() => {
+  document.fonts.onloadingdone = () => {
+    refresh();
+  };
+});
 
+
+watch([props.grids, ruler, wordFont, sizeFont, props.solutionStyle,
+props.exportOptions], () => {
+  refresh();
 });
 </script>
 
@@ -178,9 +188,7 @@ props.exportOptions], () => {
   z-index: 1000;
 }
 
-.words.ruler {
-  background: red;
-}
+.words.ruler {}
 
 .size {
   font: v-bind(sizeFont);

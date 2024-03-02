@@ -23,7 +23,6 @@ import { api } from "../../api";
 import { TextStyle, Font } from "grid";
 import FontLoader from "./FontLoader.vue";
 import Sizeinput from "../forms/Sizeinput.vue";
-
 import { useModel } from "../../js/useModel";
 
 const props = defineProps<{

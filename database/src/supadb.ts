@@ -1,7 +1,7 @@
-import { Grid, GridStyle, GridState, defaultStyles, defaultSolutionStyle } from "grid";
+import { GridStyle, GridState, defaultStyles, defaultSolutionStyle } from "grid";
 import { Database } from "./db";
 import { SupabaseClient, createClient } from '@supabase/supabase-js';
-import { Font, SBSchema } from "./types";
+import { Book, Font, SBSchema } from "./types";
 
 
 export class SupaDB extends Database {
@@ -52,8 +52,7 @@ export class SupaDB extends Database {
     return data!.map(({ data }) => data);
   }
 
-  async pushGrid(g: Grid) {
-    const grid = JSON.parse(g.serialize()) as GridState;
+  async pushGrid(grid: GridState) {
     await this.supabase.from('Grids').upsert({
       id: grid.id,
       created: new Date(grid.created).toISOString(),
@@ -63,7 +62,7 @@ export class SupaDB extends Database {
     return grid.id;
   }
 
-  async updateGrid(grid: Grid) {
+  async updateGrid(grid: GridState) {
     // things with same id are overwritten
     return this.pushGrid(grid);
   }
@@ -77,6 +76,40 @@ export class SupaDB extends Database {
     const { data } = await this.supabase.from('Grids')
       .select('id, data')
       .eq('id', id);
+    return data && data.length ? data[0].data : undefined;
+  }
+
+  async getBooks() {
+    const { data } = await this.supabase.from('Books').select();
+    return data!.flatMap(({ data }) => data);
+  }
+
+  async pushBook(book: Book) {
+    await this.supabase.from('Books').upsert({
+      id: book.id,
+      created: new Date(book.created).toISOString(),
+      // TODO: See wether the db should take care of this
+      // or if it should be done in the client
+      updated: new Date(book.updated).toISOString(),
+      data: book,
+      userid: this.userid,
+    });
+    return book.id;
+  }
+
+  async updateBook(book: Book) {
+    return await this.pushBook(book);
+  }
+
+  async deleteBook(bookId: string) {
+    await this.supabase.from('Books').delete()
+      .eq('id', bookId);
+  }
+
+  async getBook(bookId: string) {
+    const { data } = await this.supabase.from('Books')
+      .select('id, data')
+      .eq('id', bookId);
     return data && data.length ? data[0].data : undefined;
   }
 

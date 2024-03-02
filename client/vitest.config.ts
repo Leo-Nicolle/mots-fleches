@@ -5,8 +5,9 @@ export default defineConfig({
   plugins: [vue()],
   test: {
     include: ["test/forms/*"],
-    reporters: ['default', "test/svg-reporter.ts"],
-    environment: 'happy-dom'
+    setupFiles: ["test/setup.ts"],
+    // reporters: ['default', "test/svg-reporter.ts"],
+    environment: 'jsdom'
   },
   envDir: "envs/",
 });

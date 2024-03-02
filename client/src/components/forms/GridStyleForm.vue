@@ -26,6 +26,10 @@
         <n-form-item :label="$t('forms.spaceWidth')" path="grid.spaceSize">
           <n-input-number role="space" v-model:value="value.grid.spaceSize" />
         </n-form-item>
+        <n-form-item v-if="defbgcolor" :label="$t('forms.backgroundColor')" path="definition.backgroundColor">
+          <n-color-picker role="definition-background-color" v-model:value="value.definition.backgroundColor"
+            :show-alpha="false" size="small" />
+        </n-form-item>
       </div>
       <h3>{{ $t("forms.solutions") }}</h3>
       <FontSelector v-model="value.solutions" role-prefix="solutions" />
@@ -89,6 +93,10 @@ const props = defineProps<{
    * Show the format inputs
    */
   format?: boolean;
+  /**
+   * Show definition background color input in the grid section 
+   */
+  defbgcolor?: boolean;
 }>();
 const emit = defineEmits<{
   /**

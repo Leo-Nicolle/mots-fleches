@@ -49,7 +49,6 @@
       <n-button v-if="screenSize === 'phone' && leftPanelWidth > 0" class="left-panel-toggle"
         :type="showLeftDrawer ? 'primary' : 'warning'" icon-placement="right" @click="showLeftDrawer = !showLeftDrawer">
         {{ showLeftDrawer ? "<" : ">" }} </n-button>
-
           <div @scroll="onScroll" class="maincontentscroll scroll">
             <!-- @slot Slot for element in the main panel  -->
             <slot name="body"></slot>
@@ -138,11 +137,22 @@ function getNavChildren() {
         h(
           RouterLink,
           {
+            to: "/books",
+          },
+          { default: () => i18n.global.t("nav.books") }
+        ),
+      key: "go-to-books",
+    },
+    {
+      label: () =>
+        h(
+          RouterLink,
+          {
             to: "/grids",
           },
           { default: () => i18n.global.t("nav.grids") }
         ),
-      key: "go-back-home",
+      key: "go-to-grids",
     },
     {
       label: () =>
@@ -154,17 +164,6 @@ function getNavChildren() {
           { default: () => i18n.global.t("nav.styles") }
         ),
       key: "go-to-styles",
-    },
-    {
-      label: () =>
-        h(
-          RouterLink,
-          {
-            to: "/solutions",
-          },
-          { default: () => i18n.global.t("nav.solutions") }
-        ),
-      key: "go-to-solutions",
     },
     {
       label: () =>
@@ -343,7 +342,7 @@ nav {
   gap: 10px;
   width: v-bind(leftWidth);
   min-width: v-bind(leftWidth);
-  overflow: scroll;
+  overflow-y: scroll;
   max-height: 100%;
   align-items: center;
   justify-content: flex-start;

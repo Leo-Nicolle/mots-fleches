@@ -1,12 +1,13 @@
 <template>
   <Layout>
     <template #left-panel>
-      <OptionsForm v-if="style" v-model="style" grid format>
+      <OptionsForm v-if="style" v-model="style" grid format defbgcolor>
         <SolutionsForm v-model="style" />
       </OptionsForm>
     </template>
     <template #body>
-      <WordsIndex :grids="grids" v-if="grids.length && style" class="paper"
+      <Loading v-if="loading" />
+      <WordsIndex :grids="grids" v-else-if="grids.length && style" class="paper"
         @page-count="solutionFirstPage = $event + indexFirstPage" :export-options="exportOptions" :solutionStyle="style"
         :page="indexFirstPage" />
       <NoGrid v-else />
@@ -21,6 +22,7 @@ import { ref, onMounted, toRaw, watch } from "vue";
 import { useRoute } from "vue-router";
 import Layout from "../../layouts/Main.vue";
 import OptionsForm from "../../components/forms/GridStyleForm.vue";
+import Loading from '../../components/Loading.vue';
 import SolutionsPaper from "../../components/Solutions.vue";
 import WordsIndex from "../../components/WordsIndex.vue";
 import SolutionsForm from "../../components/forms/SolutionsStyleForm.vue";
@@ -35,6 +37,7 @@ import { api } from "../../api";
 
 const route = useRoute();
 const grids = ref<Grid[]>([]);
+const loading = ref(true);
 const style = ref<SolutionStyle>();
 const exportOptions = ref<ExportOptions>({
   ...defaultExportOptions,
@@ -47,17 +50,19 @@ const indexFirstPage = ref(0);
 const solutionFirstPage = ref(0);
 const saveTimeout = ref(0);
 function fetch() {
-  const promise = route.query.ids
-    ? Promise.all(
-      (route.query.ids as string).split(",").map((id) => api.getGrid(id))
-    ).then((gs) => {
-      grids.value = gs.filter((e) => e) as Grid[];
-    })
+  loading.value = true;
+  const id = route.params.id as string || 'solution';
+  const bookId = route.params.bookId as string | undefined;
+  const promise = bookId && bookId !== 'none'
+    ? api.getBookGrids(bookId)
+      .then((gs) => {
+        grids.value = gs.filter((e) => e).map(g => Grid.unserialize(g!));
+      })
     : api.getGrids().then((gs) => {
       grids.value = gs;
     });
   return promise
-    .then(() => api.db.getStyle("solution"))
+    .then(() => api.db.getStyle(id))
     .then((s) => {
       style.value = s as SolutionStyle;
       indexFirstPage.value =
@@ -65,6 +70,9 @@ function fetch() {
     })
     .catch((e) => {
       console.error("E", e);
+    })
+    .finally(() => {
+      loading.value = false;
     });
 }
 
