@@ -7,7 +7,9 @@ export const lang = {
         solutions: "Soluciones",
         words: "Palabras",
         about: "Acerca de",
-        fonts: "Fuentes"
+        fonts: "Fuentes",
+        book: "Libro",
+        books: "Libros",
     },
     buttons: {
         changeLanguage: "Cambiar idioma",
@@ -101,9 +103,17 @@ export const lang = {
         fontFamily: "Fuente",
         fontWeight: "Peso",
         offset: "Desplazamiento",
+        styles: 'Estilos',
+        solutionStyles: "Estilos de la solución",
         lineSpacing: "Espaciado de línea",
         baselineShift: 'Desplazamiento',
         alignmentBaseline: 'Alineación',
+        copy: "Copiar",
+        reuse: "Reutilizar",
+        move: "Mover",
+        mode: 'Modo',
+        target: "Objetivo Cuadrícula",
+        addWords: 'Añadir palabras',
     },
     tooltips: {
         incomplete: "esta incompleto",
@@ -111,6 +121,12 @@ export const lang = {
         noarrow: "no tiene flecha",
         toomanyarrows: "tiene demasiadas flechas",
         add: "Añadir {word} al diccionario",
+        loading: "Cargando...",
+    },
+    modals: {
+        bookTitle: "Libro",
+        copyTitle: "Copiar cuadrículas",
+        style: "Ajustes del Estilo",
     },
     alert: {
         wrongpassword: "Contraseña incorrecta",
@@ -153,6 +169,11 @@ export const lang = {
         normal: "Libre",
         check: "Verification",
         heatmap: "Probabilidad",
+    },
+    help: {
+        copygrid: "Copiar la cuadrícula en otra cuadrícula",
+        movegrid: "Mover la cuadrícula en otro libro",
+        reusegrid: "Reutilizar la cuadrícula en otro libro (editar en un libro editará en el otro)",
     },
     home: {
         nav: {

@@ -1,5 +1,6 @@
 <template>
   <section>
+    <h3>{{ $t("forms.addWords") }}</h3>
     <n-form inline>
       <n-form-item :label="$t('forms.add')" path="add">
         <n-input v-model:value="value" :placeholder="$t('forms.addWord')" @keyup="onAddKeyup" />

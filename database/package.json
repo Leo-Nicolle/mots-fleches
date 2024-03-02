@@ -6,6 +6,12 @@
   "main": "dist/clientdb.js",
   "types": "dist/types/index-client.d.ts",
   "browser": "./dist/clientdb.js",
+  "exports": {
+    ".": {
+      "import": "./dist/clientdb.js",
+      "types": "./dist/types/index-client.d.ts"
+    }
+  },
   "scripts": {
     "prebuild": "rm -rf dist",
     "build": "vite build -c vite.config.js",

@@ -1,6 +1,6 @@
 <template>
   <div class="lougout">
-    <n-icon v-if="!closed" size="5em" >
+    <n-icon v-if="!closed" size="5em">
       <LoaderIcon />
     </n-icon>
     <span>
@@ -21,22 +21,22 @@ const router = useRouter();
 const closed = ref(false);
 const message = ref<string>("waiting");
 function exit() {
-  if (api.mode === 'supadb'){
+  if (api.mode === 'supadb') {
     return api.signout();
-  } 
-  return Promise.resolve(); 
-  
+  }
+  return Promise.resolve();
+
 }
 
 onMounted(() => {
   setTimeout(() => {
     exit()
-    .then(() => {
-      api.signout();
-      message.value = "success";
-      closed.value = true;
-      router.push('/login');
-    });
+      .then(() => {
+        api.signout();
+        message.value = "success";
+        closed.value = true;
+        router.push('/login');
+      });
   }, 500);
 
 });

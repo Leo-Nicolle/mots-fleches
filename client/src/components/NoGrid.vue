@@ -1,8 +1,7 @@
 <template>
   <h3 class="warning-no-grid">
     {{ $t("alert.noGrid") }}
-    <a href="/#/grids">{{ $t("buttons.here") }}</a
-    >
+    <a href="/grids">{{ $t("buttons.here") }}</a>
   </h3>
 </template>
 

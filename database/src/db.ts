@@ -1,12 +1,17 @@
-import { Grid, GridStyle, GridState, SolutionStyle } from "grid";
-import { Font } from "./types";
+import { GridStyle, GridState, SolutionStyle } from "grid";
+import { Book, Font } from "./types";
 
 export abstract class Database {
   abstract getGrids(): Promise<GridState[]>;
-  abstract pushGrid(grid: Grid): Promise<string>;
-  abstract updateGrid(grid: Grid): Promise<string>;
+  abstract pushGrid(grid: GridState): Promise<string>;
+  abstract updateGrid(grid: GridState): Promise<string>;
   abstract deleteGrid(gridId: string): Promise<void>;
   abstract getGrid(gridId: string): Promise<GridState | undefined>;
+  abstract getBooks(): Promise<Book[]>;
+  abstract pushBook(book: Book): Promise<string>;
+  abstract updateBook(book: Book): Promise<string>;
+  abstract deleteBook(bookId: string): Promise<void>;
+  abstract getBook(bookId: string): Promise<Book | undefined>;
   abstract getStyles(): Promise<(GridStyle | SolutionStyle)[]>;
   abstract getStyle(optionId: string): Promise<GridStyle | SolutionStyle | undefined>;
   abstract pushStyle(option: any): Promise<string>;

@@ -13,6 +13,17 @@ export type Json =
   | { [key: string]: Json; }
   | Json[];
 
+export type Book = {
+  id: string;
+  title: string;
+  grids: string[];
+  comment: string;
+  created: number;
+  updated: number;
+  style: string;
+  solutionStyle: string;
+};
+
 export interface SBSchema {
   public: {
     Tables: {
@@ -32,6 +43,26 @@ export interface SBSchema {
         Update: {
           created?: string;
           data?: GridState;
+          id?: string;
+          userid?: string;
+        };
+      };
+      Books: {
+        Row: {
+          created: string;
+          data: Book;
+          id: string;
+          userid: string;
+        };
+        Insert: {
+          created?: string;
+          data?: Book;
+          id: string;
+          userid?: string;
+        };
+        Update: {
+          created?: string;
+          data?: Book;
           id?: string;
           userid?: string;
         };

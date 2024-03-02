@@ -1,12 +1,10 @@
 <template>
   <Layout>
     <template v-slot:left-panel>
-      <div class="left-panel">
-        <!-- @slot Slot to add elements within left panel  -->
-        <slot name="left-panel"></slot>
-        <n-button v-if="hasDeleteButton" @click="deleteVisible = true" type="warning" round>
-          {{ $t("buttons.delete") }}</n-button>
-      </div>
+      <!-- @slot Slot to add elements within left panel  -->
+      <slot name="left-panel"></slot>
+      <n-button v-if="hasDeleteButton" @click="deleteVisible = true" type="warning" round>
+        {{ $t("buttons.delete") }}</n-button>
     </template>
     <template v-slot:body>
       <div class="wrapper">
@@ -26,7 +24,7 @@
             <span class="card-title">
               <!-- @slot Slot for element title  -->
               <slot name="card-title" :elt="elt" :i="i"> </slot>
-              <n-checkbox @click="(evt) => {
+              <n-checkbox class="checkbox" @click="(evt) => {
                 evt.preventDefault();
                 evt.stopPropagation();
               }
@@ -36,9 +34,11 @@
           </template>
 
           <template #default>
-            <div class="card-body" @click="() => onClick(elt)">
-              <!-- @slot Slot for element body  -->
-              <slot name="card-body" :elt="elt" :i="i"> </slot>
+            <div class="card-body">
+              <slot v-if="!getLink" name="card-body" :elt="elt" :i="i"> </slot>
+              <router-link v-else :to="getLink(elt)">
+                <slot name="card-body" :elt="elt" :i="i"> </slot>
+              </router-link>
             </div>
           </template>
         </n-card>
@@ -95,9 +95,9 @@ const props = defineProps<{
    */
   onDelete: (selected: any[]) => Promise<unknown>;
   /**
-   * Callback when an element is clicked
+   * link to open when element is clicked
    */
-  onClick?: (elt: any) => void;
+  getLink?: (elt: any) => string;
 }>();
 const selected = ref<boolean[]>([]);
 const selectedElements = computed(() =>
@@ -141,7 +141,13 @@ watch(selectedElements, () => {
 }
 
 .card-title {
-  display: flex;
+  display: grid;
+  grid-template-columns: 40px auto 40px;
+  justify-items: center;
+}
+
+.card-title>div {
+  grid-column-start: 3;
 }
 
 .card-title>div {

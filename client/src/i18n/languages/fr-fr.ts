@@ -7,7 +7,9 @@ export const lang = {
         solutions: "Solutions",
         words: "Mots",
         about: "A propos",
-        fonts: "Polices"
+        fonts: "Polices",
+        book: "Livre",
+        books: "Livres",
     },
     buttons: {
         changeLanguage: "Traduire",
@@ -101,10 +103,18 @@ export const lang = {
         fontFamily: "Police",
         fontWeight: "Epaisseur",
         offset: "Décalage",
+        styles: "Styles",
+        solutionStyles: "Styles des solutions",
         line: 'Ligne',
         lineSpacing: "Interlignage",
         baselineShift: 'Décalage',
         alignmentBaseline: 'Alignement',
+        copy: "Copier",
+        reuse: 'Réutiliser',
+        move: "Déplacer",
+        mode: 'Mode',
+        target: "Livre Cible",
+        addWords: 'Ajouter des mots',
     },
     tooltips: {
         incomplete: "est incomplet",
@@ -112,9 +122,13 @@ export const lang = {
         noarrow: "n'a pas de flèche",
         toomanyarrows: "a trop de flèches",
         add: "Ajouter {word} au dictionnaire",
+        loading: "Chargement...",
     },
     modals: {
         exportTitle: "Export",
+        copyTitle: "Copier les grilles",
+        bookTitle: "Livre",
+        style: "Paramètres du style",
     },
     alert: {
         wrongpassword: "Mot de passe ou email incorrect.",
@@ -156,6 +170,11 @@ export const lang = {
         normal: "Libre",
         check: "Verification",
         heatmap: "Probabilités",
+    },
+    help: {
+        copygrid: 'Duplique la grille dans un autre livre',
+        movegrid: 'Déplace la grille dans un autre livre',
+        reusegrid: 'Réutilise la grille dans un autre livre (modifier dans un livre modifie dans l\'autre)',
     },
     home: {
         nav: {

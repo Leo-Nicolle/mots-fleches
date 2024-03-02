@@ -346,6 +346,7 @@ export class Grid {
       cells
     };
   }
+
   /**
    * Converts the grid to a sreialized string
    * @returns GridState JSON string
@@ -361,15 +362,21 @@ export class Grid {
       title: this.title,
       styleId: this.styleId
     };
-    return JSON.stringify(gridState);
+    return gridState;
   }
   /**
    * Creates a grid from a serialized string
    * @param s GridState JSON string
    * @returns A new grid
    */
-  static unserialize(s: string) {
-    const { rows, cols, comment, title, id, cells, created, styleId } = JSON.parse(s) as GridState;
+  static unserialize(s: string | GridState) {
+    let state: GridState;
+    if (typeof s === 'string') {
+      state = JSON.parse(s) as GridState;
+    } else {
+      state = s;
+    }
+    const { rows, cols, comment, title, id, cells, created, styleId } = state;
     const res = new Grid(rows, cols, id);
     cells.forEach((row, i) => {
       row.forEach((cell, j) => {

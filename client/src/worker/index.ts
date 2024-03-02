@@ -70,11 +70,11 @@ class WorkerController extends EventEmitter<Events> {
   }
 
   checkGrid(grid: Grid) {
-    this._postMessage('check', grid.serialize(), this.searchWorkerId);
+    this._postMessage('check', JSON.stringify(grid.serialize()), this.searchWorkerId);
   }
 
   run(grid: Grid) {
-    this._postMessage('run', grid.serialize(), this.suggestionWorkerId);
+    this._postMessage('run', JSON.stringify(grid.serialize()), this.suggestionWorkerId);
   }
 
   autofill(grid: Grid, words: string[]) {
@@ -169,7 +169,7 @@ class WorkerController extends EventEmitter<Events> {
   }
 
   private _fetchLocale(locale: string) {
-    return fetch(locale + '.zip')
+    return fetch(`/${locale}.zip`)
       .then((response) => response.arrayBuffer())
       .then((data) => new Promise<{ words: string[], definitions: string; }>((resolve, reject) => {
         fflate.unzip(new Uint8Array(data), (err, decompressed) => {

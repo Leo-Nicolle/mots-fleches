@@ -7,7 +7,9 @@ export const lang = {
     solutions: "Solutions",
     words: "Words",
     about: "About",
-    fonts: "Fonts"
+    fonts: "Fonts",
+    book: "Book",
+    books: "Books",
   },
   buttons: {
     changeLanguage: "change language",
@@ -101,9 +103,17 @@ export const lang = {
     fontFamily: "Font family",
     fontWeight: "Font weight",
     offset: "Offset",
+    styles: "Styles",
+    solutionStyles: "Solution styles",
     lineSpacing: "Line spacing",
     baselineShift: 'Baseline',
     alignmentBaseline: 'Alignment',
+    copy: "Copy",
+    reuse: 'Reuse',
+    move: "Move",
+    mode: 'Mode',
+    target: "Target Book",
+    addWords: 'Add words',
   },
   tooltips: {
     incomplete: "is incomplete",
@@ -111,6 +121,12 @@ export const lang = {
     noarrow: "has no arrow",
     toomanyarrows: 'has too many arrows',
     add: "Add {word} to dictionary",
+    loading: 'Loading...',
+  },
+  modals: {
+    bookTitle: "Book",
+    copyTitle: "Copy grids",
+    style: "Style Settings",
   },
   alert: {
     wrongpassword: "Wrong password or email",
@@ -153,6 +169,11 @@ export const lang = {
     check: "Check",
     heatmap: "Heatmap",
 
+  },
+  help: {
+    copygrid: "Duplicate the grid into annother grid",
+    movegrid: "Move the grid into annother book",
+    reusegrid: "Reuse the grid into annother book (editing in one book will edit in the other)",
   },
   home: {
     nav: {

@@ -1,4 +1,4 @@
-import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
+import { createRouter, createWebHashHistory, createWebHistory, RouteRecordRaw } from 'vue-router';
 import { api } from '../api';
 
 const routes: Array<RouteRecordRaw> = [
@@ -17,12 +17,22 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/grids',
     name: 'grids',
-    component: () => import('../views/Grids.vue')
+    component: () => import('../views/Book.vue')
+  },
+  {
+    path: '/books',
+    name: 'books',
+    component: () => import('../views/Books.vue')
   },
   {
     path: '/grid/:id',
     name: 'grid',
     component: () => import('../views/editors/GridEditor.vue')
+  },
+  {
+    path: '/book/:id',
+    name: 'book',
+    component: () => import('../views/Book.vue')
   },
   {
     path: '/grid-export/:id',
@@ -32,7 +42,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/styles',
     name: 'stylesList',
-    component: () => import('../views/editors/StyleEditor.vue')
+    component: () => import('../views/Styles.vue')
   },
   {
     path: '/styles/:id',
@@ -40,7 +50,7 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/editors/StyleEditor.vue')
   },
   {
-    path: '/solutions',
+    path: '/solutions/:id/:bookId',
     name: 'solutions',
     component: () => import('../views/editors/SolutionsEditor.vue')
   },
@@ -108,12 +118,12 @@ const router = createRouter({
 
 router.beforeEach(async (to, from) => {
   const isSignedin = await api.isSignedIn();
-  if (
-    !isSignedin &&
-    to.meta.requiresAuth !== false
-  ) {
-    return { name: 'login', query: {redirect: to.name} };
-  }
+  // if (
+  //   !isSignedin &&
+  //   to.meta.requiresAuth !== false
+  // ) {
+  //   return { name: 'login', query: { redirect: to.name } };
+  // }
 });
 
 export default router;

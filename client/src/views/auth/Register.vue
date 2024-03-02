@@ -2,28 +2,13 @@
   <Layout :title="$t('register.title')" :alert="alert">
     <template #default>
       <n-form-item :label="$t('register.email')" path="login">
-        <n-input
-          role="login"
-          type="text"
-          placeholder="name@mail.com"
-          v-model:value="email"
-        />
+        <n-input role="login" type="text" placeholder="name@mail.com" v-model:value="email" />
       </n-form-item>
       <n-form-item :label="$t('register.password')" path="password">
-        <n-input
-          role="password"
-          type="password"
-          placeholder="password"
-          v-model:value="password"
-        ></n-input>
+        <n-input role="password" type="password" placeholder="password" v-model:value="password"></n-input>
       </n-form-item>
       <n-form-item :label="$t('register.confirmPassword')" path="password">
-        <n-input
-          role="passwordcheck"
-          type="password"
-          placeholder="passwordcheck"
-          v-model:value="passwordcheck"
-        ></n-input>
+        <n-input role="passwordcheck" type="password" placeholder="passwordcheck" v-model:value="passwordcheck"></n-input>
       </n-form-item>
     </template>
     <template #footer>
@@ -48,7 +33,7 @@ const email = ref<string>("");
 const password = ref<string>("");
 const passwordcheck = ref<string>("");
 
-const {alert, setAlert} = useAlert();
+const { alert, setAlert } = useAlert();
 async function register(method: string) {
   const { data, error } = await api.supadb.supabase.auth.signUp({
     email: email.value,

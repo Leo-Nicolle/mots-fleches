@@ -86,7 +86,6 @@ const props = defineProps<{
   cellProbas: CellProba[][];
   mode: Mode;
   grid: Grid;
-  gridVersion: number;
   style: GridStyle;
   zoom: number;
   offset: [number, number];
@@ -254,7 +253,7 @@ watchEffect(() => {
   hotLetters.value = getLetters(props.cell, props.cellProbas);
   refreshHeatmap();
 });
-watch([props.mode, props.grid], () => {
+watch(() => [props.mode, props.grid], () => {
   throttledRefresValidity();
 });
 onMounted(() => {

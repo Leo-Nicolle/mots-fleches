@@ -2,20 +2,10 @@
   <Layout :title="$t('login.title')" :alert="alert">
     <template #default>
       <n-form-item :label="$t('login.email')" path="login">
-        <n-input
-          role="login"
-          type="text"
-          placeholder="name@mail.com"
-          v-model:value="email"
-        />
+        <n-input role="login" type="text" placeholder="name@mail.com" v-model:value="email" />
       </n-form-item>
       <n-form-item :label="$t('login.password')" path="password">
-        <n-input
-          role="password"
-          type="password"
-          placeholder="password"
-          v-model:value="password"
-        ></n-input>
+        <n-input role="password" type="password" placeholder="password" v-model:value="password"></n-input>
       </n-form-item>
       <span class="forgot-password hidden" @click="onForgotPassword">
         {{ $t("login.forgotPassword") }}
@@ -58,8 +48,8 @@ const email = ref<string>("");
 const password = ref<string>("");
 const { alert, setAlert } = useAlert();
 const route = useRoute();
-function redirect(){
-  return router.push(route.query.redirect as string ||  "/");
+function redirect() {
+  return router.push(route.query.redirect as string || "/");
 }
 async function login(method: string) {
   const { data, error } = api.supadb.supabase.auth.signInWithOAuth({
@@ -114,16 +104,19 @@ async function localMode() {
   justify-content: center;
   width: 100%;
 }
+
 .forgot-password {
   color: #888;
   font-style: italic;
   cursor: pointer;
 }
+
 .forgot-password:hover {
   color: #000;
   text-decoration: underline;
 }
-.hidden{
+
+.hidden {
   display: none;
 }
 </style>
