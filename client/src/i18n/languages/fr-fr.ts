@@ -10,6 +10,7 @@ export const lang = {
         fonts: "Polices",
         book: "Livre",
         books: "Livres",
+        preferences: "Préférences",
     },
     buttons: {
         changeLanguage: "Traduire",
@@ -175,6 +176,23 @@ export const lang = {
         copygrid: 'Duplique la grille dans un autre livre',
         movegrid: 'Déplace la grille dans un autre livre',
         reusegrid: 'Réutilise la grille dans un autre livre (modifier dans un livre modifie dans l\'autre)',
+        shortcuts: {
+            toggleDefinition: "Change une cellule normale en cellule de définition et vice versa.",
+            exitDefinition: "Passe à la cellule suivante lorsque vous êtes dans une cellule de définition (comme les flèches dans les cellules normales).",
+            horizontalSplit: "Ajoute une barre horizontale à la cellule actuelle, indiquant un tiret ou un espace dans le mot.",
+            verticalSplit: "Ajoute une barre verticale à la cellule actuelle, indiquant un tiret ou un espace dans le mot.",
+            changeMode: "Change le mode de l'éditeur (Libre, Vérification, Probabilités).",
+        }
+    },
+    preferences: {
+        hotkeys: "Raccourcis",
+        shortcuts: {
+            toggleMode: "Basculer le mode",
+            exitDefinition: "Sortir de la définition",
+            horizontalSplit: "Espace horizontal",
+            verticalSplit: "Espace vertical",
+            changeMode: "Changer de mode",
+        }
     },
     home: {
         nav: {

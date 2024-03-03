@@ -71,6 +71,11 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/print/Book.vue')
   },
   {
+    path: '/preferences',
+    name: 'preferences',
+    component: () => import('../views/Preferences.vue')
+  },
+  {
     path: '/logout',
     name: 'logout',
     component: () => import('../views/auth/Logout.vue'),

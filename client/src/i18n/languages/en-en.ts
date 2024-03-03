@@ -10,6 +10,7 @@ export const lang = {
     fonts: "Fonts",
     book: "Book",
     books: "Books",
+    preferences: "Preferences",
   },
   buttons: {
     changeLanguage: "change language",
@@ -174,6 +175,23 @@ export const lang = {
     copygrid: "Duplicate the grid into annother grid",
     movegrid: "Move the grid into annother book",
     reusegrid: "Reuse the grid into annother book (editing in one book will edit in the other)",
+    shortcuts: {
+      toggleDefinition: "Changes a normal cell into a Definition cell and vice versa.",
+      exitDefinition: "Goes to the next cell when you are in a definition cell (like the arrows in normal cells).",
+      horizontalSplit: "Adds an horizontal stroke to the current cell, indicating a dash or a spcace in the word.",
+      verticalSplit: "Adds an horizontal stroke to the current cell, indicating a dash or a spcace in the word.",
+      changeMode: "Changes the mode of the editor (Free, Check, Heatmap).",
+    }
+  },
+  preferences: {
+    hotkeys: "Shortcuts",
+    shortcuts: {
+      toggleDefinition: "Toggle definition",
+      exitDefinition: "Exit definition",
+      horizontalSplit: "Add horizontal space in a cell",
+      verticalSplit: "Add vertical scape in a cell",
+      changeMode: "Change mode",
+    }
   },
   home: {
     nav: {

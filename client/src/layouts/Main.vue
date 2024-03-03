@@ -87,12 +87,13 @@ const locale = ref(i18n.global.locale);
 const nav = ref<MenuOption[]>([]);
 const router = useRouter();
 const showLeftDrawer = ref(false);
-const { onResize, cleanupUseResponsive, screenSize } = useResponsive();
+const { cleanupUseResponsive, screenSize } = useResponsive();
 const collapsed = ref(true);
 const switchingLocale = ref(false);
 const props = withDefaults(
   defineProps<{
-    showLoginButton?: boolean; leftPanelWidth?: number;
+    showLoginButton?: boolean;
+    leftPanelWidth?: number;
     leftPanelScroll?: boolean;
   }>(),
   {

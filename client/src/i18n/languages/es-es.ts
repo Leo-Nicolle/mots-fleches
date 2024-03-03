@@ -10,6 +10,7 @@ export const lang = {
         fonts: "Fuentes",
         book: "Libro",
         books: "Libros",
+        preferences: "Preferencias",
     },
     buttons: {
         changeLanguage: "Cambiar idioma",
@@ -174,6 +175,23 @@ export const lang = {
         copygrid: "Copiar la cuadrícula en otra cuadrícula",
         movegrid: "Mover la cuadrícula en otro libro",
         reusegrid: "Reutilizar la cuadrícula en otro libro (editar en un libro editará en el otro)",
+        shortcuts: {
+            toggleDefinition: "Cambiar una celda normal a una celda de definición y viceversa.",
+            exitDefinition: "Ir a la siguiente celda cuando esté en una celda de definición (como las flechas en las celdas normales).",
+            horizontalSplit: "Añade una línea horizontal a la celda actual, indicando un guión o un espacio en la palabra.",
+            verticalSplit: "Añade una línea vertical a la celda actual, indicando un guión o un espacio en la palabra.",
+            changeMode: "Cambia el modo del editor (Libre, Verificación, Probabilidad).",
+        }
+    },
+    preferences: {
+        hotkeys: "Atajos",
+        shortcuts: {
+            toggleDefinition: "Cambiar una celda a definición",
+            exitDefinition: "Salir de la celda de definición",
+            horizontalSplit: "Añadir espacio horizontal en una celda",
+            verticalSplit: "Añadir espacio vertical en una celda",
+            changeMode: "Cambiar de modo",
+        }
     },
     home: {
         nav: {
