@@ -11,7 +11,6 @@
         {{ elt.family }}
       </span>
     </template>
-    <template #card-body="{ elt, i }"> </template>
   </Layout>
 </template>
 
@@ -25,6 +24,7 @@ import { api } from "../api";
 import { onMounted, ref } from "vue";
 import { Font } from "database";
 import { loadFont } from "../components/fonts/load-font";
+import { postEvent } from "../js/telemetry";
 
 const fonts = ref<Font[]>([]);
 const selected = ref<Font[]>([]);
@@ -40,6 +40,7 @@ function getFonts() {
   });
 }
 function onUpload(filesContents: [string, string][]) {
+  postEvent("create-font");
   return Promise.all(
     filesContents.map(([filename, dataURL]) => {
       const family = filename

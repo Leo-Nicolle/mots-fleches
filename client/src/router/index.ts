@@ -1,6 +1,6 @@
 import { createRouter, createWebHashHistory, createWebHistory, RouteRecordRaw } from 'vue-router';
 import { api } from '../api';
-import { trackPageview } from '../js/plausible';
+import { trackPageview } from '../js/telemetry';
 
 const routes: Array<RouteRecordRaw> = [
   {

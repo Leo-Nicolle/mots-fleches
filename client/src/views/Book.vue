@@ -48,6 +48,7 @@ import { workerController } from "../worker";
 import BookButtons from "../components/sidebars/BookButtons.vue";
 import GridCopyModal from "../components/modals/GridCopyModal.vue";
 import { Book } from "database";
+import { postEvent } from "../js/telemetry";
 /**
  * View to display all grids in a grid layout
  */
@@ -108,11 +109,13 @@ function fetch() {
 }
 
 function onDelete() {
+  postEvent('delete-grid');
   const ids = selected.value.map((grid) => grid.id);
   return api.deleteGrids(ids)
     .then(() => fetch());
 }
 function download() {
+  postEvent('download-grids');
   const toDl = selected.value.length ? selected.value : grids.value;
   const a = document.createElement("a");
   const file = new Blob([JSON.stringify(toDl)], { type: "text/plain" });
@@ -122,6 +125,7 @@ function download() {
 }
 
 function onUpload(filesContents: [string, string][]) {
+  postEvent('upload-grids');
   return Promise.all(
     filesContents.map(([filename, json]) => {
       return Promise.all(
@@ -133,6 +137,7 @@ function onUpload(filesContents: [string, string][]) {
   ).then(() => fetch());
 }
 function createGrid() {
+  postEvent('create-grid');
   const newGrid = new Grid(10, 10);
   newGrid.title = "Nouvelle Grille";
   workerController

@@ -23,6 +23,7 @@
 <script setup lang="ts">
 import { computed, defineProps, onMounted, ref, toRaw, watch } from "vue";
 import { api } from "../../api";
+import { postEvent } from "../../js/telemetry";
 /**
  * Component to add and delete words
  * Also has a list of all the words
@@ -48,12 +49,14 @@ function getWords() {
 }
 function onAddKeyup(evt: KeyboardEvent) {
   if (evt.code !== "Enter") return;
+  postEvent('create-word');
   api.db.pushWord(toRaw(value.value)).then(() => {
     getWords();
   });
 }
 function onDeleteKeyup(evt: KeyboardEvent) {
   if (evt.code !== "Enter") return;
+  postEvent('delete-word');
   api.db.deleteWord(toRaw(value.value)).then(() => {
     getWords();
   });

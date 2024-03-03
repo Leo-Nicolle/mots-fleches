@@ -22,6 +22,7 @@ import { defineProps, onMounted, ref, toRaw, watch } from "vue";
 import throttle from "lodash.throttle";
 import { api } from "../../api";
 import { workerController } from "../../worker";
+import { postEvent } from "../../js/telemetry";
 /**
  * Component to add and delete words
  * Also has a list of all the words
@@ -65,26 +66,18 @@ function getWords() {
 }
 function onAddKeyup(evt: KeyboardEvent) {
   if (evt.code !== "Enter") return;
+  postEvent('ban-word');
   api.db.pushBannedWord(toRaw(value.value)).then(() => {
     getWords();
   });
 }
 function unban(word: string) {
+  postEvent('unban-word');
   api.db.deleteBannedWord(word).then(() => {
     getWords();
   });
 }
 
-// const options = computed(() => {
-//   return words.value
-//     .filter((w) => w.startsWith(value.value))
-//     .map((suffix) => {
-//       return {
-//         label: suffix,
-//         value: suffix,
-//       };
-//     });
-// });
 </script>
 
 <style scoped>

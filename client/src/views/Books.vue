@@ -29,6 +29,7 @@ import {
 import { v4 as uuid } from "uuid";
 import { api } from "../api";
 import { Book } from "database";
+import { postEvent } from "../js/telemetry";
 /**
  * View to display all grids in a grid layout
  */
@@ -47,11 +48,13 @@ function fetch() {
 }
 
 function onDelete() {
+  postEvent('delete-book');
   return Promise.all(
     selected.value.map((grid) => api.db.deleteBook(grid.id))
   ).then(() => fetch());
 }
 function createBook() {
+  postEvent('create-book');
   const newBook: Book = {
     id: uuid(),
     created: Date.now(),

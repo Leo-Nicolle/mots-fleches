@@ -38,6 +38,7 @@ import ExportOptionsForm from "../forms/ExportOptions.vue";
 import { Grid, GridStyle, SolutionStyle, nullCell } from "grid";
 import { ref, defineProps, watch, nextTick } from "vue";
 import { ExportOptions, defaultExportOptions } from "../../types";
+import { postEvent } from "../../js/telemetry";
 
 const props = defineProps<{
   grids: Grid[];
@@ -54,7 +55,7 @@ const visible = ref(false);
 function print() {
   const svgGrid = document.querySelector(".exporter svg");
   if (!svgGrid) return;
-
+  postEvent('export-svg-grid');
   let promise = Promise.resolve();
   for (let i = 0; i < props.grids.length; i++) {
     promise = promise

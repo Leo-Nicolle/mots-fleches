@@ -28,9 +28,11 @@ import BannedWords from "../components/forms/BannedWords.vue";
 import UploadModal from "../components/modals/UploadModal.vue";
 import { api } from "../api";
 import { ref } from "vue";
+import { postEvent } from "../js/telemetry";
 const mode = ref<'words' | 'bannedWords'>('words');
 const version = ref(0);
 function download() {
+  postEvent("download-words");
   api.db.getWords().then((words) => {
     const a = document.createElement("a");
     const file = new Blob([JSON.stringify(words)], { type: "text/plain" });
@@ -40,6 +42,7 @@ function download() {
   });
 }
 function onUpload(filesContents: [string, string][]) {
+  postEvent("upload-words");
   return Promise.all(
     filesContents.map(([filename, json]) => {
       return Promise.all(
