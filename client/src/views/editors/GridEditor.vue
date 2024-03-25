@@ -23,7 +23,7 @@ function fetch() {
     .getGrid(route.params.id as string)
     .then((g) => {
       grid.value = g!;
-      return api.db.getStyle(grid.value!.styleId);
+      return api.db.getStyle(route.params.style as string || 'default');
     })
     .then((opts) => {
       style.value = opts;
