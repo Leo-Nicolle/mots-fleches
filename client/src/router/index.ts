@@ -25,7 +25,7 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/Books.vue')
   },
   {
-    path: '/grid/:id',
+    path: '/grid/:id/:style',
     name: 'grid',
     component: () => import('../views/editors/GridEditor.vue')
   },
