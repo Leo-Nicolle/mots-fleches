@@ -1,12 +1,12 @@
 <template>
   <span class="formatpicker">
     <h3>{{ $t("forms.format") }}</h3>
-    <n-form-item :label="$t('forms.format')" path="fomat.name">
+    <n-form-item :label="$t('forms.format')" path="format.name">
       <n-select v-model:value="format" :options="options" />
     </n-form-item>
-    <!-- <n-form-item label="Orientation" path="fomat.orientation">
-        <n-select v-model:value="value.orientation" :options="orientations" />
-      </n-form-item> -->
+    <n-form-item :label="$t('forms.orientation')" path="format.orientation">
+      <n-select v-model:value="orientation" :options="orientations" />
+    </n-form-item>
     <n-form-item :label="$t('forms.width')" path="format.width">
       <n-input-number role="format-width" v-model:value="value.width" />
     </n-form-item>
@@ -19,14 +19,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps, defineEmits, computed, watchEffect } from "vue";
+import { ref, defineProps, defineEmits, computed, watchEffect, toRaw, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import { useModel } from "../../js/useModel";
 import { Format } from "grid";
 import MarginForm from "./MarginForm.vue";
 /**
  * Form to edit paper format and margins
  */
-
 const props = defineProps<{
   /** The format to edit */
   modelValue: Format;
@@ -37,7 +37,7 @@ const emit = defineEmits<{
    */
   (event: "update:modelValue", value: Format): void;
 }>();
-
+const i18n = useI18n();
 const options = ref([
   {
     label: "A5",
@@ -59,17 +59,23 @@ const options = ref([
 
 const orientations = ref([
   {
-    label: "Portrait",
+    label: i18n.t('forms.portrait'),
     value: "portrait",
   },
   {
-    label: "Paysage",
-    value: "paysage",
+    label: i18n.t('forms.landscape'),
+    value: "landscape",
   },
 ]);
 
-function decompose(format: string) {
-  return format.split("x").map((e) => +e);
+
+function getWH(format: string, orientation: string) {
+  if (format === "custom") return [props.modelValue.height, props.modelValue.width];
+  const [w, h] = format.split("x").map((e) => +e);
+  if (orientation === "portrait") {
+    return [Math.min(w, h), Math.max(w, h)];
+  }
+  return [Math.max(w, h), Math.min(w, h)];
 }
 /**
  * The format selected
@@ -80,7 +86,7 @@ const format = computed({
     const height = props.modelValue.height;
     const option =
       options.value.find((o) => {
-        const [h, w] = decompose(o.value);
+        const [w, h] = getWH(o.value, orientation.value);
         if (w === width && h === height) return true;
       }) ||
       (options.value.find((o) => o.value === "custom") as {
@@ -90,18 +96,30 @@ const format = computed({
     return option.value;
   },
   set: (format) => {
-    const lengths =
-      format === "custom"
-        ? [props.modelValue.height, props.modelValue.width]
-        : decompose(format);
-    if (format === "portrait") {
-      lengths.sort((a, b) => a - b);
-    } else if (format === "paysage") {
-      lengths.sort((a, b) => b - a);
-    }
-    const [height, width] = lengths;
+    console.log("Set", format, orientation.value);
+    const [width, height] = getWH(format, orientation.value);
     emit("update:modelValue", {
-      ...props.modelValue,
+      ...toRaw(props.modelValue),
+      width,
+      height,
+    });
+  },
+});
+
+const orientation = computed({
+  get: () => {
+    const width = props.modelValue.width;
+    const height = props.modelValue.height;
+    return width > height ? "landscape" : "portrait";
+  },
+  set: (orientation) => {
+    const w = props.modelValue.width;
+    const h = props.modelValue.height;
+    const width = orientation === "portrait" ? Math.min(w, h) : Math.max(w, h);
+    const height = orientation === "portrait" ? Math.max(w, h) : Math.min(w, h);
+
+    emit("update:modelValue", {
+      ...toRaw(props.modelValue),
       width,
       height,
     });
@@ -115,6 +133,7 @@ const value = useModel<Format>(props, emit);
 .sizeinput {
   display: flex;
 }
+
 .n-base-selection-label {
   min-width: 72px;
 }

@@ -114,6 +114,9 @@ export const lang = {
         mode: 'Modo',
         target: "Objetivo Cuadrícula",
         addWords: 'Añadir palabras',
+        orientation: "Orientación",
+        portrait: "Vertical",
+        landscape: "Horizontal",
     },
     tooltips: {
         incomplete: "esta incompleto",

@@ -115,6 +115,9 @@ export const lang = {
         mode: 'Mode',
         target: "Livre Cible",
         addWords: 'Ajouter des mots',
+        orientation: "Orientation",
+        portrait: "Portrait",
+        landscape: "Paysage",
     },
     tooltips: {
         incomplete: "est incomplet",
