@@ -1,13 +1,13 @@
 <template>
   <div v-if="grids && solutionStyle">
     <FontLoader :value="solutionStyle.grids.gridN" />
-    <Paper v-for="(gs, i) in gridsPerPage" :key="i" :format="solutionStyle.paper" :showMargins="exportOptions.margins"
+    <Paper v-for="(gs, i) in gridsPerPage" :key="i" :format="printFormat" :showMargins="exportOptions.margins"
       :page-number="page + i" :showPagination="exportOptions.pagination" :pagination="solutionStyle.pagination">
       <div class="grids">
         <div v-for="(grid, j) in gs" :key="j" class="grid-c">
           <span class="gridN">{{ j + solutionStyle.pagination.startIdx }}</span>
-          <SVGGrid :grid="grid" :focus="nullCell" dir="horizontal" :style="solutionStyle" :export-options="exportOptions"
-            :export-style="exportOptions" />
+          <SVGGrid :grid="grid" :focus="nullCell" dir="horizontal" :style="solutionStyle"
+            :export-options="exportOptions" :export-style="exportOptions" />
         </div>
       </div>
     </Paper>
@@ -19,7 +19,7 @@ import { defineProps, defineEmits } from "vue";
 import SVGGrid from "./svg-renderer/Grid.vue";
 import Paper from "./Paper.vue";
 import FontLoader from "./fonts/FontLoader.vue";
-import { Grid, nullCell, SolutionStyle } from "grid";
+import { Format, Grid, nullCell, SolutionStyle } from "grid";
 import { computed } from "vue";
 import { ExportOptions } from "../types";
 import { getFont } from "../js/useFont";
@@ -44,11 +44,14 @@ const props = defineProps<{
    * What to export
    */
   exportOptions: ExportOptions;
+
+  format?: Format;
   /**
    * number of the first page
    */
   page: number;
 }>();
+const printFormat = computed(() => props.format || props.solutionStyle.paper);
 const rows = computed(() => {
   if (!props.solutionStyle) return "";
   return `repeat(${props.solutionStyle.grids.rows},0)`;

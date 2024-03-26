@@ -1,11 +1,10 @@
 <template>
   <div v-if="grids && solutionStyle">
-
     <FontLoader :value="solutionStyle.grids.gridN" />
     <FontLoader :value="solutionStyle.words" />
-    <Paper v-for="(words, i) in layout.wordsPerPage" :key="i" :format="solutionStyle.paper"
-      :showMargins="exportOptions.margins" :showPagination="exportOptions.pagination" :pageNumber="page + i"
-      :pagination="solutionStyle.pagination" bodyClass="body-index">
+    <Paper v-for="(words, i) in layout.wordsPerPage" :key="i" :format="printFormat" :showMargins="exportOptions.margins"
+      :showPagination="exportOptions.pagination" :pageNumber="page + i" :pagination="solutionStyle.pagination"
+      bodyClass="body-index">
       <span class="words" ref="wordsContainer">
         <span v-for="(word, j) in words" :class="typeof word === 'number' ? 'size' : 'word'" :key="word">
           {{ word }}
@@ -13,7 +12,8 @@
       </span>
     </Paper>
     <Teleport to="#outside">
-      <Paper class="paper ruler" :format="solutionStyle.paper" :showMargins="true" :showPagination="true" :pageNumber="1">
+      <Paper class="paper ruler" :format="solutionStyle.paper" :showMargins="true" :showPagination="true"
+        :pageNumber="1">
         <span class="words ruler" ref="ruler"> </span>
       </Paper>
     </Teleport>
@@ -22,7 +22,7 @@
 
 <script setup lang="ts">
 import { defineProps, ref, defineEmits, watch } from "vue";
-import { Grid, getAllWords, SolutionStyle } from "grid";
+import { Grid, getAllWords, SolutionStyle, Format } from "grid";
 import { computed } from "vue";
 import Paper from "./Paper.vue";
 import FontLoader from "./fonts/FontLoader.vue";
@@ -47,13 +47,14 @@ const props = defineProps<{
    * The styles to render list
    */
   solutionStyle: SolutionStyle;
+  format?: Format;
   page: number;
 }>();
 
 const emit = defineEmits<{
   (event: "pageCount", value: number): void;
 }>();
-
+const printFormat = computed(() => props.format || props.solutionStyle.paper);
 const wordFont = computed(() => getFont(props.solutionStyle.words));
 const wordsColor = computed(() => props.solutionStyle.words.color);
 const sizeFont = computed(() => getFont(props.solutionStyle.size));
