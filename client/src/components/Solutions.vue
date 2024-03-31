@@ -2,7 +2,8 @@
   <div v-if="grids && solutionStyle">
     <FontLoader :value="solutionStyle.grids.gridN" />
     <Paper v-for="(gs, i) in gridsPerPage" :key="i" :format="printFormat" :showMargins="exportOptions.margins"
-      :page-number="page + i" :showPagination="exportOptions.pagination" :pagination="solutionStyle.pagination">
+      :page-number="page + i" :showPagination="exportOptions.pagination" body-full-height
+      :pagination="solutionStyle.pagination">
       <div class="grids">
         <div v-for="(grid, j) in gs" :key="j" class="grid-c">
           <span class="gridN">{{ j + solutionStyle.pagination.startIdx }}</span>
@@ -54,11 +55,15 @@ const props = defineProps<{
 const printFormat = computed(() => props.format || props.solutionStyle.paper);
 const rows = computed(() => {
   if (!props.solutionStyle) return "";
-  return `repeat(${props.solutionStyle.grids.rows},0)`;
+  const r = props.solutionStyle.grids.rows;
+  const percent = Math.floor(100 / r);
+  return `repeat(${r}, ${percent}%)`;
 });
 const cols = computed(() => {
   if (!props.solutionStyle) return "";
-  return `repeat(${props.solutionStyle.grids.cols},0)`;
+  const r = props.solutionStyle.grids.cols;
+  const percent = Math.floor(100 / r);
+  return `repeat(${r}, ${percent}%)`;
 });
 const gridNFont = computed(() => getFont(props.solutionStyle.grids.gridN));
 const gridNColor = computed(() => {
