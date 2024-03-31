@@ -8,7 +8,7 @@
 <script setup lang="ts">
 import { defineProps, computed, ref, onMounted } from "vue";
 import router from "../router";
-import { trackEvent, trackEventP } from "../js/plausible";
+import { postEvent } from "../js/telemetry";
 /**
  * Component to print. It uses an iframe to print the page.
  *
@@ -47,7 +47,7 @@ onMounted(() => {
       iframe.contentWindow.postMessage('print', '*');
     }
     else if (data === 'print-done') {
-      trackEventP("print", {
+      postEvent("print", {
         props: {
           length: props.query.ids.split(',').length,
           route: props.route,

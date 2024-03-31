@@ -1,5 +1,6 @@
 import { createRouter, createWebHashHistory, createWebHistory, RouteRecordRaw } from 'vue-router';
 import { api } from '../api';
+import { trackPageview } from '../js/telemetry';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -117,13 +118,24 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from) => {
+
+  try {
+    if (to.name) {
+      trackPageview({
+        url: to.name
+      });
+    }
+  } catch (e) {
+    console.error(e);
+  }
+
   const isSignedin = await api.isSignedIn();
-  // if (
-  //   !isSignedin &&
-  //   to.meta.requiresAuth !== false
-  // ) {
-  //   return { name: 'login', query: { redirect: to.name } };
-  // }
+  if (
+    !isSignedin &&
+    to.meta.requiresAuth !== false
+  ) {
+    return { name: 'login', query: { redirect: to.name } };
+  }
 });
 
 export default router;

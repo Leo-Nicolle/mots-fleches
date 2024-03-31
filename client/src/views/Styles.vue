@@ -37,6 +37,7 @@ import StyleModal from "../components/modals/StyleModal.vue";
 import { api } from "../api";
 import { computed } from "vue";
 import { v4 as uuid } from "uuid";
+import { postEvent } from "../js/telemetry";
 /**
  * View to display all styles in a grid layout
  */
@@ -69,6 +70,7 @@ function fetch() {
     });
 }
 function onDelete() {
+  postEvent(mode.value === 'solution' ? 'delete-solution-style' : 'delete-style');
   return api.deleteStyles(selected.value.map((style) => style.id)).then(() => fetch());
 }
 function getLink(style: GridStyle | SolutionStyle) {
@@ -79,6 +81,7 @@ function getLink(style: GridStyle | SolutionStyle) {
 }
 
 function createStyle() {
+  postEvent(mode.value === 'solution' ? 'create-solution-style' : 'create-style');
   const newStyle = structuredClone(mode.value === 'style'
     ? defaultStyles
     : defaultSolutionStyle);

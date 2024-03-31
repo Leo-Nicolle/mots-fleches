@@ -1,12 +1,12 @@
 import Plausible, { EventOptions } from 'plausible-tracker';
 
 export const plausible = Plausible({
-  hashMode: true,
-  trackLocalhost: true,
+  hashMode: false,
+  trackLocalhost: false,
   apiHost: 'https://motsflex.com/plausible'
 });
 
-function trackEventP(eventName: string, options?: EventOptions) {
+function postEvent(eventName: string, options?: EventOptions) {
   return new Promise((resolve, reject) => {
     plausible.trackEvent(eventName, {
       callback: resolve,
@@ -15,4 +15,4 @@ function trackEventP(eventName: string, options?: EventOptions) {
   });
 }
 const { trackEvent, trackPageview, } = plausible;
-export { trackEvent, trackPageview, trackEventP };
+export { trackEvent, trackPageview, postEvent };

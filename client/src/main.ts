@@ -5,7 +5,6 @@ import VueHighlightJS from 'vue3-highlightjs';
 import 'highlight.js/styles/monokai.css';
 import { i18n } from './i18n';
 import router from './router';
-import { plausible } from './js/plausible';
 
 const app = createApp(App)
   .use(router)
@@ -14,4 +13,3 @@ const app = createApp(App)
   .use(i18n);
 
 app.mount('#app');
-plausible.enableAutoPageviews();
