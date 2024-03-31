@@ -42,12 +42,14 @@ function fetch() {
     : api.getGrids().then((gs) => {
       grids.value = gs;
     });
+  const solutionId = route.query.solution as string || 'solution';
+  const styleId = route.query.style as string || 'default';
   return promise
-    .then(() => api.db.getStyle("solution"))
+    .then(() => api.db.getStyle(solutionId))
     .then((solutions) => {
       solutionStyle.value = solutions as SolutionStyle;
     })
-    .then(() => api.db.getStyle("default"))
+    .then(() => api.db.getStyle(styleId))
     .then((s) => {
       style.value = s as GridStyle;
     })
@@ -97,4 +99,3 @@ onUnmounted(() => {
   top: 20px;
 }
 </style>
-

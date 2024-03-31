@@ -49,6 +49,10 @@ const props = defineProps<{
    * Class to add to the body
    */
   bodyClass?: string;
+  /**
+   * Wether body takes full height or not
+   */
+  bodyFullHeight?: boolean;
   pageNumber?: number;
   showPagination: boolean;
   pagination?: PaginationStyle;
@@ -96,6 +100,25 @@ const padding = computed(() => {
   const { top, left, right, bottom } = props.format.margin;
   return [top, right, bottom, left].map((m) => `${m}cm`).join(" ");
 });
+const maxHeight = computed(() => {
+  const p = props.pagination;
+  const mb = p ? p.margin.bottom : 'null';
+  const ms = p ? p.size : 'null';
+  const { top, bottom } = props.format.margin;
+  const toRemove = [
+    `${top}cm`,
+    `${bottom}cm`,
+    `${mb}`,
+    `${ms}`
+  ]
+    .filter(e => e !== 'null')
+    .join(' - ');
+  return `calc(${pageHeight.value} - ${toRemove})`;
+});
+const height = computed(() => {
+  return props.bodyFullHeight ? maxHeight.value : "unset";
+
+});
 const formatStyle = computed(() => {
   if (!props.format) return "";
   return `${props.format.width}cm ${props.format.height}cm`;
@@ -138,7 +161,8 @@ body {
       flex-direction: column;
       align-items: center;
       justify-content: space-around;
-      height: 100%;
+      max-height: v-bind(maxHeight);
+      height: v-bind(height);
       width: 100%;
     }
 

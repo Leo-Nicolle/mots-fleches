@@ -1,6 +1,6 @@
 <template>
   <Layout v-if="style && solutionsStyle" :eltList="grids" :onCreate="createGrid" :onDelete="onDelete"
-    :getLink="(grid) => `/grid/${grid.id}`" @select="(s) => (selected = s)" :has-create-button="true"
+    :getLink="(grid) => `/grid/${grid.id}/${style.id}`" @select="(s) => (selected = s)" :has-create-button="true"
     :has-delete-button="true">
     <template v-slot:left-panel>
       <BookButtons v-if="isBook && book" :style="style" :solutionsStyle="solutionsStyle" :selected="selectedIds"
@@ -60,7 +60,16 @@ const solutionsStyle = ref<SolutionStyle>();
 const selected = ref<Grid[]>([]);
 const thumbnails = ref<string[]>([]);
 const exportQuery = computed(() => {
-  const res = { ids: selected.value.map((s) => s.id).join(",") };
+  const ids = (selected.value.length ? selected.value : grids.value)
+    .map(g => g.id)
+    .join(',');
+  const style = book.value ? book.value.style : 'default';
+  const solution = book.value ? book.value.solutionStyle : 'solution';
+  const res = {
+    ids,
+    style,
+    solution
+  };
   return res;
 });
 const isBook = computed(() => route.name === 'book');

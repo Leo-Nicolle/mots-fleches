@@ -1,19 +1,21 @@
 <template>
   <div v-if="grids && solutionStyle">
-
+    <!-- <button @click="refresh"> Refresh</button> -->
     <FontLoader :value="solutionStyle.grids.gridN" />
     <FontLoader :value="solutionStyle.words" />
-    <Paper v-for="(words, i) in layout.wordsPerPage" :key="i" :format="solutionStyle.paper"
-      :showMargins="exportOptions.margins" :showPagination="exportOptions.pagination" :pageNumber="page + i"
-      :pagination="solutionStyle.pagination" bodyClass="body-index">
-      <span class="words" ref="wordsContainer">
+    <Paper v-for="(words, i) in layout.wordsPerPage" :key="i" :format="printFormat" :showMargins="exportOptions.margins"
+      :showPagination="exportOptions.pagination" :pageNumber="page + i" :pagination="solutionStyle.pagination"
+      bodyClass="body-index">
+      <span class="words" ref="wordsContainer"
+        :style="i === layout.wordsPerPage.length - 1 ? { height: `${layout.lastPageHeight}px` } : null">
         <span v-for="(word, j) in words" :class="typeof word === 'number' ? 'size' : 'word'" :key="word">
           {{ word }}
         </span>
       </span>
     </Paper>
     <Teleport to="#outside">
-      <Paper class="paper ruler" :format="solutionStyle.paper" :showMargins="true" :showPagination="true" :pageNumber="1">
+      <Paper class="paper ruler" :format="solutionStyle.paper" :showMargins="true" :showPagination="true"
+        :pageNumber="1" :pagination="solutionStyle.pagination">
         <span class="words ruler" ref="ruler"> </span>
       </Paper>
     </Teleport>
@@ -22,7 +24,7 @@
 
 <script setup lang="ts">
 import { defineProps, ref, defineEmits, watch } from "vue";
-import { Grid, getAllWords, SolutionStyle } from "grid";
+import { Grid, getAllWords, SolutionStyle, Format } from "grid";
 import { computed } from "vue";
 import Paper from "./Paper.vue";
 import FontLoader from "./fonts/FontLoader.vue";
@@ -47,20 +49,20 @@ const props = defineProps<{
    * The styles to render list
    */
   solutionStyle: SolutionStyle;
+  format?: Format;
   page: number;
 }>();
 
 const emit = defineEmits<{
   (event: "pageCount", value: number): void;
 }>();
-
+const printFormat = computed(() => props.format || props.solutionStyle.paper);
 const wordFont = computed(() => getFont(props.solutionStyle.words));
 const wordsColor = computed(() => props.solutionStyle.words.color);
 const sizeFont = computed(() => getFont(props.solutionStyle.size));
 const sizeColor = computed(() => props.solutionStyle.size.color);
-const layout = ref<{ wordsPerPage: (number | string)[][]; heights: string[]; }>({
+const layout = ref<{ wordsPerPage: (number | string)[][]; lastPageHeight?: number; }>({
   wordsPerPage: [],
-  heights: [],
 });
 const columnGap = 10;
 const gap = computed(() => `${columnGap}px`);
@@ -80,9 +82,29 @@ function nodesBSStart(
   return start;
 }
 
+function findHeightLastPage(ruler: HTMLDivElement, maxWidth: number,) {
+  let start = 0;
+  let end = ruler.getBoundingClientRect().height;
+  const lastChild = ruler.lastElementChild as HTMLDivElement;
+  while (start <= end) {
+    const middle = (start + end) >>> 1;
+    ruler.style.height = `${middle}px`;
+    const { x, width } = lastChild.getBoundingClientRect();
+    const right = x + width;
+    if (right < maxWidth) {
+      end = middle - 1;
+    }
+    else {
+      start = middle + 1;
+    }
+  }
+  ruler.style.height = ``;
+  return start;
+}
+
 function refresh() {
   if (!props.grids || !ruler.value) {
-    layout.value = { wordsPerPage: [], heights: [] };
+    layout.value = { wordsPerPage: [] };
     return;
   }
   const words = Array.from(getAllWords(props.grids))
@@ -118,24 +140,23 @@ function refresh() {
         allTexts.push(word);
       });
     });
-
-  // find the first node outside boundaries: 
-  const nodes = Array.from(r.children) as HTMLDivElement[];
-  const maxX = nodes[nodes.length - 1].getBoundingClientRect().x;
-  const pages = Math.ceil(maxX / W);
-  const indexes = [0];
   const wordsPerPage = [];
-  for (let i = 0; i < pages; i++) {
-    indexes.push(nodesBSStart(nodes, 0, nodes.length - 1, startX + (i + 1) * W - tolerance));
-    wordsPerPage.push(allTexts.slice(indexes[i], indexes[i + 1]));
+  let offset = 0;
+  let lastPageHeight = 0;
+  while (r.children.length) {
+    const nodes = Array.from(r.children) as HTMLDivElement[];
+    const lastIndex = nodesBSStart(nodes, 0, nodes.length - 1, startX + W - tolerance);
+    wordsPerPage.push(allTexts.slice(offset, offset + lastIndex));
+    if (lastIndex === nodes.length) {
+      lastPageHeight = findHeightLastPage(r, startX + W - tolerance);
+    }
+    offset += lastIndex;
+    nodes.slice(0, lastIndex).forEach(n => r.removeChild(n));
   }
-  if (indexes[indexes.length - 1] < allTexts.length - 1) {
-    wordsPerPage.push(wordsPerPage.slice(indexes.length - 1));
-  }
-  // r.innerHTML = "";
+  r.innerHTML = "";
   layout.value = {
     wordsPerPage,
-    heights: ['100%']
+    lastPageHeight
   };
   emit('pageCount', wordsPerPage.length);
 }
@@ -187,8 +208,6 @@ props.exportOptions], () => {
   left: 0;
   z-index: 1000;
 }
-
-.words.ruler {}
 
 .size {
   font: v-bind(sizeFont);

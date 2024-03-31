@@ -2,9 +2,9 @@
   <div class="book" v-if="grids && style && solutionStyle">
     <GridPaper v-for="(grid, i) in grids" :key="grid.id" :grid="grid" :style="style" :exportOptions="gridExport"
       :pagination="solutionStyle.pagination" :page="solutionStyle.pagination.startIdx + i" />
-    <IndexPaper :grids="grids" :solutionStyle="solutionStyle" :exportOptions="solutionExport"
+    <IndexPaper :grids="grids" :solutionStyle="solutionStyle" :format="style.paper" :exportOptions="solutionExport"
       :page="solutionStyle.pagination.startIdx + grids.length" @pageCount="evt => indexPages = evt" />
-    <SolutionPaper :grids="grids" :solutionStyle="solutionStyle" :exportOptions="solutionExport"
+    <SolutionPaper :grids="grids" :solutionStyle="solutionStyle" :format="style.paper" :exportOptions="solutionExport"
       :page="solutionStyle.pagination.startIdx + grids.length + indexPages" />
   </div>
 </template>
@@ -61,7 +61,7 @@ const solutionExport = computed(() => ({
     splits: false,
     spaces: false,
     definitions: false,
-    cellsBackground: false
+    cellsBackground: false,
   },
   ...props.exportOptions,
 }));
