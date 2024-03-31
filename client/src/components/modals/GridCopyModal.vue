@@ -13,8 +13,8 @@
           <InfoPopup>
             <div class="gridcopyinfo">
               <span v-for="action in actions" :key="action"><b>{{ $t(`forms.${action}`) }}</b>: {{
-                $t(`help.${action}grid`)
-              }}<br /></span>
+    $t(`help.${action}grid`)
+  }}<br /></span>
             </div>
           </InfoPopup>
         </n-form-item>
@@ -80,8 +80,6 @@ function save() {
     visible.value = false;
     return Promise.resolve();
   }
-
-  Vue.$plausible.trackEvent('download', { props: { method: 'HTTP' } });
 
   return Promise.resolve()
     .then(() => {
