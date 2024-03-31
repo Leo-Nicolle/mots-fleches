@@ -61,7 +61,7 @@ const solutionExport = computed(() => ({
     splits: false,
     spaces: false,
     definitions: false,
-    cellsBackground: false
+    cellsBackground: false,
   },
   ...props.exportOptions,
 }));

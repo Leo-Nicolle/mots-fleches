@@ -1,19 +1,8 @@
 <template>
-  <Paper
-    :format="style.paper"
-    :showMargins="exportOptions.margins"
-    :showPagination="!!exportOptions.pagination"
-    :pagination="pagination"
-    :pageNumber="page"
-  >
-    <SVGGrid
-      v-if="grid && style"
-      :grid="grid"
-      :focus="nullCell"
-      dir="horizontal"
-      :style="style"
-      :export-options="exportOptions"
-    />
+  <Paper :format="style.paper" :showMargins="exportOptions.margins" :showPagination="!!exportOptions.pagination"
+    :pagination="pagination" :pageNumber="page" body-full-height>
+    <SVGGrid v-if="grid && style" :grid="grid" :focus="nullCell" dir="horizontal" :style="style"
+      :export-options="exportOptions" />
   </Paper>
 </template>
 
@@ -44,5 +33,4 @@ const props = defineProps<{
 }>();
 </script>
 
-<style lang="less">
-</style>
+<style lang="less"></style>
