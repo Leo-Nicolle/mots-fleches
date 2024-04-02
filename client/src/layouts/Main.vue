@@ -11,6 +11,15 @@
         <!-- @slot Slot for element in the left of the header  -->
         <slot name="header"> </slot>
       </span>
+      <n-breadcrumb v-if="breadcrumbs">
+        <n-breadcrumb-item clickable key="home" href="#/">
+          <n-icon>
+            <HomeOutline />
+          </n-icon>
+        </n-breadcrumb-item>
+        <n-breadcrumb-item v-for="b in breadcrumbs" :clickable="b.to !== undefined" :to="b.to" :key="b.text"
+          :href="b.to">{{ b.text }}</n-breadcrumb-item>
+      </n-breadcrumb>
       <span class="right">
         <n-popselect v-model:value="locale" :options="localeOptions">
           <n-button :type="switchingLocale ? 'warning' : ''">
@@ -58,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-import { MenuOutline } from "@vicons/ionicons5";
+import { HomeOutline, MenuOutline } from "@vicons/ionicons5";
 import LoaderIcon from "../components/LoaderIcon.vue";
 import type { MenuOption } from "naive-ui";
 import {
@@ -82,6 +91,7 @@ import { workerController } from "../worker";
 import { useResponsive } from "../js/useResponsive";
 import "keyboard-css";
 import { api } from "../api";
+import { Breadcrumbs } from "../types";
 window.api = api;
 const locale = ref(i18n.global.locale);
 const nav = ref<MenuOption[]>([]);
@@ -94,6 +104,7 @@ const props = withDefaults(
   defineProps<{
     showLoginButton?: boolean; leftPanelWidth?: number;
     leftPanelScroll?: boolean;
+    breadcrumbs?: Breadcrumbs;
   }>(),
   {
     showLoginButton: true,
@@ -197,6 +208,17 @@ function getNavChildren() {
           { default: () => i18n.global.t("nav.about") }
         ),
       key: "go-to-about",
+    },
+    {
+      label: () =>
+        h(
+          RouterLink,
+          {
+            to: "/changelog",
+          },
+          { default: () => i18n.global.t("nav.changelog") }
+        ),
+      key: "go-to-changelog",
     },
   ];
 }

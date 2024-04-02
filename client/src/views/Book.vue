@@ -1,7 +1,8 @@
 <template>
-  <Layout v-if="style && solutionsStyle" :eltList="grids" :onCreate="createGrid" :onDelete="onDelete"
-    :getLink="(grid) => `/grid/${grid.id}/${style.id}`" @select="(s) => (selected = s)" :has-create-button="true"
-    :has-delete-button="true">
+  <Layout v-if="style && solutionsStyle"
+    :breadcrumbs="isBook ? [{ text: $t('nav.books'), to: '#/books' }, { text: book!.title }] : [{ text: $t('nav.grids') }]"
+    :eltList="grids" :onCreate="createGrid" :onDelete="onDelete" :getLink="(grid) => `/grid/${grid.id}/${style.id}`"
+    @select="(s) => (selected = s)" :has-create-button="true" :has-delete-button="true">
     <template v-slot:left-panel>
       <BookButtons v-if="isBook && book" :style="style" :solutionsStyle="solutionsStyle" :selected="selectedIds"
         v-model="book" @update="fetch" />

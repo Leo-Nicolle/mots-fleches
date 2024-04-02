@@ -10,6 +10,7 @@ export const lang = {
         fonts: "Polices",
         book: "Livre",
         books: "Livres",
+        changelog: "Changelog",
     },
     buttons: {
         changeLanguage: "Traduire",
