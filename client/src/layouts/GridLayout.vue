@@ -1,5 +1,5 @@
 <template>
-  <Layout>
+  <Layout :breadcrumbs="breadcrumbs">
     <template v-slot:left-panel>
       <!-- @slot Slot to add elements within left panel  -->
       <slot name="left-panel"></slot>
@@ -25,10 +25,10 @@
               <!-- @slot Slot for element title  -->
               <slot name="card-title" :elt="elt" :i="i"> </slot>
               <n-checkbox class="checkbox" @click="(evt) => {
-                evt.preventDefault();
-                evt.stopPropagation();
-              }
-                " v-model:checked="selected[i]">
+    evt.preventDefault();
+    evt.stopPropagation();
+  }
+    " v-model:checked="selected[i]">
               </n-checkbox>
             </span>
           </template>
@@ -45,11 +45,11 @@
         <n-modal preset="dialog" :title="`${$t('buttons.delete')} ?`" :showIcon="false" v-model:show="deleteVisible">
           <template #action>
             <n-button @click="deleteVisible = false">{{
-              $t("buttons.no")
-            }}</n-button>
+    $t("buttons.no")
+  }}</n-button>
             <n-button @click="onDel" type="warning">{{
-              $t("buttons.yes")
-            }}</n-button>
+    $t("buttons.yes")
+              }}</n-button>
           </template>
         </n-modal>
       </div>
@@ -68,6 +68,7 @@ import {
 } from "vue";
 import { AddCircleOutline as AddIcon } from "@vicons/ionicons5";
 import Layout from "./Main.vue";
+import { Breadcrumbs } from "../types";
 
 /**
  * Component used to display a list of elements in a grid layout.
@@ -98,6 +99,7 @@ const props = defineProps<{
    * link to open when element is clicked
    */
   getLink?: (elt: any) => string;
+  breadcrumbs?: Breadcrumbs;
 }>();
 const selected = ref<boolean[]>([]);
 const selectedElements = computed(() =>
@@ -220,4 +222,3 @@ watch(selectedElements, () => {
   transform: scale(5);
 }
 </style>
-

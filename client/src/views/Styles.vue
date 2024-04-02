@@ -1,6 +1,7 @@
 <template>
-  <Layout v-if="styles.length" :eltList="elements" :onCreate="createStyle" :onDelete="onDelete" :has-create-button="true"
-    :has-delete-button="true" :getLink="getLink" @select="(s) => (selected = s)">
+  <Layout v-if="styles.length" :breadcrumbs="[{ text: $t('nav.styles') }]" :eltList="elements" :onCreate="createStyle"
+    :onDelete="onDelete" :has-create-button="true" :has-delete-button="true" :getLink="getLink"
+    @select="(s) => (selected = s)">
     <template v-slot:left-panel>
       <n-tabs v-model:value="mode" type="card">
         <n-tab-pane name="style" :tab="$t('nav.styles')">
@@ -111,4 +112,3 @@ onMounted(() => {
   max-width: 295px;
 }
 </style>
-

@@ -1,5 +1,5 @@
 <template>
-  <Layout @scroll="onScroll" :left-panel-scroll="highlightMode !== 'autofill'">
+  <Layout :breadcrumbs="breadcrumbs" @scroll="onScroll" :left-panel-scroll="highlightMode !== 'autofill'">
     <template #left-panel>
       <span class="title">
         <h2>
@@ -43,10 +43,10 @@
         <div class="superpose">
           <SVGGrid @focus="(cell) => (focus = cell)" @hover="(cell) => (hoveredCell = cell)" :grid="grid" :focus="focus"
             :dir="dir" :style="style" :zoom="1 / zoom" class="svg-grid" :export-options="{
-              ...defaultExportOptions,
-              texts: true,
-              highlight: true,
-            }"></SVGGrid>
+    ...defaultExportOptions,
+    texts: true,
+    highlight: true,
+  }"></SVGGrid>
           <GridHighlight :grid="grid" :style="style" :cell="hoveredCell" :cellProbas="cellProbas" :zoom="zoom"
             :mode="highlightMode" :offset="offset" :dir="dir" @update="onGridUpdate" />
           <GridInput :grid="grid" :dir="dir" :style="style" :cell="focus" :offset="offset" :zoom="zoom"
@@ -87,7 +87,7 @@ import {
 import Layout from "../layouts/Main.vue";
 import SVGGrid from "./svg-renderer/Grid.vue";
 import GridInput from "./svg-renderer/GridInput.vue";
-import { defaultExportOptions, Method, Mode, Ordering } from "../types";
+import { Breadcrumbs, defaultExportOptions, Method, Mode, Ordering } from "../types";
 import GridModal from "./modals/GridModal.vue";
 import Autofill from "./sidebars/Autofill.vue";
 import GridHighlight from "./svg-renderer/GridHighlight.vue";
@@ -95,6 +95,9 @@ import Suggestion from "./sidebars/Suggestion.vue";
 import Definition from './sidebars/Definition.vue';
 import Buttons from './sidebars/Buttons.vue';
 import { workerController } from "../worker";
+import { useRouter } from "vue-router";
+import { api } from "../api";
+import { useI18n } from "vue-i18n";
 /**
  * Component to edit a grid
  */
@@ -107,6 +110,9 @@ const props = defineProps<{
 const emit = defineEmits<{
   (event: "update"): void;
 }>();
+const i18n = useI18n();
+const breadcrumbs = ref<Breadcrumbs>([]);
+const router = useRouter();
 const grid = defineModel<Grid>({ required: true });
 const dir = ref<Direction>("horizontal");
 const focus = ref<Cell>(nullCell);
@@ -173,6 +179,22 @@ onMounted(() => {
   computeOffset(null);
   workerController.checkGrid(grid.value);
   throttledRefresCellProba();
+  const prev = router.options.history.state.back as string;
+  if (prev.startsWith('/book')) {
+    api.db.getBook(prev.split('/')[2]).then((book) => {
+      if (!book) return;
+      breadcrumbs.value = [
+        { text: i18n.t('nav.books'), to: `#/books` },
+        { text: book?.title, to: `#/book/${book.id}` },
+        { text: grid.value.title }
+      ];
+    });
+  } else {
+    breadcrumbs.value = [
+      { text: i18n.t('nav.grids'), to: `#/grids` },
+      { text: grid.value.title }
+    ];
+  }
 });
 
 onBeforeUnmount(() => { });

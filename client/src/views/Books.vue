@@ -1,6 +1,7 @@
 <template>
-  <Layout :eltList="books" :onCreate="createBook" :onDelete="onDelete" :getLink="(book) => `/book/${book.id}`"
-    @select="(s) => (selected = s)" :has-create-button="true" :has-delete-button="true">
+  <Layout :breadcrumbs="[{ text: $t('nav.books') }]" :eltList="books" :onCreate="createBook" :onDelete="onDelete"
+    :getLink="(book) => `/book/${book.id}`" @select="(s) => (selected = s)" :has-create-button="true"
+    :has-delete-button="true">
     <template v-slot:left-panel>
       <h3>{{ $t("nav.books") }}</h3>
     </template>

@@ -1,6 +1,6 @@
 <template>
-  <Layout v-if="fonts" :eltList="fonts" :onDelete="onDelete" @select="(s) => (selected = s)" :has-create-button="false"
-    :has-delete-button="true">
+  <Layout v-if="fonts" :breadcrumbs="[{ text: $t('nav.fonts') }]" :eltList="fonts" :onDelete="onDelete"
+    @select="(s) => (selected = s)" :has-create-button="false" :has-delete-button="true">
     <template v-slot:left-panel>
       <UploadModal :title="$t('titles.newFont')" :buttonText="$t('buttons.create')" :readAsDataURL="true" :single="true"
         @ok="onUpload" />
@@ -72,4 +72,3 @@ function onDelete() {
   text-align: center;
 }
 </style>
-
