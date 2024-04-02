@@ -1,3 +1,7 @@
+### 02/04/2023
+
+Added changelog page and added breadcrumb.
+
 ### 31/03/2023
 
 Fixed print rendering for words index:
