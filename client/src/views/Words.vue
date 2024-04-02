@@ -1,5 +1,5 @@
 <template>
-  <Layout :left-panel-width="300">
+  <Layout :breadcrumbs="[{ text: $t('nav.words') }]" :left-panel-width="300">
     <template v-slot:left-panel>
       <n-tabs v-model:value="mode" type="card">
         <n-tab-pane name="words" :tab="$t('forms.myWords')">
@@ -59,4 +59,3 @@ function onUpload(filesContents: [string, string][]) {
   margin: 1em 0 0 1em;
 }
 </style>
-

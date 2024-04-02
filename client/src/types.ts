@@ -13,7 +13,7 @@ export type ExportOptions = {
   spaces: boolean;
   fills: boolean;
   pagination: boolean;
-}
+};
 
 export const defaultExportOptions: ExportOptions = {
   outerBorders: true,
@@ -34,13 +34,16 @@ export type Rect = {
   y: number;
   width: number;
   height: number;
-}
+};
 export type Handle = {
   top: string;
   left: string;
   index: number;
   dirs: ArrowDir[];
-}
+};
 export type Ordering = 'best' | 'alpha' | 'inverse-alpha' | 'random';
 export type Method = 'simple' | 'accurate';
 export type Mode = "normal" | "check" | "heatmap" | "autofill";
+
+
+export type Breadcrumbs = { text: string, to?: string; }[];

@@ -110,6 +110,11 @@ const routes: Array<RouteRecordRaw> = [
     name: 'fonts',
     component: () => import('../views/Fonts.vue')
   },
+  {
+    path: '/changelog',
+    name: 'changelog',
+    component: () => import('../views/Changelog.vue')
+  },
 ];
 
 const router = createRouter({
