@@ -23,7 +23,6 @@
         <n-form-item :label="$t('forms.solutionStyles')" path="book.solutionStyle">
           <n-select v-model:value="book.solutionStyle" :options="solutionStyles" :loading="loading"
             :defaultValue="book.solutionStyle" filterable />
-          />
         </n-form-item>
         <n-form-item :label="$t('forms.comment')" path="book.comment">
           <n-input type="textarea" v-model:value="book.comment" placeholder="comment" :autosize="{
