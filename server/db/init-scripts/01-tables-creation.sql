@@ -1,19 +1,4 @@
 -- ============================
--- Users Table
--- ============================
-CREATE TABLE Users (
-    id SERIAL PRIMARY KEY,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW(),
-    last_connection TIMESTAMP,            
-    status VARCHAR(20) DEFAULT 'active',
-    disk_usage BIGINT DEFAULT 0,          
-    tier_id INTEGER DEFAULT 1,            
-    FOREIGN KEY (tier_id) REFERENCES Tiers(id)
-);
-
--- ============================
 -- Tiers (Paying Tiers) Table
 -- ============================
 CREATE TABLE Tiers (
@@ -23,8 +8,23 @@ CREATE TABLE Tiers (
     max_users INTEGER DEFAULT 1,
     max_grids INTEGER,
     max_custom_words INTEGER,
-    max_disk_usage BIGINT DEFAULT 104857600, -- Limite d'espace disque (par défaut 100 Mo)
-    features JSONB -- Stocke des options 
+    max_disk_usage BIGINT DEFAULT 104857600,
+    features JSONB
+);
+
+-- ============================
+-- Users Table
+-- ============================
+CREATE TABLE Users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    last_connection TIMESTAMP,
+    status VARCHAR(20) DEFAULT 'active',
+    disk_usage BIGINT DEFAULT 0,
+    tier_id INTEGER DEFAULT 1,
+    FOREIGN KEY (tier_id) REFERENCES Tiers(id)
 );
 
 -- ============================
@@ -36,9 +36,9 @@ CREATE TABLE Groups (
     description TEXT,
     created_at TIMESTAMP DEFAULT NOW(),
     owner_id INTEGER NOT NULL,
-    disk_usage BIGINT DEFAULT 0,              -- Utilisation actuelle du disque (en octets)
-    tier_id INTEGER DEFAULT 1,                -- Niveau de l'abonnement du groupe
-    expires_at TIMESTAMP,                     -- Date d'expiration de l'abonnement
+    disk_usage BIGINT DEFAULT 0,
+    tier_id INTEGER DEFAULT 1,
+    expires_at TIMESTAMP,
     FOREIGN KEY (owner_id) REFERENCES Users(id) ON DELETE CASCADE,
     FOREIGN KEY (tier_id) REFERENCES Tiers(id)
 );
@@ -49,7 +49,7 @@ CREATE TABLE Groups (
 CREATE TABLE GroupMembers (
     user_id INTEGER NOT NULL,
     group_id INTEGER NOT NULL,
-    role VARCHAR(20) DEFAULT 'member', -- Rôles: 'admin', 'member'
+    role VARCHAR(20) DEFAULT 'member',
     PRIMARY KEY (user_id, group_id),
     FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE,
     FOREIGN KEY (group_id) REFERENCES Groups(id) ON DELETE CASCADE
@@ -62,8 +62,8 @@ CREATE TABLE Crosswords (
     id SERIAL PRIMARY KEY,
     content TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW(), -- Pour détecter les conflits
-    version INTEGER DEFAULT 1,          -- Pour l'optimistic locking
+    updated_at TIMESTAMP DEFAULT NOW(),
+    version INTEGER DEFAULT 1,
     user_id INTEGER,
     group_id INTEGER,
     FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE SET NULL,
@@ -108,8 +108,8 @@ CREATE TABLE WordLists (
     name VARCHAR(255) NOT NULL,
     words JSONB NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW(), -- Pour détecter les conflits
-    version INTEGER DEFAULT 1,          -- Pour l'optimistic locking
+    updated_at TIMESTAMP DEFAULT NOW(),
+    version INTEGER DEFAULT 1,
     user_id INTEGER,
     group_id INTEGER,
     FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE SET NULL,
@@ -153,7 +153,7 @@ CREATE TABLE Payments (
     amount DECIMAL(10, 2) NOT NULL,
     status VARCHAR(20) DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT NOW(),
-    payment_for VARCHAR(20) DEFAULT 'user', -- 'user' ou 'group'
+    payment_for VARCHAR(20) DEFAULT 'user',
     FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE SET NULL,
     FOREIGN KEY (group_id) REFERENCES Groups(id) ON DELETE SET NULL
 );

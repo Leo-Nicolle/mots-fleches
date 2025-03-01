@@ -39,6 +39,7 @@ services:
   # Adminer service - Run only in development
   adminer:
     image: adminer
+    container_name: crosswords-adminer
     restart: unless-stopped
     ports:
       - ${ADMINER_PORT}:8080
