@@ -1,26 +1,21 @@
 import express from 'express';
-import { config } from 'dotenv';
-import passport from 'passport';
-import path from 'path';
-import paymentsRouter from './routes/payments';
+import config from './services/env';
+// import paymentsRouter from './routes/payments';
 import authRouter from './routes/auth';
 import secureRouter from './routes/secure';
 import helmet from './config/helmet';
+import passport from './config/passport';
 // Load .env from parent directory
-config({ path: path.resolve(__dirname, '..', '.env') });
-
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = config.port || 3000;
 
 helmet(app);
-app.use(passport.initialize());
+passport(app);
 
 app.use(express.json());
-app.use(passport.initialize());
-
 app.use('/api/auth', authRouter);
 app.use('/api/secure', secureRouter);
-app.use('/api/payments', paymentsRouter);
+// app.use('/api/payments', paymentsRouter);
 
 app.get('/', (req, res) => {
   res.send('Welcome to the Crosswords API!');

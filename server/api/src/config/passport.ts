@@ -1,28 +1,35 @@
 import passport from 'passport';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
-import { config } from 'dotenv';
-import path from 'path';
+import { type Express } from 'express';
+import prisma from '../prisma';
+import config from '../services/env';
 
-config({ path: path.resolve(__dirname, '..', '.env.jwt') });
-
-const JWT_SECRET = process.env.JWT_SECRET as string;
-
-const opts = {
+const options = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: JWT_SECRET,
+  secretOrKey: config.auth.jwtSecret,
 };
 
 passport.use(
-  new JwtStrategy(opts, async (payload, done) => {
+  new JwtStrategy(options, async (payload, done) => {
     try {
-      // Replace with a real database lookup
-      const user = { id: payload.userId, email: 'user@example.com' }; // Mock user
-      if (user) return done(null, user);
-      return done(null, false);
+      // Fetch user from the database using Prisma
+      const user = await prisma.users.findUnique({
+        where: { id: payload.userId },
+      });
+
+      if (!user) {
+        return done(null, false);
+      }
+
+      // Attach user to request object
+      return done(null, user);
     } catch (error) {
+      console.error('Error fetching user:', error);
       return done(error, false);
     }
   })
 );
 
-export default passport;
+export default function setupAuth(app: Express) {
+  app.use(passport.initialize());
+}

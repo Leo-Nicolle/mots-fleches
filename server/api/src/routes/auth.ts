@@ -11,14 +11,14 @@ router.post('/register', async (req: Request, res: Response) => {
     return;
   }
 
-  const existingUser = await prisma.user.findUnique({ where: { email } });
+  const existingUser = await prisma.users.findUnique({ where: { email } });
   if (existingUser) {
     res.status(409).json({ error: 'User already exists' });
     return;
   }
 
   const hashedPassword = await hashPassword(password);
-  const newUser = await prisma.user.create({
+  const newUser = await prisma.users.create({
     data: {
       email,
       password: hashedPassword,
@@ -32,7 +32,7 @@ router.post('/register', async (req: Request, res: Response) => {
 
 router.post('/login', async (req: Request, res: Response) => {
   const { email, password } = req.body;
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await prisma.users.findUnique({ where: { email } });
 
   if (!user || !(await verifyPassword(password, user.password))) {
     res.status(401).json({ error: 'Invalid credentials' });

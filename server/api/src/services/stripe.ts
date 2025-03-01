@@ -1,21 +1,19 @@
 import Stripe from 'stripe';
-import path from 'path';
-import { config } from 'dotenv';
-
-config({ path: path.resolve(__dirname, '..', '.env.stripe') });
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
+import { getProductById } from './products';
+import './env';
+import config from './env';
+const stripe = new Stripe(config.stripe.secretKey as string, {
   apiVersion: '2022-11-15',
 });
 
-export const createCustomer = async (email: string) => {
-  return await stripe.customers.create({ email });
-};
+export const createPaymentIntent = async (productId: string) => {
+  const product = getProductById(productId);
+  if (!product) throw new Error('Invalid product ID');
 
-export const createPaymentIntent = async (amount: number, currency: string) => {
   return await stripe.paymentIntents.create({
-    amount,
-    currency,
+    amount: product.price,
+    currency: product.currency,
+    description: product.name,
     payment_method_types: ['card'],
   });
 };

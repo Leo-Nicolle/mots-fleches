@@ -1,6 +1,6 @@
 import helmet from 'helmet';
+import { type Express } from 'express';
 import rateLimit from 'express-rate-limit';
-import './config/passport';
 
 export default function protect(app: Express) {
   // Security: HTTP headers
