@@ -110,24 +110,26 @@ model tiers {
 }
 
 model users {
-  id              Int            @id @default(autoincrement())
-  email           String         @unique @db.VarChar(255)
-  password        String
-  created_at      DateTime?      @default(now()) @db.Timestamp(6)
-  last_connection DateTime?      @db.Timestamp(6)
-  status          String?        @default("active") @db.VarChar(20)
-  disk_usage      BigInt?        @default(0)
-  tier_id         Int?           @default(1)
-  books           books[]
-  crosswords      crosswords[]
-  customwords     customwords[]
-  groupmembers    groupmembers[]
-  groups          groups[]
-  images          images[]
-  payments        payments[]
-  tiers           tiers?         @relation(fields: [tier_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  wordlists       wordlists[]
-  words           words[]
+  id                       Int            @id @default(autoincrement())
+  email                    String         @unique @db.VarChar(255)
+  password                 String
+  created_at               DateTime?      @default(now()) @db.Timestamp(6)
+  last_connection          DateTime?      @db.Timestamp(6)
+  status                   String?        @default("active") @db.VarChar(20)
+  disk_usage               BigInt?        @default(0)
+  tier_id                  Int?           @default(1)
+  refresh_token            String?
+  refresh_token_expires_at DateTime?      @db.Timestamp(6)
+  books                    books[]
+  crosswords               crosswords[]
+  customwords              customwords[]
+  groupmembers             groupmembers[]
+  groups                   groups[]
+  images                   images[]
+  payments                 payments[]
+  tiers                    tiers?         @relation(fields: [tier_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  wordlists                wordlists[]
+  words                    words[]
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -159,4 +161,10 @@ model words {
   users      users?  @relation(fields: [user_id], references: [id], onUpdate: NoAction)
 
   @@index([word], map: "idx_words_word")
+}
+
+model tokenblacklist {
+  id         Int      @id @default(autoincrement())
+  token      String
+  expires_at DateTime @db.Timestamp(6)
 }

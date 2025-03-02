@@ -1,4 +1,18 @@
-import { vi } from 'vitest';
+import { execSync } from 'child_process';
+import { PrismaClient } from '@prisma/client';
 
-// Mock prismaClient globally
-vi.mock('../src/prisma', () => import('./mocks/prisma'));
+const prisma = new PrismaClient();
+
+async function main() {
+  console.log('Resetting database...');
+  await prisma.$executeRaw`TRUNCATE TABLE "users" RESTART IDENTITY CASCADE;`;
+}
+
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

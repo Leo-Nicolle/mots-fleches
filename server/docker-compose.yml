@@ -3,14 +3,14 @@ version: "3.9"
 services:
   db:
     image: postgres
-    container_name: crosswords-postgres
+    container_name: ${CONTAINER_NAME}-db
     restart: unless-stopped
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data # Persistent data storage
+      - ${POSTGRES_DATA}
       - ./db/init-scripts:/docker-entrypoint-initdb.d:ro # Updated path for init scripts
     networks:
       - internal-network # Internal network for inter-service communication
@@ -22,7 +22,7 @@ services:
     build:
       context: ./api # Path to API source
       dockerfile: Dockerfile # Use the Dockerfile in the API directory
-    container_name: crosswords-api
+    container_name: ${CONTAINER_NAME}-api
     restart: unless-stopped
     environment:
       DB_HOST: ${DB_HOST}
@@ -39,7 +39,7 @@ services:
   # Adminer service - Run only in development
   adminer:
     image: adminer
-    container_name: crosswords-adminer
+    container_name: ${CONTAINER_NAME}-adminer
     restart: unless-stopped
     ports:
       - ${ADMINER_PORT}:8080
@@ -47,6 +47,7 @@ services:
       - internal-network
     profiles:
       - development # Run only in development
+      - test
 
 networks:
   internal-network:

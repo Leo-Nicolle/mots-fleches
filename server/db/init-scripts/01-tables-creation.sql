@@ -11,9 +11,8 @@ CREATE TABLE Tiers (
     max_disk_usage BIGINT DEFAULT 104857600,
     features JSONB
 );
-
 -- ============================
--- Users Table
+-- Users Table (Modified)
 -- ============================
 CREATE TABLE Users (
     id SERIAL PRIMARY KEY,
@@ -24,6 +23,8 @@ CREATE TABLE Users (
     status VARCHAR(20) DEFAULT 'active',
     disk_usage BIGINT DEFAULT 0,
     tier_id INTEGER DEFAULT 1,
+    refresh_token TEXT,                          -- Stores the latest refresh token
+    refresh_token_expires_at TIMESTAMP,           -- Stores expiration date of the refresh token
     FOREIGN KEY (tier_id) REFERENCES Tiers(id)
 );
 
@@ -159,9 +160,20 @@ CREATE TABLE Payments (
 );
 
 -- ============================
+-- TokenBlacklist Table
+-- ============================
+
+CREATE TABLE TokenBlacklist (
+    id SERIAL PRIMARY KEY,
+    token TEXT NOT NULL,
+    expires_at TIMESTAMP NOT NULL
+);
+
+-- ============================
 -- Indexes and Optimizations
 -- ============================
 CREATE INDEX idx_words_word ON Words(word);
 CREATE INDEX idx_customwords_word ON CustomWords(word);
 CREATE INDEX idx_wordlists_user ON WordLists(user_id);
 CREATE INDEX idx_wordlists_group ON WordLists(group_id);
+CREATE INDEX idx_tokens_token ON TokenBlacklist(token);
