@@ -12,15 +12,15 @@
       </span>
     </template>
     <template #footer>
-      <n-button class="login-btn" disabled type="primary" @click="emailLogin">{{
+      <n-button class="login-btn" type="primary" @click="emailLogin">{{
         $t("login.login")
-      }}</n-button>
-      <n-button class="login-btn" disabled type="info" @click="createAccount">{{
+        }}</n-button>
+      <n-button class="login-btn" type="info" @click="createAccount">{{
         $t("login.register")
-      }}</n-button>
+        }}</n-button>
       <n-button class="login-btn" type="primary" @click="localMode">{{
         $t("login.localMode")
-      }}</n-button>
+        }}</n-button>
     </template>
 
     <template #action>
@@ -62,19 +62,35 @@ async function login(method: string) {
   redirect();
 }
 async function emailLogin() {
-  const { data, error } = await api.supadb.supabase.auth.signInWithPassword({
-    email: email.value,
-    password: password.value,
-  });
-  if (error) {
+  try {
+    const { accessToken, refreshToken } = await api.remote.signin(
+      email.value,
+      password.value
+    );
+    localStorage.setItem("accessToken", accessToken);
+    localStorage.setItem("refreshToken", refreshToken);
+    api.mode = "remote";
+    redirect();
+  } catch (e) {
+    // console.log(e);
     alert.value = { type: "error", id: "wrongpassword" };
     setTimeout(() => {
       alert.value = false;
     }, 3000);
-  } else {
-    api.mode = "supadb";
-    redirect();
   }
+  // const { data, error } = await api.supadb.supabase.auth.signInWithPassword({
+  //   email: email.value,
+  //   password: password.value,
+  // });
+  // if (error) {
+  //   alert.value = { type: "error", id: "wrongpassword" };
+  //   setTimeout(() => {
+  //     alert.value = false;
+  //   }, 3000);
+  // } else {
+  //   api.mode = "supadb";
+  //   redirect();
+  // }
 }
 async function onForgotPassword() {
   const { data, error } = await api.supadb.supabase.auth.signInWithOtp({
@@ -120,4 +136,3 @@ async function localMode() {
   display: none;
 }
 </style>
-

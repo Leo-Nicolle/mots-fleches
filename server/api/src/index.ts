@@ -1,21 +1,33 @@
 import express from 'express';
+import cors from 'cors';
 import config from './services/env';
-// import paymentsRouter from './routes/payments';
+import paymentsRouter from './routes/payments';
+import webhookRouter from './routes/webhook';
 import authRouter from './routes/auth';
 import secureRouter from './routes/secure';
+import gridRouter from './routes/grid';
 import helmet from './config/helmet';
 import passport from './config/passport';
 // Load .env from parent directory
 const app = express();
 const PORT = config.port || 3000;
-
-helmet(app);
+// helmet(app);
 passport(app);
+if (config.mode === 'development') {
+  app.use(cors());
+}
 
+// Add this at the end of your middleware stack
+app.use((req, res, next) => {
+  console.log('Req:', req.url);
+  next();
+});
+app.use('/api', webhookRouter);
 app.use(express.json());
 app.use('/api/auth', authRouter);
 app.use('/api/secure', secureRouter);
-// app.use('/api/payments', paymentsRouter);
+app.use('/api/payments', paymentsRouter);
+app.use('/api/', gridRouter);
 
 app.get('/', (req, res) => {
   res.send('Welcome to the Crosswords API!');

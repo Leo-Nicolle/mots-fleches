@@ -34,10 +34,10 @@ export const lang = {
     here: "here",
   },
   errors: {
-    'no-horizontal-arrow': 'No horizontal arrow',
-    'no-vertical-arrow': 'No vertical arrow',
-    'incomplete-word': 'Incomplete word',
-    'no-definition': 'No definition found',
+    "no-horizontal-arrow": "No horizontal arrow",
+    "no-vertical-arrow": "No vertical arrow",
+    "incomplete-word": "Incomplete word",
+    "no-definition": "No definition found",
   },
   titles: {
     newFont: "New Font",
@@ -48,7 +48,7 @@ export const lang = {
   forms: {
     title: "Title",
     options: "Options",
-    default: 'Default',
+    default: "Default",
     solutions: "Solutions",
     gridSize: "Grid size",
     comment: "Comment",
@@ -63,7 +63,7 @@ export const lang = {
     texts: "Texts",
     highlight: "Highlight",
     splits: "Splits",
-    spaces: 'Spaces',
+    spaces: "Spaces",
     fills: "Fills",
     outBorderSize: "Border size",
     outBorderColor: "Border color",
@@ -78,11 +78,11 @@ export const lang = {
     height: "Height",
     margins: "Margins",
     margin: "Margin",
-    align: 'Alignment',
+    align: "Alignment",
     pagination: "Pagination",
     left: "Left",
-    center: 'Center',
-    startIndex: 'First page index',
+    center: "Center",
+    startIndex: "First page index",
     top: "Top",
     right: "Right",
     bottom: "Bottom",
@@ -107,14 +107,14 @@ export const lang = {
     styles: "Styles",
     solutionStyles: "Solution styles",
     lineSpacing: "Line spacing",
-    baselineShift: 'Baseline',
-    alignmentBaseline: 'Alignment',
+    baselineShift: "Baseline",
+    alignmentBaseline: "Alignment",
     copy: "Copy",
-    reuse: 'Reuse',
+    reuse: "Reuse",
     move: "Move",
-    mode: 'Mode',
+    mode: "Mode",
     target: "Target Book",
-    addWords: 'Add words',
+    addWords: "Add words",
     orientation: "Orientation",
     portrait: "Portrait",
     landscape: "Landscape",
@@ -123,9 +123,9 @@ export const lang = {
     incomplete: "is incomplete",
     nodef: "has no definition",
     noarrow: "has no arrow",
-    toomanyarrows: 'has too many arrows',
+    toomanyarrows: "has too many arrows",
     add: "Add {word} to dictionary",
-    loading: 'Loading...',
+    loading: "Loading...",
   },
   modals: {
     bookTitle: "Book",
@@ -136,7 +136,8 @@ export const lang = {
     wrongpassword: "Wrong password or email",
     passwordsdontmatch: "Passwords don't match",
     passwordtooshort: "Password too short, minimum 6 characters",
-    noGrid: "You don't have any grid yet, please create one before modify styles."
+    noGrid:
+      "You don't have any grid yet, please create one before modify styles.",
   },
   login: {
     title: "Login",
@@ -158,8 +159,9 @@ export const lang = {
   },
   sentemail: {
     title: "Email sent",
-    message: "An email has been sent to {email}. Please follow the instructions in the email to complete the registration process.",
-    redirect: 'Go to login page',
+    message:
+      "An email has been sent to {email}. Please follow the instructions in the email to complete the registration process.",
+    redirect: "Go to login page",
   },
   passwordreset: {
     title: "Reset password",
@@ -172,12 +174,50 @@ export const lang = {
     normal: "Free",
     check: "Check",
     heatmap: "Heatmap",
-
   },
   help: {
     copygrid: "Duplicate the grid into annother grid",
     movegrid: "Move the grid into annother book",
-    reusegrid: "Reuse the grid into annother book (editing in one book will edit in the other)",
+    reusegrid:
+      "Reuse the grid into annother book (editing in one book will edit in the other)",
+  },
+  plans: {
+    title: "Choose Your Plan",
+    confirmationTitle: "Confirm your choice",
+    proceedToPayment: "Proceed to payment",
+    confirmationMessage: "Are you sure of your choice?",
+    goBack: "Go back",
+    select: "Select Plan",
+    limits: {
+      grids: "Max grids",
+      custom_words: "Max words",
+      styles: "Max styles",
+      books: "Max books",
+      word_lists: "Max word lists",
+      max_list_size: "Max words per list",
+    },
+    billing: {
+      monthly: "Monthly",
+      yearly: "Yearly",
+    },
+  },
+  billing: {
+    title: "Billing Information",
+    billingDetails: "Billing Details",
+    paymentDetails: "Payment Details",
+    name: "Name",
+    email: "Email",
+    address: "Address",
+    city: "City",
+    zip: "ZIP Code",
+    cardNumber: "Card Number",
+    expiry: "Expiry Date",
+    cvc: "CVC",
+    requiredField: "This field is required",
+    invalidEmail: "Invalid email address",
+    invalidCardNumber: "Invalid card number",
+    invalidExpiry: "Invalid expiry date",
+    invalidCVC: "Invalid CVC",
   },
   home: {
     nav: {
@@ -202,16 +242,15 @@ export const lang = {
       why: "Why MotsFlex?",
       who: "Who is behind it?",
       contribute: "How to contribute?",
-      support: "Support MotsFlex"
+      support: "Support MotsFlex",
     },
     welcome: {
-      title: 'Welcome to MotsFlex!',
-      p: 'MotsFlex is an open source tool to help you create and print Crosswords',
+      title: "Welcome to MotsFlex!",
+      p: "MotsFlex is an open source tool to help you create and print Crosswords",
     },
     wcid: `MotsFlex is a Crosswords creation tool. It helps you filling up
             the grid with words, and then export it as a PDF file. It can even
-            generate words index and solution pages for you.`
-    ,
+            generate words index and solution pages for you.`,
     gridfilling: `MotsFlex has a powefull suggestion engine, which helps you filling
         up the grid without efforts. Everytime you modify the grid, it tries
         to find the words that fit the best into the grid, and proposes them
@@ -240,8 +279,7 @@ export const lang = {
     grideditor: {
       p: `The editor is the main part of MotsFlex. It has many features and
             shortcuts, which are listed below.`,
-      list:
-        `<li>
+      list: `<li>
                 <b>Turn a cell into definition:</b> Press
                 <kbd class="kbc-button">Esc</kbd>. Press again to turn it back
                 to a normal cell.
@@ -298,7 +336,7 @@ export const lang = {
             <b>Make the cells bigger/smaller when printing:</b> You will
             need to go to the Styles page, and change the
             <em>Cell size</em> property.
-          </li>`
+          </li>`,
     },
     customwords: `Just got to the <em>Words</em> page, and add your words. You can
         also delete them from there. You cannot modify the base
@@ -314,7 +352,7 @@ export const lang = {
         <em>score</ em >: The first words in the list will be less likely to
           block you.The second mode just suggest you words that fit in the
           grid.
-          `
+          `,
     },
     heatmap: `
     Everytime you change something in the grid, the heatmap is
@@ -336,7 +374,7 @@ export const lang = {
     >.`,
     langswitch: {
       one: `Just click on the`,
-      two: `icon on the top right of the screen and select the language you want.`
+      two: `icon on the top right of the screen and select the language you want.`,
     },
     about: `Mots flex is an Open Source project (MIT licence). You can find
     the code
@@ -373,6 +411,6 @@ export const lang = {
     for now MotsFlex is on the free tier, but if the number of users increase, I will have to pay
     for it. So if you want to support MotsFlex, you can: <a href="https://www.buymeacoffee.com/nicolleleo">Buy me a beer</a>. 
     I will drink it to your health!
-    `
-  }
+    `,
+  },
 };

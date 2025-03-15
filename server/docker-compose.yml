@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   db:
     image: postgres
@@ -16,6 +14,10 @@ services:
       - internal-network # Internal network for inter-service communication
     ports:
       - ${DB_PORT}
+    profiles:
+      - production
+      - development
+      - test
 
   # API service - Run only in production
   api:

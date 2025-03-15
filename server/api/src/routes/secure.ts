@@ -4,14 +4,13 @@ import { authMiddleware } from '../middleware/auth';
 const router = Router();
 
 router.get('/profile', authMiddleware, (req: Request, res: Response) => {
-  res.json({
+  res.status(200).json({
     message: 'This is a protected profile route!',
-    user: req.user,
   });
 });
 
 router.get('/settings', authMiddleware, (req: Request, res: Response) => {
-  res.json({
+  res.status(200).json({
     message: 'User settings',
     user: req.user,
   });

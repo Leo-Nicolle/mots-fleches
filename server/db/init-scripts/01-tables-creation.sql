@@ -1,21 +1,9 @@
 -- ============================
--- Tiers (Paying Tiers) Table
--- ============================
-CREATE TABLE Tiers (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
-    price DECIMAL(10, 2) NOT NULL,
-    max_users INTEGER DEFAULT 1,
-    max_grids INTEGER,
-    max_custom_words INTEGER,
-    max_disk_usage BIGINT DEFAULT 104857600,
-    features JSONB
-);
--- ============================
 -- Users Table (Modified)
 -- ============================
 CREATE TABLE Users (
     id SERIAL PRIMARY KEY,
+    stripe_id VARCHAR(255),
     email VARCHAR(255) UNIQUE NOT NULL,
     password TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
@@ -24,8 +12,7 @@ CREATE TABLE Users (
     disk_usage BIGINT DEFAULT 0,
     tier_id INTEGER DEFAULT 1,
     refresh_token TEXT,                          -- Stores the latest refresh token
-    refresh_token_expires_at TIMESTAMP,           -- Stores expiration date of the refresh token
-    FOREIGN KEY (tier_id) REFERENCES Tiers(id)
+    refresh_token_expires_at TIMESTAMP           -- Stores expiration date of the refresh token
 );
 
 -- ============================
@@ -40,8 +27,7 @@ CREATE TABLE Groups (
     disk_usage BIGINT DEFAULT 0,
     tier_id INTEGER DEFAULT 1,
     expires_at TIMESTAMP,
-    FOREIGN KEY (owner_id) REFERENCES Users(id) ON DELETE CASCADE,
-    FOREIGN KEY (tier_id) REFERENCES Tiers(id)
+    FOREIGN KEY (owner_id) REFERENCES Users(id) ON DELETE CASCADE
 );
 
 -- ============================
@@ -93,7 +79,19 @@ CREATE TABLE Words (
 CREATE TABLE CustomWords (
     id SERIAL PRIMARY KEY,
     word VARCHAR(255) NOT NULL,
-    definition TEXT,
+    user_id INTEGER,
+    group_id INTEGER,
+    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE SET NULL,
+    FOREIGN KEY (group_id) REFERENCES Groups(id) ON DELETE SET NULL,
+    CHECK (user_id IS NOT NULL OR group_id IS NOT NULL)
+);
+
+-- ============================
+-- BannedWords Table
+-- ============================
+CREATE TABLE BannedWords (
+    id SERIAL PRIMARY KEY,
+    word VARCHAR(255) NOT NULL,
     user_id INTEGER,
     group_id INTEGER,
     FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE SET NULL,
@@ -168,6 +166,29 @@ CREATE TABLE TokenBlacklist (
     token TEXT NOT NULL,
     expires_at TIMESTAMP NOT NULL
 );
+
+-- ============================
+-- Fonts Table
+-- ============================
+CREATE TABLE Fonts (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    file_url TEXT NOT NULL,
+    user_id INTEGER,
+    group_id INTEGER,
+    created_at TIMESTAMP DEFAULT NOW(),
+    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE SET NULL,
+    FOREIGN KEY (group_id) REFERENCES Groups(id) ON DELETE SET NULL,
+    CHECK (user_id IS NOT NULL OR group_id IS NOT NULL)
+);
+
+-- ============================
+-- Indexes for Fonts Table
+-- ============================
+CREATE INDEX idx_fonts_name ON Fonts(name);
+CREATE INDEX idx_fonts_user ON Fonts(user_id);
+CREATE INDEX idx_fonts_group ON Fonts(group_id);
+
 
 -- ============================
 -- Indexes and Optimizations

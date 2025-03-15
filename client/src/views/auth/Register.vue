@@ -8,16 +8,17 @@
         <n-input role="password" type="password" placeholder="password" v-model:value="password"></n-input>
       </n-form-item>
       <n-form-item :label="$t('register.confirmPassword')" path="password">
-        <n-input role="passwordcheck" type="password" placeholder="passwordcheck" v-model:value="passwordcheck"></n-input>
+        <n-input role="passwordcheck" type="password" placeholder="passwordcheck"
+          v-model:value="passwordcheck"></n-input>
       </n-form-item>
     </template>
     <template #footer>
       <n-button class="cancel-btn" type="info" @click="cancel">{{
         $t("register.cancel")
-      }}</n-button>
+        }}</n-button>
       <n-button class="register-btn" type="primary" @click="register">{{
         $t("register.send")
-      }}</n-button>
+        }}</n-button>
     </template>
   </Layout>
 </template>
@@ -35,29 +36,43 @@ const passwordcheck = ref<string>("");
 
 const { alert, setAlert } = useAlert();
 async function register(method: string) {
-  const { data, error } = await api.supadb.supabase.auth.signUp({
-    email: email.value,
-    password: password.value,
-  });
-  if (error) {
-    console.log(
-      "Error: ",
-      error.cause,
-      error.message,
-      error.name,
-      error.status
+  try {
+    await api.remote.register(
+      email.value,
+      password.value
     );
-    const id = error.message.includes(
-      "Password should be at least 6 characters"
-    )
-      ? "passwordtooshort"
-      : "wrongpassword";
+    api.mode = "remote";
+    router.push("/signin");
+  } catch (error) {
+    console.log(
+      "Error: ", error
+    );
 
-    return setAlert("error", id);
-  } else {
-    api.mode = "supadb";
-    router.push("/");
+    // return setAlert("error", id);
   }
+  // const { data, error } = await api.supadb.supabase.auth.signUp({
+  //   email: email.value,
+  //   password: password.value,
+  // });
+  // if (error) {
+  //   console.log(
+  //     "Error: ",
+  //     error.cause,
+  //     error.message,
+  //     error.name,
+  //     error.status
+  //   );
+  //   const id = error.message.includes(
+  //     "Password should be at least 6 characters"
+  //   )
+  //     ? "passwordtooshort"
+  //     : "wrongpassword";
+
+  //   return setAlert("error", id);
+  // } else {
+  //   api.mode = "supadb";
+  //   router.push("/");
+  // }
 }
 async function cancel() {
   router.push("/login");
@@ -69,4 +84,3 @@ async function cancel() {
   justify-content: space-between;
 }
 </style>
-

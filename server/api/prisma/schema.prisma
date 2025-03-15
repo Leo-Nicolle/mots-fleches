@@ -33,13 +33,12 @@ model crosswords {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model customwords {
-  id         Int     @id @default(autoincrement())
-  word       String  @db.VarChar(255)
-  definition String?
-  user_id    Int?
-  group_id   Int?
-  groups     groups? @relation(fields: [group_id], references: [id], onUpdate: NoAction)
-  users      users?  @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+  id       Int     @id @default(autoincrement())
+  word     String  @db.VarChar(255)
+  user_id  Int?
+  group_id Int?
+  groups   groups? @relation(fields: [group_id], references: [id], onUpdate: NoAction)
+  users    users?  @relation(fields: [user_id], references: [id], onUpdate: NoAction)
 
   @@index([word], map: "idx_customwords_word")
 }
@@ -63,9 +62,11 @@ model groups {
   disk_usage   BigInt?        @default(0)
   tier_id      Int?           @default(1)
   expires_at   DateTime?      @db.Timestamp(6)
+  bannedwords  bannedwords[]
   books        books[]
   crosswords   crosswords[]
   customwords  customwords[]
+  fonts        fonts[]
   groupmembers groupmembers[]
   users        users          @relation(fields: [owner_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   tiers        tiers?         @relation(fields: [tier_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -111,6 +112,7 @@ model tiers {
 
 model users {
   id                       Int            @id @default(autoincrement())
+  stripe_id                String?        @db.VarChar(255)
   email                    String         @unique @db.VarChar(255)
   password                 String
   created_at               DateTime?      @default(now()) @db.Timestamp(6)
@@ -120,9 +122,11 @@ model users {
   tier_id                  Int?           @default(1)
   refresh_token            String?
   refresh_token_expires_at DateTime?      @db.Timestamp(6)
+  bannedwords              bannedwords[]
   books                    books[]
   crosswords               crosswords[]
   customwords              customwords[]
+  fonts                    fonts[]
   groupmembers             groupmembers[]
   groups                   groups[]
   images                   images[]
@@ -167,4 +171,32 @@ model tokenblacklist {
   id         Int      @id @default(autoincrement())
   token      String
   expires_at DateTime @db.Timestamp(6)
+
+  @@index([token], map: "idx_tokens_token")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model bannedwords {
+  id       Int     @id @default(autoincrement())
+  word     String  @db.VarChar(255)
+  user_id  Int?
+  group_id Int?
+  groups   groups? @relation(fields: [group_id], references: [id], onUpdate: NoAction)
+  users    users?  @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model fonts {
+  id         Int       @id @default(autoincrement())
+  name       String    @unique @db.VarChar(255)
+  file_url   String
+  user_id    Int?
+  group_id   Int?
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  groups     groups?   @relation(fields: [group_id], references: [id], onUpdate: NoAction)
+  users      users?    @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+
+  @@index([group_id], map: "idx_fonts_group")
+  @@index([name], map: "idx_fonts_name")
+  @@index([user_id], map: "idx_fonts_user")
 }

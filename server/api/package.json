@@ -4,6 +4,8 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
+    "stripe-connect": "stripe listen --forward-to localhost:5480/api/webhook",
+    "predev": "docker compose --env-file ../.env --profile development restart",
     "dev": "nodemon --exec node -r esbuild-register src/index.ts",
     "type-check": "tsc --noEmit",
     "build": "npm run type-check && node esbuild.config.js",
@@ -12,8 +14,8 @@
     "start": "node dist/index.js",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write .",
-    "pretest": "docker compose --env-file test/.env.test --profile development restart",
-    "posttest": "docker compose --env-file test/.env.test --profile development down -v",
+    "pretest": "docker compose --env-file test/.env.test --profile test restart",
+    "posttest": "docker compose --env-file test/.env.test --profile test down -v",
     "test": "vitest run -c test/vitest.config.ts "
   },
   "keywords": [],
@@ -41,6 +43,7 @@
     "@types/node": "^22.13.8",
     "@types/passport-jwt": "^4.0.1",
     "@types/stripe": "^8.0.417",
+    "cors": "^2.8.5",
     "dotenv-cli": "^8.0.0",
     "esbuild": "^0.25.0",
     "esbuild-register": "^3.6.0",
