@@ -1,15 +1,11 @@
-import { createApp } from 'vue';
-import App from './App.vue';
-import naive from 'naive-ui';
-import VueHighlightJS from 'vue3-highlightjs';
-import 'highlight.js/styles/monokai.css';
-import { i18n } from './i18n';
-import router from './router';
+import { createApp } from "vue";
+import App from "./App.vue";
+import naive from "naive-ui";
+import VueHighlightJS from "vue3-highlightjs";
+import "highlight.js/styles/monokai.css";
+import { i18n } from "./i18n";
+import router from "./router";
 
-const app = createApp(App)
-  .use(router)
-  .use(VueHighlightJS)
-  .use(naive)
-  .use(i18n);
+const app = createApp(App).use(router).use(VueHighlightJS).use(naive).use(i18n);
 
-app.mount('#app');
+app.mount("#app");

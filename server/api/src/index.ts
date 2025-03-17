@@ -19,13 +19,15 @@ if (config.mode === 'development') {
 
 // Add this at the end of your middleware stack
 app.use((req, res, next) => {
-  console.log('Req:', req.url);
+  // res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Cross-Origin-Embedder-Policy', 'credentialless');
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
   next();
 });
 app.use('/api', webhookRouter);
 app.use(express.json());
 app.use('/api/auth', authRouter);
-app.use('/api/secure', secureRouter);
+app.use('/api', secureRouter);
 app.use('/api/payments', paymentsRouter);
 app.use('/api/', gridRouter);
 

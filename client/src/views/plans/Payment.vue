@@ -1,6 +1,15 @@
 <template>
   <div class="container">
-    <h1>{{ $t("billing.title") }}</h1>
+    <h1>{{ $t("billing.completeYourPurchase") }}</h1>
+
+    <!-- Plan Details Section -->
+    <div class="plan-details">
+      <h2>{{ props.plan.name }}</h2>
+      <p>
+        {{ formatPrice(props.plan.price, props.plan.currency) }}
+        ({{ props.plan.billing === 'yearly' ? $t("plans.billing.yearly") : $t("plans.billing.monthly") }})
+      </p>
+    </div>
 
     <form class="payment-form" @submit.prevent="handlePayment">
       <h3>{{ $t("billing.billingDetails") }}</h3>
@@ -36,31 +45,15 @@
       </n-form>
 
       <h3>{{ $t("billing.paymentDetails") }}</h3>
-      <n-form>
-        <n-form-item :label="$t('billing.cardNumber') + ' *'"
-          :feedback="!isCardNumberValid ? $t('billing.invalidCardNumber') : ''"
-          :validation-status="!isCardNumberValid ? 'error' : null">
-          <n-input v-model:value="formattedCardNumber" type="text" @input="formatCardNumber" maxlength="19"
-            placeholder="1234 5678 9012 3456" required />
-        </n-form-item>
-
-        <n-form-item :label="$t('billing.expiry') + ' *'" :feedback="!isExpiryValid ? $t('billing.invalidExpiry') : ''"
-          :validation-status="!isExpiryValid ? 'error' : null">
-          <n-input v-model:value="formatedExpiry" type="text" @input="validateExpiry" placeholder="MM/YY" required />
-        </n-form-item>
-
-        <n-form-item :label="$t('billing.cvc') + ' *'" :feedback="!isCVCValid ? $t('billing.invalidCVC') : ''"
-          :validation-status="!isCVCValid ? 'error' : null">
-          <n-input v-model:value="formatedCVC" type="text" @input="validateCVC" maxlength="4" required />
-        </n-form-item>
-      </n-form>
+      <div id="card-element" class="stripe-card-element"></div>
+      <div v-if="cardError" class="error">{{ cardError }}</div>
 
       <div class="actions">
-        <n-button type="primary" size="large" html-type="submit" :disabled="!isFormValid">
-          {{ $t("plans.proceedToPayment") }}
-        </n-button>
         <n-button size="large" @click="goBack">
           {{ $t("plans.goBack") }}
+        </n-button>
+        <n-button type="primary" size="large" attr-type="submit" :disabled="!isFormValid || isProcessing">
+          {{ isProcessing ? $t("billing.processing") : $t("plans.proceedToPayment") }}
         </n-button>
       </div>
     </form>
@@ -68,12 +61,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch } from "vue";
+import { ref, reactive, computed, onMounted } from "vue";
 import { defineProps, defineEmits } from "vue";
+import { loadStripe, Stripe, StripeElements } from "@stripe/stripe-js";
 import { NButton, NInput, NForm, NFormItem } from "naive-ui";
-import { Plan } from "database";
+import { api, Plan } from "database";
 
-const props = defineProps<{ plan: Plan }>();
+const props = defineProps<{ plan: Plan; publishableKey: string }>();
 const emit = defineEmits<{
   (event: "paymentCompleted", value: void): void;
   (event: "goBack", value: void): void;
@@ -87,99 +81,143 @@ const billingDetails = reactive({
   zip: "",
 });
 
-const paymentDetails = reactive({
-  cardNumber: "",
-  expiry: "",
-  cvc: "",
+const isEmailValid = computed(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(billingDetails.email));
+const isFormValid = computed(() => billingDetails.name && billingDetails.email && isEmailValid.value);
+
+const stripe = ref<Stripe | null>(null);
+const elements = ref<StripeElements | null>(null);
+const cardElement = ref(null);
+const cardError = ref("");
+const isProcessing = ref(false);
+
+onMounted(async () => {
+  api.remote.fetcher.get('/payments/billing-details')
+    .then(res => {
+      billingDetails.name = res.data.name || '';
+      billingDetails.email = res.data.email || '';
+      billingDetails.address = res.data.address || '';
+      billingDetails.city = res.data.city || '';
+      billingDetails.zip = res.data.zip || '';
+      console.log('data', res.data);
+    });
+  stripe.value = await loadStripe(props.publishableKey);
+  if (!stripe.value) {
+    console.error("Stripe failed to load");
+    return;
+  }
+
+  elements.value = stripe.value.elements();
+  cardElement.value = elements.value.create("card", {
+    hidePostalCode: true,
+    disableLink: true
+  });
+  cardElement.value.mount("#card-element");
 });
 
-// Computed formatted card number
-const formattedCardNumber = ref("");
-const formatedExpiry = ref("");
-const formatedCVC = ref("");
-// Validation states
-const isCardNumberValid = ref(true);
-const isExpiryValid = ref(true);
-const isCVCValid = ref(true);
-const isEmailValid = computed(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(billingDetails.email));
-
-// Computed property to check if the form is valid
-const isFormValid = computed(
-  () =>
-    billingDetails.name &&
-    billingDetails.email &&
-    isEmailValid.value &&
-    billingDetails.address &&
-    billingDetails.city &&
-    billingDetails.zip &&
-    isCardNumberValid.value &&
-    isExpiryValid.value &&
-    isCVCValid.value
-);
-
-// Format card number (add spaces every 4 digits)
-const formatCardNumber = (value: string) => {
-  paymentDetails.cardNumber = value
-    .replace(/\D/g, "").substring(0, 16);
-  formattedCardNumber.value = value.replace(/\D/g, "").replace(/(\d{4})/g, "$1 ").trim();
-  isCardNumberValid.value = paymentDetails.cardNumber.length === 16
-    && luhnCheck(paymentDetails.cardNumber);
-};
-
-// Validate expiry date (MM/YY format)
-const validateExpiry = (value: string) => {
-  // remove everything except digits
-  value = value.replace(/\D/g, "")
-    .slice(0, 4);
-  // add a slash after the first two digits
-  if (value.length >= 2) {
-    value = value.substring(0, 2) + "/" + value.substring(2);
-  }
-  const [month, year] = value.split("/").map((v) => parseInt(v, 10));
-  const now = new Date();
-  const currentYear = parseInt(now.getFullYear().toString().slice(-2), 10);
-  const currentMonth = now.getMonth() + 1;
-  formatedExpiry.value = value;
-  paymentDetails.expiry = value;
-  isExpiryValid.value =
-    /^[0-9]{2}\/[0-9]{2}$/.test(paymentDetails.expiry) &&
-    month >= 1 &&
-    month <= 12 &&
-    (year > currentYear || (year === currentYear && month >= currentMonth));
-};
-
-// Validate CVC (3 or 4 digits)
-const validateCVC = (value: string) => {
-  formatedCVC.value = value.replace(/\D/g, "").substring(0, 4);
-  paymentDetails.cvc = value.replace(/\D/g, "").substring(0, 4);
-  isCVCValid.value = /^[0-9]{3,4}$/.test(paymentDetails.cvc);
-};
-
-// Luhn algorithm for card number validation
-const luhnCheck = (num: string) => {
-  let sum = 0;
-  let shouldDouble = false;
-
-  for (let i = num.length - 1; i >= 0; i--) {
-    let digit = parseInt(num.charAt(i), 10);
-
-    if (shouldDouble) {
-      digit *= 2;
-      if (digit > 9) digit -= 9;
+const handlePayment = async () => {
+  try {
+    if (!isFormValid.value) {
+      console.error("Form is invalid");
+      return;
     }
 
-    sum += digit;
-    shouldDouble = !shouldDouble;
+    if (!stripe.value || !elements.value) {
+      console.error("Stripe is not initialized");
+      return;
+    }
+
+    isProcessing.value = true;
+
+    // Request Payment Intent from the backend
+    const { data } = await api.remote.fetcher.post("/payments/subscribe", {
+      productId: props.plan.productId,
+      planId: props.plan.planId,
+    });
+
+    if (!data?.client_secret) {
+      console.error("Missing client secret in response");
+      return;
+    }
+
+    const secret = data.client_secret;
+    // update custommer details
+    await api.remote.fetcher.post('/payments/billing-details', billingDetails);
+    // Confirm payment with Stripe Elements
+    const result = await stripe.value.confirmCardPayment(secret, {
+      payment_method: {
+        card: cardElement.value,
+        billing_details: {
+          name: billingDetails.name,
+          email: billingDetails.email,
+          address: {
+            line1: billingDetails.address,
+            city: billingDetails.city,
+            postal_code: billingDetails.zip,
+          },
+        },
+      },
+    });
+
+    if (result.error) {
+      cardError.value = result.error.message || "Payment failed";
+      console.error("Payment failed:", result.error.message);
+      isProcessing.value = false;
+      return;
+    }
+
+    if (result.paymentIntent?.status === "succeeded") {
+      console.log("Payment succeeded!");
+      emit("paymentCompleted");
+    } else {
+      console.error("Unexpected payment status:", result.paymentIntent?.status);
+    }
+  } catch (error) {
+    console.error("Error during payment:", error);
+  } finally {
+    isProcessing.value = false;
   }
-
-  return sum % 10 === 0;
-};
-
-const handlePayment = () => {
-  emit("paymentCompleted");
 };
 
 const goBack = () => {
   emit("goBack");
 };
+
+const formatPrice = (price: number, currency: string) => {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
+  }).format(price / 100); // Convert cents to dollars/euros
+};
 </script>
+
+<style scoped>
+.payment-form {
+  width: 300px;
+}
+
+.plan-details {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  background-color: #f9f9f9;
+}
+
+.actions {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.stripe-card-element {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.error {
+  color: red;
+  font-size: 0.9em;
+}
+</style>

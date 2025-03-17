@@ -5,12 +5,12 @@ import {
   SolutionStyle,
   getDefinitions,
 } from "grid";
-import { Database, Idatabase, SupaDB, RemoteDB } from "database";
-import { v4 as uuid } from "uuid";
+import { Database } from "./db";
+import { Idatabase } from "./idb";
+import { SupaDB } from "./supadb";
+import { RemoteDB } from "./remote";
 import throttle from "lodash.throttle";
-import axios from "axios";
-import { setDatabase } from "database";
-const debugMigration = true;
+import { v4 as uuid } from "uuid";
 
 class API {
   public idb: Idatabase;
@@ -25,10 +25,7 @@ class API {
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRudnhtcnFoa2RseW5odGR6bXB3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODIyNTM0MTEsImV4cCI6MTk5NzgyOTQxMX0.4PczPPAxbkwBvig7NTHNbR8JumuwPPqfyS_kGnkxP5I"
     );
     const token = localStorage.getItem("accessToken") || "";
-    this.remote = new RemoteDB("http://localhost:5480/api", token, {
-      // allow cross origin requests
-      // "Access-Control-Allow-Origin": "*",
-    });
+    this.remote = new RemoteDB("http://localhost:5480/api", token);
     this._mode = mode;
   }
 

@@ -5,23 +5,21 @@ import axios from "axios";
 import { AxiosAPI } from "./types";
 
 export class RemoteDB extends Database {
-  private serverURL: string;
-  private fetcher: AxiosAPI;
+  public fetcher: AxiosAPI;
   private anonKey: string;
-  private headers: any;
   // TODO: Make use of refresh token.
   // private refreshToken: string;
-  constructor(serverURL: string, anonKey: string = "", headers: any = {}) {
+  constructor(serverURL: string, anonKey: string = "") {
     super();
-    this.headers = headers;
-    this.serverURL = serverURL;
     this.anonKey = anonKey;
     this.fetcher = axios.create({
       baseURL: serverURL,
-      headers: {
-        ...headers,
-        Authorization: `Bearer ${this.anonKey}`,
-      },
+    });
+    // Set Authorization dynamically using an interceptor
+    //@ts-expect-error
+    this.fetcher.interceptors.request.use((config) => {
+      config.headers.Authorization = `Bearer ${this.anonKey}`;
+      return config;
     });
   }
 
@@ -31,17 +29,20 @@ export class RemoteDB extends Database {
       password,
     });
     this.anonKey = data.accessToken;
-    this.fetcher = axios.create({
-      baseURL: this.serverURL,
-      headers: {
-        ...this.headers,
-        Authorization: `Bearer ${this.anonKey}`,
-      },
-    });
     return data;
+  }
+  public setToken(anonKey: string) {
+    this.anonKey = anonKey;
   }
   public async getPlans() {
     const { data } = await this.fetcher.get("/payments/plans");
+    return data;
+  }
+  public async subscribe(payload: { priceId: string }) {
+    const { data } = await this.fetcher.post(
+      "/payments/create-subscription",
+      payload
+    );
     return data;
   }
   public register(email: string, password: string) {

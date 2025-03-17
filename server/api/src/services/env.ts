@@ -9,7 +9,6 @@ if (!process.env.STRIPE_SECRET_KEY) {
 }
 if (!process.env.PORT) {
   dotenv({ path: path.resolve('..', '.env') });
-  // console.log('LA', process.env);
 }
 const config = {
   port: process.env.PORT || 3000,

@@ -14,7 +14,6 @@ router.get('/grids', authMiddleware, async (req: Request, res: Response) => {
   const grids = await prisma.crosswords.findMany({
     where: { user_id: user.id },
   });
-  console.log('LA');
 
   res.json(grids);
 });

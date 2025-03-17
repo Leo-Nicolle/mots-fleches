@@ -11,6 +11,7 @@ router.post(
   async (req, res) => {
     // Retrieve the event by verifying the signature using the raw body and secret.
     let event;
+    console.log('ICI');
     const sig = req.headers['stripe-signature'] as string;
     try {
       event = stripe.webhooks.constructEvent(
@@ -35,8 +36,32 @@ router.post(
     // Review important events for Billing webhooks
     // https://stripe.com/docs/billing/webhooks
     // Remove comment to see the various objects sent for this sample
+    console.log(event.type);
     switch (event.type) {
-      case 'custommer.subscription.deleted': {
+      // case 'payment_intent.succeeded': {
+      //   const paymentIntent = dataObject as Stripe.PaymentIntent;
+      //   const stripe_id =
+      //     typeof paymentIntent.customer === 'string'
+      //       ? paymentIntent.customer
+      //       : paymentIntent.customer.id;
+      //   const user = await prisma.users.findFirst({
+      //     where: { stripe_id },
+      //   });
+      //   if (!user) {
+      //     break;
+      //   }
+      //   const tierId = paymentIntent.metadata.tierId;
+      //   if (!tierId) {
+      //     break;
+      //   }
+      //   await prisma.users.update({
+      //     where: { id: user.id },
+      //     data: { tier_id: Number(tierId) },
+      //   });
+      //   console.log('PaymentIntent was successful!');
+      //   break;
+      // }
+      case 'customer.subscription.deleted': {
         const subscription = dataObject as Stripe.Subscription;
         const stripe_id =
           typeof subscription.customer === 'string'
@@ -55,6 +80,7 @@ router.post(
         break;
       }
       case 'invoice.payment_succeeded': {
+        console.log('invoice.payment_succeeded');
         const invoice = dataObject as Stripe.Invoice;
         if (
           invoice.billing_reason !== 'subscription_create' ||
@@ -74,13 +100,16 @@ router.post(
         const user = await prisma.users.findFirst({
           where: { stripe_id },
         });
-        if (!planName || !user || !planName) {
+        console.log(planName, user);
+        if (!planName || !user) {
           break;
         }
         const { name, period, tierId } = parseNickName(planName);
         if (!name || !period || !tierId) {
           break;
         }
+        console.log(tierId, period);
+
         await prisma.users.update({
           where: { id: user.id },
           data: { tier_id: tierId },
@@ -96,15 +125,6 @@ router.post(
       case 'invoice.finalized':
         // If you want to manually send out invoices to your customers
         // or store them locally to reference to avoid hitting Stripe rate limits.
-        break;
-      case 'customer.subscription.deleted':
-        if (event.request != null) {
-          // handle a subscription cancelled by your request
-          // from above.
-        } else {
-          // handle subscription cancelled automatically based
-          // upon your subscription settings.
-        }
         break;
       case 'customer.subscription.trial_will_end':
         // Send notification to your user that the trial will end

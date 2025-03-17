@@ -121,10 +121,15 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import("../views/Changelog.vue"),
   },
   {
+    path: "/profile",
+    name: "profile",
+    component: () => import("../views/Profile.vue"),
+  },
+  {
     path: "/subscribe",
     name: "subscribe",
     component: () => import("../views/plans/Index.vue"),
-    meta: { requiresAuth: false },
+    meta: { requiresAuth: false, allowCOEP: true },
   },
 ];
 
@@ -147,6 +152,20 @@ router.beforeEach(async (to, from) => {
   const isSignedin = await api.isSignedIn();
   if (!isSignedin && to.meta.requiresAuth !== false) {
     return { name: "login", query: { redirect: to.name } };
+  }
+
+  if (to.meta.allowCOEP) {
+    // window.location.href = to.fullPath; // Forces full reload
+    // Clear the cookies when leaving the route
+    document.cookie =
+      "cross-origin-opener-policy=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    document.cookie =
+      "cross-origin-embedder-policy=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    // return false; // Cancels Vue Router navigation
+  } else {
+    console.log("Setting COEP/COOP headers");
+    document.cookie = "cross-origin-opener-policy=same-origin; path=/";
+    document.cookie = "cross-origin-embedder-policy=credentialless; path=/";
   }
 });
 

@@ -69,30 +69,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, defineEmits } from "vue";
+import { ref, computed, defineProps, defineEmits } from "vue";
 import { NCard, NButton } from "naive-ui";
-import { api } from "../../api";
 import { type Plan } from "database";
 
 const selectedPlan = ref<string | null>(null);
 const isYearly = ref<boolean>(false);
-const plans = ref<Plan[]>([]);
+const props = defineProps<{
+  plans: Plan[];
+}>();
 const emit = defineEmits<{
   (event: "planSelected", value: Plan): void;
 }>();
-// Fetch plans from the server
-const fetchPlans = async () => {
-  try {
-    const response = await api.remote.getPlans();
-    plans.value = response.plans.sort((a, b) => a.price - b.price);
-  } catch (error) {
-    console.error("Error fetching plans:", error);
-  }
-};
 
 // Filter plans based on the selected billing cycle
 const filteredPlans = computed(() =>
-  plans.value.filter((plan) => plan.period === (isYearly.value ? "yearly" : "monthly"))
+  props.plans.filter((plan) => plan.period === (isYearly.value ? "yearly" : "monthly"))
 );
 
 // Format price for display
@@ -111,8 +103,6 @@ const confirmPlan = (plan: Plan) => {
   emit('planSelected', plan);
 };
 
-// Fetch plans on component mount
-onMounted(fetchPlans);
 </script>
 
 <style scoped>

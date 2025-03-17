@@ -103,7 +103,6 @@ router.post('/refresh-token', async (req: Request, res: Response) => {
 
 router.post('/logout', authMiddleware, async (req: Request, res: Response) => {
   const accessToken = req.headers.authorization?.split(' ')[1];
-  console.log('accessToken', accessToken);
   if (!accessToken) {
     res.status(400).json({ error: 'Access token is required' });
     return;

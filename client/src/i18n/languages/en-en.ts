@@ -202,7 +202,7 @@ export const lang = {
     },
   },
   billing: {
-    title: "Billing Information",
+    completeYourPurchase: "Complete Your Purchase",
     billingDetails: "Billing Details",
     paymentDetails: "Payment Details",
     name: "Name",
@@ -218,6 +218,16 @@ export const lang = {
     invalidCardNumber: "Invalid card number",
     invalidExpiry: "Invalid expiry date",
     invalidCVC: "Invalid CVC",
+  },
+  profile: {
+    title: "Profile",
+    email: "Email",
+    changePassword: "Change Password",
+    currentPassword: "Current Password",
+    newPassword: "New Password",
+    confirmPassword: "Confirm Password",
+    planDetails: "Plan Details",
+    save: "Save",
   },
   home: {
     nav: {

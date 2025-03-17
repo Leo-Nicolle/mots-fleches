@@ -1,7 +1,11 @@
 import { Router } from 'express';
 import { users as User } from '@prisma/client';
-import stripe, { createSubscription, getPlans } from '../services/stripe';
-import { type Invoice } from '@stripe/stripe-js';
+import stripe, {
+  createPaymentIntent,
+  createSubscription,
+  getBillingDetails,
+  getPlans,
+} from '../services/stripe';
 import { authMiddleware } from '../middleware/auth';
 
 const router = Router();
@@ -18,6 +22,52 @@ router.get('/plans', async (req, res) => {
     res.status(500).send({ error: 'Failed to fetch tier information' });
   }
 });
+router.post('/billing-details', authMiddleware, async (req, res) => {
+  const user = req.user as User;
+  if (!user) return;
+  try {
+    const billingDetails = req.body as {
+      name: string;
+      email: string;
+      address: string;
+      city: string;
+      zip: string;
+    };
+    await stripe.customers.update(user.stripe_id!, {
+      name: billingDetails.name,
+      email: billingDetails.email,
+      address: {
+        line1: billingDetails.address,
+        city: billingDetails.city,
+        postal_code: billingDetails.zip,
+      },
+    });
+    res.send({ message: 'Billing details updated' });
+  } catch (error) {
+    console.error('Error fetching tier information:', error);
+    res.status(500).send({ error: 'Failed to fetch tier information' });
+  }
+});
+router.get('/billing-details', authMiddleware, async (req, res) => {
+  try {
+    const user = req.user as User;
+    if (!user?.stripe_id) {
+      res
+        .status(400)
+        .send({ error: 'User does not have a Stripe customer ID' });
+      return;
+    }
+    const billingDetails = await getBillingDetails(user.stripe_id);
+    if (billingDetails.deleted) {
+      res.status(404).send({ error: 'Customer not found in Stripe' });
+      return;
+    }
+    res.json(billingDetails); // Send the response back to the client
+  } catch (error) {
+    console.error('Error fetching billing details:', error);
+    res.status(500).send({ error: 'Failed to fetch billing details' });
+  }
+});
 
 router.get('/options', async (req, res) => {
   try {
@@ -31,47 +81,47 @@ router.get('/options', async (req, res) => {
     res.status(500).send({ error: 'Failed to fetch pricing options' });
   }
 });
-/*
-router.post('/create-customer', authMiddleware, async (req, res) => {
-  // Create a new customer object
+
+router.post('/subscribe', authMiddleware, async (req, res) => {
+  if (!req.user) {
+    return res.status(401).send({ error: 'Unauthorized' });
+  }
+
+  try {
+    const user = req.user as User; // Authenticated user
+    const planId = req.body.planId; // Price ID sent from the client
+
+    if (!user.stripe_id) {
+      return res
+        .status(400)
+        .send({ error: 'User does not have a Stripe customer ID' });
+    }
+    // Create the subscription
+    const subscription = await createSubscription(user.stripe_id, planId);
+
+    // Return the client secret for payment confirmation
+    const client_secret =
+      subscription.latest_invoice?.payment_intent?.client_secret;
+    if (!client_secret) {
+      return res.status(500).send({ error: 'Failed to create subscription' });
+    }
+
+    res.status(200).send({ client_secret });
+  } catch (error) {
+    console.error('Error creating subscription:', error);
+    res.status(400).send({ error: 'Error creating subscription' });
+  }
+});
+router.post('/payment-intent', authMiddleware, async (req, res) => {
+  if (!req.user) return;
   try {
     const user = req.user as User;
-    if (user.stripe_id) {
-      const customer = await stripe.customers.retrieve(user.stripe_id);
-      res.send({ customer: customer });
-      return;
-    }
-    const customer = await stripe.customers.create({
-      email: user.email,
-    });
-    // update user with stripe_id
-    await prisma.users.update({
-      where: { id: user.id },
-      data: {
-        stripe_id: customer.id,
-      },
-    });
-    res.send({ customer: customer });
+    const productId = req.body.productId;
+    const paymentIntent = await createPaymentIntent(productId, user.stripe_id!);
+    res.status(200).send({ client_secret: paymentIntent.client_secret });
   } catch (error) {
-    res.status(400).send({ error: { message: 'Error creating custommer' } });
-    return;
-  }
-});*/
-
-router.post('/create-subscription', authMiddleware, async (req, res) => {
-  try {
-    const user = req.user! as User;
-    const customer = await stripe.customers.retrieve(user.stripe_id!);
-    const priceID = req.body.priceId;
-    const subscription = await createSubscription(customer.id, priceID);
-
-    res.send({
-      subscriptionId: subscription.id,
-      clientSecret: (subscription.latest_invoice as Invoice).payment_intent
-        .client_secret,
-    });
-  } catch (error) {
-    res.status(400).send({ error: 'Error creating subscription' });
+    console.log('Error on payment intent:', error);
+    res.status(400).send({ error: 'Error on payment intent' });
     return;
   }
 });

@@ -16,7 +16,8 @@ export type Plan = {
   currency: string;
   nickname: string;
   name: string;
-  product: string;
+  productId: string;
+  planId: string;
   limits: PlanLimits;
 };
 
@@ -83,6 +84,15 @@ type ApiPostMap = {
   "/auth/logout": {
     body: string;
     response: string;
+  };
+  "/payments/create-subscription": {
+    body: {
+      priceId: string;
+    };
+    response: {
+      subscriptionId: string;
+      clientSecret: string;
+    };
   };
   // "/grid": {
   //   body: GridState;
