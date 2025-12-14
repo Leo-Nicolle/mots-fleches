@@ -27,9 +27,12 @@
     "axios": "^1.4.0",
     "grid": "file:../grid",
     "idb": "^7.1.1",
-    "merge": "^2.1.1"
+    "lodash.throttle": "^4.1.1",
+    "merge": "^2.1.1",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
+    "@types/lodash.throttle": "^4.1.9",
     "rollup-plugin-node": "^0.2.1",
     "typescript": "^5.0.4",
     "vite": "^4.3.8"

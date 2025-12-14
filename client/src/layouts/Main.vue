@@ -41,6 +41,9 @@
             </n-icon>
           </template>
         </n-button>
+        <n-button v-if="isSignedIn" strong secondary icon-placement="right" @click="router.push('/profile')">
+          Profile
+        </n-button>
       </span>
     </div>
     <div class="body">

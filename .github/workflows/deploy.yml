@@ -20,7 +20,7 @@ jobs:
       - name: Setup
         run: |
           mkdir -p ~/.ssh/ && touch ~/.ssh/known_hosts
-          ssh-keyscan ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+          ssh-c ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > $KEY
           chmod 600 $KEY
           echo "PUBLIC=$DIR/public" >> $GITHUB_ENV

@@ -134,7 +134,7 @@ const routes: Array<RouteRecordRaw> = [
 ];
 
 const router = createRouter({
-  history: createWebHashHistory(""),
+  history: createWebHistory(""), // Use createWebHistory instead of createWebHashHistory
   routes,
 });
 
@@ -155,18 +155,26 @@ router.beforeEach(async (to, from) => {
   }
 
   if (to.meta.allowCOEP) {
-    // window.location.href = to.fullPath; // Forces full reload
-    // Clear the cookies when leaving the route
+    // Clear COEP/COOP cookies
+    console.log("ALLOW COEP");
     document.cookie =
       "cross-origin-opener-policy=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     document.cookie =
       "cross-origin-embedder-policy=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-    // return false; // Cancels Vue Router navigation
+
+    // Perform a full page reload for allowCOEP routes
+    if (to.fullPath !== window.location.pathname) {
+      window.location.href = to.fullPath; // Ensure clean navigation
+      return false; // Prevent Vue Router from handling the navigation
+    }
   } else {
+    // Set COEP/COOP headers for other routes
     console.log("Setting COEP/COOP headers");
     document.cookie = "cross-origin-opener-policy=same-origin; path=/";
     document.cookie = "cross-origin-embedder-policy=credentialless; path=/";
   }
+
+  return true;
 });
 
 export default router;
