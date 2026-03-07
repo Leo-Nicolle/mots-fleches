@@ -1,6 +1,15 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi } from 'vitest';
 import request from 'supertest';
 import express from 'express';
+
+vi.mock('../src/services/stripe', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../src/services/stripe')>();
+  return {
+    ...actual,
+    getCustommer: vi.fn().mockResolvedValue(null),
+    createCustommer: vi.fn().mockResolvedValue({ id: 'cus_test_mock' }),
+  };
+});
 import authRouter from '../src/routes/auth';
 import secureRouter from '../src/routes/secure';
 import passport from '../src/config/passport';
@@ -22,7 +31,7 @@ const testUser = {
 let accessToken = '';
 let refreshToken = '';
 
-describe.skip('Authentication Tests', () => {
+describe('Authentication Tests', () => {
   beforeAll(async () => {
     const hashedPassword = await hashPassword(testUser.password);
     await prisma.users.create({

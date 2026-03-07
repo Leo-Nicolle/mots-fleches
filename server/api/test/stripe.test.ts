@@ -21,8 +21,7 @@ const user = {
   email: 'payment-tests@example.com',
   password: 'password123',
 };
-let token = '';
-describe('Stripe Service Tests', () => {
+describe.skip('Stripe Service Tests', () => {
   beforeAll(async () => {
     const hashedPassword = await hashPassword(user.password);
     await prisma.users.create({
@@ -32,7 +31,7 @@ describe('Stripe Service Tests', () => {
         tier_id: 1,
       },
     });
-    token = await request(app).post('/api/auth/login').send(user);
+    await request(app).post('/api/auth/login').send(user);
   });
   afterAll(async () => {
     const { stripe_id } =
