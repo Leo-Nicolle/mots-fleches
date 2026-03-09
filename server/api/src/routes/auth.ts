@@ -76,6 +76,7 @@ router.post('/login', async (req: Request, res: Response) => {
     refreshToken,
   });
 });
+
 router.post('/refresh-token', async (req: Request, res: Response) => {
   const { refreshToken } = req.body;
 
@@ -129,6 +130,22 @@ router.post('/logout', authMiddleware, async (req: Request, res: Response) => {
   } catch (error) {
     res.status(403).json({ error: 'Invalid or expired refresh token' });
   }
+});
+
+router.post('/change-password', authMiddleware, async (req: Request, res: Response) => {
+  const { currentPassword, newPassword } = req.body;
+  if (!currentPassword || !newPassword) {
+    res.status(400).json({ error: 'Current and new password required' });
+    return;
+  }
+  const user = await prisma.users.findUnique({ where: { id: req.user!.id } });
+  if (!user || !(await verifyPassword(currentPassword, user.password))) {
+    res.status(401).json({ error: 'Invalid current password' });
+    return;
+  }
+  const hashed = await hashPassword(newPassword);
+  await prisma.users.update({ where: { id: user.id }, data: { password: hashed } });
+  res.status(200).json({ message: 'Password updated successfully' });
 });
 
 export default router;

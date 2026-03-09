@@ -57,7 +57,7 @@ function onUpload(filesContents: [string, string][]) {
 }
 function onDelete() {
   return Promise.all(
-    selected.value.map((font) => api.db.deleteFont(font.id))
+    selected.value.map((font) => api.db.deleteFont(font.family))
   ).then(() => getFonts());
 }
 </script>

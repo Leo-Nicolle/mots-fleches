@@ -134,6 +134,7 @@ model users {
   tiers                    tiers?         @relation(fields: [tier_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   wordlists                wordlists[]
   words                    words[]
+  styles                   styles[]
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -173,6 +174,17 @@ model tokenblacklist {
   expires_at DateTime @db.Timestamp(6)
 
   @@index([token], map: "idx_tokens_token")
+}
+
+model styles {
+  id        Int    @id @default(autoincrement())
+  client_id String @db.VarChar(255)
+  data      Json
+  user_id   Int?
+  users     users? @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+
+  @@index([client_id, user_id], map: "idx_styles_client_user")
+  @@index([user_id], map: "idx_styles_user")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.

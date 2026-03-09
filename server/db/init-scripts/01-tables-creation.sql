@@ -191,6 +191,20 @@ CREATE INDEX idx_fonts_group ON Fonts(group_id);
 
 
 -- ============================
+-- Styles Table
+-- ============================
+CREATE TABLE Styles (
+    id SERIAL PRIMARY KEY,
+    client_id VARCHAR(255) NOT NULL,
+    data JSONB NOT NULL,
+    user_id INTEGER,
+    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE SET NULL
+);
+
+CREATE INDEX idx_styles_client_user ON Styles(client_id, user_id);
+CREATE INDEX idx_styles_user ON Styles(user_id);
+
+-- ============================
 -- Indexes and Optimizations
 -- ============================
 CREATE INDEX idx_words_word ON Words(word);

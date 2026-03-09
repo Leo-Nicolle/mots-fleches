@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres
+    image: postgres:17
     container_name: ${CONTAINER_NAME}-db
     restart: unless-stopped
     environment:

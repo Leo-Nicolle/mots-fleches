@@ -5,12 +5,10 @@ import {
   SolutionStyle,
   getDefinitions,
 } from "grid";
-import { Database, Idatabase, SupaDB, RemoteDB } from "database";
+import { Database, Idatabase, SupaDB, RemoteDB, Book, Font } from "database";
 import { v4 as uuid } from "uuid";
 import throttle from "lodash.throttle";
-import axios from "axios";
 import { setDatabase } from "database";
-const debugMigration = true;
 
 class API {
   public idb: Idatabase;
@@ -18,17 +16,13 @@ class API {
   public remote: RemoteDB;
   public _mode: string;
   constructor(mode: string = "unknown") {
-    // axios.get('/debug-db.json').then(({ data }) => setDatabase(data, 7));
     this.idb = new Idatabase();
     this.supadb = new SupaDB(
       "https://tnvxmrqhkdlynhtdzmpw.supabase.co",
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRudnhtcnFoa2RseW5odGR6bXB3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODIyNTM0MTEsImV4cCI6MTk5NzgyOTQxMX0.4PczPPAxbkwBvig7NTHNbR8JumuwPPqfyS_kGnkxP5I"
     );
     const token = localStorage.getItem("accessToken") || "";
-    this.remote = new RemoteDB("http://localhost:5480/api", token, {
-      // allow cross origin requests
-      // "Access-Control-Allow-Origin": "*",
-    });
+    this.remote = new RemoteDB("http://localhost:5480/api", token);
     this._mode = mode;
   }
 
@@ -230,27 +224,113 @@ class API {
   }
 
   isSignedIn() {
-    return localStorage.getItem("db-mode") === "idb"
-      ? Promise.resolve(true)
-      : localStorage.getItem("db-mode") === "remote"
-      ? Promise.resolve(true)
-      : // ? this.remote
-      //     .getGrids()
-      //     .then(() => true)
-      //     .catch(() => false)
-      localStorage.getItem("db-mode") === "supadb"
-      ? this.db.isSignedIn()
-      : Promise.resolve(false);
+    const mode = localStorage.getItem("db-mode");
+    if (mode === "idb") return Promise.resolve(true);
+    if (mode === "remote") return this.remote.isSignedIn();
+    if (mode === "supadb") return this.supadb.isSignedIn();
+    return Promise.resolve(false);
   }
+
   signout() {
-    console.log("signout");
+    const prevMode = this.mode;
     localStorage.removeItem("db-mode");
-    if (this.mode === "supadb") {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    this._mode = "idb";
+    if (prevMode === "supadb") {
       return this.supadb.supabase.auth.signOut();
-    } else if (this.mode === "remote") {
+    } else if (prevMode === "remote") {
       return this.remote.logout();
     }
     return Promise.resolve();
+  }
+
+  /**
+   * Silently sync local IndexedDB ↔ remote after login.
+   * - Items with timestamps (books, fonts): keep the most recently updated version in both stores.
+   * - Items without timestamps (grids, styles): remote is authoritative; local-only items are pushed up.
+   * - Words / bannedWords (plain strings): union both sets.
+   */
+  async syncOnLogin() {
+    const [[idbGrids, remoteGrids], [idbBooks, remoteBooks], [idbStyles, remoteStyles], [idbWords, remoteWords], [idbBanned, remoteBanned], [idbFonts, remoteFonts]] =
+      await Promise.all([
+        Promise.all([this.idb.getGrids(), this.remote.getGrids()]),
+        Promise.all([this.idb.getBooks(), this.remote.getBooks()]),
+        Promise.all([this.idb.getStyles(), this.remote.getStyles()]),
+        Promise.all([this.idb.getWords(), this.remote.getWords()]),
+        Promise.all([this.idb.getBannedWords(), this.remote.getBannedWords()]),
+        Promise.all([this.idb.getFonts(), this.remote.getFonts()]),
+      ]);
+
+    const ops: Promise<unknown>[] = [];
+
+    // --- Grids (no updated field — remote wins for conflicts) ---
+    const remoteGridIds = new Set(remoteGrids.map((g: GridState) => g.id));
+    for (const g of idbGrids) {
+      if (!remoteGridIds.has(g.id)) ops.push(this.remote.pushGrid(g));
+    }
+    for (const g of remoteGrids) {
+      ops.push(this.idb.pushGrid(g)); // upsert: remote overwrites local
+    }
+
+    // --- Books (compare updated timestamp) ---
+    const remoteBookMap = new Map(remoteBooks.map((b: Book) => [b.id, b]));
+    for (const local of idbBooks as Book[]) {
+      const remote = remoteBookMap.get(local.id);
+      if (!remote) {
+        ops.push(this.remote.pushBook(local));
+      } else if (local.updated > remote.updated) {
+        ops.push(this.remote.pushBook(local));
+        ops.push(this.idb.pushBook(local)); // already local, no-op effectively
+      } else {
+        ops.push(this.idb.pushBook(remote));
+      }
+    }
+    for (const remote of remoteBooks as Book[]) {
+      if (!idbBooks.find((b: Book) => b.id === remote.id)) {
+        ops.push(this.idb.pushBook(remote));
+      }
+    }
+
+    // --- Styles (no updated field — remote wins for conflicts) ---
+    const remoteStyleIds = new Set(remoteStyles.map((s: GridStyle) => s.id));
+    for (const s of idbStyles as GridStyle[]) {
+      if (!remoteStyleIds.has(s.id)) ops.push(this.remote.pushStyle(s));
+    }
+    for (const s of remoteStyles as GridStyle[]) {
+      ops.push(this.idb.pushStyle(s)); // upsert
+    }
+
+    // --- Fonts (compare updated timestamp) ---
+    const remoteFontMap = new Map(remoteFonts.map((f: Font) => [f.family, f]));
+    for (const local of idbFonts as Font[]) {
+      const remote = remoteFontMap.get(local.family);
+      if (!remote) {
+        ops.push(this.remote.pushFont(local));
+      } else if (local.updated > remote.updated) {
+        ops.push(this.remote.pushFont(local));
+      } else {
+        ops.push(this.idb.pushFont(remote));
+      }
+    }
+    for (const remote of remoteFonts as Font[]) {
+      if (!idbFonts.find((f: Font) => f.family === remote.family)) {
+        ops.push(this.idb.pushFont(remote));
+      }
+    }
+
+    // --- Words / BannedWords (union) ---
+    const idbWordSet = new Set(idbWords as string[]);
+    const remoteWordSet = new Set(remoteWords as string[]);
+    for (const w of idbWordSet) if (!remoteWordSet.has(w)) ops.push(this.remote.pushWord(w));
+    for (const w of remoteWordSet) if (!idbWordSet.has(w)) ops.push(this.idb.pushWord(w));
+
+    const idbBannedSet = new Set(idbBanned as string[]);
+    const remoteBannedSet = new Set(remoteBanned as string[]);
+    for (const w of idbBannedSet) if (!remoteBannedSet.has(w)) ops.push(this.remote.pushBannedWord(w));
+    for (const w of remoteBannedSet) if (!idbBannedSet.has(w)) ops.push(this.idb.pushBannedWord(w));
+
+    await Promise.allSettled(ops);
   }
 }
 

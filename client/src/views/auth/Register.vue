@@ -35,44 +35,17 @@ const password = ref<string>("");
 const passwordcheck = ref<string>("");
 
 const { alert, setAlert } = useAlert();
-async function register(method: string) {
-  try {
-    await api.remote.register(
-      email.value,
-      password.value
-    );
-    api.mode = "remote";
-    router.push("/signin");
-  } catch (error) {
-    console.log(
-      "Error: ", error
-    );
-
-    // return setAlert("error", id);
+async function register() {
+  if (password.value !== passwordcheck.value) {
+    setAlert("error", "passwordmismatch");
+    return;
   }
-  // const { data, error } = await api.supadb.supabase.auth.signUp({
-  //   email: email.value,
-  //   password: password.value,
-  // });
-  // if (error) {
-  //   console.log(
-  //     "Error: ",
-  //     error.cause,
-  //     error.message,
-  //     error.name,
-  //     error.status
-  //   );
-  //   const id = error.message.includes(
-  //     "Password should be at least 6 characters"
-  //   )
-  //     ? "passwordtooshort"
-  //     : "wrongpassword";
-
-  //   return setAlert("error", id);
-  // } else {
-  //   api.mode = "supadb";
-  //   router.push("/");
-  // }
+  try {
+    await api.remote.register(email.value, password.value);
+    router.push("/login");
+  } catch (error) {
+    setAlert("error", "registerfailed");
+  }
 }
 async function cancel() {
   router.push("/login");

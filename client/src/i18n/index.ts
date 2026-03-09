@@ -1,7 +1,7 @@
 import { createI18n } from "vue-i18n";
 
 export function loadLanguages() {
-    const context = import.meta.globEager("./languages/*.ts");
+    const context = import.meta.glob("./languages/*.ts", { eager: true });
     const languages: Record<string, any> = {};
     let langs = Object.keys(context);
     for (let key of langs) {

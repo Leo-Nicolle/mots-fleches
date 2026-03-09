@@ -179,6 +179,22 @@ export const lang = {
         movegrid: "Mover la cuadrícula en otro libro",
         reusegrid: "Reutilizar la cuadrícula en otro libro (editar en un libro editará en el otro)",
     },
+    profile: {
+        title: "Perfil",
+        email: "Correo electrónico",
+        changePassword: "Cambiar contraseña",
+        currentPassword: "Contraseña actual",
+        newPassword: "Nueva contraseña",
+        confirmPassword: "Confirmar contraseña",
+        updatePassword: "Actualizar contraseña",
+        billingDetails: "Datos de facturación",
+        billingName: "Nombre",
+        billingEmail: "Correo electrónico",
+        billingAddress: "Dirección",
+        billingCity: "Ciudad",
+        billingZip: "Código postal",
+        save: "Guardar",
+    },
     home: {
         nav: {
             welcome: "Bienvenido",

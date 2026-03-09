@@ -25,6 +25,17 @@ export type PlansResponse = {
   publishableKey: string;
   plans: Plan[];
 };
+
+export type ProfileResponse = {
+  email: string;
+  billing?: {
+    name?: string;
+    email?: string;
+    address?: string;
+    city?: string;
+    zip?: string;
+  } | null;
+};
 // Generic type to generate API route mappings dynamically
 type GenMap<T extends string, D> = {
   [K in `/${T}s` | `/${T}/:id`]: K extends `/${T}/:id` ? D : D[];
@@ -59,6 +70,7 @@ type ApiGetMap = GenMap<"grid", Grid> &
   GenMap<"banned-word", string> &
   GenMap<"style", GridStyle | SolutionStyle> & {
     "/payments/plans": PlansResponse;
+    "/profile": ProfileResponse;
   };
 type ApiPostMap = {
   "/auth/login": {
@@ -82,17 +94,23 @@ type ApiPostMap = {
     };
   };
   "/auth/logout": {
-    body: string;
-    response: string;
+    body: undefined;
+    response: { message: string };
   };
-  "/payments/create-subscription": {
+  "/payments/subscribe": {
     body: {
-      priceId: string;
+      planId: string;
     };
     response: {
-      subscriptionId: string;
-      clientSecret: string;
+      client_secret: string;
     };
+  };
+  "/auth/change-password": {
+    body: {
+      currentPassword: string;
+      newPassword: string;
+    };
+    response: { message: string };
   };
   // "/grid": {
   //   body: GridState;
@@ -119,7 +137,9 @@ export interface AxiosAPI {
 
   post<T extends keyof ApiPostMap>(
     url: T,
-    data: ApiPostMap[T] extends { body: infer B } ? B : never
+    ...args: ApiPostMap[T] extends { body: undefined }
+      ? []
+      : [data: ApiPostMap[T] extends { body: infer B } ? B : never]
   ): Promise<AxiosResponse<ApiPostMap[T]["response"]>>;
 
   // put<T extends keyof ApiPutMap, D>(

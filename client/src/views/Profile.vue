@@ -27,23 +27,6 @@
           </n-form>
         </section>
 
-        <!-- Plan Details Section -->
-        <section class="profile-section">
-          <h2>{{ $t("profile.planDetails") }}</h2>
-          <p>
-            <strong>{{ plan.name }}</strong> -
-            {{ formatPrice(plan.price, plan.currency) }}
-            ({{ plan.billing === 'yearly' ? $t("plans.billing.yearly") : $t("plans.billing.monthly") }})
-          </p>
-          <ul>
-            <li>{{ $t("plans.limits.grids") }}: {{ plan.limits.grids }}</li>
-            <li>{{ $t("plans.limits.custom_words") }}: {{ plan.limits.custom_words }}</li>
-            <li>{{ $t("plans.limits.word_lists") }}: {{ plan.limits.word_lists }}</li>
-            <li>{{ $t("plans.limits.max_list_size") }}: {{ plan.limits.max_list_size }}</li>
-          </ul>
-          <n-button type="primary" @click="upgradePlan">{{ $t("profile.upgradePlan") }}</n-button>
-        </section>
-
         <!-- Billing Details Section -->
         <section class="profile-section">
           <h2>{{ $t("profile.billingDetails") }}</h2>
@@ -60,12 +43,10 @@
 
 <script setup lang="ts">
 import { reactive, onMounted } from "vue";
-import { useRouter } from 'vue-router';
 import { NForm, NFormItem, NInput, NButton } from "naive-ui";
-import { api } from "database";
+import { api } from "../api";
 import Layout from "../layouts/Main.vue";
 
-const router = useRouter();
 const user = reactive({
   email: "",
 });
@@ -74,19 +55,6 @@ const passwords = reactive({
   current: "",
   new: "",
   confirm: "",
-});
-
-const plan = reactive({
-  name: "",
-  price: 0,
-  currency: "USD",
-  billing: "monthly",
-  limits: {
-    grids: 0,
-    custom_words: 0,
-    word_lists: 0,
-    max_list_size: 0,
-  },
 });
 
 const billing = reactive({
@@ -100,19 +68,12 @@ const billing = reactive({
 const fetchUserData = async () => {
   try {
     const { data } = await api.remote.fetcher.get("/profile");
-    console.log("User data:", data);
     user.email = data.email;
-    plan.name = data.tier;
-    plan.price = data.billing.price || 0;
-    plan.currency = data.billing.currency || "USD";
-    plan.billing = data.billing.period || "monthly";
-    plan.limits = data.limits || {};
-
-    billing.name = data.billing.name || "";
-    billing.email = data.billing.email || "";
-    billing.address = data.billing.address || "";
-    billing.city = data.billing.city || "";
-    billing.zip = data.billing.zip || "";
+    billing.name = data.billing?.name || "";
+    billing.email = data.billing?.email || "";
+    billing.address = data.billing?.address || "";
+    billing.city = data.billing?.city || "";
+    billing.zip = data.billing?.zip || "";
   } catch (error) {
     console.error("Error fetching user data:", error);
   }
@@ -120,38 +81,25 @@ const fetchUserData = async () => {
 
 const changePassword = async () => {
   if (passwords.new !== passwords.confirm) {
-    alert("Passwords do not match!");
+    console.error("Passwords do not match");
     return;
   }
   try {
-    await api.remote.fetcher.post("/user/change-password", {
+    await api.remote.fetcher.post("/auth/change-password", {
       currentPassword: passwords.current,
       newPassword: passwords.new,
     });
-    alert("Password updated successfully!");
     passwords.current = "";
     passwords.new = "";
     passwords.confirm = "";
   } catch (error) {
     console.error("Error updating password:", error);
-    alert("Failed to update password.");
   }
-};
-
-const upgradePlan = () => {
-  router.push("/subscribe");
 };
 
 onMounted(() => {
   fetchUserData();
 });
-
-const formatPrice = (price: number, currency: string) => {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency,
-  }).format(price / 100); // Convert cents to dollars/euros
-};
 </script>
 
 <style scoped>

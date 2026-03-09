@@ -3,7 +3,7 @@
 ## How to start the database (developement)
 
 ```bash
-docker-compose --env-file .env --profile development up -d
+docker compose --env-file .env --profile development up -d
 ```
 
 ## How to stop the database
@@ -21,7 +21,7 @@ npm run dev
 ## How to start the server (production)
 
 ```bash
-docker-compose --env-file .env.production --profile production up -d --build
+docker compose --env-file .env.production --profile production up -d --build
 ```
 
 ## How to stop the server

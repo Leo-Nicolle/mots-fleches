@@ -180,6 +180,22 @@ export const lang = {
         movegrid: 'Déplace la grille dans un autre livre',
         reusegrid: 'Réutilise la grille dans un autre livre (modifier dans un livre modifie dans l\'autre)',
     },
+    profile: {
+        title: "Profil",
+        email: "Email",
+        changePassword: "Changer le mot de passe",
+        currentPassword: "Mot de passe actuel",
+        newPassword: "Nouveau mot de passe",
+        confirmPassword: "Confirmer le mot de passe",
+        updatePassword: "Mettre à jour le mot de passe",
+        billingDetails: "Informations de facturation",
+        billingName: "Nom",
+        billingEmail: "Email",
+        billingAddress: "Adresse",
+        billingCity: "Ville",
+        billingZip: "Code postal",
+        save: "Enregistrer",
+    },
     home: {
         nav: {
             welcome: "Bienvenue",

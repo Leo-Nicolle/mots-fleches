@@ -7,20 +7,44 @@ import { AxiosAPI } from "./types";
 export class RemoteDB extends Database {
   public fetcher: AxiosAPI;
   private anonKey: string;
-  // TODO: Make use of refresh token.
-  // private refreshToken: string;
+  private refreshToken: string;
+  private serverURL: string;
+
   constructor(serverURL: string, anonKey: string = "") {
     super();
+    this.serverURL = serverURL;
     this.anonKey = anonKey;
+    this.refreshToken = localStorage.getItem("refreshToken") || "";
     this.fetcher = axios.create({
       baseURL: serverURL,
     });
-    // Set Authorization dynamically using an interceptor
+    // Attach access token to every request
     //@ts-expect-error
     this.fetcher.interceptors.request.use((config) => {
       config.headers.Authorization = `Bearer ${this.anonKey}`;
       return config;
     });
+    // Refresh token on 401
+    //@ts-expect-error
+    this.fetcher.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        if (error.response?.status === 401 && this.refreshToken) {
+          try {
+            const { data } = await axios.post(`${this.serverURL}/auth/refresh-token`, {
+              refreshToken: this.refreshToken,
+            });
+            this.anonKey = data.accessToken;
+            localStorage.setItem("accessToken", data.accessToken);
+            error.config.headers.Authorization = `Bearer ${this.anonKey}`;
+            return this.fetcher.request(error.config);
+          } catch {
+            // Refresh failed — propagate the original error
+          }
+        }
+        return Promise.reject(error);
+      }
+    );
   }
 
   public async signin(email: string, password: string) {
@@ -29,28 +53,30 @@ export class RemoteDB extends Database {
       password,
     });
     this.anonKey = data.accessToken;
+    this.refreshToken = data.refreshToken;
     return data;
   }
+
   public setToken(anonKey: string) {
     this.anonKey = anonKey;
   }
+
   public async getPlans() {
     const { data } = await this.fetcher.get("/payments/plans");
     return data;
   }
-  public async subscribe(payload: { priceId: string }) {
-    const { data } = await this.fetcher.post(
-      "/payments/create-subscription",
-      payload
-    );
+
+  public async subscribe(payload: { planId: string }) {
+    const { data } = await this.fetcher.post("/payments/subscribe", payload);
     return data;
   }
+
   public register(email: string, password: string) {
     return this.fetcher.post("/auth/register", { email, password });
   }
 
   public logout() {
-    return this.fetcher.post("/auth/logout", this.anonKey);
+    return this.fetcher.post("/auth/logout");
   }
 
   async getGrids() {
@@ -64,7 +90,6 @@ export class RemoteDB extends Database {
   }
 
   async updateGrid(grid: GridState) {
-    // things with same id are overwritten
     return this.pushGrid(grid);
   }
 
@@ -184,7 +209,12 @@ export class RemoteDB extends Database {
   }
 
   async isSignedIn() {
-    // TODO: check if token is valid
-    return true;
+    if (!this.anonKey) return false;
+    try {
+      await this.fetcher.get("/profile");
+      return true;
+    } catch {
+      return false;
+    }
   }
 }

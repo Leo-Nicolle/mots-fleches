@@ -226,7 +226,13 @@ export const lang = {
     currentPassword: "Current Password",
     newPassword: "New Password",
     confirmPassword: "Confirm Password",
-    planDetails: "Plan Details",
+    updatePassword: "Update Password",
+    billingDetails: "Billing Details",
+    billingName: "Name",
+    billingEmail: "Email",
+    billingAddress: "Address",
+    billingCity: "City",
+    billingZip: "ZIP Code",
     save: "Save",
   },
   home: {
@@ -350,7 +356,7 @@ export const lang = {
     },
     customwords: `Just got to the <em>Words</em> page, and add your words. You can
         also delete them from there. You cannot modify the base
-        dictionnary though. 
+        dictionnary though.
         You might need to refresh the page to get thoose words in your suggestions.`,
     suggestions: {
       one: "Theere are two suggestion modes:",
@@ -376,7 +382,7 @@ export const lang = {
     It is advisable to fill up first the most red cells.
 
     `,
-    languages: `                  
+    languages: `
     For now MotsFlex only supports Français, Español and English. If
     you want to add a new language, please open an issue on
     <a href="https://github.com/Leo-Nicolle/mots-fleches/issues"
@@ -390,14 +396,14 @@ export const lang = {
     the code
     <a href="https://github.com/Leo-Nicolle/mots-fleches"> here</a>.`,
     why: `
-    It all started with a friend wanting to create crossword puzzles. When I saw her doing it 
-    by hand, I started too look on internet for a tool to generate crosswords. I was surprised to see tat 
-    there were only paying solutions, or small free tools that would create sparse crosswords or withoout 
+    It all started with a friend wanting to create crossword puzzles. When I saw her doing it
+    by hand, I started too look on internet for a tool to generate crosswords. I was surprised to see tat
+    there were only paying solutions, or small free tools that would create sparse crosswords or withoout
     printing features etc. Well there were clearly a lack of tool in that field.
     So I started to create MotsFlex, as a suggestions engine at first. A few months later,
     I injured myself doing woodworking. I was stuck at home with a hand in a cast, and I needed
-    to do something. During three weeks I added more features, and published it online. 
-    Since, my hand is back to life, and I continue maintaining and making evolve MotsFlex. 
+    to do something. During three weeks I added more features, and published it online.
+    Since, my hand is back to life, and I continue maintaining and making evolve MotsFlex.
     `,
     who: `
     For now there is only me. But if you want to contribute, you are more than welcome !
@@ -419,7 +425,7 @@ export const lang = {
     MotsFlex is free fow now, and the local mode will remain free, but the online accounts might
     end up to cost me money. I host the grids on <a href="https://supabase.com/"> Supabase</a>,
     for now MotsFlex is on the free tier, but if the number of users increase, I will have to pay
-    for it. So if you want to support MotsFlex, you can: <a href="https://www.buymeacoffee.com/nicolleleo">Buy me a beer</a>. 
+    for it. So if you want to support MotsFlex, you can: <a href="https://www.buymeacoffee.com/nicolleleo">Buy me a beer</a>.
     I will drink it to your health!
     `,
   },
