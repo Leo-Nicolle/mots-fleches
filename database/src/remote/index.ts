@@ -1,4 +1,4 @@
-import { GridStyle, GridState } from "grid";
+import { GridStyle, GridState, SolutionStyle } from "grid";
 import { Database } from "../db";
 import { Book, Font } from "../types";
 import axios from "axios";
@@ -207,6 +207,67 @@ export class RemoteDB extends Database {
   async deleteFont(fontId: string) {
     await this.fetcher.delete(`/font/${fontId}`);
   }
+
+  // ── Group resources ────────────────────────────────────────────────────────
+
+  async getGroupGrids(groupId: number): Promise<GridState[]> {
+    const { data } = await (this.fetcher as any).get(`/group/${groupId}/grids`);
+    return data;
+  }
+
+  async getGroupBooks(groupId: number): Promise<Book[]> {
+    const { data } = await (this.fetcher as any).get(`/group/${groupId}/books`);
+    return data;
+  }
+
+  async getGroupStyles(groupId: number): Promise<(GridStyle | SolutionStyle)[]> {
+    const { data } = await (this.fetcher as any).get(`/group/${groupId}/styles`);
+    return data;
+  }
+
+  async getGroupStyle(groupId: number, clientId: string): Promise<GridStyle | SolutionStyle> {
+    const { data } = await (this.fetcher as any).get(`/group/${groupId}/style/${clientId}`);
+    return data;
+  }
+
+  async shareGrid(groupId: number, gridId: string): Promise<void> {
+    await (this.fetcher as any).post(`/group/${groupId}/grid/${gridId}/share`);
+  }
+
+  async unshareGrid(groupId: number, gridId: string): Promise<void> {
+    await (this.fetcher as any).delete(`/group/${groupId}/grid/${gridId}/share`);
+  }
+
+  async shareBook(groupId: number, bookId: string): Promise<void> {
+    await (this.fetcher as any).post(`/group/${groupId}/book/${bookId}/share`);
+  }
+
+  async unshareBook(groupId: number, bookId: string): Promise<void> {
+    await (this.fetcher as any).delete(`/group/${groupId}/book/${bookId}/share`);
+  }
+
+  async shareStyle(groupId: number, styleId: string): Promise<void> {
+    await (this.fetcher as any).post(`/group/${groupId}/style/${styleId}/share`);
+  }
+
+  async unshareStyle(groupId: number, styleId: string): Promise<void> {
+    await (this.fetcher as any).delete(`/group/${groupId}/style/${styleId}/share`);
+  }
+
+  async getGroupFonts(groupId: number): Promise<Font[]> {
+    const res = await (this.fetcher as any).get(`/group/${groupId}/fonts`);
+    return res.data;
+  }
+
+  async shareFont(groupId: number, fontName: string): Promise<void> {
+    await (this.fetcher as any).post(`/group/${groupId}/font/${encodeURIComponent(fontName)}/share`);
+  }
+
+  async unshareFont(groupId: number, fontName: string): Promise<void> {
+    await (this.fetcher as any).delete(`/group/${groupId}/font/${encodeURIComponent(fontName)}/share`);
+  }
+
+  // ── Auth ───────────────────────────────────────────────────────────────────
 
   async isSignedIn() {
     if (!this.anonKey) return false;

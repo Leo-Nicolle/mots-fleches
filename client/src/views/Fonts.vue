@@ -1,15 +1,22 @@
 <template>
-  <Layout v-if="fonts" :breadcrumbs="[{ text: $t('nav.fonts') }]" :eltList="fonts" :onDelete="onDelete"
-    @select="(s) => (selected = s)" :has-create-button="false" :has-delete-button="true">
+  <Layout v-if="fonts" :breadcrumbs="[{ text: $t('nav.fonts') }]" :eltList="displayedFonts" :onDelete="onDelete"
+    @select="(s) => (selected = s)" :has-create-button="false" :has-delete-button="activeGroupId === null">
     <template v-slot:left-panel>
-      <UploadModal :title="$t('titles.newFont')" :buttonText="$t('buttons.create')" :readAsDataURL="true" :single="true"
-        @ok="onUpload" />
+      <UploadModal v-if="activeGroupId === null" :title="$t('titles.newFont')" :buttonText="$t('buttons.create')"
+        :readAsDataURL="true" :single="true" @ok="onUpload" />
+      <GroupFilter
+        v-if="api.mode === 'remote' && myGroups.length > 0"
+        v-model="activeGroupId"
+        :groups="myGroups"
+        :resource-label="$t('nav.fonts')"
+      />
     </template>
     <template #card-title="{ elt }">
       <FontLoader :value="elt" />
       <span class="font-body" :style="{ 'font-family': elt.family }">
         {{ elt.family }}
       </span>
+      <FontModal v-if="activeGroupId === null" :font="elt" />
     </template>
   </Layout>
 </template>
@@ -18,17 +25,49 @@
 import Layout from "../layouts/GridLayout.vue";
 import UploadModal from "../components/modals/UploadModal.vue";
 import FontLoader from "../components/fonts/FontLoader.vue";
+import GroupFilter from "../components/GroupFilter.vue";
+import FontModal from "../components/modals/FontModal.vue";
 
-import { v4 as uuid } from "uuid";
 import { api } from "../api";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed, watch } from "vue";
 import { Font } from "database";
+import type { GroupSummary } from "database";
 import { loadFont } from "../components/fonts/load-font";
 import { postEvent } from "../js/telemetry";
 
 const fonts = ref<Font[]>([]);
+const groupFonts = ref<Font[]>([]);
+const myGroups = ref<GroupSummary[]>([]);
+const activeGroupId = ref<number | null>(null);
 const selected = ref<Font[]>([]);
-onMounted(() => {
+const displayedFonts = computed(() => activeGroupId.value !== null ? groupFonts.value : fonts.value);
+async function fetchMyGroups() {
+  if (api.mode !== "remote") return;
+  try {
+    const { data } = await api.remote.fetcher.get("/groups");
+    myGroups.value = data;
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+async function fetchGroupFonts(groupId: number) {
+  try {
+    const raw = await (api.remote as any).getGroupFonts(groupId);
+    groupFonts.value = raw;
+    await Promise.all(groupFonts.value.map((font) => loadFont(font)));
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+watch(activeGroupId, (id) => {
+  if (id !== null) fetchGroupFonts(id);
+  else groupFonts.value = [];
+});
+
+onMounted(async () => {
+  await fetchMyGroups();
   getFonts();
 });
 function getFonts() {

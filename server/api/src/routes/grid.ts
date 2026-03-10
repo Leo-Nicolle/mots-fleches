@@ -19,7 +19,17 @@ router.get('/grid/:id', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
   const results = await prisma.$queryRaw<{ content: string }[]>`
     SELECT content FROM crosswords
-    WHERE user_id = ${user.id} AND content::jsonb->>'id' = ${req.params.id}
+    WHERE content::jsonb->>'id' = ${req.params.id}
+      AND (
+        user_id = ${user.id}
+        OR group_id IN (SELECT group_id FROM groupmembers WHERE user_id = ${user.id})
+        OR EXISTS (
+          SELECT 1 FROM books b
+          WHERE b.group_id IN (SELECT group_id FROM groupmembers WHERE user_id = ${user.id})
+            AND b.grid_ids::jsonb->'grids' @> to_jsonb(${req.params.id}::text)
+        )
+      )
+    LIMIT 1
   `;
   if (!results.length) {
     res.status(404).json({ error: 'Grid not found' });
@@ -71,13 +81,31 @@ router.get('/book/:id', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
   const results = await prisma.$queryRaw<{ grid_ids: unknown }[]>`
     SELECT grid_ids FROM books
-    WHERE user_id = ${user.id} AND grid_ids::jsonb->>'id' = ${req.params.id}
+    WHERE grid_ids::jsonb->>'id' = ${req.params.id}
+      AND (
+        user_id = ${user.id}
+        OR group_id IN (SELECT group_id FROM groupmembers WHERE user_id = ${user.id})
+      )
+    LIMIT 1
   `;
   if (!results.length) {
     res.status(404).json({ error: 'Book not found' });
     return;
   }
   res.json(results[0].grid_ids);
+});
+
+router.get('/book/:id/ownership', authMiddleware, async (req: Request, res: Response) => {
+  const user = req.user as User;
+  const result = await prisma.$queryRaw<{ count: bigint; group_id: number | null }[]>`
+    SELECT COUNT(*) as count, MAX(group_id) as group_id FROM books
+    WHERE grid_ids::jsonb->>'id' = ${req.params.id}
+      AND (user_id = ${user.id} OR group_id IN (SELECT group_id FROM groupmembers WHERE user_id = ${user.id}))
+  `;
+  const owned = result[0].count > 0n && (await prisma.$queryRaw<{ count: bigint }[]>`
+    SELECT COUNT(*) as count FROM books WHERE user_id = ${user.id} AND grid_ids::jsonb->>'id' = ${req.params.id}
+  `)[0].count > 0n;
+  res.json({ owned, group_id: result[0].group_id ?? null });
 });
 
 router.post('/book', authMiddleware, async (req: Request, res: Response) => {

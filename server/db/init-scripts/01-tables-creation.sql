@@ -205,6 +205,17 @@ CREATE INDEX idx_styles_client_user ON Styles(client_id, user_id);
 CREATE INDEX idx_styles_user ON Styles(user_id);
 
 -- ============================
+-- StyleShares Table (many-to-many: a style can be shared to multiple groups)
+-- ============================
+CREATE TABLE StyleShares (
+    style_id INTEGER NOT NULL REFERENCES Styles(id) ON DELETE CASCADE,
+    group_id INTEGER NOT NULL REFERENCES Groups(id) ON DELETE CASCADE,
+    PRIMARY KEY (style_id, group_id)
+);
+
+CREATE INDEX idx_styleshares_group ON StyleShares(group_id);
+
+-- ============================
 -- Indexes and Optimizations
 -- ============================
 CREATE INDEX idx_words_word ON Words(word);

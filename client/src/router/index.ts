@@ -126,6 +126,11 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import("../views/Profile.vue"),
   },
   {
+    path: "/groups",
+    name: "groups",
+    component: () => import("../views/Groups.vue"),
+  },
+  {
     path: "/subscribe",
     name: "subscribe",
     component: () => import("../views/plans/Index.vue"),

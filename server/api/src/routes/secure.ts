@@ -6,6 +6,11 @@ import plans from '../plans.json';
 
 const router = Router();
 
+router.get('/me', authMiddleware, (req: Request, res: Response) => {
+  const user = req.user as User;
+  res.json({ id: user.id, email: user.email });
+});
+
 router.get('/profile', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
   if (!user) return;

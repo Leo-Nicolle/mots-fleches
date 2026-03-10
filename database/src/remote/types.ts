@@ -26,6 +26,29 @@ export type PlansResponse = {
   plans: Plan[];
 };
 
+export type GroupMember = {
+  user_id: number;
+  email: string;
+  role: string;
+};
+
+export type GroupSummary = {
+  id: number;
+  name: string;
+  description: string | null;
+  owner_id: number;
+  role: string;
+  members_count: number;
+};
+
+export type GroupDetail = {
+  id: number;
+  name: string;
+  description: string | null;
+  owner_id: number;
+  members: GroupMember[];
+};
+
 export type ProfileResponse = {
   email: string;
   billing?: {
@@ -70,7 +93,14 @@ type ApiGetMap = GenMap<"grid", Grid> &
   GenMap<"banned-word", string> &
   GenMap<"style", GridStyle | SolutionStyle> & {
     "/payments/plans": PlansResponse;
+    "/me": { id: number; email: string };
     "/profile": ProfileResponse;
+    "/groups": GroupSummary[];
+    "/group/:id": GroupDetail;
+    "/group/:id/member": GroupMember;
+    "/group/:id/grids": Grid[];
+    "/group/:id/books": Book[];
+    "/group/:id/styles": (GridStyle | SolutionStyle)[];
   };
 type ApiPostMap = {
   "/auth/login": {
@@ -111,6 +141,26 @@ type ApiPostMap = {
       newPassword: string;
     };
     response: { message: string };
+  };
+  "/group": {
+    body: { name: string; description?: string };
+    response: { id: number; name: string; description: string | null };
+  };
+  "/group/:id/member": {
+    body: { email: string; role?: string };
+    response: GroupMember;
+  };
+  "/group/:id/grid/:gridId/share": {
+    body: undefined;
+    response: { success: true };
+  };
+  "/group/:id/book/:bookId/share": {
+    body: undefined;
+    response: { success: true };
+  };
+  "/group/:id/style/:styleId/share": {
+    body: undefined;
+    response: { success: true };
   };
   // "/grid": {
   //   body: GridState;

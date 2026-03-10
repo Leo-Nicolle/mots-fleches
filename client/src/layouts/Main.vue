@@ -41,8 +41,11 @@
             </n-icon>
           </template>
         </n-button>
+        <n-button v-if="isSignedIn" strong secondary icon-placement="right" @click="router.push('/groups')">
+          {{ $t("groups.title") }}
+        </n-button>
         <n-button v-if="isSignedIn" strong secondary icon-placement="right" @click="router.push('/profile')">
-          Profile
+          {{ $t("profile.title") }}
         </n-button>
       </span>
     </div>

@@ -6,6 +6,8 @@ import webhookRouter from './routes/webhook';
 import authRouter from './routes/auth';
 import secureRouter from './routes/secure';
 import gridRouter from './routes/grid';
+import groupsRouter from './routes/groups';
+import groupResourcesRouter from './routes/group-resources';
 import helmet from './config/helmet';
 import passport from './config/passport';
 // Load .env from parent directory
@@ -30,6 +32,8 @@ app.use('/api/auth', authRouter);
 app.use('/api', secureRouter);
 app.use('/api/payments', paymentsRouter);
 app.use('/api/', gridRouter);
+app.use('/api/', groupsRouter);
+app.use('/api/', groupResourcesRouter);
 
 app.get('/', (req, res) => {
   res.send('Welcome to the Crosswords API!');

@@ -32,6 +32,16 @@
             <n-input-number role="cols" v-model:value="grid.cols" :on-change="v => resize(grid.rows, v)" />
           </n-form-item>
         </span>
+        <n-form-item v-if="api.mode === 'remote' && myGroups.length > 0" :label="$t('groups.share')">
+          <n-select
+            :value="sharedGroupId"
+            :options="groupOptions"
+            :loading="sharingLoading"
+            clearable
+            :placeholder="$t('groups.notShared')"
+            @update:value="onShareChange"
+          />
+        </n-form-item>
       </n-form>
     </template>
   </n-modal>
@@ -56,18 +66,24 @@ import {
   watchEffect,
   defineModel,
   watch,
-  toRaw
+  toRaw,
+  computed,
 } from "vue";
 import { CogOutline as CogIcon } from "@vicons/ionicons5";
 import { Grid } from "grid";
 import generate from "../../js/maze-generator";
 import { api } from "../../api";
 import { workerController } from "../../worker";
+import type { GroupSummary } from "database";
 const grid = defineModel<Grid>('grid', { required: true });
 const opts = ref<{ label: string; value: string; }[]>([]);
 const randomConfirmVisible = ref(false);
 const visible = ref(false);
 const generating = ref(false);
+const myGroups = ref<GroupSummary[]>([]);
+const sharedGroupId = ref<number | null>(null);
+const sharingLoading = ref(false);
+const groupOptions = computed(() => myGroups.value.map((g) => ({ label: g.name, value: g.id })));
 const emit = defineEmits<{
   /**
    * Modal open
@@ -84,9 +100,40 @@ function onRandomize() {
       generating.value = false;
     });
 }
+async function loadSharing() {
+  if (api.mode !== 'remote') return;
+  sharingLoading.value = true;
+  try {
+    const [groupsRes, sharingRes] = await Promise.all([
+      api.remote.fetcher.get('/groups'),
+      (api.remote.fetcher as any).get(`/grid/${grid.value.id}/sharing`),
+    ]);
+    myGroups.value = groupsRes.data;
+    sharedGroupId.value = (sharingRes.data as any).group_id ?? null;
+  } catch (e) {
+    console.error(e);
+  } finally {
+    sharingLoading.value = false;
+  }
+}
+
+async function onShareChange(groupId: number | null) {
+  try {
+    if (groupId === null) {
+      await (api.remote as any).unshareGrid(sharedGroupId.value ?? 0, grid.value.id);
+    } else {
+      await (api.remote as any).shareGrid(groupId, grid.value.id);
+    }
+    sharedGroupId.value = groupId;
+  } catch (e) {
+    console.error(e);
+  }
+}
+
 watchEffect(() => {
   if (!visible.value) return;
   emit("open");
+  loadSharing();
 });
 onMounted(() => {
   api.db

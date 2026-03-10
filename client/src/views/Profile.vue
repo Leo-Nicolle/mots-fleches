@@ -28,6 +28,7 @@
         </section>
 
         <!-- Billing Details Section -->
+        <!--          
         <section class="profile-section">
           <h2>{{ $t("profile.billingDetails") }}</h2>
           <p><strong>{{ $t("profile.billingName") }}:</strong> {{ billing.name }}</p>
@@ -35,7 +36,7 @@
           <p><strong>{{ $t("profile.billingAddress") }}:</strong> {{ billing.address }}</p>
           <p><strong>{{ $t("profile.billingCity") }}:</strong> {{ billing.city }}</p>
           <p><strong>{{ $t("profile.billingZip") }}:</strong> {{ billing.zip }}</p>
-        </section>
+        </section> -->
       </div>
     </template>
   </Layout>
