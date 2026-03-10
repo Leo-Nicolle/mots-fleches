@@ -33,7 +33,10 @@
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "prisma": "^6.4.1",
-    "stripe": "^17.7.0"
+    "stripe": "^17.7.0",
+    "ws": "^8.19.0",
+    "y-websocket": "^3.0.0",
+    "yjs": "^13.6.29"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
@@ -43,6 +46,7 @@
     "@types/node": "^22.13.8",
     "@types/passport-jwt": "^4.0.1",
     "@types/stripe": "^8.0.417",
+    "@types/ws": "^8.18.1",
     "cors": "^2.8.5",
     "dotenv-cli": "^8.0.0",
     "esbuild": "^0.25.0",

@@ -1,6 +1,9 @@
 <template>
   <Layout :title="$t('register.title')" :alert="alert">
     <template #default>
+      <n-form-item :label="$t('register.pseudo')" path="pseudo">
+        <n-input type="text" :placeholder="$t('register.pseudoPlaceholder')" v-model:value="pseudo" />
+      </n-form-item>
       <n-form-item :label="$t('register.email')" path="login">
         <n-input role="login" type="text" placeholder="name@mail.com" v-model:value="email" />
       </n-form-item>
@@ -30,6 +33,7 @@ import Layout from "../../layouts/NotLoggedin.vue";
 import { useRouter } from "vue-router";
 import { useAlert } from "../../js/useAlert";
 const router = useRouter();
+const pseudo = ref<string>("");
 const email = ref<string>("");
 const password = ref<string>("");
 const passwordcheck = ref<string>("");
@@ -41,7 +45,7 @@ async function register() {
     return;
   }
   try {
-    await api.remote.register(email.value, password.value);
+    await api.remote.register(email.value, password.value, pseudo.value || undefined);
     router.push("/login");
   } catch (error) {
     setAlert("error", "registerfailed");

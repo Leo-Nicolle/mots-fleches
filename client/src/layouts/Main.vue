@@ -12,13 +12,13 @@
         <slot name="header"> </slot>
       </span>
       <n-breadcrumb v-if="breadcrumbs">
-        <n-breadcrumb-item clickable key="home" href="#/">
+        <n-breadcrumb-item clickable key="home" @click="router.push('/')">
           <n-icon>
             <HomeOutline />
           </n-icon>
         </n-breadcrumb-item>
-        <n-breadcrumb-item v-for="b in breadcrumbs" :clickable="b.to !== undefined" :to="b.to" :key="b.text"
-          :href="b.to">{{ b.text }}</n-breadcrumb-item>
+        <n-breadcrumb-item v-for="b in breadcrumbs" :clickable="b.to !== undefined" :key="b.text"
+          @click="b.to && router.push(b.to)">{{ b.text }}</n-breadcrumb-item>
       </n-breadcrumb>
       <span class="right">
         <n-popselect v-model:value="locale" :options="localeOptions">

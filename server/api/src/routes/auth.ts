@@ -16,7 +16,7 @@ import { createCustommer, getCustommer } from '../services/stripe';
 const router = Router();
 
 router.post('/register', async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  const { email, password, pseudo } = req.body;
   if (!email || !password) {
     res.status(400).json({ error: 'Email and password required' });
     return;
@@ -37,6 +37,7 @@ router.post('/register', async (req: Request, res: Response) => {
         email,
         password: hashedPassword,
         stripe_id: customer.id,
+        pseudo: pseudo || null,
       },
     });
 

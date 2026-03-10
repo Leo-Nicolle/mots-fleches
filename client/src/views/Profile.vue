@@ -10,6 +10,17 @@
           <p>{{ user.email }}</p>
         </section>
 
+        <!-- Pseudo Section -->
+        <section class="profile-section">
+          <h2>{{ $t("profile.pseudo") }}</h2>
+          <n-form @submit.prevent="savePseudo">
+            <n-form-item>
+              <n-input v-model:value="user.pseudo" :placeholder="$t('profile.pseudoPlaceholder')" />
+            </n-form-item>
+            <n-button type="primary" attr-type="submit">{{ $t("profile.savePseudo") }}</n-button>
+          </n-form>
+        </section>
+
         <!-- Change Password Section -->
         <section class="profile-section">
           <h2>{{ $t("profile.changePassword") }}</h2>
@@ -50,6 +61,7 @@ import Layout from "../layouts/Main.vue";
 
 const user = reactive({
   email: "",
+  pseudo: "",
 });
 
 const passwords = reactive({
@@ -66,10 +78,15 @@ const billing = reactive({
   zip: "",
 });
 
+const savePseudo = async () => {
+  await api.remote.fetcher.put("/profile/pseudo", { pseudo: user.pseudo });
+};
+
 const fetchUserData = async () => {
   try {
     const { data } = await api.remote.fetcher.get("/profile");
     user.email = data.email;
+    user.pseudo = data.pseudo || "";
     billing.name = data.billing?.name || "";
     billing.email = data.billing?.email || "";
     billing.address = data.billing?.address || "";

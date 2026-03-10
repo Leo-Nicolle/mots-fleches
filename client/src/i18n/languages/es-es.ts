@@ -151,6 +151,8 @@ export const lang = {
     },
     register: {
         title: "Registrarse",
+        pseudo: "Nombre de usuario",
+        pseudoPlaceholder: "Elige un nombre de usuario",
         email: "Correo electrónico",
         password: "Contraseña",
         passwordConfirm: "Confirmar contraseña",
@@ -214,6 +216,9 @@ export const lang = {
     profile: {
         title: "Perfil",
         email: "Correo electrónico",
+        pseudo: "Nombre de usuario",
+        pseudoPlaceholder: "Tu nombre de usuario",
+        savePseudo: "Guardar nombre de usuario",
         changePassword: "Cambiar contraseña",
         currentPassword: "Contraseña actual",
         newPassword: "Nueva contraseña",

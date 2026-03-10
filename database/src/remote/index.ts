@@ -71,8 +71,8 @@ export class RemoteDB extends Database {
     return data;
   }
 
-  public register(email: string, password: string) {
-    return this.fetcher.post("/auth/register", { email, password });
+  public register(email: string, password: string, pseudo?: string) {
+    return this.fetcher.post("/auth/register", { email, password, pseudo });
   }
 
   public logout() {

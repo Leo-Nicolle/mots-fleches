@@ -1,6 +1,11 @@
 <template>
   <div id="Grid">
-    <Editor v-if="grid && style" v-model="grid" :style="style" />
+    <Editor v-if="grid && style" v-model="grid" :style="style"
+      :collab-status="collab.status.value"
+      :remote-users="collab.remoteUsers.value"
+      @update="onGridUpdate"
+      @focus-change="collab.setFocus"
+    />
   </div>
 </template>
 
@@ -11,13 +16,23 @@ import { ref, onMounted, toRaw, watch } from "vue";
 import { useRoute } from "vue-router";
 import { api } from "../../api";
 import { workerController } from '../../worker';
-/**
- * Route to edit a grid
- * Uses the route query to get the grid id
- */
+import { useCollab } from '../../js/useCollab';
+
 const grid = ref<Grid>();
 const style = ref<GridStyle>();
 const route = useRoute();
+const isCollab = ref(false);
+const collab = useCollab(route.params.id as string, grid, () => {
+  // if (grid.value) workerController.run(toRaw(grid.value));
+  console.log('Grid updated from collab');
+});
+
+function onGridUpdate() {
+  if (isCollab.value) {
+    collab.syncUpdate();
+  }
+}
+
 function fetch() {
   return api
     .getGrid(route.params.id as string)
@@ -40,14 +55,25 @@ function fetch() {
       console.error("E", e);
     });
 }
+
+// Autosave only when not in collab mode
 watch(() => grid, () => {
-  if (!grid.value) return;
+  if (!grid.value || isCollab.value) return;
   api.saveGrid(toRaw(grid.value));
 }, { deep: true });
 
+onMounted(async () => {
+  await fetch();
 
-onMounted(() => {
-  fetch();
+  // Start collab session when using the remote backend
+  if (api.mode === 'remote') {
+    try {
+      await collab.connect();
+      isCollab.value = true;
+    } catch (e) {
+      console.warn('Collab unavailable, falling back to autosave:', e);
+    }
+  }
 });
 </script>
 

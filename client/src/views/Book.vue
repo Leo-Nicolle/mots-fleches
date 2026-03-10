@@ -1,6 +1,6 @@
 <template>
   <Layout v-if="style && solutionsStyle"
-    :breadcrumbs="isBook ? [{ text: $t('nav.books'), to: '#/books' }, { text: book!.title }] : [{ text: $t('nav.grids') }]"
+    :breadcrumbs="isBook ? [{ text: $t('nav.books'), to: '/books' }, { text: book!.title }] : [{ text: $t('nav.grids') }]"
     :eltList="displayedGrids"
     :onCreate="canWrite ? createGrid : undefined"
     :onDelete="onDelete"

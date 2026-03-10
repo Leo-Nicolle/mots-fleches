@@ -7,6 +7,15 @@
         </h2>
         <GridModal v-model:grid="grid" @open="focus = nullCell" />
       </span>
+      <span class="collab-bar">
+        <span v-if="collabStatus" class="collab-status" :class="collabStatus">
+          {{ collabStatus }}
+        </span>
+        <span v-for="user in remoteUsers" :key="user.clientId" class="collab-user"
+          :style="{ background: user.color }" :title="user.name + (user.focus ? ` (${user.focus.x},${user.focus.y})` : '')">
+          {{ user.name.slice(0, 1).toUpperCase() }}
+        </span>
+      </span>
       <span>
         <n-button @click="onModeClick">
           {{ $t(`modes.${highlightMode}`) }}
@@ -49,6 +58,8 @@
   }"></SVGGrid>
           <GridHighlight :grid="grid" :style="style" :cell="hoveredCell" :cellProbas="cellProbas" :zoom="zoom"
             :mode="highlightMode" :offset="offset" :dir="dir" @update="onGridUpdate" />
+          <CollabCursors v-if="remoteUsers && remoteUsers.length" :style="style" :zoom="zoom"
+            :remote-users="remoteUsers" />
           <GridInput :grid="grid" :dir="dir" :style="style" :cell="focus" :offset="offset" :zoom="zoom"
             @focus="(point) => (focus = point)" @update="onGridUpdate" @keyup="onKeyUp">
           </GridInput>
@@ -71,6 +82,7 @@ import {
   unref,
   defineModel
 } from "vue";
+import type { CollabStatus, RemoteUser } from '../js/useCollab';
 import {
   AddCircleOutline,
   RemoveCircleOutline,
@@ -94,6 +106,7 @@ import GridHighlight from "./svg-renderer/GridHighlight.vue";
 import Suggestion from "./sidebars/Suggestion.vue";
 import Definition from './sidebars/Definition.vue';
 import Buttons from './sidebars/Buttons.vue';
+import CollabCursors from './svg-renderer/CollabCursors.vue';
 import { workerController } from "../worker";
 import { useRouter } from "vue-router";
 import { api } from "../api";
@@ -102,13 +115,13 @@ import { useI18n } from "vue-i18n";
  * Component to edit a grid
  */
 const props = defineProps<{
-  /**
-   * The grid style
-   */
   style: GridStyle;
+  collabStatus?: CollabStatus;
+  remoteUsers?: RemoteUser[];
 }>();
 const emit = defineEmits<{
   (event: "update"): void;
+  (event: "focus-change", x: number, y: number): void;
 }>();
 const i18n = useI18n();
 const breadcrumbs = ref<Breadcrumbs>([]);
@@ -154,6 +167,12 @@ function onGridUpdate() {
   throttledRefresCellProba();
   emit("update");
 }
+
+watch(focus, (cell) => {
+  if (cell) {
+    emit("focus-change", cell.x, cell.y);
+  }
+});
 function computeOffset(e) {
   const topOffset =
     container.value.querySelector(".svg-grid").getBoundingClientRect().top -
@@ -184,14 +203,14 @@ onMounted(() => {
     api.db.getBook(prev.split('/')[2]).then((book) => {
       if (!book) return;
       breadcrumbs.value = [
-        { text: i18n.t('nav.books'), to: `#/books` },
-        { text: book?.title, to: `#/book/${book.id}` },
+        { text: i18n.t('nav.books'), to: `/books` },
+        { text: book?.title, to: `/book/${book.id}` },
         { text: grid.value.title }
       ];
     });
   } else {
     breadcrumbs.value = [
-      { text: i18n.t('nav.grids'), to: `#/grids` },
+      { text: i18n.t('nav.grids'), to: `/grids` },
       { text: grid.value.title }
     ];
   }
@@ -343,5 +362,36 @@ text.highlighted {
 
 .superpose>* {
   grid-area: 1 / 1 / 1 / 1;
+}
+
+.collab-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.collab-status {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.collab-status.connected    { background: #d4edda; color: #155724; }
+.collab-status.connecting   { background: #fff3cd; color: #856404; }
+.collab-status.disconnected { background: #f8d7da; color: #721c24; }
+
+.collab-user {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: default;
 }
 </style>

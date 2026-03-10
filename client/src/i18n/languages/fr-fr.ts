@@ -152,6 +152,8 @@ export const lang = {
     },
     register: {
         title: "Inscription",
+        pseudo: "Pseudonyme",
+        pseudoPlaceholder: "Choisissez un pseudonyme",
         email: "Email",
         password: "Mot de passe",
         confirmPassword: "Confirmer le mot de passe",
@@ -215,6 +217,9 @@ export const lang = {
     profile: {
         title: "Profil",
         email: "Email",
+        pseudo: "Pseudonyme",
+        pseudoPlaceholder: "Votre pseudonyme",
+        savePseudo: "Enregistrer le pseudonyme",
         changePassword: "Changer le mot de passe",
         currentPassword: "Mot de passe actuel",
         newPassword: "Nouveau mot de passe",

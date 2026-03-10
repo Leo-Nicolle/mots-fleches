@@ -51,6 +51,7 @@ export type GroupDetail = {
 
 export type ProfileResponse = {
   email: string;
+  pseudo?: string | null;
   billing?: {
     name?: string;
     email?: string;
@@ -192,10 +193,10 @@ export interface AxiosAPI {
       : [data: ApiPostMap[T] extends { body: infer B } ? B : never]
   ): Promise<AxiosResponse<ApiPostMap[T]["response"]>>;
 
-  // put<T extends keyof ApiPutMap, D>(
-  //   url: T,
-  //   data: D
-  // ): Promise<AxiosResponse<ApiPutMap[T]>>;
+  put<T extends string, D = unknown>(
+    url: T,
+    data?: D
+  ): Promise<AxiosResponse<unknown>>;
 
   delete<T extends string>(
     url: T

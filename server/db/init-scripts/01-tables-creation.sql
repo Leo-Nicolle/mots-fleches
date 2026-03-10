@@ -6,6 +6,7 @@ CREATE TABLE Users (
     stripe_id VARCHAR(255),
     email VARCHAR(255) UNIQUE NOT NULL,
     password TEXT NOT NULL,
+    pseudo VARCHAR(255),
     created_at TIMESTAMP DEFAULT NOW(),
     last_connection TIMESTAMP,
     status VARCHAR(20) DEFAULT 'active',
@@ -214,6 +215,18 @@ CREATE TABLE StyleShares (
 );
 
 CREATE INDEX idx_styleshares_group ON StyleShares(group_id);
+
+-- ============================
+-- YDocUpdates Table (Yjs collaboration state — one row per active grid)
+-- ============================
+CREATE TABLE YDocUpdates (
+    id          SERIAL PRIMARY KEY,
+    doc_name    VARCHAR(255) NOT NULL UNIQUE,
+    update      BYTEA NOT NULL,
+    updated_at  TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_ydocupdates_updated ON YDocUpdates(updated_at);
 
 -- ============================
 -- Indexes and Optimizations

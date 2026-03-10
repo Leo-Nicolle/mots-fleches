@@ -116,6 +116,7 @@ model users {
   stripe_id                String?        @db.VarChar(255)
   email                    String         @unique @db.VarChar(255)
   password                 String
+  pseudo                   String?        @db.VarChar(255)
   created_at               DateTime?      @default(now()) @db.Timestamp(6)
   last_connection          DateTime?      @db.Timestamp(6)
   status                   String?        @default("active") @db.VarChar(20)
@@ -197,6 +198,15 @@ model styleshares {
 
   @@id([style_id, group_id])
   @@index([group_id], map: "idx_styleshares_group")
+}
+
+model ydocupdates {
+  id         Int      @id @default(autoincrement())
+  doc_name   String   @unique @db.VarChar(255)
+  update     Bytes
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+
+  @@index([updated_at], map: "idx_ydocupdates_updated")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
