@@ -161,10 +161,9 @@ function refreshSimpleSearch() {
   refreshingSearch.value = true;
   workerController.search(grid.value, focus.value, dir.value);
 }
-const throttledRefresCellProba = throttle(refreshCellProba, 200);
 const throttledRefresSimpleSearch = throttle(refreshSimpleSearch, 60);
 function onGridUpdate() {
-  throttledRefresCellProba();
+  refreshCellProba();
   emit("update");
 }
 
@@ -190,14 +189,14 @@ watchEffect(() => {
 });
 watch(method, () => {
   if (method.value === "accurate") {
-    return throttledRefresCellProba();
+    return refreshCellProba();
   }
   throttledRefresSimpleSearch();
 });
 onMounted(() => {
   computeOffset(null);
   workerController.checkGrid(grid.value);
-  throttledRefresCellProba();
+  refreshCellProba();
   const prev = router.options.history.state.back as string;
   if (prev.startsWith('/book')) {
     api.db.getBook(prev.split('/')[2]).then((book) => {
@@ -283,7 +282,7 @@ workerController.on("search-result", (data) => {
 });
 
 workerController.on("locale-changed", () => {
-  throttledRefresCellProba();
+  refreshCellProba();
   throttledRefresSimpleSearch();
 });
 workerController.on("start-locale-change", () => {

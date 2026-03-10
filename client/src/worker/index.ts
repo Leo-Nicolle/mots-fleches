@@ -1,6 +1,7 @@
 import { CellProba, Direction, Grid, GridValidity, Vec } from "grid";
 import EventEmitter from "eventemitter3";
 import * as fflate from "fflate";
+import throttle from "lodash.throttle";
 import { api } from "../api";
 import { copyCellProbas } from "./utils/heatmap";
 
@@ -97,13 +98,13 @@ class WorkerController extends EventEmitter<Events> {
     );
   }
 
-  run(grid: Grid) {
+  run = throttle((grid: Grid) => {
     this._postMessage(
       "run",
       JSON.stringify(grid.serialize()),
       this.suggestionWorkerId
     );
-  }
+  }, 200);
 
   autofill(grid: Grid, words: string[]) {
     this.loadingPromise.then(() => {

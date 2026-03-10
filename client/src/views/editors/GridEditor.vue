@@ -23,8 +23,7 @@ const style = ref<GridStyle>();
 const route = useRoute();
 const isCollab = ref(false);
 const collab = useCollab(route.params.id as string, grid, () => {
-  // if (grid.value) workerController.run(toRaw(grid.value));
-  console.log('Grid updated from collab');
+  if (grid.value) workerController.run(toRaw(grid.value));
 });
 
 function onGridUpdate() {
