@@ -8,7 +8,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
   dotenv({ path: path.resolve('..', '.env.stripe') });
 }
 if (!process.env.PORT) {
-  dotenv({ path: path.resolve('..', '.env') });
+  dotenv({ path: path.resolve('..', '.env.dev') });
 }
 if(!process.env.TURNSTILE_SECRET_KEY) {
   dotenv({ path: path.resolve('..', '.env.turnstile') });

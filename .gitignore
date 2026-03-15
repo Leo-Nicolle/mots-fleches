@@ -20,3 +20,4 @@ postgres-data/
 *.stripe
 .env.jwt
 .env.turnstile
+server/.env

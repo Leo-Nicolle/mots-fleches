@@ -31,13 +31,23 @@ services:
       dockerfile: Dockerfile # Use the Dockerfile in the API directory
     container_name: ${CONTAINER_NAME}-api
     restart: unless-stopped
+    env_file:
+      - .env
+      - .env.jwt
+      - .env.stripe
+      - .env.turnstile
     environment:
       DB_HOST: ${DB_HOST}
       DB_USER: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_NAME: ${POSTGRES_DB}
+      PORT: 3000
+      MODE: production
+    ports:
+      - "${API_PORT:-5480}:3000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - internal-network # Use the same internal network
     profiles:
