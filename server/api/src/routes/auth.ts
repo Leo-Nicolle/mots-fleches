@@ -16,10 +16,26 @@ import { createCustommer, getCustommer } from '../services/stripe';
 const router = Router();
 
 router.post('/register', async (req: Request, res: Response) => {
-  const { email, password, pseudo } = req.body;
+  const { email, password, pseudo, turnstileToken } = req.body;
   if (!email || !password) {
     res.status(400).json({ error: 'Email and password required' });
     return;
+  }
+  if (config.turnstile.secretKey) {
+    if (!turnstileToken) {
+      res.status(400).json({ error: 'Captcha token required' });
+      return;
+    }
+    const verifyRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret: config.turnstile.secretKey, response: turnstileToken }),
+    });
+    const verifyData = await verifyRes.json() as { success: boolean };
+    if (!verifyData.success) {
+      res.status(400).json({ error: 'Captcha verification failed' });
+      return;
+    }
   }
 
   const existingUser = await prisma.users.findUnique({ where: { email } });
@@ -27,26 +43,30 @@ router.post('/register', async (req: Request, res: Response) => {
     res.status(409).json({ error: 'User already exists' });
     return;
   }
-  // create stripe account for the user
+  const hashedPassword = await hashPassword(password);
+
+  // Attempt to create a Stripe customer; fail gracefully if Stripe is unavailable
+  let stripeId: string | null = null;
   try {
-    const customer =
-      (await getCustommer(email)) || (await createCustommer(email));
-    const hashedPassword = await hashPassword(password);
+    const customer = (await getCustommer(email)) || (await createCustommer(email));
+    stripeId = customer?.id ?? null;
+  } catch (error) {
+    console.warn('[register] Stripe unavailable, proceeding without stripe_id:', error);
+  }
+
+  try {
     const newUser = await prisma.users.create({
       data: {
         email,
         password: hashedPassword,
-        stripe_id: customer.id,
+        stripe_id: stripeId,
         pseudo: pseudo || null,
       },
     });
-
-    res
-      .status(201)
-      .json({ message: 'User registered successfully', userId: newUser.id });
+    res.status(201).json({ message: 'User registered successfully', userId: newUser.id });
   } catch (error) {
-    console.log('error', error);
-    if (error.core === 'email_invalid')
+    console.error('[register] DB error:', error);
+    if ((error as { code?: string }).code === 'email_invalid')
       res.status(400).json({ error: 'Invalid email' });
     else res.status(500).json({ error: 'Internal server error' });
   }

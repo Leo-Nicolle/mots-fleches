@@ -7,28 +7,24 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model books {
-  id       Int     @id @default(autoincrement())
-  name     String  @db.VarChar(255)
-  grid_ids Json
-  user_id  Int?
-  group_id Int?
-  groups   groups? @relation(fields: [group_id], references: [id], onUpdate: NoAction)
-  users    users?  @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+  id         Int          @id @default(autoincrement())
+  name       String       @db.VarChar(255)
+  grid_ids   Json
+  user_id    Int?
+  users      users?       @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+  bookshares bookshares[]
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model crosswords {
-  id         Int       @id @default(autoincrement())
-  content    String
-  created_at DateTime? @default(now()) @db.Timestamp(6)
-  updated_at DateTime? @default(now()) @db.Timestamp(6)
-  version    Int?      @default(1)
-  user_id    Int?
-  group_id   Int?
-  groups     groups?   @relation(fields: [group_id], references: [id], onUpdate: NoAction)
-  users      users?    @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+  id               Int                @id @default(autoincrement())
+  content          String
+  created_at       DateTime?          @default(now()) @db.Timestamp(6)
+  updated_at       DateTime?          @default(now()) @db.Timestamp(6)
+  version          Int?               @default(1)
+  user_id          Int?
+  users            users?             @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+  crosswordshares  crosswordshares[]
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -54,27 +50,27 @@ model groupmembers {
 }
 
 model groups {
-  id           Int            @id @default(autoincrement())
-  name         String         @unique @db.VarChar(255)
-  description  String?
-  created_at   DateTime?      @default(now()) @db.Timestamp(6)
-  owner_id     Int
-  disk_usage   BigInt?        @default(0)
-  tier_id      Int?           @default(1)
-  expires_at   DateTime?      @db.Timestamp(6)
-  bannedwords  bannedwords[]
-  books        books[]
-  crosswords   crosswords[]
-  customwords  customwords[]
-  fonts        fonts[]
-  groupmembers groupmembers[]
-  users        users          @relation(fields: [owner_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  tiers        tiers?         @relation(fields: [tier_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  images       images[]
-  payments     payments[]
-  styleshares  styleshares[]
-  wordlists    wordlists[]
-  words        words[]
+  id              Int               @id @default(autoincrement())
+  name            String            @unique @db.VarChar(255)
+  description     String?
+  created_at      DateTime?         @default(now()) @db.Timestamp(6)
+  owner_id        Int
+  disk_usage      BigInt?           @default(0)
+  tier_id         Int?              @default(1)
+  expires_at      DateTime?         @db.Timestamp(6)
+  bannedwords     bannedwords[]
+  customwords     customwords[]
+  groupmembers    groupmembers[]
+  users           users             @relation(fields: [owner_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  tiers           tiers?            @relation(fields: [tier_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  images          images[]
+  payments        payments[]
+  styleshares     styleshares[]
+  words           words[]
+  crosswordshares crosswordshares[]
+  bookshares      bookshares[]
+  wordlistshares  wordlistshares[]
+  fontshares      fontshares[]
 }
 
 model images {
@@ -139,20 +135,17 @@ model users {
   styles                   styles[]
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model wordlists {
-  id         Int       @id @default(autoincrement())
-  name       String    @db.VarChar(255)
-  words      Json
-  created_at DateTime? @default(now()) @db.Timestamp(6)
-  updated_at DateTime? @default(now()) @db.Timestamp(6)
-  version    Int?      @default(1)
-  user_id    Int?
-  group_id   Int?
-  groups     groups?   @relation(fields: [group_id], references: [id], onUpdate: NoAction)
-  users      users?    @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+  id              Int               @id @default(autoincrement())
+  name            String            @db.VarChar(255)
+  words           Json
+  created_at      DateTime?         @default(now()) @db.Timestamp(6)
+  updated_at      DateTime?         @default(now()) @db.Timestamp(6)
+  version         Int?              @default(1)
+  user_id         Int?
+  users           users?            @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+  wordlistshares  wordlistshares[]
 
-  @@index([group_id], map: "idx_wordlists_group")
   @@index([user_id], map: "idx_wordlists_user")
 }
 
@@ -200,6 +193,46 @@ model styleshares {
   @@index([group_id], map: "idx_styleshares_group")
 }
 
+model crosswordshares {
+  crossword_id Int
+  group_id     Int
+  crosswords   crosswords @relation(fields: [crossword_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  groups       groups     @relation(fields: [group_id],     references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([crossword_id, group_id])
+  @@index([group_id], map: "idx_crosswordshares_group")
+}
+
+model bookshares {
+  book_id  Int
+  group_id Int
+  books    books  @relation(fields: [book_id],  references: [id], onDelete: Cascade, onUpdate: NoAction)
+  groups   groups @relation(fields: [group_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([book_id, group_id])
+  @@index([group_id], map: "idx_bookshares_group")
+}
+
+model wordlistshares {
+  wordlist_id Int
+  group_id    Int
+  wordlists   wordlists @relation(fields: [wordlist_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  groups      groups    @relation(fields: [group_id],    references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([wordlist_id, group_id])
+  @@index([group_id], map: "idx_wordlistshares_group")
+}
+
+model fontshares {
+  font_id  Int
+  group_id Int
+  fonts    fonts  @relation(fields: [font_id],  references: [id], onDelete: Cascade, onUpdate: NoAction)
+  groups   groups @relation(fields: [group_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([font_id, group_id])
+  @@index([group_id], map: "idx_fontshares_group")
+}
+
 model ydocupdates {
   id         Int      @id @default(autoincrement())
   doc_name   String   @unique @db.VarChar(255)
@@ -219,18 +252,15 @@ model bannedwords {
   users    users?  @relation(fields: [user_id], references: [id], onUpdate: NoAction)
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model fonts {
-  id         Int       @id @default(autoincrement())
-  name       String    @unique @db.VarChar(255)
+  id         Int          @id @default(autoincrement())
+  name       String       @unique @db.VarChar(255)
   file_url   String
   user_id    Int?
-  group_id   Int?
-  created_at DateTime? @default(now()) @db.Timestamp(6)
-  groups     groups?   @relation(fields: [group_id], references: [id], onUpdate: NoAction)
-  users      users?    @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+  created_at DateTime?    @default(now()) @db.Timestamp(6)
+  users      users?       @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+  fontshares fontshares[]
 
-  @@index([group_id], map: "idx_fonts_group")
   @@index([name], map: "idx_fonts_name")
   @@index([user_id], map: "idx_fonts_user")
 }

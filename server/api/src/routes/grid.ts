@@ -18,14 +18,20 @@ router.get('/grids', authMiddleware, async (req: Request, res: Response) => {
 router.get('/grid/:id', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
   const results = await prisma.$queryRaw<{ content: string }[]>`
-    SELECT content FROM crosswords
-    WHERE content::jsonb->>'id' = ${req.params.id}
+    SELECT c.content FROM crosswords c
+    WHERE c.content::jsonb->>'id' = ${req.params.id}
       AND (
-        user_id = ${user.id}
-        OR group_id IN (SELECT group_id FROM groupmembers WHERE user_id = ${user.id})
+        c.user_id = ${user.id}
+        OR EXISTS (
+          SELECT 1 FROM crosswordshares cs
+          JOIN groupmembers gm ON gm.group_id = cs.group_id
+          WHERE cs.crossword_id = c.id AND gm.user_id = ${user.id}
+        )
         OR EXISTS (
           SELECT 1 FROM books b
-          WHERE b.group_id IN (SELECT group_id FROM groupmembers WHERE user_id = ${user.id})
+          JOIN bookshares bs ON bs.book_id = b.id
+          JOIN groupmembers gm ON gm.group_id = bs.group_id
+          WHERE gm.user_id = ${user.id}
             AND b.grid_ids::jsonb->'grids' @> to_jsonb(${req.params.id}::text)
         )
       )
@@ -42,20 +48,42 @@ router.post('/grid', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
   const grid = req.body;
   const content = JSON.stringify(grid);
-  const existing = await prisma.$queryRaw<{ id: number }[]>`
+
+  // 1. Check if the user owns a row with this client_id
+  const owned = await prisma.$queryRaw<{ id: number }[]>`
     SELECT id FROM crosswords
     WHERE user_id = ${user.id} AND content::jsonb->>'id' = ${grid.id}
   `;
-  if (existing.length) {
+  if (owned.length) {
     await prisma.crosswords.update({
-      where: { id: existing[0].id },
+      where: { id: owned[0].id },
       data: { content, updated_at: new Date() },
     });
-  } else {
-    await prisma.crosswords.create({
-      data: { content, user_id: user.id },
-    });
+    res.json(grid.id);
+    return;
   }
+
+  // 2. Check if a shared row is accessible via the user's group membership
+  const shared = await prisma.$queryRaw<{ id: number }[]>`
+    SELECT c.id FROM crosswords c
+    JOIN crosswordshares cs ON cs.crossword_id = c.id
+    JOIN groupmembers gm ON gm.group_id = cs.group_id
+    WHERE gm.user_id = ${user.id} AND c.content::jsonb->>'id' = ${grid.id}
+    LIMIT 1
+  `;
+  if (shared.length) {
+    await prisma.crosswords.update({
+      where: { id: shared[0].id },
+      data: { content, updated_at: new Date() },
+    });
+    res.json(grid.id);
+    return;
+  }
+
+  // 3. Create a new row owned by this user
+  await prisma.crosswords.create({
+    data: { content, user_id: user.id },
+  });
   res.json(grid.id);
 });
 
@@ -80,11 +108,15 @@ router.get('/books', authMiddleware, async (req: Request, res: Response) => {
 router.get('/book/:id', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
   const results = await prisma.$queryRaw<{ grid_ids: unknown }[]>`
-    SELECT grid_ids FROM books
-    WHERE grid_ids::jsonb->>'id' = ${req.params.id}
+    SELECT b.grid_ids FROM books b
+    WHERE b.grid_ids::jsonb->>'id' = ${req.params.id}
       AND (
-        user_id = ${user.id}
-        OR group_id IN (SELECT group_id FROM groupmembers WHERE user_id = ${user.id})
+        b.user_id = ${user.id}
+        OR EXISTS (
+          SELECT 1 FROM bookshares bs
+          JOIN groupmembers gm ON gm.group_id = bs.group_id
+          WHERE bs.book_id = b.id AND gm.user_id = ${user.id}
+        )
       )
     LIMIT 1
   `;
@@ -97,37 +129,75 @@ router.get('/book/:id', authMiddleware, async (req: Request, res: Response) => {
 
 router.get('/book/:id/ownership', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
-  const result = await prisma.$queryRaw<{ count: bigint; group_id: number | null }[]>`
-    SELECT COUNT(*) as count, MAX(group_id) as group_id FROM books
-    WHERE grid_ids::jsonb->>'id' = ${req.params.id}
-      AND (user_id = ${user.id} OR group_id IN (SELECT group_id FROM groupmembers WHERE user_id = ${user.id}))
+  const book = await prisma.$queryRaw<{ id: number }[]>`
+    SELECT b.id FROM books b
+    WHERE b.grid_ids::jsonb->>'id' = ${req.params.id}
+      AND (
+        b.user_id = ${user.id}
+        OR EXISTS (
+          SELECT 1 FROM bookshares bs
+          JOIN groupmembers gm ON gm.group_id = bs.group_id
+          WHERE bs.book_id = b.id AND gm.user_id = ${user.id}
+        )
+      )
+    LIMIT 1
   `;
-  const owned = result[0].count > 0n && (await prisma.$queryRaw<{ count: bigint }[]>`
+  if (!book.length) {
+    res.json({ owned: false, group_ids: [] });
+    return;
+  }
+  const owned = (await prisma.$queryRaw<{ count: bigint }[]>`
     SELECT COUNT(*) as count FROM books WHERE user_id = ${user.id} AND grid_ids::jsonb->>'id' = ${req.params.id}
   `)[0].count > 0n;
-  res.json({ owned, group_id: result[0].group_id ?? null });
+  const shares = await prisma.bookshares.findMany({
+    where: { book_id: book[0].id },
+    select: { group_id: true },
+  });
+  res.json({ owned, group_ids: shares.map((s) => s.group_id) });
 });
 
 router.post('/book', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
-  // RemoteDB sends { id, data: Book }
   const bookData = req.body.data ?? req.body;
   const bookId = req.body.id ?? bookData.id;
-  const existing = await prisma.$queryRaw<{ id: number }[]>`
+
+  // 1. Check if the user owns a row with this client_id
+  const owned = await prisma.$queryRaw<{ id: number }[]>`
     SELECT id FROM books
     WHERE user_id = ${user.id} AND grid_ids::jsonb->>'id' = ${bookId}
   `;
-  if (existing.length) {
+  if (owned.length) {
     await prisma.$executeRaw`
       UPDATE books
       SET name = ${bookData.title ?? bookId}, grid_ids = ${JSON.stringify(bookData)}::jsonb
-      WHERE id = ${existing[0].id}
+      WHERE id = ${owned[0].id}
     `;
-  } else {
-    await prisma.books.create({
-      data: { name: bookData.title ?? bookId, grid_ids: bookData, user_id: user.id },
-    });
+    res.json(bookId);
+    return;
   }
+
+  // 2. Check if a shared row is accessible via the user's group membership
+  const shared = await prisma.$queryRaw<{ id: number }[]>`
+    SELECT b.id FROM books b
+    JOIN bookshares bs ON bs.book_id = b.id
+    JOIN groupmembers gm ON gm.group_id = bs.group_id
+    WHERE gm.user_id = ${user.id} AND b.grid_ids::jsonb->>'id' = ${bookId}
+    LIMIT 1
+  `;
+  if (shared.length) {
+    await prisma.$executeRaw`
+      UPDATE books
+      SET name = ${bookData.title ?? bookId}, grid_ids = ${JSON.stringify(bookData)}::jsonb
+      WHERE id = ${shared[0].id}
+    `;
+    res.json(bookId);
+    return;
+  }
+
+  // 3. Create a new row owned by this user
+  await prisma.books.create({
+    data: { name: bookData.title ?? bookId, grid_ids: bookData, user_id: user.id },
+  });
   res.json(bookId);
 });
 

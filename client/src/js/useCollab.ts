@@ -37,20 +37,14 @@ export function useCollab(gridId: string, grid: Ref<Grid | undefined>, onRemoteC
   async function connect() {
     if (provider) return; // already connected
 
-    // 1. Exchange JWT for a one-time ticket and fetch user info
+    // 1. Exchange JWT for a one-time ticket (response includes display name)
     const accessToken = localStorage.getItem('accessToken') || '';
-    const [ticketRes, meRes] = await Promise.all([
-      fetch(`${API_BASE}/collab/ticket`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${accessToken}` },
-      }),
-      fetch(`${API_BASE}/me`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      }),
-    ]);
+    const ticketRes = await fetch(`${API_BASE}/collab/ticket`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
     if (!ticketRes.ok) throw new Error('Failed to obtain collab ticket');
-    const { ticket } = await ticketRes.json();
-    const me = meRes.ok ? await meRes.json() : null;
+    const { ticket, name: userName } = await ticketRes.json();
 
     // 2. Create Yjs document
     ydoc = new Y.Doc();
@@ -102,7 +96,7 @@ export function useCollab(gridId: string, grid: Ref<Grid | undefined>, onRemoteC
 
     // 6. Awareness: track remote users' focus
     provider.awareness.setLocalStateField('user', {
-      name: me?.pseudo || me?.email || `User-${Math.floor(Math.random() * 1000)}`,
+      name: userName,
       color: randomColor(),
     });
 

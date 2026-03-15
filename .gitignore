@@ -19,3 +19,4 @@ scripts/plausible-key
 postgres-data/
 *.stripe
 .env.jwt
+.env.turnstile

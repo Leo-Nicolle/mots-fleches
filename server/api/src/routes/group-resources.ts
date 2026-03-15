@@ -58,7 +58,9 @@ router.get('/group/:id/grids', authMiddleware, async (req: Request, res: Respons
     return;
   }
 
-  const rows = await prisma.crosswords.findMany({ where: { group_id: groupId } });
+  const rows = await prisma.crosswords.findMany({
+    where: { crosswordshares: { some: { group_id: groupId } } },
+  });
   res.json(rows.map((r) => JSON.parse(r.content)));
 });
 
@@ -71,8 +73,25 @@ router.get('/group/:id/books', authMiddleware, async (req: Request, res: Respons
     return;
   }
 
-  const rows = await prisma.books.findMany({ where: { group_id: groupId } });
+  const rows = await prisma.books.findMany({
+    where: { bookshares: { some: { group_id: groupId } } },
+  });
   res.json(rows.map((r) => r.grid_ids));
+});
+
+router.get('/group/:id/wordlists', authMiddleware, async (req: Request, res: Response) => {
+  const user = req.user as User;
+  const groupId = parseInt(req.params.id);
+
+  if (!(await isMember(user.id, groupId))) {
+    res.status(403).json({ error: 'Not a member of this group' });
+    return;
+  }
+
+  const rows = await prisma.wordlists.findMany({
+    where: { wordlistshares: { some: { group_id: groupId } } },
+  });
+  res.json(rows.map((r) => r.words));
 });
 
 router.get('/group/:id/styles', authMiddleware, async (req: Request, res: Response) => {
@@ -95,22 +114,40 @@ router.get('/group/:id/styles', authMiddleware, async (req: Request, res: Respon
 
 router.get('/grid/:id/sharing', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
-  const result = await prisma.$queryRaw<{ group_id: number | null }[]>`
-    SELECT group_id FROM crosswords
+  const row = await prisma.$queryRaw<{ id: number }[]>`
+    SELECT id FROM crosswords
     WHERE user_id = ${user.id} AND content::jsonb->>'id' = ${req.params.id}
   `;
-  if (!result.length) { res.status(404).json({ error: 'Grid not found' }); return; }
-  res.json({ group_id: result[0].group_id });
+  if (!row.length) { res.status(404).json({ error: 'Grid not found' }); return; }
+  const shares = await prisma.crosswordshares.findMany({
+    where: { crossword_id: row[0].id },
+    select: { group_id: true },
+  });
+  res.json({ group_ids: shares.map((s) => s.group_id) });
 });
 
 router.get('/book/:id/sharing', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
-  const result = await prisma.$queryRaw<{ group_id: number | null }[]>`
-    SELECT group_id FROM books
+  const row = await prisma.$queryRaw<{ id: number }[]>`
+    SELECT id FROM books
     WHERE user_id = ${user.id} AND grid_ids::jsonb->>'id' = ${req.params.id}
   `;
-  if (!result.length) { res.status(404).json({ error: 'Book not found' }); return; }
-  res.json({ group_id: result[0].group_id });
+  if (!row.length) { res.status(404).json({ error: 'Book not found' }); return; }
+  const shares = await prisma.bookshares.findMany({
+    where: { book_id: row[0].id },
+    select: { group_id: true },
+  });
+  res.json({ group_ids: shares.map((s) => s.group_id) });
+});
+
+router.get('/wordlist/:id/sharing', authMiddleware, async (req: Request, res: Response) => {
+  const user = req.user as User;
+  const wordlist = await prisma.wordlists.findFirst({
+    where: { id: parseInt(req.params.id), user_id: user.id },
+    include: { wordlistshares: { select: { group_id: true } } },
+  });
+  if (!wordlist) { res.status(404).json({ error: 'WordList not found' }); return; }
+  res.json({ group_ids: wordlist.wordlistshares.map((s) => s.group_id) });
 });
 
 router.get('/style/:id/sharing', authMiddleware, async (req: Request, res: Response) => {
@@ -121,6 +158,16 @@ router.get('/style/:id/sharing', authMiddleware, async (req: Request, res: Respo
   });
   if (!style) { res.status(404).json({ error: 'Style not found' }); return; }
   res.json({ group_ids: style.styleshares.map((s) => s.group_id) });
+});
+
+router.get('/font/:name/sharing', authMiddleware, async (req: Request, res: Response) => {
+  const user = req.user as User;
+  const font = await prisma.fonts.findFirst({
+    where: { name: req.params.name, user_id: user.id },
+    include: { fontshares: { select: { group_id: true } } },
+  });
+  if (!font) { res.status(404).json({ error: 'Font not found' }); return; }
+  res.json({ group_ids: font.fontshares.map((s) => s.group_id) });
 });
 
 // ── Share / Unshare grids ─────────────────────────────────────────────────────
@@ -135,20 +182,25 @@ router.post('/group/:id/grid/:gridId/share', authMiddleware, async (req: Request
     return;
   }
 
-  const result = await prisma.$executeRaw`
-    UPDATE crosswords
-    SET group_id = ${groupId}
+  const row = await prisma.$queryRaw<{ id: number }[]>`
+    SELECT id FROM crosswords
     WHERE user_id = ${user.id} AND content::jsonb->>'id' = ${gridId}
   `;
-  if (result === 0) {
+  if (!row.length) {
     res.status(404).json({ error: 'Grid not found or not owned by you' });
     return;
   }
 
+  await prisma.crosswordshares.upsert({
+    where: { crossword_id_group_id: { crossword_id: row[0].id, group_id: groupId } },
+    create: { crossword_id: row[0].id, group_id: groupId },
+    update: {},
+  });
+
   // Auto-share the style referenced by this grid
   const grid = await prisma.$queryRaw<{ styleId: string }[]>`
     SELECT content::jsonb->>'styleId' AS "styleId" FROM crosswords
-    WHERE user_id = ${user.id} AND content::jsonb->>'id' = ${gridId}
+    WHERE id = ${row[0].id}
   `;
   if (grid.length && grid[0].styleId) {
     await autoShareStyle(grid[0].styleId, user.id, groupId);
@@ -159,17 +211,21 @@ router.post('/group/:id/grid/:gridId/share', authMiddleware, async (req: Request
 
 router.delete('/group/:id/grid/:gridId/share', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
+  const groupId = parseInt(req.params.id);
   const gridId = req.params.gridId;
 
-  const result = await prisma.$executeRaw`
-    UPDATE crosswords
-    SET group_id = NULL
+  const row = await prisma.$queryRaw<{ id: number }[]>`
+    SELECT id FROM crosswords
     WHERE user_id = ${user.id} AND content::jsonb->>'id' = ${gridId}
   `;
-  if (result === 0) {
+  if (!row.length) {
     res.status(404).json({ error: 'Grid not found or not owned by you' });
     return;
   }
+
+  await prisma.crosswordshares.deleteMany({
+    where: { crossword_id: row[0].id, group_id: groupId },
+  });
   res.json({ success: true });
 });
 
@@ -185,21 +241,25 @@ router.post('/group/:id/book/:bookId/share', authMiddleware, async (req: Request
     return;
   }
 
-  const result = await prisma.$executeRaw`
-    UPDATE books
-    SET group_id = ${groupId}
+  const row = await prisma.$queryRaw<{ id: number }[]>`
+    SELECT id FROM books
     WHERE user_id = ${user.id} AND grid_ids::jsonb->>'id' = ${bookId}
   `;
-  if (result === 0) {
+  if (!row.length) {
     res.status(404).json({ error: 'Book not found or not owned by you' });
     return;
   }
 
+  await prisma.bookshares.upsert({
+    where: { book_id_group_id: { book_id: row[0].id, group_id: groupId } },
+    create: { book_id: row[0].id, group_id: groupId },
+    update: {},
+  });
+
   // Auto-share style and solutionStyle referenced by this book
   const book = await prisma.$queryRaw<{ style: string; solutionStyle: string }[]>`
     SELECT grid_ids::jsonb->>'style' AS style, grid_ids::jsonb->>'solutionStyle' AS "solutionStyle"
-    FROM books
-    WHERE user_id = ${user.id} AND grid_ids::jsonb->>'id' = ${bookId}
+    FROM books WHERE id = ${row[0].id}
   `;
   if (book.length) {
     const { style, solutionStyle } = book[0];
@@ -212,17 +272,68 @@ router.post('/group/:id/book/:bookId/share', authMiddleware, async (req: Request
 
 router.delete('/group/:id/book/:bookId/share', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
+  const groupId = parseInt(req.params.id);
   const bookId = req.params.bookId;
 
-  const result = await prisma.$executeRaw`
-    UPDATE books
-    SET group_id = NULL
+  const row = await prisma.$queryRaw<{ id: number }[]>`
+    SELECT id FROM books
     WHERE user_id = ${user.id} AND grid_ids::jsonb->>'id' = ${bookId}
   `;
-  if (result === 0) {
+  if (!row.length) {
     res.status(404).json({ error: 'Book not found or not owned by you' });
     return;
   }
+
+  await prisma.bookshares.deleteMany({
+    where: { book_id: row[0].id, group_id: groupId },
+  });
+  res.json({ success: true });
+});
+
+// ── Share / Unshare wordlists ─────────────────────────────────────────────────
+
+router.post('/group/:id/wordlist/:wordlistId/share', authMiddleware, async (req: Request, res: Response) => {
+  const user = req.user as User;
+  const groupId = parseInt(req.params.id);
+  const wordlistId = parseInt(req.params.wordlistId);
+
+  if (!(await isMember(user.id, groupId))) {
+    res.status(403).json({ error: 'Not a member of this group' });
+    return;
+  }
+
+  const existing = await prisma.wordlists.findFirst({
+    where: { id: wordlistId, user_id: user.id },
+  });
+  if (!existing) {
+    res.status(404).json({ error: 'WordList not found or not owned by you' });
+    return;
+  }
+
+  await prisma.wordlistshares.upsert({
+    where: { wordlist_id_group_id: { wordlist_id: wordlistId, group_id: groupId } },
+    create: { wordlist_id: wordlistId, group_id: groupId },
+    update: {},
+  });
+  res.json({ success: true });
+});
+
+router.delete('/group/:id/wordlist/:wordlistId/share', authMiddleware, async (req: Request, res: Response) => {
+  const user = req.user as User;
+  const groupId = parseInt(req.params.id);
+  const wordlistId = parseInt(req.params.wordlistId);
+
+  const existing = await prisma.wordlists.findFirst({
+    where: { id: wordlistId, user_id: user.id },
+  });
+  if (!existing) {
+    res.status(404).json({ error: 'WordList not found or not owned by you' });
+    return;
+  }
+
+  await prisma.wordlistshares.deleteMany({
+    where: { wordlist_id: wordlistId, group_id: groupId },
+  });
   res.json({ success: true });
 });
 
@@ -273,7 +384,7 @@ router.delete('/group/:id/style/:styleId/share', authMiddleware, async (req: Req
   res.json({ success: true });
 });
 
-// ── GET group fonts ───────────────────────────────────────────────────────────
+// ── GET / Share / Unshare fonts ───────────────────────────────────────────────
 
 router.get('/group/:id/fonts', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
@@ -284,25 +395,15 @@ router.get('/group/:id/fonts', authMiddleware, async (req: Request, res: Respons
     return;
   }
 
-  const rows = await prisma.fonts.findMany({ where: { group_id: groupId } });
+  const rows = await prisma.fonts.findMany({
+    where: { fontshares: { some: { group_id: groupId } } },
+  });
   res.json(rows.map((f) => ({
     family: f.name,
     content: f.file_url,
     updated: f.created_at ? f.created_at.getTime() : 0,
   })));
 });
-
-router.get('/font/:name/sharing', authMiddleware, async (req: Request, res: Response) => {
-  const user = req.user as User;
-  const font = await prisma.fonts.findFirst({
-    where: { name: req.params.name, user_id: user.id },
-    select: { group_id: true },
-  });
-  if (!font) { res.status(404).json({ error: 'Font not found' }); return; }
-  res.json({ group_id: font.group_id });
-});
-
-// ── Share / Unshare fonts ─────────────────────────────────────────────────────
 
 router.post('/group/:id/font/:name/share', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
@@ -321,12 +422,17 @@ router.post('/group/:id/font/:name/share', authMiddleware, async (req: Request, 
     return;
   }
 
-  await prisma.fonts.update({ where: { id: existing.id }, data: { group_id: groupId } });
+  await prisma.fontshares.upsert({
+    where: { font_id_group_id: { font_id: existing.id, group_id: groupId } },
+    create: { font_id: existing.id, group_id: groupId },
+    update: {},
+  });
   res.json({ success: true });
 });
 
 router.delete('/group/:id/font/:name/share', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
+  const groupId = parseInt(req.params.id);
 
   const existing = await prisma.fonts.findFirst({
     where: { name: req.params.name, user_id: user.id },
@@ -336,7 +442,9 @@ router.delete('/group/:id/font/:name/share', authMiddleware, async (req: Request
     return;
   }
 
-  await prisma.fonts.update({ where: { id: existing.id }, data: { group_id: null } });
+  await prisma.fontshares.deleteMany({
+    where: { font_id: existing.id, group_id: groupId },
+  });
   res.json({ success: true });
 });
 

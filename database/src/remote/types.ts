@@ -118,6 +118,8 @@ type ApiPostMap = {
     body: {
       email: string;
       password: string;
+      pseudo?: string;
+      turnstileToken?: string;
     };
     response: {
       message: string;

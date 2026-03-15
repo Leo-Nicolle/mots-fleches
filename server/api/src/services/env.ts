@@ -10,6 +10,9 @@ if (!process.env.STRIPE_SECRET_KEY) {
 if (!process.env.PORT) {
   dotenv({ path: path.resolve('..', '.env') });
 }
+if(!process.env.TURNSTILE_SECRET_KEY) {
+  dotenv({ path: path.resolve('..', '.env.turnstile') });
+}
 const config = {
   port: process.env.PORT || 3000,
   mode: process.env.MODE || 'production',
@@ -31,5 +34,8 @@ const config = {
     refreshTokenExpiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN || '7d',
   },
   environment: process.env.NODE_ENV || 'development',
+  turnstile: {
+    secretKey: process.env.TURNSTILE_SECRET_KEY || '',
+  },
 };
 export default config;

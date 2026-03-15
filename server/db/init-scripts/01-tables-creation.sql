@@ -53,10 +53,7 @@ CREATE TABLE Crosswords (
     updated_at TIMESTAMP DEFAULT NOW(),
     version INTEGER DEFAULT 1,
     user_id INTEGER,
-    group_id INTEGER,
-    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE SET NULL,
-    FOREIGN KEY (group_id) REFERENCES Groups(id) ON DELETE SET NULL,
-    CHECK (user_id IS NOT NULL OR group_id IS NOT NULL)
+    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE SET NULL
 );
 
 -- ============================
@@ -73,6 +70,7 @@ CREATE TABLE Words (
     FOREIGN KEY (group_id) REFERENCES Groups(id) ON DELETE SET NULL,
     CHECK (user_id IS NOT NULL OR group_id IS NOT NULL)
 );
+-- Note: Words/CustomWords/BannedWords retain group_id (direct ownership, not shared)
 
 -- ============================
 -- CustomWords Table
@@ -111,10 +109,7 @@ CREATE TABLE WordLists (
     updated_at TIMESTAMP DEFAULT NOW(),
     version INTEGER DEFAULT 1,
     user_id INTEGER,
-    group_id INTEGER,
-    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE SET NULL,
-    FOREIGN KEY (group_id) REFERENCES Groups(id) ON DELETE SET NULL,
-    CHECK (user_id IS NOT NULL OR group_id IS NOT NULL)
+    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE SET NULL
 );
 
 -- ============================
@@ -137,10 +132,7 @@ CREATE TABLE Books (
     name VARCHAR(255) NOT NULL,
     grid_ids JSONB NOT NULL,
     user_id INTEGER,
-    group_id INTEGER,
-    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE SET NULL,
-    FOREIGN KEY (group_id) REFERENCES Groups(id) ON DELETE SET NULL,
-    CHECK (user_id IS NOT NULL OR group_id IS NOT NULL)
+    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE SET NULL
 );
 
 -- ============================
@@ -176,11 +168,8 @@ CREATE TABLE Fonts (
     name VARCHAR(255) NOT NULL UNIQUE,
     file_url TEXT NOT NULL,
     user_id INTEGER,
-    group_id INTEGER,
     created_at TIMESTAMP DEFAULT NOW(),
-    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE SET NULL,
-    FOREIGN KEY (group_id) REFERENCES Groups(id) ON DELETE SET NULL,
-    CHECK (user_id IS NOT NULL OR group_id IS NOT NULL)
+    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE SET NULL
 );
 
 -- ============================
@@ -188,7 +177,6 @@ CREATE TABLE Fonts (
 -- ============================
 CREATE INDEX idx_fonts_name ON Fonts(name);
 CREATE INDEX idx_fonts_user ON Fonts(user_id);
-CREATE INDEX idx_fonts_group ON Fonts(group_id);
 
 
 -- ============================
@@ -217,6 +205,46 @@ CREATE TABLE StyleShares (
 CREATE INDEX idx_styleshares_group ON StyleShares(group_id);
 
 -- ============================
+-- CrosswordShares Table (many-to-many: a grid can be shared to multiple groups)
+-- ============================
+CREATE TABLE CrosswordShares (
+    crossword_id INTEGER NOT NULL REFERENCES Crosswords(id) ON DELETE CASCADE,
+    group_id     INTEGER NOT NULL REFERENCES Groups(id)     ON DELETE CASCADE,
+    PRIMARY KEY (crossword_id, group_id)
+);
+CREATE INDEX idx_crosswordshares_group ON CrosswordShares(group_id);
+
+-- ============================
+-- BookShares Table
+-- ============================
+CREATE TABLE BookShares (
+    book_id  INTEGER NOT NULL REFERENCES Books(id)  ON DELETE CASCADE,
+    group_id INTEGER NOT NULL REFERENCES Groups(id) ON DELETE CASCADE,
+    PRIMARY KEY (book_id, group_id)
+);
+CREATE INDEX idx_bookshares_group ON BookShares(group_id);
+
+-- ============================
+-- WordListShares Table
+-- ============================
+CREATE TABLE WordListShares (
+    wordlist_id INTEGER NOT NULL REFERENCES WordLists(id) ON DELETE CASCADE,
+    group_id    INTEGER NOT NULL REFERENCES Groups(id)    ON DELETE CASCADE,
+    PRIMARY KEY (wordlist_id, group_id)
+);
+CREATE INDEX idx_wordlistshares_group ON WordListShares(group_id);
+
+-- ============================
+-- FontShares Table
+-- ============================
+CREATE TABLE FontShares (
+    font_id  INTEGER NOT NULL REFERENCES Fonts(id)  ON DELETE CASCADE,
+    group_id INTEGER NOT NULL REFERENCES Groups(id) ON DELETE CASCADE,
+    PRIMARY KEY (font_id, group_id)
+);
+CREATE INDEX idx_fontshares_group ON FontShares(group_id);
+
+-- ============================
 -- YDocUpdates Table (Yjs collaboration state — one row per active grid)
 -- ============================
 CREATE TABLE YDocUpdates (
@@ -234,5 +262,4 @@ CREATE INDEX idx_ydocupdates_updated ON YDocUpdates(updated_at);
 CREATE INDEX idx_words_word ON Words(word);
 CREATE INDEX idx_customwords_word ON CustomWords(word);
 CREATE INDEX idx_wordlists_user ON WordLists(user_id);
-CREATE INDEX idx_wordlists_group ON WordLists(group_id);
 CREATE INDEX idx_tokens_token ON TokenBlacklist(token);

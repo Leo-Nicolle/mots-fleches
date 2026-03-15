@@ -382,7 +382,10 @@ export class Grid {
       row.forEach((cell, j) => {
         cell.highlighted = false;
         cell.suggestion = '';
-        res.cells[i][j] = cell;
+        res.cells[i][j] = {
+          ...res.cells[i][j],
+          ...cell
+        }
       });
     });
     res.title = title;

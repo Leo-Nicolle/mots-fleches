@@ -160,14 +160,20 @@ function handleConnection(ws: WebSocket, docName: string) {
 
 async function checkGridAccess(userId: number, gridId: string): Promise<boolean> {
   const results = await prisma.$queryRaw<{ content: string }[]>`
-    SELECT content FROM crosswords
-    WHERE content::jsonb->>'id' = ${gridId}
+    SELECT c.content FROM crosswords c
+    WHERE c.content::jsonb->>'id' = ${gridId}
       AND (
-        user_id = ${userId}
-        OR group_id IN (SELECT group_id FROM groupmembers WHERE user_id = ${userId})
+        c.user_id = ${userId}
+        OR EXISTS (
+          SELECT 1 FROM crosswordshares cs
+          JOIN groupmembers gm ON gm.group_id = cs.group_id
+          WHERE cs.crossword_id = c.id AND gm.user_id = ${userId}
+        )
         OR EXISTS (
           SELECT 1 FROM books b
-          WHERE b.group_id IN (SELECT group_id FROM groupmembers WHERE user_id = ${userId})
+          JOIN bookshares bs ON bs.book_id = b.id
+          JOIN groupmembers gm ON gm.group_id = bs.group_id
+          WHERE gm.user_id = ${userId}
             AND b.grid_ids::jsonb->'grids' @> to_jsonb(${gridId}::text)
         )
       )
