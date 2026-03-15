@@ -33,7 +33,7 @@ router.get('/groups', authMiddleware, async (req: Request, res: Response) => {
 // Get group details with members (must be a member)
 router.get('/group/:id', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
-  const groupId = parseInt(req.params.id);
+  const groupId = parseInt(req.params.id as string);
 
   const membership = await prisma.groupmembers.findUnique({
     where: { user_id_group_id: { user_id: user.id, group_id: groupId } },
@@ -97,7 +97,7 @@ router.post('/group', authMiddleware, async (req: Request, res: Response) => {
 // Update group name/description (owner only)
 router.put('/group/:id', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
-  const groupId = parseInt(req.params.id);
+  const groupId = parseInt(req.params.id as string);
 
   const group = await prisma.groups.findUnique({ where: { id: groupId } });
   if (!group) {
@@ -123,7 +123,7 @@ router.put('/group/:id', authMiddleware, async (req: Request, res: Response) => 
 // Delete group (owner only)
 router.delete('/group/:id', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
-  const groupId = parseInt(req.params.id);
+  const groupId = parseInt(req.params.id as string);
 
   const group = await prisma.groups.findUnique({ where: { id: groupId } });
   if (!group) {
@@ -142,7 +142,7 @@ router.delete('/group/:id', authMiddleware, async (req: Request, res: Response) 
 // Add a member by email (owner or admin)
 router.post('/group/:id/member', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
-  const groupId = parseInt(req.params.id);
+  const groupId = parseInt(req.params.id as string);
 
   const callerMembership = await prisma.groupmembers.findUnique({
     where: { user_id_group_id: { user_id: user.id, group_id: groupId } },
@@ -185,8 +185,8 @@ router.post('/group/:id/member', authMiddleware, async (req: Request, res: Respo
 // Remove a member (owner/admin, or the member themselves leaving)
 router.delete('/group/:id/member/:userId', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
-  const groupId = parseInt(req.params.id);
-  const targetUserId = parseInt(req.params.userId);
+  const groupId = parseInt(req.params.id as string);
+  const targetUserId = parseInt(req.params.userId as string);
   const isSelf = user.id === targetUserId;
 
   if (!isSelf) {
@@ -220,8 +220,8 @@ router.delete('/group/:id/member/:userId', authMiddleware, async (req: Request, 
 // Update member role (owner only)
 router.put('/group/:id/member/:userId', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
-  const groupId = parseInt(req.params.id);
-  const targetUserId = parseInt(req.params.userId);
+  const groupId = parseInt(req.params.id as string);
+  const targetUserId = parseInt(req.params.userId as string);
 
   const group = await prisma.groups.findUnique({ where: { id: groupId } });
   if (!group || group.owner_id !== user.id) {

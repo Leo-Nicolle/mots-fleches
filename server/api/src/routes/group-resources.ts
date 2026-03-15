@@ -29,7 +29,7 @@ async function autoShareStyle(clientId: string, userId: number, groupId: number)
 
 router.get('/group/:id/style/:clientId', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
-  const groupId = parseInt(req.params.id);
+  const groupId = parseInt(req.params.id as string);
 
   if (!(await isMember(user.id, groupId))) {
     res.status(403).json({ error: 'Not a member of this group' });
@@ -37,7 +37,7 @@ router.get('/group/:id/style/:clientId', authMiddleware, async (req: Request, re
   }
 
   const share = await prisma.styleshares.findFirst({
-    where: { group_id: groupId, styles: { client_id: req.params.clientId } },
+    where: { group_id: groupId, styles: { client_id: req.params.clientId as string } },
     include: { styles: true },
   });
   if (!share) {
@@ -51,7 +51,7 @@ router.get('/group/:id/style/:clientId', authMiddleware, async (req: Request, re
 
 router.get('/group/:id/grids', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
-  const groupId = parseInt(req.params.id);
+  const groupId = parseInt(req.params.id as string);
 
   if (!(await isMember(user.id, groupId))) {
     res.status(403).json({ error: 'Not a member of this group' });
@@ -66,7 +66,7 @@ router.get('/group/:id/grids', authMiddleware, async (req: Request, res: Respons
 
 router.get('/group/:id/books', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
-  const groupId = parseInt(req.params.id);
+  const groupId = parseInt(req.params.id as string);
 
   if (!(await isMember(user.id, groupId))) {
     res.status(403).json({ error: 'Not a member of this group' });
@@ -81,7 +81,7 @@ router.get('/group/:id/books', authMiddleware, async (req: Request, res: Respons
 
 router.get('/group/:id/wordlists', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
-  const groupId = parseInt(req.params.id);
+  const groupId = parseInt(req.params.id as string);
 
   if (!(await isMember(user.id, groupId))) {
     res.status(403).json({ error: 'Not a member of this group' });
@@ -96,7 +96,7 @@ router.get('/group/:id/wordlists', authMiddleware, async (req: Request, res: Res
 
 router.get('/group/:id/styles', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
-  const groupId = parseInt(req.params.id);
+  const groupId = parseInt(req.params.id as string);
 
   if (!(await isMember(user.id, groupId))) {
     res.status(403).json({ error: 'Not a member of this group' });
@@ -143,7 +143,7 @@ router.get('/book/:id/sharing', authMiddleware, async (req: Request, res: Respon
 router.get('/wordlist/:id/sharing', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
   const wordlist = await prisma.wordlists.findFirst({
-    where: { id: parseInt(req.params.id), user_id: user.id },
+    where: { id: parseInt(req.params.id as string), user_id: user.id },
     include: { wordlistshares: { select: { group_id: true } } },
   });
   if (!wordlist) { res.status(404).json({ error: 'WordList not found' }); return; }
@@ -153,7 +153,7 @@ router.get('/wordlist/:id/sharing', authMiddleware, async (req: Request, res: Re
 router.get('/style/:id/sharing', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
   const style = await prisma.styles.findFirst({
-    where: { client_id: req.params.id, user_id: user.id },
+    where: { client_id: req.params.id as string, user_id: user.id },
     include: { styleshares: { select: { group_id: true } } },
   });
   if (!style) { res.status(404).json({ error: 'Style not found' }); return; }
@@ -163,7 +163,7 @@ router.get('/style/:id/sharing', authMiddleware, async (req: Request, res: Respo
 router.get('/font/:name/sharing', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
   const font = await prisma.fonts.findFirst({
-    where: { name: req.params.name, user_id: user.id },
+    where: { name: req.params.name as string, user_id: user.id },
     include: { fontshares: { select: { group_id: true } } },
   });
   if (!font) { res.status(404).json({ error: 'Font not found' }); return; }
@@ -174,7 +174,7 @@ router.get('/font/:name/sharing', authMiddleware, async (req: Request, res: Resp
 
 router.post('/group/:id/grid/:gridId/share', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
-  const groupId = parseInt(req.params.id);
+  const groupId = parseInt(req.params.id as string);
   const gridId = req.params.gridId;
 
   if (!(await isMember(user.id, groupId))) {
@@ -211,7 +211,7 @@ router.post('/group/:id/grid/:gridId/share', authMiddleware, async (req: Request
 
 router.delete('/group/:id/grid/:gridId/share', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
-  const groupId = parseInt(req.params.id);
+  const groupId = parseInt(req.params.id as string);
   const gridId = req.params.gridId;
 
   const row = await prisma.$queryRaw<{ id: number }[]>`
@@ -233,7 +233,7 @@ router.delete('/group/:id/grid/:gridId/share', authMiddleware, async (req: Reque
 
 router.post('/group/:id/book/:bookId/share', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
-  const groupId = parseInt(req.params.id);
+  const groupId = parseInt(req.params.id as string);
   const bookId = req.params.bookId;
 
   if (!(await isMember(user.id, groupId))) {
@@ -272,7 +272,7 @@ router.post('/group/:id/book/:bookId/share', authMiddleware, async (req: Request
 
 router.delete('/group/:id/book/:bookId/share', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
-  const groupId = parseInt(req.params.id);
+  const groupId = parseInt(req.params.id as string);
   const bookId = req.params.bookId;
 
   const row = await prisma.$queryRaw<{ id: number }[]>`
@@ -294,8 +294,8 @@ router.delete('/group/:id/book/:bookId/share', authMiddleware, async (req: Reque
 
 router.post('/group/:id/wordlist/:wordlistId/share', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
-  const groupId = parseInt(req.params.id);
-  const wordlistId = parseInt(req.params.wordlistId);
+  const groupId = parseInt(req.params.id as string);
+  const wordlistId = parseInt(req.params.wordlistId as string);
 
   if (!(await isMember(user.id, groupId))) {
     res.status(403).json({ error: 'Not a member of this group' });
@@ -320,8 +320,8 @@ router.post('/group/:id/wordlist/:wordlistId/share', authMiddleware, async (req:
 
 router.delete('/group/:id/wordlist/:wordlistId/share', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
-  const groupId = parseInt(req.params.id);
-  const wordlistId = parseInt(req.params.wordlistId);
+  const groupId = parseInt(req.params.id as string);
+  const wordlistId = parseInt(req.params.wordlistId as string);
 
   const existing = await prisma.wordlists.findFirst({
     where: { id: wordlistId, user_id: user.id },
@@ -341,8 +341,8 @@ router.delete('/group/:id/wordlist/:wordlistId/share', authMiddleware, async (re
 
 router.post('/group/:id/style/:styleId/share', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
-  const groupId = parseInt(req.params.id);
-  const styleId = req.params.styleId;
+  const groupId = parseInt(req.params.id as string);
+  const styleId = req.params.styleId as string;
 
   if (!(await isMember(user.id, groupId))) {
     res.status(403).json({ error: 'Not a member of this group' });
@@ -367,8 +367,8 @@ router.post('/group/:id/style/:styleId/share', authMiddleware, async (req: Reque
 
 router.delete('/group/:id/style/:styleId/share', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
-  const groupId = parseInt(req.params.id);
-  const styleId = req.params.styleId;
+  const groupId = parseInt(req.params.id as string);
+  const styleId = req.params.styleId as string;
 
   const existing = await prisma.styles.findFirst({
     where: { client_id: styleId, user_id: user.id },
@@ -388,7 +388,7 @@ router.delete('/group/:id/style/:styleId/share', authMiddleware, async (req: Req
 
 router.get('/group/:id/fonts', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
-  const groupId = parseInt(req.params.id);
+  const groupId = parseInt(req.params.id as string);
 
   if (!(await isMember(user.id, groupId))) {
     res.status(403).json({ error: 'Not a member of this group' });
@@ -407,7 +407,7 @@ router.get('/group/:id/fonts', authMiddleware, async (req: Request, res: Respons
 
 router.post('/group/:id/font/:name/share', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
-  const groupId = parseInt(req.params.id);
+  const groupId = parseInt(req.params.id as string);
 
   if (!(await isMember(user.id, groupId))) {
     res.status(403).json({ error: 'Not a member of this group' });
@@ -415,7 +415,7 @@ router.post('/group/:id/font/:name/share', authMiddleware, async (req: Request, 
   }
 
   const existing = await prisma.fonts.findFirst({
-    where: { name: req.params.name, user_id: user.id },
+    where: { name: req.params.name as string, user_id: user.id },
   });
   if (!existing) {
     res.status(404).json({ error: 'Font not found or not owned by you' });
@@ -432,10 +432,10 @@ router.post('/group/:id/font/:name/share', authMiddleware, async (req: Request, 
 
 router.delete('/group/:id/font/:name/share', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
-  const groupId = parseInt(req.params.id);
+  const groupId = parseInt(req.params.id as string);
 
   const existing = await prisma.fonts.findFirst({
-    where: { name: req.params.name, user_id: user.id },
+    where: { name: req.params.name as string, user_id: user.id },
   });
   if (!existing) {
     res.status(404).json({ error: 'Font not found or not owned by you' });

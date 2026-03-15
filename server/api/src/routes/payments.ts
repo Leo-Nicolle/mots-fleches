@@ -101,7 +101,7 @@ router.post('/subscribe', authMiddleware, async (req, res) => {
 
     // Return the client secret for payment confirmation
     const client_secret =
-      subscription.latest_invoice?.payment_intent?.client_secret;
+      (subscription.latest_invoice as any)?.payment_intent?.client_secret;
     if (!client_secret) {
       return res.status(500).send({ error: 'Failed to create subscription' });
     }
@@ -130,12 +130,12 @@ router.get('/invoice-preview', authMiddleware, async (req, res) => {
   const user = req.user as User;
   const customerId = user.stripe_id;
   const subscription = await stripe.subscriptions.retrieve(
-    req.query.subscriptionId
+    req.query.subscriptionId as string
   );
 
   const invoice = await stripe.invoices.retrieveUpcoming({
-    customer: customerId,
-    subscription: req.query.subscriptionId,
+    customer: customerId ?? undefined,
+    subscription: req.query.subscriptionId as string,
     subscription_items: [
       {
         id: subscription.items.data[0].id,

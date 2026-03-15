@@ -3,7 +3,7 @@ import './env';
 import config from './env';
 import plans from '../plans.json';
 const stripe = new Stripe(config.stripe.secretKey as string, {
-  apiVersion: '2022-11-15',
+  apiVersion: '2025-02-24.acacia',
 });
 
 export const createPaymentIntent = async (

@@ -221,7 +221,7 @@ router.get('/styles', authMiddleware, async (req: Request, res: Response) => {
 router.get('/style/:id', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
   const style = await prisma.styles.findFirst({
-    where: { client_id: req.params.id, user_id: user.id },
+    where: { client_id: req.params.id as string, user_id: user.id },
   });
   if (!style) {
     res.status(404).json({ error: 'Style not found' });
@@ -247,7 +247,7 @@ router.post('/style', authMiddleware, async (req: Request, res: Response) => {
 router.delete('/style/:id', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
   await prisma.styles.deleteMany({
-    where: { client_id: req.params.id, user_id: user.id },
+    where: { client_id: req.params.id as string, user_id: user.id },
   });
   res.json({ success: true });
 });
@@ -263,7 +263,7 @@ router.get('/words', authMiddleware, async (req: Request, res: Response) => {
 router.get('/word/:id', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
   const word = await prisma.customwords.findFirst({
-    where: { word: req.params.id, user_id: user.id },
+    where: { word: req.params.id as string, user_id: user.id },
   });
   if (!word) {
     res.status(404).json({ error: 'Word not found' });
@@ -287,7 +287,7 @@ router.post('/word', authMiddleware, async (req: Request, res: Response) => {
 router.delete('/word/:id', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
   await prisma.customwords.deleteMany({
-    where: { word: req.params.id, user_id: user.id },
+    where: { word: req.params.id as string, user_id: user.id },
   });
   res.json({ success: true });
 });
@@ -303,7 +303,7 @@ router.get('/banned-words', authMiddleware, async (req: Request, res: Response) 
 router.get('/banned-word/:id', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
   const word = await prisma.bannedwords.findFirst({
-    where: { word: req.params.id, user_id: user.id },
+    where: { word: req.params.id as string, user_id: user.id },
   });
   if (!word) {
     res.status(404).json({ error: 'Banned word not found' });
@@ -327,7 +327,7 @@ router.post('/banned-word', authMiddleware, async (req: Request, res: Response) 
 router.delete('/banned-word/:id', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
   await prisma.bannedwords.deleteMany({
-    where: { word: req.params.id, user_id: user.id },
+    where: { word: req.params.id as string, user_id: user.id },
   });
   res.json({ success: true });
 });
@@ -349,7 +349,7 @@ router.get('/fonts', authMiddleware, async (req: Request, res: Response) => {
 router.get('/font/:id', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
   const font = await prisma.fonts.findFirst({
-    where: { name: req.params.id, user_id: user.id },
+    where: { name: req.params.id as string, user_id: user.id },
   });
   if (!font) {
     res.status(404).json({ error: 'Font not found' });
@@ -380,7 +380,7 @@ router.post('/font', authMiddleware, async (req: Request, res: Response) => {
 router.delete('/font/:id', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
   await prisma.fonts.deleteMany({
-    where: { name: req.params.id, user_id: user.id },
+    where: { name: req.params.id as string, user_id: user.id },
   });
   res.json({ success: true });
 });

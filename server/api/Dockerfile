@@ -1,13 +1,13 @@
 # ===============================
 # 1. Build Stage
 # ===============================
-FROM node:18-alpine AS build
+FROM node:22-alpine AS build
 
 # Create app directory
 WORKDIR /usr/src/app
 
 # Install dependencies based on the package-lock.json
-COPY package*.json ./
+COPY .npmrc package*.json ./
 RUN npm install
 
 # Copy the rest of the application files
@@ -19,7 +19,7 @@ RUN npm run build
 # ===============================
 # 2. Production Stage
 # ===============================
-FROM node:18-alpine AS production
+FROM node:22-alpine AS production
 
 # Create and set working directory
 WORKDIR /usr/src/app

@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import { users as User } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import parseDuration from 'parse-duration';
 import {
@@ -141,7 +142,7 @@ router.post('/logout', authMiddleware, async (req: Request, res: Response) => {
     });
     // Invalidate refresh token
     await prisma.users.update({
-      where: { id: req.user!.id! },
+      where: { id: (req.user as User).id },
       data: {
         refresh_token: null,
         refresh_token_expires_at: null,
@@ -159,7 +160,7 @@ router.post('/change-password', authMiddleware, async (req: Request, res: Respon
     res.status(400).json({ error: 'Current and new password required' });
     return;
   }
-  const user = await prisma.users.findUnique({ where: { id: req.user!.id } });
+  const user = await prisma.users.findUnique({ where: { id: (req.user as User).id } });
   if (!user || !(await verifyPassword(currentPassword, user.password))) {
     res.status(401).json({ error: 'Invalid current password' });
     return;
