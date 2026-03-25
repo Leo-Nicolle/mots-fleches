@@ -22,7 +22,7 @@ class API {
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRudnhtcnFoa2RseW5odGR6bXB3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODIyNTM0MTEsImV4cCI6MTk5NzgyOTQxMX0.4PczPPAxbkwBvig7NTHNbR8JumuwPPqfyS_kGnkxP5I"
     );
     const token = localStorage.getItem("accessToken") || "";
-    this.remote = new RemoteDB("http://localhost:5480/api", token);
+    this.remote = new RemoteDB(import.meta.env.DEV ? "http://localhost:5480/api" : "/api", token);
     this._mode = mode;
   }
 

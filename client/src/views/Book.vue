@@ -23,6 +23,7 @@
       <ExportModal :grids="selected.length ? selected : displayedGrids" :style="style" :solutionsStyle="solutionsStyle" />
       <n-button round @click="download"> {{ $t('buttons.download') }} </n-button>
       <UploadModal v-if="canWrite" :title="$t('buttons.uploadGrids')" :buttonText="$t('buttons.uploadGrids')" @ok="onUpload" />
+      <ImportGridModal v-if="isDev && !isBook" @imported="fetch" />
     </template>
     <template #card-title="{ elt }">
       <GridModal v-model:grid="(elt as Grid)" />
@@ -53,6 +54,7 @@ import ExportButton from "../components/ExportButton.vue";
 import GridModal from "../components/modals/GridModal.vue";
 import Layout from "../layouts/GridLayout.vue";
 import UploadModal from "../components/modals/UploadModal.vue";
+import ImportGridModal from "../components/modals/ImportGridModal.vue";
 import GroupFilter from "../components/GroupFilter.vue";
 import { Grid, GridState, GridStyle, SolutionStyle } from "grid";
 import generate from "../js/maze-generator";
@@ -78,6 +80,7 @@ const solutionsStyle = ref<SolutionStyle>();
 const selected = ref<Grid[]>([]);
 const thumbnails = ref<string[]>([]);
 
+const isDev = import.meta.env.DEV;
 const isBook = computed(() => route.name === "book");
 const bookOwnedByMe = ref(true); // default true; set false for shared books
 const bookGroupId = ref<number | null>(null);

@@ -17,6 +17,7 @@ import { useRoute } from "vue-router";
 import { api } from "../../api";
 import { workerController } from '../../worker';
 import { useCollab } from '../../js/useCollab';
+import { trackEditingActivity } from '../../js/telemetry';
 
 const grid = ref<Grid>();
 const style = ref<GridStyle>();
@@ -27,6 +28,7 @@ const collab = useCollab(route.params.id as string, grid, () => {
 });
 
 function onGridUpdate() {
+  trackEditingActivity('grid');
   if (isCollab.value) {
     collab.syncUpdate();
   }

@@ -32,6 +32,7 @@ export const lang = {
         uploadWords: "Upload mots",
         dragdrop: "Drag & Drop vos fichiers ici (ou clickez)",
         here: "ici",
+        importGrid: "Importer une grille (JSON)",
     },
     suggestions: {
         results: "Résultats",
@@ -41,11 +42,15 @@ export const lang = {
         'no-vertical-arrow': 'Pas de flèche verticale ',
         'incomplete-word': 'Mot incomplet',
         'no-definition': 'Pas de définition',
+        invalidJson: 'JSON invalide',
+        importFailed: 'Échec de l\'importation',
     },
     titles: {
         newFont: "Nouvelle police",
     },
     forms: {
+        jsonContent: "Contenu JSON",
+        jsonPlaceholder: "Collez votre JSON de grille ici...",
         title: "Titre",
         options: "Options",
         default: 'Défaut',
@@ -192,7 +197,7 @@ export const lang = {
         members: "membres",
         membersTitle: "Membres",
         addMember: "Ajouter un membre",
-        memberEmailPlaceholder: "membre@exemple.com",
+        memberEmailPlaceholder: "membre{'@'}exemple.com",
         add: "Ajouter",
         removeMember: "Retirer",
         edit: "Modifier",

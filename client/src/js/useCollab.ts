@@ -3,8 +3,10 @@ import { WebsocketProvider } from 'y-websocket';
 import { ref, Ref, onBeforeUnmount } from 'vue';
 import { Grid, Cell } from 'grid';
 
-const WS_BASE = 'ws://localhost:5480/collab';
-const API_BASE = 'http://localhost:5480/api';
+const API_BASE = import.meta.env.DEV ? 'http://localhost:5480/api' : '/api';
+const WS_BASE = import.meta.env.DEV
+  ? 'ws://localhost:5480/collab'
+  : `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/collab`;
 
 export type CollabStatus = 'disconnected' | 'connecting' | 'connected';
 
@@ -49,7 +51,6 @@ export function useCollab(gridId: string, grid: Ref<Grid | undefined>, onRemoteC
     // 2. Create Yjs document
     ydoc = new Y.Doc();
     const yCells = ydoc.getMap<string>('cells');
-    const yMeta = ydoc.getMap<unknown>('meta');
 
     // 3. Open WebSocket
     status.value = 'connecting';

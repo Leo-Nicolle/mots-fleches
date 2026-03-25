@@ -31,6 +31,7 @@ import NoGrid from "../../components/NoGrid.vue";
 import { Grid, SolutionStyle } from "grid";
 import { defaultExportOptions, ExportOptions } from "../../types";
 import { api } from "../../api";
+import { trackEditingActivity } from '../../js/telemetry';
 /**
  * View to edit solutions options
  */
@@ -86,6 +87,7 @@ function fetch() {
 }
 
 function save() {
+  trackEditingActivity('style');
   if (groupId.value !== null) return; // group styles are read-only
   clearTimeout(saveTimeout.value);
   saveTimeout.value = +setTimeout(() => {

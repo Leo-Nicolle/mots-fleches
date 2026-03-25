@@ -28,6 +28,7 @@ import { Grid, GridStyle } from "grid";
 import { ref, computed, onMounted, toRaw, watch } from "vue";
 import { useRoute } from "vue-router";
 import { api } from "../../api";
+import { trackEditingActivity } from '../../js/telemetry';
 /**
  * View to edit a grid style
  */
@@ -61,6 +62,7 @@ function fetch() {
 }
 
 function onUpdate() {
+  trackEditingActivity('style');
   if (groupId.value !== null) return; // group styles are read-only
   clearTimeout(saveTimeout.value);
   saveTimeout.value = setTimeout(() => {

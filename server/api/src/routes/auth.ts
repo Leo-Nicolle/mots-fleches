@@ -16,7 +16,7 @@ import { createCustommer, getCustommer } from '../services/stripe';
 
 const router = Router();
 
-router.post('/register', async (req: Request, res: Response) => {
+router.post('/join', async (req: Request, res: Response) => {
   const { email, password, pseudo, turnstileToken } = req.body;
   if (!email || !password) {
     res.status(400).json({ error: 'Email and password required' });

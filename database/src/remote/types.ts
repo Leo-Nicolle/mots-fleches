@@ -114,7 +114,7 @@ type ApiPostMap = {
       refreshToken: string;
     };
   };
-  "/auth/register": {
+  "/auth/join": {
     body: {
       email: string;
       password: string;

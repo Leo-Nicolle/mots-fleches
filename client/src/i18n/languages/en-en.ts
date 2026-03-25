@@ -32,12 +32,15 @@ export const lang = {
     uploadWords: "Upload words",
     dragdrop: "Drag files here (or click)",
     here: "here",
+    importGrid: "Import grid (JSON)",
   },
   errors: {
     "no-horizontal-arrow": "No horizontal arrow",
     "no-vertical-arrow": "No vertical arrow",
     "incomplete-word": "Incomplete word",
     "no-definition": "No definition found",
+    invalidJson: "Invalid JSON",
+    importFailed: "Import failed",
   },
   titles: {
     newFont: "New Font",
@@ -46,6 +49,8 @@ export const lang = {
     results: "Results",
   },
   forms: {
+    jsonContent: "JSON content",
+    jsonPlaceholder: "Paste your grid JSON here...",
     title: "Title",
     options: "Options",
     default: "Default",
@@ -231,7 +236,7 @@ export const lang = {
     members: "members",
     membersTitle: "Members",
     addMember: "Add a Member",
-    memberEmailPlaceholder: "member@example.com",
+    memberEmailPlaceholder: "member{'@'}example.com",
     add: "Add",
     removeMember: "Remove",
     edit: "Edit",

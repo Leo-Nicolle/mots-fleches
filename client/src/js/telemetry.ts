@@ -15,4 +15,21 @@ function postEvent(eventName: string, options?: EventOptions) {
   });
 }
 const { trackEvent, trackPageview, } = plausible;
+
+const PULSE_INTERVAL = 5 * 60 * 1000; // 5 minutes
+const PULSE_DEBOUNCE = 2000; // 2 seconds after last activity
+let editPulseTimer: ReturnType<typeof setTimeout> | null = null;
+let lastPulseSent = 0;
+
+export function trackEditingActivity(context: 'grid' | 'style') {
+  if (editPulseTimer) clearTimeout(editPulseTimer);
+  editPulseTimer = setTimeout(() => {
+    const now = Date.now();
+    if (now - lastPulseSent >= PULSE_INTERVAL) {
+      lastPulseSent = now;
+      postEvent('editing-active', { props: { context } });
+    }
+  }, PULSE_DEBOUNCE);
+}
+
 export { trackEvent, trackPageview, postEvent };
