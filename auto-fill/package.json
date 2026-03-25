@@ -1,0 +1,28 @@
+{
+  "name": "auto-fill",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./dist/auto-fill.cjs",
+  "module": "./dist/auto-fill.js",
+  "exports": {
+    ".": {
+      "import": "./dist/auto-fill.js",
+      "require": "./dist/auto-fill.cjs"
+    }
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "fflate": "^0.8.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.5",
+    "typescript": "~5.9.3",
+    "vite": "^8.0.1",
+    "vue": "^3.5.13"
+  }
+}
