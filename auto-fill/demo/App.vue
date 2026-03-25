@@ -5,26 +5,112 @@ import { DictionaryIndex, AC3Solver } from '../src/index'
 import type { GridCell, SolverResult, ScoredWord } from '../src/index'
 
 // ─── Grid layout ─────────────────────────────────────────────────────────
-// 7×7 grid with symmetrically-placed definition cells
 
 const ROWS = 12
 const COLS = 10
 
-//  D . . . . . D
-//  . . D . D . .
-//  D . . . . . D
-//  . . . . . . .
-//  D . . . . . D
-//  . . D . D . .
-//  D . . . . . D
-const DEF_SET = new Set([
-  '0,0', '6,0',
-  '2,1', '4,1',
-  '0,2', '6,2',
-  '0,4', '6,4',
-  '2,5', '4,5',
-  '0,6', '6,6',
-])
+// ─── Maze generator (ported from client/src/js/maze-generator.ts) ────────
+// Generates definition cell positions to match the dictionary's word-length
+// distribution, using a weighted random placement strategy.
+
+type Cells = { definition: boolean }[][]
+
+function getLen(cells: Cells, x: number, y: number, dx: number, dy: number): number {
+  let len = -1, cx = x, cy = y
+  while (cells[cy]?.[cx] && !cells[cy][cx].definition) { len++; cx += dx; cy += dy }
+  return len
+}
+
+function getActualDistrib(cells: Cells, rows: number, cols: number, minWord: number, maxWord: number) {
+  const dist: Record<string, number> = {}
+  let total = 0
+  const tally = (run: number) => {
+    if (run < minWord || run > maxWord) return
+    dist[run] = (dist[run] || 0) + 1
+    total++
+  }
+  for (let y = 0; y < rows; y++) {
+    let run = 0
+    for (let x = 0; x <= cols; x++) {
+      if (x === cols || cells[y][x].definition) { tally(run); run = 0 } else run++
+    }
+  }
+  for (let x = 0; x < cols; x++) {
+    let run = 0
+    for (let y = 0; y <= rows; y++) {
+      if (y === rows || cells[y][x].definition) { tally(run); run = 0 } else run++
+    }
+  }
+  if (!total) return dist
+  return Object.fromEntries(Object.entries(dist).map(([k, v]) => [k, v / total]))
+}
+
+function placeOneDefinition(
+  cells: GridCell[][], rows: number, cols: number,
+  scaledDistib: Record<string, number>, minWord: number, maxWord: number
+) {
+  const candidates = []
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      if (cells[y][x].definition) continue
+      const lL = getLen(cells, x, y, -1, 0)
+      const lR = getLen(cells, x, y, 1, 0)
+      const lT = getLen(cells, x, y, 0, -1)
+      const lB = getLen(cells, x, y, 0, 1)
+      candidates.push({ x, y, lL, lR, lT, lB })
+    }
+  }
+
+  const actDistrib = getActualDistrib(cells, rows, cols, minWord, maxWord)
+
+  const weights = candidates.map(e => {
+    const weightIfCut = [e.lL, e.lR, e.lT, e.lB]
+      .map(l => (scaledDistib[l] || 0) - (actDistrib[l] || 0))
+      .reduce((acc, diff) => acc + (diff + 1) / 2, 0) / 4
+
+    const weightIfNotCut = [e.lL + e.lR + 1, e.lT + e.lB + 1]
+      .map(l => (actDistrib[l] || 0) - (scaledDistib[l] || 0))
+      .reduce((acc, diff) => acc + (diff + 1) / 2, 0) / 2
+
+    const impossible =
+      e.lL < minWord || e.lT < minWord ||
+      (e.x < cols - 1 && e.lR < minWord) ||
+      (e.y < rows - 1 && e.lB < minWord) ||
+      (e.x === cols - 1 && e.y === rows - 1)
+
+    return { x: e.x, y: e.y, w: (weightIfCut + weightIfNotCut) * (impossible ? 0 : 1) }
+  })
+
+  const totalW = weights.reduce((s, p) => s + p.w, 0)
+  if (totalW === 0) return
+
+  let pick = Math.random() * totalW
+  for (const { x, y, w } of weights) {
+    pick -= w
+    if (pick <= 0) { cells[y][x] = { ...cells[y][x], definition: true }; return }
+  }
+}
+
+function generateMaze(cells: GridCell[][], rows: number, cols: number, distribution: [number, number][]) {
+  const minWord = 2
+  const maxWord = Math.max(...distribution.map(([l]) => l))
+
+  // Seed: top row and left column at every other cell (same as original)
+  for (let x = 0; x < cols; x += 2) cells[0][x] = { ...cells[0][x], definition: true }
+  for (let y = 0; y < rows; y += 2) cells[y][0] = { ...cells[y][0], definition: true }
+
+  const sliceTotal = distribution
+    .slice(minWord, Math.max(rows, cols) + 1)
+    .reduce((acc, [, e]) => acc + e, 0)
+
+  const scaledDistib = distribution
+    .slice(minWord, Math.max(rows, cols) + 1)
+    .reduce((acc, [key, value]) => { acc[key] = value / sliceTotal; return acc }, {} as Record<string, number>)
+
+  for (let i = 0; i < rows; i++) {
+    placeOneDefinition(cells, rows, cols, scaledDistib, minWord, maxWord)
+  }
+}
 
 // ─── Word generator (demo dictionary) ────────────────────────────────────
 
@@ -53,7 +139,7 @@ function initGrid() {
   for (let y = 0; y < ROWS; y++) {
     const row: GridCell[] = []
     for (let x = 0; x < COLS; x++) {
-      row.push({ x, y, definition: DEF_SET.has(`${x},${y}`), text: '' })
+      row.push({ x, y, definition: false, text: '' })
     }
     cells.push(row)
   }
@@ -112,6 +198,19 @@ async function loadLocale(loc: typeof locale.value) {
   dictIndex = new DictionaryIndex(words)
   isLoadingDict.value = false
   isReady.value = true
+  generateLayout()
+}
+
+function generateLayout() {
+  if (!dictIndex) return
+  initGrid()
+  const distribution = [...dictIndex.counts.entries()]
+    .map(([len, count]) => [len, count] as [number, number])
+    .sort((a, b) => a[0] - b[0])
+  generateMaze(gridCells.value, ROWS, COLS, distribution)
+  gridCells.value = gridCells.value.map(row => [...row])
+  selectedSlotId.value = null
+  suggestions.value = []
   solve()
 }
 
@@ -185,10 +284,7 @@ function fillWord(word: string) {
 }
 
 function resetGrid() {
-  initGrid()
-  selectedSlotId.value = null
-  suggestions.value = []
-  solve()
+  generateLayout()
 }
 
 // ─── Cell display helpers ─────────────────────────────────────────────────
@@ -296,7 +392,7 @@ onMounted(() => {
         </div>
 
         <div class="grid-footer">
-          <button class="btn" @click="resetGrid">Réinitialiser</button>
+          <button class="btn" @click="resetGrid">Nouvelle grille</button>
           <div v-if="solverResult" class="status" :class="{ 'status--error': solverResult.hasDeadEnd }">
             <template v-if="solverResult.hasDeadEnd">
               ✗ {{ solverResult.deadSlots.length }} slot(s) sans solution
