@@ -10,7 +10,7 @@
             <n-collapse-transition :show="alert">
               <span class="alert"> {{ $t(`alert.${alert && alert.id}`) }}</span>
             </n-collapse-transition>
-            <div class="footer">
+            <div class="auth-footer">
               <slot name="footer" />
             </div>
           </template>
@@ -35,6 +35,7 @@ const props = defineProps<{
 
 <style>
 .notloggedincard {
+  width: 100%;
   max-width: 450px;
   margin: 0;
 }
@@ -46,18 +47,21 @@ const props = defineProps<{
 }
 
 .n-scrollbar-content:has(> .notloggedin) {
-  height: 100%;
+  min-height: 100%;
 }
 .notloggedin {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  width: 100vw;
+  min-height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 2rem 1rem;
 }
-.footer {
+.auth-footer {
   display: flex;
+  flex-direction: row;
   flex-wrap: wrap;
   gap: 1rem;
   align-items: center;

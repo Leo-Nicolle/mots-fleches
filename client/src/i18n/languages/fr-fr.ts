@@ -181,6 +181,9 @@ export const lang = {
         passwordsdontmatch: "Les mots de passe ne correspondent pas.",
         passwordtooshort: "Le mot de passe est trop court. Minimum 8 caractères.",
         noGrid: "Vous n'avez pas de grille, veuillez en créer une avant de modifier les styles.",
+        registerfailed: "Échec de l'inscription.",
+        captcharequired: "Veuillez compléter le captcha.",
+        serverUnreachable: "Impossible de contacter le serveur. Vérifiez votre connexion et réessayez.",
     },
     login: {
         title: "Connexion",

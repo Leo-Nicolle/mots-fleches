@@ -70,7 +70,7 @@ function fetch() {
   const getStyle = () =>
     gid !== null && api.mode === 'remote'
       ? api.remote.getGroupStyle(gid, id)
-      : api.db.getStyle(id);
+      : api.getStyle(id);
   return promise
     .then(() => getStyle())
     .then((s) => {

@@ -47,7 +47,7 @@ function fetch() {
   const id = route.params.id as string || 'default';
   const stylePromise = groupId.value !== null && api.mode === 'remote'
     ? api.remote.getGroupStyle(groupId.value, id)
-    : api.db.getStyle(id);
+    : api.getStyle(id);
   return Promise.all([api.getGrids(), stylePromise])
     .then(([grids, opts]) => {
       grid.value = grids[0];

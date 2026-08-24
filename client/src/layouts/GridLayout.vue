@@ -182,7 +182,7 @@ watch(selectedElements, () => {
   color: inherit;
 }
 
-.n-card {
+.wrapper .n-card {
   box-shadow: 4px 4px 7px #ddd;
   height: 350px;
 }
@@ -205,14 +205,14 @@ watch(selectedElements, () => {
   max-width: 295px;
 }
 
-.n-card__content {
+.wrapper .n-card__content {
   display: flex;
   flex-direction: column;
   align-items: center;
   cursor: pointer;
 }
 
-.n-card-cover {
+.wrapper .n-card-cover {
   display: flex;
   flex-direction: column;
   align-items: center;

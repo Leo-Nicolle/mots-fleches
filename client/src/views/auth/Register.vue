@@ -66,7 +66,7 @@ onMounted(() => {
 
 async function register() {
   if (password.value !== passwordcheck.value) {
-    setAlert("error", "passwordmismatch");
+    setAlert("error", "passwordsdontmatch");
     return;
   }
   if (!turnstileToken.value) {
@@ -82,7 +82,8 @@ async function register() {
     api.syncOnLogin().catch(() => {});
     router.push("/");
   } catch (error) {
-    setAlert("error", "registerfailed");
+    const isNetworkError = !(error as any)?.response;
+    setAlert("error", isNetworkError ? "serverUnreachable" : "registerfailed");
     (window as any).turnstile?.reset();
     turnstileToken.value = null;
   }
@@ -93,7 +94,7 @@ async function cancel() {
 </script>
 
 <style>
-.footer {
+.auth-footer {
   justify-content: space-between;
 }
 </style>

@@ -179,6 +179,9 @@ export const lang = {
         passwordsdontmatch: "Las contraseñas no coinciden",
         passwordtooshort: "La contraseña es demasiado corta. Mínimo 6 caracteres",
         noGrid: "No tienes ninguna cuadrícula, por favor crea una antes de modificar los estilos.",
+        registerfailed: "Error al registrarse.",
+        captcharequired: "Completa el captcha.",
+        serverUnreachable: "No se pudo conectar con el servidor. Comprueba tu conexión e inténtalo de nuevo.",
     },
     login: {
         title: "Iniciar sesión",

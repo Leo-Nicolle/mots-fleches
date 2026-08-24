@@ -31,7 +31,11 @@ const cols = ref(10);
 const title = ref("");
 
 function create() {
-  emit("create", { rows: rows.value, cols: cols.value, title: title.value });
+  emit("create", {
+    rows: Number(rows.value) || 10,
+    cols: Number(cols.value) || 10,
+    title: title.value,
+  });
   show.value = false;
 }
 </script>

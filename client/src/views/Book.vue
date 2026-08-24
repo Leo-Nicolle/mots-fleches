@@ -159,7 +159,7 @@ function fetch() {
         const getStyle = (id: string) =>
           !bookOwnedByMe.value && groupId && api.mode === 'remote'
             ? api.remote.getGroupStyle(groupId, id)
-            : api.db.getStyle(id);
+            : api.getStyle(id);
         return Promise.all([
           Promise.all(mbook!.grids.map((id) => api.db.getGrid(id))),
           getStyle(mbook!.style),
@@ -182,7 +182,7 @@ function fetch() {
     .then((gs) => {
       grids.value = gs.sort((a, b) => b.created - a.created);
     })
-    .then(() => Promise.all([api.db.getStyle("default"), api.db.getStyle("solution")]))
+    .then(() => Promise.all([api.getStyle("default"), api.getStyle("solution")]))
     .then((opts) => {
       style.value = opts[0] as GridStyle;
       solutionsStyle.value = opts[1] as SolutionStyle;
@@ -220,7 +220,7 @@ function openNewGrid() {
   newGridVisible.value = true;
 }
 
-function createGrid(rows: number, cols: number, title?: string) {
+function createGrid({ rows, cols, title }: { rows: number; cols: number; title?: string }) {
   postEvent("create-grid");
   const newGrid = new Grid(rows, cols);
   newGrid.title = title?.trim() || t("buttons.newGrid");

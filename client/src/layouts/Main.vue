@@ -58,19 +58,19 @@
             {{ screenSize === "phone" ? "" : selected?.label }}
           </n-button>
         </n-popselect>
-        <n-button v-if="showLoginButton" strong secondary :type="isSignedIn ? 'warning' : 'primary'"
-          icon-placement="right" @click="isSignedIn ? router.push('/logout') : router.push('/login')">
-          {{ screenSize === "phone" ? '' : $t(isSignedIn ? "buttons.exit" : "buttons.login") }}
+        <n-button v-if="showLoginButton" strong secondary :type="isLoggedIn ? 'warning' : 'primary'"
+          icon-placement="right" @click="isLoggedIn ? router.push('/logout') : router.push('/login')">
+          {{ screenSize === "phone" ? '' : $t(isLoggedIn ? "buttons.exit" : "buttons.login") }}
           <template #icon>
             <n-icon>
               <LogOutOutline />
             </n-icon>
           </template>
         </n-button>
-        <n-button v-if="isSignedIn" strong secondary icon-placement="right" @click="router.push('/groups')">
+        <n-button v-if="isLoggedIn" strong secondary icon-placement="right" @click="router.push('/groups')">
           {{ $t("groups.title") }}
         </n-button>
-        <n-button v-if="isSignedIn" strong secondary icon-placement="right" @click="router.push('/profile')">
+        <n-button v-if="isLoggedIn" strong secondary icon-placement="right" @click="router.push('/profile')">
           {{ $t("profile.title") }}
         </n-button>
       </span>
@@ -147,6 +147,7 @@ const props = withDefaults(
 );
 const isSignedIn = ref(false);
 const dbMode = ref<string>(api.mode);
+const isLoggedIn = computed(() => isSignedIn.value && dbMode.value !== "idb");
 function refreshSignedId() {
   api
     .isSignedIn()

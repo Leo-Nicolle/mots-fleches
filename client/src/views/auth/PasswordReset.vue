@@ -69,7 +69,7 @@ async function cancel() {
 </script>
 
 <style>
-.footer {
+.auth-footer {
   justify-content: space-between;
 }
 </style>

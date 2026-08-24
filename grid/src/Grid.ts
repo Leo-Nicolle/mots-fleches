@@ -388,12 +388,22 @@ export class Grid {
     } else {
       state = s;
     }
-    const { rows, cols, comment, title, id, cells, created, styleId } = state;
+    const { comment, title, id, cells, created, styleId } = state;
+    // Recover from corrupted rows/cols by falling back to the cells dimensions.
+    const rows =
+      typeof state.rows === "number" && Number.isFinite(state.rows) && state.rows > 0
+        ? state.rows
+        : (cells && cells.length) || 0;
+    const cols =
+      typeof state.cols === "number" && Number.isFinite(state.cols) && state.cols > 0
+        ? state.cols
+        : (cells && cells[0] && cells[0].length) || 0;
     const res = new Grid(rows, cols, id);
     cells.forEach((row, i) => {
       row.forEach((cell, j) => {
         cell.highlighted = false;
         cell.suggestion = '';
+        if (!res.cells[i]) return;
         res.cells[i][j] = {
           ...res.cells[i][j],
           ...cell

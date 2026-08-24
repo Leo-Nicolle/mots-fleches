@@ -45,11 +45,11 @@ function fetch() {
   const solutionId = route.query.solution as string || 'solution';
   const styleId = route.query.style as string || 'default';
   return promise
-    .then(() => api.db.getStyle(solutionId))
+    .then(() => api.getStyle(solutionId))
     .then((solutions) => {
       solutionStyle.value = solutions as SolutionStyle;
     })
-    .then(() => api.db.getStyle(styleId))
+    .then(() => api.getStyle(styleId))
     .then((s) => {
       style.value = s as GridStyle;
     })

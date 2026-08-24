@@ -26,7 +26,7 @@
         </n-form-item>
         <span class="rowcols">
           <n-form-item :label="$t('forms.rows')" path="rows">
-            <n-input-number role="rows" v-model:value="grid.rows" @update:value="v => resize(v, grid.cols)" />
+            <n-input-number role="rows" v-model:value="grid.rows" :min="1" @update:value="v => resize(v, grid.cols)" />
           </n-form-item>
           <n-form-item path="randomize">
             <n-button role="randomize" @click="randomConfirmVisible = true; generating = false;" type="warning">
@@ -34,7 +34,7 @@
             </n-button>
           </n-form-item>
           <n-form-item :label="$t('forms.cols')" path="grid.cols">
-            <n-input-number role="cols" v-model:value="grid.cols" @update:value="v => resize(grid.rows, v)" />
+            <n-input-number role="cols" v-model:value="grid.cols" :min="1" @update:value="v => resize(grid.rows, v)" />
           </n-form-item>
         </span>
         <n-form-item v-if="api.mode === 'remote' && myGroups.length > 0" :label="$t('groups.share')">

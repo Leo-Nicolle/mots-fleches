@@ -180,6 +180,9 @@ export const lang = {
     passwordtooshort: "Password too short, minimum 6 characters",
     noGrid:
       "You don't have any grid yet, please create one before modify styles.",
+    registerfailed: "Registration failed.",
+    captcharequired: "Please complete the captcha.",
+    serverUnreachable: "Could not reach the server. Check your connection and try again.",
   },
   login: {
     title: "Login",

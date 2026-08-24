@@ -54,7 +54,8 @@ async function emailLogin() {
     api.syncOnLogin().catch(() => {}); // silent background sync
     redirect();
   } catch (e) {
-    alert.value = { type: "error", id: "wrongpassword" };
+    const isNetworkError = !(e as any)?.response;
+    alert.value = { type: "error", id: isNetworkError ? "serverUnreachable" : "wrongpassword" };
     setTimeout(() => {
       alert.value = false;
     }, 3000);

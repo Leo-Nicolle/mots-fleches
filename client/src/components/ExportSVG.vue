@@ -37,7 +37,7 @@ const style = ref<GridStyle>();
 const exporter = ref<HTMLDivElement>();
 
 watchEffect(() => {
-  api.db.getStyle(props.grid.styleId).then((opts) => {
+  api.getStyle(props.grid.styleId).then((opts) => {
     style.value = opts;
   });
 });

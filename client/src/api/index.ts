@@ -58,6 +58,12 @@ class API {
       .then((grid) => (grid ? Grid.unserialize(grid) : undefined));
   }
 
+  getStyle(id: string): Promise<GridStyle | SolutionStyle | undefined> {
+    return this.db
+      .getStyle(id)
+      .then((style) => (style ? style : undefined));
+  }
+
   getBookGrids(bookId: string) {
     return this.db
       .getBook(bookId)
