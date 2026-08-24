@@ -127,6 +127,18 @@ export class Grid {
   }
 
   /**
+   * Resets every cell of the grid to a fresh, empty, non-definition cell
+   * while keeping the current dimensions.
+   */
+  clear(): void {
+    for (let y = 0; y < this.rows; y++) {
+      for (let x = 0; x < this.cols; x++) {
+        this.cells[y][x] = Grid.newCell(x, y);
+      }
+    }
+  }
+
+  /**
    * Set the cell at the given coordinates as a definition cell (or not)
    * @param coordinates
    * @param value true to make it a definition cell, false to make it a normal cell 

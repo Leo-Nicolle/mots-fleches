@@ -2,13 +2,19 @@
   <Layout v-if="style && solutionsStyle"
     :breadcrumbs="isBook ? [{ text: $t('nav.books'), to: '/books' }, { text: book!.title }] : [{ text: $t('nav.grids') }]"
     :eltList="displayedGrids"
-    :onCreate="canWrite ? createGrid : undefined"
+    :onCreate="canWrite ? openNewGrid : undefined"
     :onDelete="onDelete"
     :getLink="(grid) => `/grid/${grid.id}/${style.id}`"
     @select="(s) => (selected = s)"
     :has-create-button="canWrite"
     :has-delete-button="canWrite">
     <template v-slot:left-panel>
+      <n-alert v-if="!isBook && api.mode === 'idb' && grids.length >= 2 && showSyncPrompt"
+        :title="$t('account.syncCta')" type="info" closable :on-close="dismissSyncPrompt">
+        <n-button size="small" type="primary" @click="router.push('/register')">
+          {{ $t("login.register") }}
+        </n-button>
+      </n-alert>
       <BookButtons v-if="isBook && book" :style="style" :solutionsStyle="solutionsStyle" :selected="selectedIds"
         v-model="book" @update="fetch" />
       <h3>{{ $t("nav.grids") }}</h3>
@@ -38,6 +44,7 @@
       </div>
     </template>
   </Layout>
+  <NewGridModal v-model:show="newGridVisible" @create="createGrid" />
   <Teleport to="#outside">
     <div>
       <GridThumbnail v-if="style && displayedGrids" :grids="displayedGrids" :style="style" v-model="thumbnails" />
@@ -47,7 +54,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import GridThumbnail from "../components/svg-renderer/GridThumbnail.vue";
 import ExportModal from "../components/modals/ExportModal.vue";
 import ExportButton from "../components/ExportButton.vue";
@@ -55,6 +62,7 @@ import GridModal from "../components/modals/GridModal.vue";
 import Layout from "../layouts/GridLayout.vue";
 import UploadModal from "../components/modals/UploadModal.vue";
 import ImportGridModal from "../components/modals/ImportGridModal.vue";
+import NewGridModal from "../components/modals/NewGridModal.vue";
 import GroupFilter from "../components/GroupFilter.vue";
 import { Grid, GridState, GridStyle, SolutionStyle } from "grid";
 import generate from "../js/maze-generator";
@@ -65,11 +73,14 @@ import GridCopyModal from "../components/modals/GridCopyModal.vue";
 import { Book } from "database";
 import type { GroupSummary } from "database";
 import { postEvent } from "../js/telemetry";
+import { useI18n } from "vue-i18n";
 
 /**
  * View to display all grids in a grid layout
  */
 const route = useRoute();
+const router = useRouter();
+const { t } = useI18n();
 const grids = ref<Grid[]>([]);
 const groupGrids = ref<Grid[]>([]);
 const myGroups = ref<GroupSummary[]>([]);
@@ -79,6 +90,12 @@ const style = ref<GridStyle>();
 const solutionsStyle = ref<SolutionStyle>();
 const selected = ref<Grid[]>([]);
 const thumbnails = ref<string[]>([]);
+const newGridVisible = ref(false);
+const showSyncPrompt = ref(!localStorage.getItem("motsflex-sync-prompt-dismissed"));
+function dismissSyncPrompt() {
+  showSyncPrompt.value = false;
+  localStorage.setItem("motsflex-sync-prompt-dismissed", "1");
+}
 
 const isDev = import.meta.env.DEV;
 const isBook = computed(() => route.name === "book");
@@ -199,10 +216,14 @@ function onUpload(filesContents: [string, string][]) {
   ).then(() => fetch());
 }
 
-function createGrid() {
+function openNewGrid() {
+  newGridVisible.value = true;
+}
+
+function createGrid(rows: number, cols: number, title?: string) {
   postEvent("create-grid");
-  const newGrid = new Grid(10, 10);
-  newGrid.title = "Nouvelle Grille";
+  const newGrid = new Grid(rows, cols);
+  newGrid.title = title?.trim() || t("buttons.newGrid");
   workerController
     .getDistribution()
     .then((distribution) => {

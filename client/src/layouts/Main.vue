@@ -6,6 +6,11 @@
           <img class="menuicon" src="/icon.svg" />
           <span v-if="screenSize !== 'phone'">Motsflex</span>
         </span>
+        <span v-if="screenSize !== 'phone'" class="header-nav">
+          <n-button text @click="router.push('/grids')">{{ $t("nav.grids") }}</n-button>
+          <n-button text @click="router.push('/books')">{{ $t("nav.books") }}</n-button>
+          <n-button text @click="router.push('/styles')">{{ $t("nav.styles") }}</n-button>
+        </span>
         <n-menu v-if="showLoginButton" class="burger" :accordion="true" :mode="'horizontal'" :collapsed="collapsed"
           :collapsed-width="64" :collapsed-icon-size="22" :options="menuOptions" />
         <!-- @slot Slot for element in the left of the header  -->
@@ -21,6 +26,27 @@
           @click="b.to && router.push(b.to)">{{ b.text }}</n-breadcrumb-item>
       </n-breadcrumb>
       <span class="right">
+        <n-tooltip v-if="showLoginButton && dbMode === 'idb'" trigger="hover">
+          <template #trigger>
+            <n-button text class="sync-status" @click="router.push('/login')">
+              <template #icon>
+                <n-icon>
+                  <CloudOfflineOutline />
+                </n-icon>
+              </template>
+              {{ screenSize === "phone" ? "" : $t("account.savedLocally") }}
+            </n-button>
+          </template>
+          {{ $t("account.syncCta") }}
+        </n-tooltip>
+        <n-button v-else-if="showLoginButton && dbMode !== 'idb'" text class="sync-status" disabled>
+          <template #icon>
+            <n-icon>
+              <CloudDoneOutline />
+            </n-icon>
+          </template>
+          {{ screenSize === "phone" ? "" : $t("account.synced") }}
+        </n-button>
         <n-popselect v-model:value="locale" :options="localeOptions">
           <n-button :type="switchingLocale ? 'warning' : ''">
             <template #icon>
@@ -92,6 +118,7 @@ import {
 import { RouterLink, useRouter } from "vue-router";
 import { renderIcon } from "../js/utils";
 import { LogOutOutline, LanguageOutline } from "@vicons/ionicons5";
+import { CloudOfflineOutline, CloudDoneOutline } from "@vicons/ionicons5";
 import { i18n, setLanguage } from "../i18n";
 import { workerController } from "../worker";
 import { useResponsive } from "../js/useResponsive";
@@ -119,6 +146,7 @@ const props = withDefaults(
   }
 );
 const isSignedIn = ref(false);
+const dbMode = ref<string>(api.mode);
 function refreshSignedId() {
   api
     .isSignedIn()
@@ -128,6 +156,7 @@ function refreshSignedId() {
     .catch(() => {
       isSignedIn.value = false;
     });
+  dbMode.value = api.mode;
 }
 const interval = setInterval(() => refreshSignedId(), 10_000);
 const leftWidth = computed(() => {
@@ -318,6 +347,13 @@ function onScroll(e: Event) {
   align-items: center;
   justify-content: flex-start;
   margin-left: 4px;
+}
+
+.header-nav {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  align-items: center;
 }
 
 .header>.right {

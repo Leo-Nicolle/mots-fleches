@@ -1,9 +1,14 @@
 <template>
-  <n-button role="modal-options-button" circle @click="visible = true">
-    <n-icon>
-      <CogIcon />
-    </n-icon>
-  </n-button>
+  <n-tooltip trigger="hover">
+    <template #trigger>
+      <n-button role="modal-options-button" circle @click="visible = true">
+        <n-icon>
+          <CogIcon />
+        </n-icon>
+      </n-button>
+    </template>
+    {{ $t("tooltips.gridSettings") }}
+  </n-tooltip>
   <n-modal preset="dialog" :title="$t('forms.options')" :showIcon="false" v-model:show="visible">
     <template #header>
       {{ grid.title }}
@@ -11,7 +16,7 @@
     <template #action>
       <n-form :label-width="80">
         <n-form-item :label="$t('forms.title')" path="title">
-          <n-input role="title" type="text" placeholder="Nouvelle Grille" v-model:value="grid.title" />
+          <n-input role="title" type="text" :placeholder="$t('buttons.newGrid')" v-model:value="grid.title" />
         </n-form-item>
         <n-form-item :label="$t('forms.comment')" path="description">
           <n-input role="comment" type="textarea" :placeholder="`${$t('forms.comment')}...`" v-model:value="grid.comment"
@@ -21,7 +26,7 @@
         </n-form-item>
         <span class="rowcols">
           <n-form-item :label="$t('forms.rows')" path="rows">
-            <n-input-number role="rows" v-model:value="grid.rows" :on-change="v => resize(v, grid.cols)" />
+            <n-input-number role="rows" v-model:value="grid.rows" @update:value="v => resize(v, grid.cols)" />
           </n-form-item>
           <n-form-item path="randomize">
             <n-button role="randomize" @click="randomConfirmVisible = true; generating = false;" type="warning">
@@ -29,7 +34,7 @@
             </n-button>
           </n-form-item>
           <n-form-item :label="$t('forms.cols')" path="grid.cols">
-            <n-input-number role="cols" v-model:value="grid.cols" :on-change="v => resize(grid.rows, v)" />
+            <n-input-number role="cols" v-model:value="grid.cols" @update:value="v => resize(grid.rows, v)" />
           </n-form-item>
         </span>
         <n-form-item v-if="api.mode === 'remote' && myGroups.length > 0" :label="$t('groups.share')">
@@ -71,7 +76,7 @@ import {
 } from "vue";
 import { CogOutline as CogIcon } from "@vicons/ionicons5";
 import { Grid } from "grid";
-import generate from "../../js/maze-generator";
+import generate, { generateExtension } from "../../js/maze-generator";
 import { api } from "../../api";
 import { workerController } from "../../worker";
 import type { GroupSummary } from "database";
@@ -151,8 +156,28 @@ onMounted(() => {
 function resize(rows: number, cols: number) {
   nextTick(() => {
     const g = toRaw(grid.value);
+    const oldRows = g.cells.length;
+    const oldCols = g.cells[0]?.length || 0;
+    const isEmpty = g.cells.every((row) => row.every((c) => !c.text));
     g.resize(rows, cols);
+    if (isEmpty) g.clear();
     grid.value = g;
+    if (isEmpty) {
+      workerController.getDistribution().then((distribution) => {
+        generate({ grid: g, distribution });
+        grid.value = g;
+        api.saveGrid(g);
+      });
+      return;
+    }
+    if (rows > oldRows || cols > oldCols) {
+      workerController.getDistribution().then((distribution) => {
+        generateExtension({ grid: g, distribution, oldRows, oldCols });
+        grid.value = g;
+        api.saveGrid(g);
+      });
+      return;
+    }
     api.saveGrid(g);
   });
 }

@@ -8,23 +8,43 @@
           {{ $t("forms.grid") }}
         </h3>
         <n-form-item :label="$t('forms.cellSize')" path="grid.cellSize">
-          <n-input-number role="cell-size" v-model:value="value.grid.cellSize" />
+          <n-tooltip trigger="hover">
+            <template #trigger>
+              <n-input-number role="cell-size" v-model:value="value.grid.cellSize" />
+            </template>
+            {{ $t("tooltips.cellSize") }}
+          </n-tooltip>
         </n-form-item>
         <n-form-item :label="$t('forms.borderSize')" path="grid.borderSize">
-          <n-input-number role="border-size" v-model:value="value.grid.borderSize" />
+          <n-tooltip trigger="hover">
+            <template #trigger>
+              <n-input-number role="border-size" v-model:value="value.grid.borderSize" />
+            </template>
+            {{ $t("tooltips.borderSize") }}
+          </n-tooltip>
         </n-form-item>
         <n-form-item :label="$t('forms.borderColor')" path="grid.borderColor">
           <n-color-picker role="border-color" v-model:value="value.grid.borderColor" :show-alpha="false" size="small" />
         </n-form-item>
         <n-form-item :label="$t('forms.outBorderSize')" path="grid.outerBorderSize">
-          <n-input-number role="outerBorder-size" v-model:value="value.grid.outerBorderSize" />
+          <n-tooltip trigger="hover">
+            <template #trigger>
+              <n-input-number role="outerBorder-size" v-model:value="value.grid.outerBorderSize" />
+            </template>
+            {{ $t("tooltips.outBorderSize") }}
+          </n-tooltip>
         </n-form-item>
         <n-form-item :label="$t('forms.outBorderColor')" path="grid.outerBorderColor">
           <n-color-picker role="outerBorder-color" v-model:value="value.grid.outerBorderColor" :show-alpha="false"
             size="small" />
         </n-form-item>
         <n-form-item :label="$t('forms.spaceWidth')" path="grid.spaceSize">
-          <n-input-number role="space" v-model:value="value.grid.spaceSize" />
+          <n-tooltip trigger="hover">
+            <template #trigger>
+              <n-input-number role="space" v-model:value="value.grid.spaceSize" />
+            </template>
+            {{ $t("tooltips.spaceWidth") }}
+          </n-tooltip>
         </n-form-item>
         <n-form-item v-if="defbgcolor" :label="$t('forms.backgroundColor')" path="definition.backgroundColor">
           <n-color-picker role="definition-background-color" v-model:value="value.definition.backgroundColor"

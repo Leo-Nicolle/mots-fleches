@@ -39,12 +39,14 @@ import { api } from "../api";
 import { Book } from "database";
 import type { GroupSummary } from "database";
 import { postEvent } from "../js/telemetry";
+import { useI18n } from "vue-i18n";
 
 const books = ref<Book[]>([]);
 const groupBooks = ref<Book[]>([]);
 const myGroups = ref<GroupSummary[]>([]);
 const activeGroupId = ref<number | null>(null);
 const selected = ref<Book[]>([]);
+const { t } = useI18n();
 
 const displayedBooks = computed(() =>
   activeGroupId.value === null ? books.value : groupBooks.value
@@ -98,7 +100,7 @@ function createBook() {
     grids: [],
     solutionStyle: "solution",
     style: "default",
-    title: "Nouveau Livre",
+    title: t("buttons.newBook"),
     comment: "",
   };
   api.db.pushBook(newBook).then(() => fetchMyBooks());

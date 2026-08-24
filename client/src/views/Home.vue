@@ -21,6 +21,14 @@
             <img src="/icon.svg" id="heroimage" />
             <h1>{{ $t("home.welcome.title") }}</h1>
             <p>{{ $t("home.welcome.p") }}</p>
+            <div class="hero-actions">
+              <n-button type="primary" size="large" @click="router.push('/grids')">
+                {{ $t("buttons.createFirstGrid") }}
+              </n-button>
+              <n-button size="large" @click="scrollTo('#manual')">
+                {{ $t("home.nav.howtouse") }}
+              </n-button>
+            </div>
           </section>
           <section id="wcid">
             <h2>{{ $t("home.nav.wcid") }}</h2>
@@ -163,9 +171,11 @@ import {
 } from "@vicons/ionicons5";
 import { useThemeVars } from "naive-ui";
 import { ref } from "vue";
+import { useRouter } from "vue-router";
 
 const { t } = useI18n();
 const theme = useThemeVars();
+const router = useRouter();
 const highlighted = ref('');
 type Menu = {
   title: string;
@@ -311,6 +321,14 @@ span.highlighted {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .icontext {

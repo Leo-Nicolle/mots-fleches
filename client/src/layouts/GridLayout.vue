@@ -8,6 +8,10 @@
     </template>
     <template v-slot:body>
       <div class="wrapper">
+        <div v-if="!eltList.length" class="empty-state">
+          <h3>{{ $t("empty.title") }}</h3>
+          <p>{{ $t("empty.hint") }}</p>
+        </div>
         <n-card v-if="hasCreateButton" @click="onCreate" :title="$t('buttons.create')">
           <template #default>
             <div class="card-body">
@@ -163,6 +167,19 @@ watch(selectedElements, () => {
   grid-template-columns: repeat(auto-fill, minmax(300px, 300px));
   padding-bottom: 12px;
   width: 100%;
+}
+
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px 20px;
+  color: #888;
+}
+
+.empty-state h3 {
+  margin: 0 0 8px;
+  font-size: 1.4em;
+  color: inherit;
 }
 
 .n-card {

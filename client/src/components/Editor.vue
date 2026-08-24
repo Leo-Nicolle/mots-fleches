@@ -1,56 +1,76 @@
 <template>
   <Layout :breadcrumbs="breadcrumbs" @scroll="onScroll" :left-panel-scroll="highlightMode !== 'autofill'">
     <template #left-panel>
-      <span class="title">
-        <h2>
-          {{ grid.title ? grid.title : $t("buttons.newGrid") }}
-        </h2>
-        <GridModal v-model:grid="grid" @open="focus = nullCell" />
-      </span>
-      <span class="collab-bar">
-        <span v-if="collabStatus" class="collab-status" :class="collabStatus">
-          {{ collabStatus }}
+      <div class="editor-panel">
+        <span class="title">
+          <h2 class="grid-title">
+            {{ grid.title ? grid.title : $t("buttons.newGrid") }}
+          </h2>
+          <span class="title-actions">
+            <span v-for="user in remoteUsers" :key="user.clientId" class="collab-user"
+              :style="{ background: user.color }" :title="user.name + (user.focus ? ` (${user.focus.x},${user.focus.y})` : '')">
+              {{ user.name.slice(0, 1).toUpperCase() }}
+            </span>
+            <n-tooltip v-if="collabStatus" trigger="hover">
+              <template #trigger>
+                <span class="collab-dot" :class="collabStatus"></span>
+              </template>
+              {{ $t(`collab.${collabStatus}`) }}
+            </n-tooltip>
+            <GridModal v-model:grid="grid" @open="focus = nullCell" />
+          </span>
         </span>
-        <span v-for="user in remoteUsers" :key="user.clientId" class="collab-user"
-          :style="{ background: user.color }" :title="user.name + (user.focus ? ` (${user.focus.x},${user.focus.y})` : '')">
-          {{ user.name.slice(0, 1).toUpperCase() }}
-        </span>
-      </span>
-      <span>
-        <n-button @click="onModeClick">
-          {{ $t(`modes.${highlightMode}`) }}
-        </n-button>
-      </span>
-      <Buttons v-model:dir="dir" v-model:method="method" v-model:ordering="ordering" :mode="highlightMode"></Buttons>
-      <Autofill v-if="highlightMode === 'autofill'" :grid="grid" />
-      <Suggestion v-else-if="!focus.definition" :point="focus" :dir="dir" :grid-id="grid.id" :method="method"
-        :ordering="ordering" :cellProbas="cellProbas" :searchResult="searchResult" :loading="isLoadingSuggestions"
-        @hover="onHover" @click="onClick" @mouseout="onMouseOut">
-      </Suggestion>
-      <Definition v-else-if="focus.definition" :grid="grid" :focus="focus" :dir="dir" />
+        <ModeControl v-model:mode="highlightMode" :suggested="suggestedMode" />
+        <Buttons v-model:dir="dir" v-model:method="method" v-model:ordering="ordering" :mode="highlightMode"></Buttons>
+        <Autofill v-if="highlightMode === 'autofill'" :grid="grid" />
+        <Suggestion v-else-if="!focus.definition" :point="focus" :dir="dir" :grid-id="grid.id" :method="method"
+          :ordering="ordering" :cellProbas="cellProbas" :searchResult="searchResult" :loading="isLoadingSuggestions"
+          @hover="onHover" @click="onClick" @mouseout="onMouseOut">
+        </Suggestion>
+        <Definition v-else-if="focus.definition" :grid="grid" :focus="focus" :dir="dir" />
+      </div>
     </template>
     <template #body>
       <div class="container" ref="container">
         <div class="controls">
-          <n-button class="zoom-controls" @click="resetGrid">
-            Reset
-          </n-button>
+          <n-tooltip trigger="hover">
+            <template #trigger>
+              <n-button class="zoom-controls" @click="resetGrid">
+                {{ $t("buttons.reset") }}
+              </n-button>
+            </template>
+            {{ $t("tooltips.reset") }}
+          </n-tooltip>
           <span class="zoom-controls">
-            Zoom
-            <n-button @click="onZoomIn" circle>
-              <n-icon>
-                <AddCircleOutline />
-              </n-icon>
-            </n-button>
-            <n-button @click="onZoomOut" circle>
-              <n-icon>
-                <RemoveCircleOutline />
-              </n-icon>
-            </n-button>
+            {{ $t("buttons.zoom") }}
+            <n-tooltip trigger="hover">
+              <template #trigger>
+                <n-button @click="onZoomIn" circle>
+                  <n-icon>
+                    <AddCircleOutline />
+                  </n-icon>
+                </n-button>
+              </template>
+              {{ $t("tooltips.zoomIn") }}
+            </n-tooltip>
+            <n-tooltip trigger="hover">
+              <template #trigger>
+                <n-button @click="onZoomOut" circle>
+                  <n-icon>
+                    <RemoveCircleOutline />
+                  </n-icon>
+                </n-button>
+              </template>
+              {{ $t("tooltips.zoomOut") }}
+            </n-tooltip>
+          </span>
+          <span class="zoom-controls help">
+            <ShortcutHelp auto-open />
           </span>
         </div>
         <div class="superpose">
-          <SVGGrid @focus="(cell) => (focus = cell)" @hover="(cell) => (hoveredCell = cell)" :grid="grid" :focus="focus"
+          <SVGGrid @focus="onGridFocus" @hover="(cell) => (hoveredCell = cell)" @toggle-direction="toggleDirection"
+            :grid="grid" :focus="focus"
             :dir="dir" :style="style" :zoom="1 / zoom" class="svg-grid" :export-options="{
     ...defaultExportOptions,
     texts: true,
@@ -61,7 +81,7 @@
           <CollabCursors v-if="remoteUsers && remoteUsers.length" :style="style" :zoom="zoom"
             :remote-users="remoteUsers" />
           <GridInput :grid="grid" :dir="dir" :style="style" :cell="focus" :offset="offset" :zoom="zoom"
-            @focus="(point) => (focus = point)" @update="onGridUpdate" @keyup="onKeyUp">
+            @focus="onGridFocus" @update="onGridUpdate" @keyup="onKeyUp">
           </GridInput>
         </div>
       </div>
@@ -95,6 +115,7 @@ import {
   nullCell,
   GridStyle,
   CellProba,
+  GridValidity,
 } from "grid";
 import Layout from "../layouts/Main.vue";
 import SVGGrid from "./svg-renderer/Grid.vue";
@@ -106,11 +127,14 @@ import GridHighlight from "./svg-renderer/GridHighlight.vue";
 import Suggestion from "./sidebars/Suggestion.vue";
 import Definition from './sidebars/Definition.vue';
 import Buttons from './sidebars/Buttons.vue';
+import ModeControl from './sidebars/ModeControl.vue';
 import CollabCursors from './svg-renderer/CollabCursors.vue';
+import ShortcutHelp from './ShortcutHelp.vue';
 import { workerController } from "../worker";
 import { useRouter } from "vue-router";
 import { api } from "../api";
 import { useI18n } from "vue-i18n";
+import { matches } from "../js/shortcuts";
 /**
  * Component to edit a grid
  */
@@ -137,11 +161,23 @@ const ordering = ref<Ordering>("best");
 const orderings = ref<Ordering[]>(["best", "alpha", "inverse-alpha", "random"]);
 const zoom = ref(1);
 const highlightModes = ["normal", "check", "heatmap"] as Mode[];
-const highlightMode = ref<Mode>(highlightModes[2]);
+const highlightMode = ref<Mode>(highlightModes[0]);
 const cellProbas = ref<CellProba[][]>([]);
 const searchResult = ref<string[]>([]);
 const refreshingRun = ref(false);
 const refreshingSearch = ref(false);
+const gridComplete = ref(false);
+const suggestCheck = ref(false);
+const modeGuideSeen = ref(
+  localStorage.getItem("motsflex-mode-guide-seen") === "1"
+);
+const suggestedMode = computed<Mode | undefined>(() =>
+  suggestCheck.value ? "check" : undefined
+);
+const throttledCheckGrid = throttle(
+  () => workerController.checkGrid(grid.value),
+  500
+);
 function resetGrid() {
   grid.value.cells.forEach((row) => {
     row.forEach((cell) => {
@@ -164,6 +200,7 @@ function refreshSimpleSearch() {
 const throttledRefresSimpleSearch = throttle(refreshSimpleSearch, 60);
 function onGridUpdate() {
   refreshCellProba();
+  throttledCheckGrid();
   emit("update");
 }
 
@@ -222,13 +259,6 @@ function onZoomIn() {
 function onZoomOut() {
   zoom.value = Math.max(0.5, zoom.value - 0.1);
 }
-function onModeClick() {
-  const newIndex =
-    (highlightModes.findIndex((m) => m === highlightMode.value) + 1) %
-    highlightModes.length;
-  highlightMode.value = highlightModes[newIndex];
-}
-
 function onHover(value: string) {
   const cells = grid.value.getBounds(focus.value, dir.value).cells;
   if (!cells || !cells.length) return;
@@ -243,28 +273,42 @@ function onClick(value: string) {
   grid.value.setWord(value, cells[0], dir.value);
   onGridUpdate();
 }
+function toggleDirection() {
+  dir.value = dir.value === "horizontal" ? "vertical" : "horizontal";
+}
+function onGridFocus(cell: Cell) {
+  focus.value = cell;
+  if (cell.definition) return;
+  // If the cell is a single-letter slot in the current direction (boxed
+  // between definition cells), switch to the perpendicular direction.
+  if (grid.value.getBounds(cell, dir.value).length === 1) {
+    const perp = Grid.perpendicular(dir.value);
+    if (grid.value.getBounds(cell, perp).length > 1) {
+      dir.value = perp;
+    }
+  }
+}
 function onKeyUp(evt: KeyboardEvent) {
-  if (!evt.ctrlKey) return;
   let consumed = false;
-  if (evt.key === "ArrowUp" || evt.key === "ArrowDown") {
-    dir.value = "vertical";
+  if (matches(evt, "setDirection")) {
+    dir.value = evt.key === "ArrowUp" || evt.key === "ArrowDown"
+      ? "vertical"
+      : "horizontal";
     consumed = true;
   }
-  if (evt.key === "ArrowLeft" || evt.key === "ArrowRight") {
-    dir.value = "horizontal";
-    consumed = true;
-  }
-  // TODO: check how to delegate this to Buttons.vue
-  if (evt.key === ">" || evt.key === "<") {
-    // ordering.value = ordering.value * -1;
-    const ords = unref(orderings);
-    ordering.value =
-      ords[(ords.findIndex((o) => o === ordering.value) + 1) % ords.length];
-    consumed = true;
-  }
-  if (evt.code === "Space") {
-    method.value = method.value = "simple" ? "accurate" : "simple";
-    consumed = true;
+  // Only cycle ordering / method when not editing a definition,
+  // otherwise typing a space or < > would trigger them.
+  if (!focus.value.definition) {
+    if (matches(evt, "cycleOrdering")) {
+      const ords = unref(orderings);
+      ordering.value =
+        ords[(ords.findIndex((o) => o === ordering.value) + 1) % ords.length];
+      consumed = true;
+    }
+    if (matches(evt, "switchMethod")) {
+      method.value = method.value === "simple" ? "accurate" : "simple";
+      consumed = true;
+    }
   }
   // @ts-ignore
   evt.canceled = consumed;
@@ -284,10 +328,32 @@ workerController.on("search-result", (data) => {
 workerController.on("locale-changed", () => {
   refreshCellProba();
   throttledRefresSimpleSearch();
+  throttledCheckGrid();
 });
 workerController.on("start-locale-change", () => {
   refreshingRun.value = true;
   refreshingSearch.value = true;
+});
+
+workerController.on("check-result", (data: GridValidity) => {
+  gridComplete.value =
+    Object.keys(data.horizontal).length === 0 &&
+    Object.keys(data.vertical).length === 0;
+});
+
+watch([gridComplete, highlightMode], () => {
+  suggestCheck.value =
+    gridComplete.value &&
+    highlightMode.value === "normal" &&
+    !modeGuideSeen.value;
+});
+
+watch(highlightMode, (mode) => {
+  if (mode === "check" && suggestCheck.value) {
+    modeGuideSeen.value = true;
+    localStorage.setItem("motsflex-mode-guide-seen", "1");
+    suggestCheck.value = false;
+  }
 });
 
 watch([focus, dir], () => {
@@ -307,10 +373,38 @@ const isLoadingSuggestions = computed(() => {
   margin-left: 10px;
 }
 
+.editor-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 100%;
+}
+
+.editor-panel > .title,
+.editor-panel > .buttons {
+  flex-shrink: 0;
+}
+
 .title {
   display: flex;
-  justify-content: space-around;
+  align-items: center;
+  justify-content: space-between;
   width: 100%;
+}
+
+.title .grid-title {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.title-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .svg-grid {
@@ -363,23 +457,16 @@ text.highlighted {
   grid-area: 1 / 1 / 1 / 1;
 }
 
-.collab-bar {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.collab-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  cursor: default;
 }
-
-.collab-status {
-  font-size: 11px;
-  padding: 2px 6px;
-  border-radius: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-.collab-status.connected    { background: #d4edda; color: #155724; }
-.collab-status.connecting   { background: #fff3cd; color: #856404; }
-.collab-status.disconnected { background: #f8d7da; color: #721c24; }
+.collab-dot.connected    { background: #2ecc71; }
+.collab-dot.connecting   { background: #f39c12; }
+.collab-dot.disconnected { background: #e74c3c; }
 
 .collab-user {
   width: 24px;

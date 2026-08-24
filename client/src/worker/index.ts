@@ -211,7 +211,14 @@ class WorkerController extends EventEmitter<Events> {
 
   private _fetchLocale(locale: string) {
     return fetch(`/${locale}.zip`)
-      .then((response) => response.arrayBuffer())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch dictionary: ${response.status} ${response.statusText}`
+          );
+        }
+        return response.arrayBuffer();
+      })
       .then(
         (data) =>
           new Promise<{ words: string[]; definitions: string }>(

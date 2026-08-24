@@ -1,25 +1,44 @@
 <template>
   <span class="buttons">
-    <n-button v-if="buttons.has('ordering')" icon-placement="right" @click="emit('update:ordering', nextOrdering())">
-      {{ orderingText() }}
-    </n-button>
-    <n-button v-if="buttons.has('method')" icon-placement="right" @click="emit('update:method', nextMethod())">
-      <template #icon>
-        <n-icon>
-          <Hammer v-if="method === 'accurate'" />
-          <Flash v-else />
-        </n-icon>
+    <n-tooltip v-if="buttons.has('ordering')" trigger="hover">
+      <template #trigger>
+        <n-button size="small" circle @click="emit('update:ordering', nextOrdering())">
+          <template #icon>
+            <n-icon>
+              <component :is="orderingIcon()" />
+            </n-icon>
+          </template>
+        </n-button>
       </template>
-    </n-button>
-    <n-button v-if="buttons.has('dir')" icon-placement="right"
-      @click="emit('update:dir', dir === 'horizontal' ? 'vertical' : 'horizontal')">
-      <template #icon>
-        <n-icon>
-          <ArrowForward v-if="dir === 'horizontal'" />
-          <ArrowDown v-else />
-        </n-icon>
+      {{ `${$t("tooltips.ordering")}: ${orderingText()}` }}
+    </n-tooltip>
+    <n-tooltip v-if="buttons.has('method')" trigger="hover">
+      <template #trigger>
+        <n-button size="small" circle @click="emit('update:method', nextMethod())">
+          <template #icon>
+            <n-icon>
+              <Hammer v-if="method === 'accurate'" />
+              <Flash v-else />
+            </n-icon>
+          </template>
+        </n-button>
       </template>
-    </n-button>
+      {{ $t("tooltips.method") }}
+    </n-tooltip>
+    <n-tooltip v-if="buttons.has('dir')" trigger="hover">
+      <template #trigger>
+        <n-button size="small" circle
+          @click="emit('update:dir', dir === 'horizontal' ? 'vertical' : 'horizontal')">
+          <template #icon>
+            <n-icon>
+              <ArrowForward v-if="dir === 'horizontal'" />
+              <ArrowDown v-else />
+            </n-icon>
+          </template>
+        </n-button>
+      </template>
+      {{ $t("tooltips.direction") }}
+    </n-tooltip>
   </span>
 </template>
 <script setup lang="ts">
@@ -29,6 +48,9 @@ import {
   ArrowForward,
   Hammer,
   Flash,
+  ArrowUp,
+  Shuffle,
+  Trophy,
 } from "@vicons/ionicons5";
 import { Direction } from "grid";
 import { Method, Mode, Ordering } from "../../types";
@@ -99,6 +121,19 @@ function orderingText() {
       return "Score";
     case "random":
       return "Random";
+  }
+}
+
+function orderingIcon() {
+  switch (props.ordering) {
+    case "alpha":
+      return ArrowUp;
+    case "inverse-alpha":
+      return ArrowDown;
+    case "best":
+      return Trophy;
+    case "random":
+      return Shuffle;
   }
 }
 
