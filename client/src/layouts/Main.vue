@@ -396,12 +396,13 @@ nav {
   margin-top: 15px;
   grid-row-start: 2;
   display: grid;
-  grid-template-columns: v-bind(leftWidth) auto;
+  grid-template-columns: v-bind(leftWidth) minmax(0, 1fr);
   grid-template-rows: calc(100vh - 42px);
   grid-column-gap: 15px;
 }
 
 .left-panel {
+  grid-column: 1;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -448,6 +449,8 @@ nav {
 }
 
 .maincontentscroll {
+  grid-column: 2;
+  min-width: 0;
   overflow: scroll;
   padding-bottom: 10px;
   padding-right: 10px;
