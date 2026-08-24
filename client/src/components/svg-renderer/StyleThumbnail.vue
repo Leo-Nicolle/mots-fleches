@@ -23,7 +23,7 @@ import {
 } from "grid";
 import { defaultExportOptions } from "../../types";
 import { useModel } from "../../js/useModel";
-import axios from "axios";
+import { createStyleTemplateGrid } from "../../js/template-grid";
 
 /**
  * Button to add words from the grid to the dictionnary
@@ -86,10 +86,9 @@ function exportSvg(index = 0) {
   });
 }
 function fetch() {
-  return axios.get('/grid-style-thumbnail.json')
-    .then(({ data }) => {
-      exportingGrid.value = Grid.unserialize(data);
-    });
+  return createStyleTemplateGrid().then((grid) => {
+    exportingGrid.value = grid;
+  });
 }
 watch(() => [props.styles], () => {
   fetch()

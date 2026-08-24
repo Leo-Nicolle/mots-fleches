@@ -24,8 +24,10 @@
       </span>
     </template>
     <template #card-body="{ elt, i }">
-      <span v-if="thumbnails[i]" v-html="thumbnails[i]"></span>
-      <img v-else src="/placeholder.png" />
+      <div class="preview">
+        <span v-if="thumbnails[i]" v-html="thumbnails[i]"></span>
+        <img v-else src="/placeholder.png" />
+      </div>
     </template>
   </Layout>
   <Teleport to="#outside">
@@ -152,6 +154,14 @@ onMounted(async () => {
   align-items: center;
   align-content: space-around;
   justify-content: space-around;
+}
+
+.preview {
+  width: 170px;
+  height: 170px;
+  max-width: 170px;
+  max-height: 170px;
+  overflow: hidden;
 }
 
 .card-body>pre {

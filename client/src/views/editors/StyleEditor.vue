@@ -19,8 +19,8 @@
 <script setup lang="ts">
 import GridPaper from "../../components/GridPaper.vue";
 import GridStyleForm from "../../components/forms/GridStyleForm.vue";
-import Loading from "../../components/Loading.vue";
 import GridForm from "../../components/forms/GridForm.vue";
+import Loading from "../../components/Loading.vue";
 import Layout from "../../layouts/Main.vue";
 import NoGrid from "../../components/NoGrid.vue";
 import { defaultExportOptions } from "../../types";
@@ -29,6 +29,7 @@ import { ref, computed, onMounted, toRaw, watch } from "vue";
 import { useRoute } from "vue-router";
 import { api } from "../../api";
 import { trackEditingActivity } from '../../js/telemetry';
+import { createStyleTemplateGrid } from '../../js/template-grid';
 /**
  * View to edit a grid style
  */
@@ -48,9 +49,9 @@ function fetch() {
   const stylePromise = groupId.value !== null && api.mode === 'remote'
     ? api.remote.getGroupStyle(groupId.value, id)
     : api.getStyle(id);
-  return Promise.all([api.getGrids(), stylePromise])
-    .then(([grids, opts]) => {
-      grid.value = grids[0];
+  return Promise.all([stylePromise, createStyleTemplateGrid()])
+    .then(([opts, template]) => {
+      grid.value = template;
       style.value = opts;
     })
     .catch((e) => {
