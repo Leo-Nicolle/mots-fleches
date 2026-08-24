@@ -3,7 +3,6 @@
 -- ============================
 CREATE TABLE Users (
     id SERIAL PRIMARY KEY,
-    stripe_id VARCHAR(255),
     email VARCHAR(255) UNIQUE NOT NULL,
     password TEXT NOT NULL,
     pseudo VARCHAR(255),

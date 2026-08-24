@@ -1,4 +1,4 @@
-import { Grid, GridStyle, SolutionStyle } from "grid";
+import { Grid, GridState, GridStyle, SolutionStyle } from "grid";
 import { Book, Font } from "../types";
 import { AxiosResponse } from "axios";
 
@@ -67,9 +67,7 @@ type GenMap<T extends string, D> = {
 type GenDeleteMap<T extends string, D = string> = {
   [K in `/${T}/:id`]: K extends `/${T}/:id` ? D : never;
 };
-type GenPostMap<T extends string, D = string> = {
-  [K in `/${T}`]: K extends `/${T}/:id` ? D : never;
-};
+
 
 // Helper type to normalize dynamic routes (convert "/item/123" → "/item/:id")
 type NormalizeRoute<T extends string, M> = T extends `/${infer Static}`
@@ -165,16 +163,31 @@ type ApiPostMap = {
     body: undefined;
     response: { success: true };
   };
-  // "/grid": {
-  //   body: GridState;
-  //   response: string;
-  // };
-} & GenPostMap<"grid", string> &
-  GenPostMap<"book", string> &
-  GenPostMap<"word", string> &
-  GenPostMap<"banned-word", string> &
-  GenPostMap<"font", string> &
-  GenPostMap<"style", string>;
+  "/grid": {
+    body: GridState;
+    response: string;
+  };
+  "/book": {
+    body: { id: string; data: Book };
+    response: string;
+  };
+  "/word": {
+    body: string;
+    response: string;
+  };
+  "/banned-word": {
+    body: string;
+    response: string;
+  };
+  "/font": {
+    body: Font;
+    response: string;
+  };
+  "/style": {
+    body: GridStyle;
+    response: string;
+  };
+};
 
 type ApiDeleteMap = GenDeleteMap<"grid", string> &
   GenDeleteMap<"book", string> &
@@ -183,6 +196,22 @@ type ApiDeleteMap = GenDeleteMap<"grid", string> &
   GenDeleteMap<"font", string> &
   GenDeleteMap<"style", string>;
 export interface AxiosAPI {
+  interceptors: {
+    request: {
+      use(
+        onFulfilled?: (config: any) => any,
+        onRejected?: (error: any) => any
+      ): number;
+    };
+    response: {
+      use(
+        onFulfilled?: (response: any) => any,
+        onRejected?: (error: any) => any
+      ): number;
+    };
+  };
+  request(config: any): Promise<AxiosResponse<any>>;
+
   // get<T extends keyof ApiGetMap>(url: T): Promise<AxiosResponse<ApiGetMap[T]>>;
   get<T extends string>(
     url: T

@@ -109,7 +109,6 @@ model tiers {
 
 model users {
   id                       Int            @id @default(autoincrement())
-  stripe_id                String?        @db.VarChar(255)
   email                    String         @unique @db.VarChar(255)
   password                 String
   pseudo                   String?        @db.VarChar(255)

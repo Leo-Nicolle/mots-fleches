@@ -1,9 +1,12 @@
 import { Router, Request, Response } from 'express';
 import { authMiddleware } from '../middleware/auth';
 import { users as User } from '@prisma/client';
-import { getBillingDetails, getTierName } from '../services/stripe';
 import plans from '../plans.json';
 import prisma from '../prisma';
+
+const getTierName = (tierId: number) => {
+  return tierId === 1 ? 'free' : tierId === 2 ? 'standard' : 'premium';
+};
 
 const router = Router();
 
@@ -16,13 +19,11 @@ router.get('/profile', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
   if (!user) return;
   try {
-    const billing = user.stripe_id ? await getBillingDetails(user.stripe_id) : null;
     const tier = getTierName(user.tier_id || 1);
 
     res.status(200).json({
       email: user.email,
       pseudo: user.pseudo,
-      billing,
       tier,
       limits: plans[tier].limits,
     });

@@ -34,7 +34,6 @@ services:
     env_file:
       - .env
       - .env.jwt
-      - .env.stripe
       - .env.turnstile
     environment:
       DB_HOST: ${DB_HOST}

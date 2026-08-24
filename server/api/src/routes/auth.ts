@@ -12,7 +12,6 @@ import {
 import prisma from '../prisma';
 import { authMiddleware } from '../middleware/auth';
 import config from '../services/env';
-import { createCustommer, getCustommer } from '../services/stripe';
 
 const router = Router();
 
@@ -46,21 +45,11 @@ router.post('/join', async (req: Request, res: Response) => {
   }
   const hashedPassword = await hashPassword(password);
 
-  // Attempt to create a Stripe customer; fail gracefully if Stripe is unavailable
-  let stripeId: string | null = null;
-  try {
-    const customer = (await getCustommer(email)) || (await createCustommer(email));
-    stripeId = customer?.id ?? null;
-  } catch (error) {
-    console.warn('[register] Stripe unavailable, proceeding without stripe_id:', error);
-  }
-
   try {
     const newUser = await prisma.users.create({
       data: {
         email,
         password: hashedPassword,
-        stripe_id: stripeId,
         pseudo: pseudo || null,
       },
     });

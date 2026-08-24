@@ -12,7 +12,7 @@ jobs:
     env:
       TARGET: ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}
       KEY: /tmp/private-key
-      DIR: ~/motsflex
+      DIR: motsflex
       DICOS: ~/dicos
     steps:
       - name: Checkout Repository
@@ -24,9 +24,7 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > $KEY
           chmod 600 $KEY
           echo "PUBLIC=$DIR/public" >> $GITHUB_ENV
-          echo "SERVER=${{ env.DIR }}/server.js" >> $GITHUB_ENV
-          echo "ASSETS=${{ env.DIR }}/public/assets" >> $GITHUB_ENV
-          echo "INDEX_HTML=${{ env.DIR }}/public/index.html" >> $GITHUB_ENV
+          echo "SERVER=$DIR/server" >> $GITHUB_ENV
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -48,7 +46,10 @@ jobs:
           ssh -i $KEY $TARGET "rm -rf $PUBLIC && mkdir -p $PUBLIC"
           scp -i $KEY -r dist/public/* "$TARGET:$PUBLIC"
           ssh -i $KEY $TARGET "cp $DICOS/*.zip $PUBLIC"
-          echo "Deploying server code"
-          scp -i $KEY -r dist/server.js "$TARGET:$SERVER"
+          echo "Deploying server folder"
+          ssh -i $KEY $TARGET "rm -rf $SERVER/api $SERVER/db && mkdir -p $SERVER"
+          tar --exclude='node_modules' --exclude='dist' --exclude='.env*' --exclude='postgres-data' -czf - server | ssh -i $KEY $TARGET "tar -xzf - -C $DIR"
+          echo "Refreshing API container"
+          ssh -i $KEY $TARGET "cd $SERVER && docker compose --env-file .env --profile production up -d --build"
       - name: Cleanup
         run: "rm -f $KEY && rm -rf ~/.ssh"

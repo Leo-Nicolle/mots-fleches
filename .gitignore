@@ -21,3 +21,6 @@ postgres-data/
 .env.jwt
 .env.turnstile
 server/.env
+dashboard/node_modules/
+dashboard/dist/
+dashboard/.env

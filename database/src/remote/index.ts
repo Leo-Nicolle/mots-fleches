@@ -19,13 +19,11 @@ export class RemoteDB extends Database {
       baseURL: serverURL,
     });
     // Attach access token to every request
-    //@ts-expect-error
     this.fetcher.interceptors.request.use((config) => {
       config.headers.Authorization = `Bearer ${this.anonKey}`;
       return config;
     });
     // Refresh token on 401
-    //@ts-expect-error
     this.fetcher.interceptors.response.use(
       (response) => response,
       async (error) => {
