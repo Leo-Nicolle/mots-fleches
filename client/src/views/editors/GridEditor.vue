@@ -63,6 +63,20 @@ watch(() => grid, () => {
   api.saveGrid(toRaw(grid.value));
 }, { deep: true });
 
+// In collab mode, metadata changes (resize/title/comment/style) must also reach
+// the Yjs doc: cell edits are synced via onGridUpdate, but the meta map (rows,
+// cols, etc.) would otherwise stay stale and clobber the grid on server close.
+watch(
+  () => {
+    const g = grid.value;
+    return g ? [g.rows, g.cols, g.title, g.comment, g.styleId] : null;
+  },
+  () => {
+    if (!grid.value || !isCollab.value) return;
+    collab.syncUpdate();
+  }
+);
+
 onMounted(async () => {
   await fetch();
 
