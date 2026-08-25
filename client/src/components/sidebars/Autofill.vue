@@ -15,6 +15,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
 import { workerController } from "../../worker";
+import { postEvent } from "../../js/telemetry";
 import throttle from "lodash.throttle";
 import { Grid } from "grid";
 const props = defineProps<{
@@ -64,6 +65,7 @@ function onKeyUp(evt: KeyboardEvent) {
 }
 function onRunClick() {
   busy.value = true;
+  postEvent("autofill-run");
   workerController.autofill(props.grid, words.value);
 }
 workerController.on('searchword-result', (words) => {

@@ -5,7 +5,7 @@ import {
   RouteRecordRaw,
 } from "vue-router";
 import { api } from "../api";
-import { trackPageview } from "../js/telemetry";
+import { trackPageviewForRoute } from "../js/telemetry";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -146,9 +146,7 @@ const router = createRouter({
 router.beforeEach(async (to, from) => {
   try {
     if (to.name) {
-      trackPageview({
-        url: to.name,
-      });
+      trackPageviewForRoute(String(to.name));
     }
   } catch (e) {
     console.error(e);

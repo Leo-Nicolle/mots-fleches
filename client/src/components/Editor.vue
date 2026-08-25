@@ -131,6 +131,7 @@ import ModeControl from './sidebars/ModeControl.vue';
 import CollabCursors from './svg-renderer/CollabCursors.vue';
 import ShortcutHelp from './ShortcutHelp.vue';
 import { workerController } from "../worker";
+import { postEvent } from "../js/telemetry";
 import { useRouter } from "vue-router";
 import { api } from "../api";
 import { useI18n } from "vue-i18n";
@@ -234,8 +235,8 @@ onMounted(() => {
   computeOffset(null);
   workerController.checkGrid(grid.value);
   refreshCellProba();
-  const prev = router.options.history.state.back as string;
-  if (prev.startsWith('/book')) {
+  const prev = router.options.history.state.back as string | null;
+  if (prev && prev.startsWith('/book')) {
     api.db.getBook(prev.split('/')[2]).then((book) => {
       if (!book) return;
       breadcrumbs.value = [
@@ -271,6 +272,7 @@ function onClick(value: string) {
   const cells = grid.value.getBounds(focus.value, dir.value).cells;
   if (!cells || !cells.length) return;
   grid.value.setWord(value, cells[0], dir.value);
+  postEvent("suggestion-click");
   onGridUpdate();
 }
 function toggleDirection() {
@@ -335,10 +337,16 @@ workerController.on("start-locale-change", () => {
   refreshingSearch.value = true;
 });
 
+let checkedOnce = false;
 workerController.on("check-result", (data: GridValidity) => {
-  gridComplete.value =
+  const complete =
     Object.keys(data.horizontal).length === 0 &&
     Object.keys(data.vertical).length === 0;
+  if (complete && !gridComplete.value && checkedOnce) {
+    postEvent("grid-completed");
+  }
+  gridComplete.value = complete;
+  checkedOnce = true;
 });
 
 watch([gridComplete, highlightMode], () => {
@@ -354,6 +362,10 @@ watch(highlightMode, (mode) => {
     localStorage.setItem("motsflex-mode-guide-seen", "1");
     suggestCheck.value = false;
   }
+});
+
+watch(highlightMode, (mode) => {
+  postEvent("editor-mode", { props: { mode } });
 });
 
 watch([focus, dir], () => {

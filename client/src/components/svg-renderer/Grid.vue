@@ -22,7 +22,7 @@
             {{ sp.text }}
           </text>
         </g>
-        <text :x="xText(cell)" :y="yText(cell) + textSize / 2 + offset" :alignment-baseline="alignBs"
+        <text :x="xText(cell)" :y="yText(cell) + textSize / 2 + offset" :alignment-baseline="alignBs" :dominant-baseline="alignBs"
           :font-family="textFontFamily" :font-weight="textFontWeight" :fill="textFontColor" :font-size="textSize"
           v-else-if="!cell.definition && exportOptions.texts">
           {{ cell.text || cell.suggestion }}
