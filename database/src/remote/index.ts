@@ -160,7 +160,7 @@ export class RemoteDB extends Database {
   }
 
   async pushWord(word: string) {
-    await this.fetcher.post("/word", word);
+    await this.fetcher.post("/word", { word });
     return word;
   }
 
@@ -179,7 +179,7 @@ export class RemoteDB extends Database {
   }
 
   async pushBannedWord(word: string) {
-    await this.fetcher.post("/banned-word", word);
+    await this.fetcher.post("/banned-word", { word });
     return word;
   }
 

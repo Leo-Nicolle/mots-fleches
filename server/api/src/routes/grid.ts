@@ -274,7 +274,11 @@ router.get('/word/:id', authMiddleware, async (req: Request, res: Response) => {
 
 router.post('/word', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
-  const word: string = req.body;
+  const word: string = req.body.word;
+  if (!word || typeof word !== 'string') {
+    res.status(400).json({ error: 'Word is required' });
+    return;
+  }
   const existing = await prisma.customwords.findFirst({
     where: { word, user_id: user.id },
   });
@@ -314,7 +318,11 @@ router.get('/banned-word/:id', authMiddleware, async (req: Request, res: Respons
 
 router.post('/banned-word', authMiddleware, async (req: Request, res: Response) => {
   const user = req.user as User;
-  const word: string = req.body;
+  const word: string = req.body.word;
+  if (!word || typeof word !== 'string') {
+    res.status(400).json({ error: 'Word is required' });
+    return;
+  }
   const existing = await prisma.bannedwords.findFirst({
     where: { word, user_id: user.id },
   });

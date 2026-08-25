@@ -172,11 +172,11 @@ type ApiPostMap = {
     response: string;
   };
   "/word": {
-    body: string;
+    body: { word: string };
     response: string;
   };
   "/banned-word": {
-    body: string;
+    body: { word: string };
     response: string;
   };
   "/font": {
