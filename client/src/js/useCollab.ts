@@ -136,9 +136,10 @@ export function useCollab(gridId: string, grid: Ref<Grid | undefined>, onRemoteC
       yMeta.set('styleId', state.styleId);
 
       // Cells
-      for (let y = 0; y < state.rows; y++) {
-        for (let x = 0; x < state.cols; x++) {
-          const cell = state.cells[y][x];
+      for (let y = 0; y < state.cells.length; y++) {
+        const row = state.cells[y];
+        for (let x = 0; x < row.length; x++) {
+          const cell = row[x];
           yCells.set(`${x},${y}`, JSON.stringify({
             text: cell.text,
             definition: cell.definition,
@@ -151,26 +152,10 @@ export function useCollab(gridId: string, grid: Ref<Grid | undefined>, onRemoteC
     });
   }
 
-  /** Sync all grid cells into Yjs after a local edit. */
+  /** Sync the full grid (meta + cells) into Yjs after a local edit. */
   function syncUpdate() {
     if (!ydoc || !grid.value || remoteUpdate) return;
-    const yCells = ydoc.getMap<string>('cells');
-    const cells = grid.value.cells;
-
-    ydoc.transact(() => {
-      for (let y = 0; y < cells.length; y++) {
-        for (let x = 0; x < cells[y].length; x++) {
-          const cell = cells[y][x];
-          yCells.set(`${x},${y}`, JSON.stringify({
-            text: cell.text,
-            definition: cell.definition,
-            arrows: cell.arrows,
-            spaceV: cell.spaceV,
-            spaceH: cell.spaceH,
-          } satisfies SyncedCell));
-        }
-      }
-    });
+    pushGridToYjs(grid.value);
   }
 
   // ---- Apply remote → grid ----------------------------------------------------
