@@ -116,6 +116,7 @@ import {
   GridStyle,
   CellProba,
   GridValidity,
+  ProblemBound,
 } from "grid";
 import Layout from "../layouts/Main.vue";
 import SVGGrid from "./svg-renderer/Grid.vue";
@@ -337,17 +338,58 @@ workerController.on("start-locale-change", () => {
   refreshingSearch.value = true;
 });
 
+const stageEvents = [
+  { key: "filled", event: "grid-filled", check: (problems: Set<string>) => !problems.has("incomplete") },
+  { key: "arrows", event: "grid-arrows", check: (problems: Set<string>) => !problems.has("noarrow") && !problems.has("too-many-arrows") },
+  { key: "definitions", event: "grid-definitions", check: (problems: Set<string>) => !problems.has("nodef") },
+  { key: "valid", event: "grid-valid", check: (problems: Set<string>) => !problems.has("unknown") },
+];
+
+const reached: Record<string, boolean> = {
+  filled: false,
+  arrows: false,
+  definitions: false,
+  valid: false,
+};
+
+function problemsOf(data: GridValidity): Set<string> {
+  const problems = new Set<string>();
+  const scan = (rec: Record<string, ProblemBound>) =>
+    Object.values(rec).forEach((b) => problems.add(b.problem));
+  scan(data.horizontal);
+  scan(data.vertical);
+  return problems;
+}
+
 let checkedOnce = false;
 workerController.on("check-result", (data: GridValidity) => {
-  const complete =
-    Object.keys(data.horizontal).length === 0 &&
-    Object.keys(data.vertical).length === 0;
+  const problems = problemsOf(data);
+  if (checkedOnce) {
+    for (const stage of stageEvents) {
+      const isReached = stage.check(problems);
+      if (isReached && !reached[stage.key]) {
+        reached[stage.key] = true;
+        postEvent(stage.event);
+      } else if (!isReached) {
+        reached[stage.key] = false;
+      }
+    }
+  }
+  const complete = problems.size === 0;
   if (complete && !gridComplete.value && checkedOnce) {
     postEvent("grid-completed");
   }
   gridComplete.value = complete;
   checkedOnce = true;
 });
+
+watch(
+  () => grid.value?.id,
+  () => {
+    checkedOnce = false;
+    for (const key in reached) reached[key] = false;
+  }
+);
 
 watch([gridComplete, highlightMode], () => {
   suggestCheck.value =
