@@ -6,6 +6,7 @@ import {
 } from "vue-router";
 import { api } from "../api";
 import { trackPageviewForRoute } from "../js/telemetry";
+import { applySeoForRoute } from "../js/seo";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -16,9 +17,7 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: "/about",
-    name: "about",
-    component: () => import("../views/Home.vue"),
-    meta: { requiresAuth: false },
+    redirect: "/",
   },
   {
     path: "/grids",
@@ -119,6 +118,7 @@ const routes: Array<RouteRecordRaw> = [
     path: "/changelog",
     name: "changelog",
     component: () => import("../views/Changelog.vue"),
+    meta: { requiresAuth: false },
   },
   {
     path: "/profile",
@@ -178,6 +178,10 @@ router.beforeEach(async (to, from) => {
   }
 
   return true;
+});
+
+router.afterEach((to) => {
+  applySeoForRoute(to.name, to.path);
 });
 
 export default router;

@@ -24,7 +24,7 @@ class WorkerController extends EventEmitter<Events> {
   public definitionWorker: Worker;
   private busy: boolean[] = [false, false];
   private queues: { type: string; data: string }[][] = [[], [], []];
-  private flagsBuffer: SharedArrayBuffer;
+  private flagsBuffer: ArrayBuffer | SharedArrayBuffer;
   private flagsArray: Uint8Array;
   private distribution: [number, number][];
   private searchWorkerId = 0;
@@ -37,18 +37,21 @@ class WorkerController extends EventEmitter<Events> {
   /* sending the buffer (copy) to worker */
   constructor(locale = "fr-fr") {
     super();
+    debugger;
     this.loadingPromise = new Promise((resolve) => setTimeout(resolve, 1000));
     if (!window.isSecureContext) {
       throw new Error("Not in a secure context");
     }
     if (crossOriginIsolated) {
       this.flagsBuffer = new SharedArrayBuffer(1);
-      this.flagsArray = new Uint8Array(this.flagsBuffer);
-      this.flagsArray[0] = 0;
     } else {
       console.error("NOT SECRURE");
-      // throw new Error("SharedArrayBuffer is not supported");
+      // SharedArrayBuffer requires cross-origin isolation; fall back to a
+      // regular ArrayBuffer so the flag can still be written to.
+      this.flagsBuffer = new ArrayBuffer(1);
     }
+    this.flagsArray = new Uint8Array(this.flagsBuffer);
+    this.flagsArray[0] = 0;
     this.distribution = [];
     this.searchWorker = new Worker(
       new URL("./workers/search", import.meta.url),
@@ -70,6 +73,17 @@ class WorkerController extends EventEmitter<Events> {
     );
     this.definitionWorker.addEventListener("message", (evt) =>
       this.onMessage(this.definitionWorkerId, evt)
+    );
+    // Workers fail silently otherwise: a load/runtime error just leaves
+    // setLocale's Promise.all hanging with no "loaded" message.
+    this.searchWorker.addEventListener("error", (evt) =>
+      console.error("[worker] search failed", evt.message || evt)
+    );
+    this.suggestionWorker.addEventListener("error", (evt) =>
+      console.error("[worker] suggestion failed", evt.message || evt)
+    );
+    this.definitionWorker.addEventListener("error", (evt) =>
+      console.error("[worker] definition failed", evt.message || evt)
     );
     this.setLocale(locale);
   }
@@ -163,7 +177,15 @@ class WorkerController extends EventEmitter<Events> {
         ? this.searchWorker
         : this.definitionWorker;
     this.loadingPromise.then(() => {
-      ww.postMessage({ type, data });
+      try {
+        ww.postMessage({ type, data });
+      } catch (err) {
+        this.busy[workerId] = false;
+        console.error(
+          `[worker] ${["search", "suggestion", "definition"][workerId]} postMessage("${type}") failed:`,
+          err
+        );
+      }
     });
   }
 
@@ -249,15 +271,38 @@ class WorkerController extends EventEmitter<Events> {
         : workerId === this.searchWorkerId
         ? this.searchWorker
         : this.definitionWorker;
-    return new Promise<T>((resolve) => {
+    const name = ["search", "suggestion", "definition"][workerId];
+    return new Promise<T>((resolve, reject) => {
       const listenner = (evt: MessageEvent) => {
         if (evt.data.type === event) {
           worker.removeEventListener("message", listenner);
+          worker.removeEventListener("error", onError);
           resolve(evt.data.data);
         }
       };
+      const onError = (evt: ErrorEvent) => {
+        worker.removeEventListener("message", listenner);
+        worker.removeEventListener("error", onError);
+        reject(
+          new Error(
+            `[worker] ${name} errored before "${event}": ${evt.message || evt}`
+          )
+        );
+      };
       worker.addEventListener("message", listenner);
-      worker.postMessage(data);
+      worker.addEventListener("error", onError);
+      try {
+        worker.postMessage(data);
+      } catch (err) {
+        // Firefox throws "The provided callback is no longer runnable" here
+        // when the worker script never loaded (e.g. missing COEP header on
+        // /assets/ while the page is cross-origin isolated).
+        worker.removeEventListener("message", listenner);
+        worker.removeEventListener("error", onError);
+        reject(
+          new Error(`[worker] ${name} postMessage failed (script not loaded?): ${err}`)
+        );
+      }
     });
   }
 
@@ -272,7 +317,8 @@ class WorkerController extends EventEmitter<Events> {
       this._fetchLocale(locale),
       api.db.getWords() as Promise<string[]>,
       api.db.getBannedWords() as Promise<string[]>,
-    ]).then(([{ words, definitions }, userWords, bannedWords]) => {
+    ])
+      .then(([{ words, definitions }, userWords, bannedWords]) => {
       for (let i = 0; i < userWords.length; i++) {
         words.push(userWords[i]);
       }
@@ -314,12 +360,15 @@ class WorkerController extends EventEmitter<Events> {
         .then((distribution) => {
           this.distribution = distribution;
           return this.emit("locale-changed");
-        })
-        .catch((err) => {
-          this.emit("locale-changed");
-          console.error(err);
         });
-    });
+    })
+      .catch((err) => {
+        // Anything above (dictionary fetch, getWords, or a worker that never
+        // reported "loaded") ends up here. Always settle loadingPromise and
+        // fire locale-changed so the app doesn't hang forever.
+        console.error("[worker] setLocale failed:", err);
+        this.emit("locale-changed");
+      });
     return this.loadingPromise;
   }
 }

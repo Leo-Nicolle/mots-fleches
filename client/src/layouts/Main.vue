@@ -3,7 +3,7 @@
     <div class="header">
       <span class="left">
         <span class="menutitle" @click="router.push('/')">
-          <img class="menuicon" src="/icon.svg" />
+          <img class="menuicon" src="/icon.svg" alt="MotsFlex" />
           <span v-if="screenSize !== 'phone'">Motsflex</span>
         </span>
         <span v-if="screenSize !== 'phone'" class="header-nav">
@@ -239,7 +239,7 @@ function getNavChildren() {
         h(
           RouterLink,
           {
-            to: "/about",
+            to: "/",
           },
           { default: () => i18n.global.t("nav.about") }
         ),

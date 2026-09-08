@@ -18,9 +18,12 @@ scripts/api-key.mjs
 scripts/plausible-key
 postgres-data/
 *.stripe
+.pw-browsers/
 .env.jwt
 .env.turnstile
 server/.env
-dashboard/node_modules/
-dashboard/dist/
-dashboard/.env
+/dashboard
+server/api/src/routes/admin.ts
+server/api/src/routes/plausible.ts
+server/api/src/middleware/admin.ts
+server/api/src/services/grid-progress.ts

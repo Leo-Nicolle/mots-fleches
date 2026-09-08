@@ -18,7 +18,7 @@
       <div class="content" ref="content">
         <article>
           <section class="hero" id="top">
-            <img src="/icon.svg" id="heroimage" />
+            <img src="/icon.svg" id="heroimage" alt="Logo MotsFlex — générateur de mots fléchés et mots croisés" />
             <h1>{{ $t("home.welcome.title") }}</h1>
             <p>{{ $t("home.welcome.p") }}</p>
             <div class="hero-actions">
@@ -41,35 +41,35 @@
             <p>
               {{ $t("home.gridfilling") }}
             </p>
-            <video src="/filling-up-fast.mp4" controls />
+            <video src="/filling-up-fast.mp4" controls preload="none" />
           </section>
           <section id="definition-editing">
             <h3>{{ $t("home.nav.definitionediting") }}</h3>
             <p>
               {{ $t("home.definitionediting") }}
             </p>
-            <video src="/editing-definition.mp4" controls />
+            <video src="/editing-definition.mp4" controls preload="none" />
           </section>
           <section id="check-mode">
             <h3>{{ $t("home.nav.checkmode") }}</h3>
             <p>
               {{ $t("home.checkmode") }}
             </p>
-            <video src="/check-mode.mp4" controls />
+            <video src="/check-mode.mp4" controls preload="none" />
           </section>
           <section id="styling">
             <h3>{{ $t("home.nav.styling") }}</h3>
             <p>
               {{ $t("home.styling") }}
             </p>
-            <video src="/styling.mp4" controls />
+            <video src="/styling.mp4" controls preload="none" />
           </section>
           <section id="printing">
             <h3>{{ $t("home.nav.printing") }}</h3>
             <p>
               {{ $t("home.printing") }}
             </p>
-            <video src="/printing.mp4" controls />
+            <video src="/printing.mp4" controls preload="none" />
           </section>
         </article>
         <article>
@@ -134,7 +134,7 @@
         </article>
         <article>
           <section class="hero" id="about">
-            <h1>{{ $t("home.nav.about") }}</h1>
+            <h2>{{ $t("home.nav.about") }}</h2>
             <p v-html="$t('home.about')"></p>
           </section>
           <section id="why">

@@ -162,8 +162,7 @@ const method = ref<Method>("accurate");
 const ordering = ref<Ordering>("best");
 const orderings = ref<Ordering[]>(["best", "alpha", "inverse-alpha", "random"]);
 const zoom = ref(1);
-const highlightModes = ["normal", "check", "heatmap"] as Mode[];
-const highlightMode = ref<Mode>(highlightModes[0]);
+const highlightMode = ref<Mode>("heatmap");
 const cellProbas = ref<CellProba[][]>([]);
 const searchResult = ref<string[]>([]);
 const refreshingRun = ref(false);
@@ -233,6 +232,7 @@ watch(method, () => {
   throttledRefresSimpleSearch();
 });
 onMounted(() => {
+  console.log("HERE");
   computeOffset(null);
   workerController.checkGrid(grid.value);
   refreshCellProba();

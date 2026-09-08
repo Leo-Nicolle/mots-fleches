@@ -2,6 +2,12 @@ import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 
 export default defineConfig({
+  worker: {
+    // The app creates workers with `{ type: "module" }`, so the worker bundles
+    // must be emitted as ES modules. The default is "iife" (classic workers),
+    // which is a format mismatch that breaks workers in the production build.
+    format: "es",
+  },
   plugins: [
     vue(),
     {

@@ -31,6 +31,7 @@ import { api } from "../../api";
 import Layout from "../../layouts/NotLoggedin.vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAlert } from "../../js/useAlert";
+import { postEvent } from "../../js/telemetry";
 
 const router = useRouter();
 const email = ref<string>("");
@@ -52,6 +53,7 @@ async function emailLogin() {
     localStorage.setItem("refreshToken", refreshToken);
     api.mode = "remote";
     api.syncOnLogin().catch(() => {}); // silent background sync
+    postEvent("login");
     redirect();
   } catch (e) {
     const isNetworkError = !(e as any)?.response;

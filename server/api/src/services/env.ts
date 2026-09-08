@@ -35,5 +35,10 @@ const config = {
   admin: {
     token: process.env.ADMIN_TOKEN || '',
   },
+  plausible: {
+    apiKey: process.env.PLAUSIBLE_API_KEY || '',
+    siteId: process.env.PLAUSIBLE_SITE_ID || 'motsflex.com',
+    apiBase: process.env.PLAUSIBLE_API_BASE || 'http://localhost:8000',
+  },
 };
 export default config;

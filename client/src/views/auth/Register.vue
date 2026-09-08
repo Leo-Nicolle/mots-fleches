@@ -33,6 +33,7 @@ import { api } from "../../api";
 import Layout from "../../layouts/NotLoggedin.vue";
 import { useRouter } from "vue-router";
 import { useAlert } from "../../js/useAlert";
+import { postEvent } from "../../js/telemetry";
 const router = useRouter();
 const pseudo = ref<string>("");
 const email = ref<string>("");
@@ -75,6 +76,7 @@ async function register() {
   }
   try {
     await api.remote.register(email.value, password.value, pseudo.value || undefined, turnstileToken.value);
+    postEvent("signup");
     const { accessToken, refreshToken } = await api.remote.signin(email.value, password.value);
     localStorage.setItem("accessToken", accessToken);
     localStorage.setItem("refreshToken", refreshToken);

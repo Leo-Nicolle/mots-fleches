@@ -1,5 +1,5 @@
 import http from 'http';
-import express from 'express';
+import express, { Router } from 'express';
 import cors from 'cors';
 import config from './services/env';
 import authRouter from './routes/auth';
@@ -8,10 +8,24 @@ import gridRouter from './routes/grid';
 import groupsRouter from './routes/groups';
 import groupResourcesRouter from './routes/group-resources';
 import collabRouter from './routes/collab';
-import adminRouter from './routes/admin';
 import helmet from './config/helmet';
 import passport from './config/passport';
 import { setupCollab } from './collab';
+
+// Admin routes live in a private repo and are injected at deploy time.
+// They are optional here so the public repo still builds without them.
+let adminRouter: Router | undefined;
+let plausibleRouter: Router | undefined;
+try {
+  adminRouter = require('./routes/admin').default;
+} catch {
+  console.warn('[api] admin routes not found, /api/admin disabled');
+}
+try {
+  plausibleRouter = require('./routes/plausible').default;
+} catch {
+  console.warn('[api] plausible routes not found, /api/admin/plausible disabled');
+}
 
 const app = express();
 const PORT = config.port || 3000;
@@ -33,7 +47,8 @@ app.use('/api/', gridRouter);
 app.use('/api/', groupsRouter);
 app.use('/api/', groupResourcesRouter);
 app.use('/api/', collabRouter);
-app.use('/api/admin', adminRouter);
+if (adminRouter) app.use('/api/admin', adminRouter);
+if (plausibleRouter) app.use('/api/admin/plausible', plausibleRouter);
 
 app.get('/', (req, res) => {
   res.send('Welcome to the Crosswords API!');
