@@ -30,6 +30,16 @@
             maxRows: 10
           }" />
         </n-form-item>
+        <n-form-item v-if="api.mode === 'remote' && myGroups.length > 0" :label="$t('groups.share')">
+          <n-select
+            :value="sharedGroupId"
+            :options="groupOptions"
+            :loading="sharingLoading"
+            clearable
+            :placeholder="$t('groups.notShared')"
+            @update:value="onShareChange"
+          />
+        </n-form-item>
       </n-form>
     </div>
     <template #action>
@@ -40,10 +50,11 @@
 
 <script setup lang="ts">
 import { Book } from 'database';
+import type { GroupSummary } from 'database';
 import { SettingsOutline } from '@vicons/ionicons5';
 import { api } from '../../api';
 import { isSolutionStyle } from "grid";
-import { ref, toRaw, defineEmits } from "vue";
+import { ref, toRaw, computed } from "vue";
 import { SelectOption } from 'naive-ui';
 const book = defineModel({
   type: Object as () => Book,
@@ -59,6 +70,10 @@ const solutionStyles = ref<any[]>([]);
 const emit = defineEmits(['update']);
 const visible = ref(false);
 const loading = ref(false);
+const myGroups = ref<GroupSummary[]>([]);
+const sharedGroupId = ref<number | null>(null);
+const sharingLoading = ref(false);
+const groupOptions = computed(() => myGroups.value.map((g) => ({ label: g.name, value: g.id })));
 
 function fetch() {
   loading.value = true;
@@ -79,9 +94,41 @@ function fetch() {
   });
 }
 
+async function loadSharing() {
+  if (api.mode !== 'remote' || !book.value) return;
+  sharingLoading.value = true;
+  try {
+    const [groupsRes, sharingRes] = await Promise.all([
+      api.remote.fetcher.get('/groups'),
+      (api.remote.fetcher as any).get(`/book/${book.value.id}/sharing`),
+    ]);
+    myGroups.value = groupsRes.data;
+    sharedGroupId.value = (sharingRes.data as any).group_id ?? null;
+  } catch (e) {
+    console.error(e);
+  } finally {
+    sharingLoading.value = false;
+  }
+}
+
+async function onShareChange(groupId: number | null) {
+  if (!book.value) return;
+  try {
+    if (groupId === null) {
+      await (api.remote as any).unshareBook(sharedGroupId.value ?? 0, book.value.id);
+    } else {
+      await (api.remote as any).shareBook(groupId, book.value.id);
+    }
+    sharedGroupId.value = groupId;
+  } catch (e) {
+    console.error(e);
+  }
+}
+
 function show() {
   return fetch()
     .then(() => {
+      loadSharing();
       visible.value = true;
     });
 }

@@ -14,31 +14,21 @@ import { ref, onMounted } from "vue";
 import LoaderIcon from "../../components/LoaderIcon.vue";
 import { api } from "../../api";
 import { useRouter } from "vue-router";
-/**
- * View to logout and close the server
- */
+
 const router = useRouter();
 const closed = ref(false);
 const message = ref<string>("waiting");
-function exit() {
-  if (api.mode === 'supadb') {
-    return api.signout();
-  }
-  return Promise.resolve();
-
-}
 
 onMounted(() => {
   setTimeout(() => {
-    exit()
+    api
+      .signout()
       .then(() => {
-        api.signout();
         message.value = "success";
         closed.value = true;
-        router.push('/login');
+        router.push("/login");
       });
   }, 500);
-
 });
 </script>
 
@@ -57,4 +47,3 @@ onMounted(() => {
   flex-direction: column;
 }
 </style>
-

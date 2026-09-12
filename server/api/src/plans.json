@@ -1,0 +1,26 @@
+{
+  "free": {
+    "limits": {
+      "grids": 0,
+      "custom_words": 0,
+      "word_lists": 0,
+      "max_list_size": 0
+    }
+  },
+  "standard": {
+    "limits": {
+      "grids": 500,
+      "custom_words": 15000,
+      "word_lists": 100,
+      "max_list_size": 1000
+    }
+  },
+  "premium": {
+    "limits": {
+      "grids": 5000,
+      "custom_words": 50000,
+      "word_lists": 200,
+      "max_list_size": 2000
+    }
+  }
+}

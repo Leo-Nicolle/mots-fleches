@@ -4,7 +4,7 @@
       autocomplete: 'enabled',
     }" :options="options" :placeholder="$t('forms.addWord')" @keyup="onKeyUp" />
     <div class="words scroll">
-      <span class="autofillword" v-for="(word, i) in words" :key="word" @click="(i) => onDelete(i)">{{ word }}</span>
+      <span class="autofillword" v-for="(word, i) in words" :key="word" @click="onDelete(i)">{{ word }}</span>
     </div>
   </div>
   <span class="run">
@@ -15,6 +15,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
 import { workerController } from "../../worker";
+import { postEvent } from "../../js/telemetry";
 import throttle from "lodash.throttle";
 import { Grid } from "grid";
 const props = defineProps<{
@@ -64,6 +65,7 @@ function onKeyUp(evt: KeyboardEvent) {
 }
 function onRunClick() {
   busy.value = true;
+  postEvent("autofill-run");
   workerController.autofill(props.grid, words.value);
 }
 workerController.on('searchword-result', (words) => {

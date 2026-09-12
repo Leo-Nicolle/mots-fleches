@@ -5,15 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  defineEmits,
-  defineProps,
-  nextTick,
-  onMounted,
-  watch,
-  ref,
-  computed,
-} from "vue";
+import { nextTick, onMounted, watch, ref, computed } from "vue";
 import SVGGrid from "./Grid.vue";
 import {
   Grid,
@@ -23,7 +15,7 @@ import {
 } from "grid";
 import { defaultExportOptions } from "../../types";
 import { useModel } from "../../js/useModel";
-import axios from "axios";
+import { createStyleTemplateGrid } from "../../js/template-grid";
 
 /**
  * Button to add words from the grid to the dictionnary
@@ -86,10 +78,9 @@ function exportSvg(index = 0) {
   });
 }
 function fetch() {
-  return axios.get('/grid-style-thumbnail.json')
-    .then(({ data }) => {
-      exportingGrid.value = Grid.unserialize(data);
-    });
+  return createStyleTemplateGrid().then((grid) => {
+    exportingGrid.value = grid;
+  });
 }
 watch(() => [props.styles], () => {
   fetch()
@@ -104,7 +95,7 @@ watch(props.modelValue, () => {
 onMounted(() => {
   fetch()
     .then(() => value.value = []);
-})
+});
 
 </script>
 

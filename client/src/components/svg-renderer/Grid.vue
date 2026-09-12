@@ -3,7 +3,8 @@
     grid,
     style
   )} ${gridTotalHeight(grid, style)}`" :width="`${gridTotalWidth(grid, style) / (zoom || 1)}px`"
-    :height="`${gridTotalHeight(grid, style) / (zoom || 1)}px`" @click="onClick" @mousemove="onMouseMove"
+    :height="`${gridTotalHeight(grid, style) / (zoom || 1)}px`" @click="onClick" @dblclick="onDblClick"
+    @mousemove="onMouseMove"
     @mouseout="onMouseLeave" xmlns="http://www.w3.org/2000/svg">
     <FontLoader :value="style.definition" />
     <FontLoader v-if="isSolutionStyle(style)" :value="style.solutions" />
@@ -21,7 +22,7 @@
             {{ sp.text }}
           </text>
         </g>
-        <text :x="xText(cell)" :y="yText(cell) + textSize / 2 + offset" :alignment-baseline="alignBs"
+        <text :x="xText(cell)" :y="yText(cell) + textSize / 2 + offset" :alignment-baseline="alignBs" :dominant-baseline="alignBs"
           :font-family="textFontFamily" :font-weight="textFontWeight" :fill="textFontColor" :font-size="textSize"
           v-else-if="!cell.definition && exportOptions.texts">
           {{ cell.text || cell.suggestion }}
@@ -60,7 +61,7 @@
 
 <script setup lang="ts">
 import FontLoader from "../fonts/FontLoader.vue";
-import { defineEmits, ref, defineProps, computed, nextTick } from "vue";
+import { ref, computed, nextTick } from "vue";
 import { getD } from "../../js/paths";
 import {
   Grid,
@@ -121,6 +122,10 @@ const emit = defineEmits<{
    * Emitted when mousemove on a cell
    */
   (event: "hover", value: Cell): void;
+  /**
+   * Emitted when a text cell is double-clicked
+   */
+  (event: "toggle-direction"): void;
 }>();
 const rows = computed(() =>
   new Array(props.grid.rows).fill(0).map((e, i) => i)
@@ -319,6 +324,12 @@ function onClick(evt: MouseEvent) {
   const cell = getCell(evt);
   if (!cell) return;
   emit("focus", cell);
+}
+
+function onDblClick(evt: MouseEvent) {
+  const cell = getCell(evt);
+  if (!cell || cell.definition) return;
+  emit("toggle-direction");
 }
 
 function onMouseMove(evt: MouseEvent) {

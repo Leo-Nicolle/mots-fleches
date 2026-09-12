@@ -44,7 +44,7 @@ export class Dico {
           .trim()
           .normalize("NFD")
           .replace(/[\u0300-\u036f]/g, "")
-          .replace(/ ?\'?-?/g, "")
+          .replace(/ ?'?-?/g, "")
           .toUpperCase()
       )
       // .sort((a, b) => Math.abs(b.length - 10) - Math.abs(a.length - 10))

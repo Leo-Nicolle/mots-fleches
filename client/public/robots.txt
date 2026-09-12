@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# Block nothing that matters; the app's dynamic data routes aren't SEO-relevant,
+# but they contain no crawlable content, so allowing them is harmless.
+
+Sitemap: https://motsflex.com/sitemap.xml

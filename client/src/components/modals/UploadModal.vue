@@ -47,7 +47,7 @@
 </template>
 
 <script lang="ts" setup >
-import { computed, defineEmits, defineProps, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 const files = ref(new Map<string, string>());
 const showModal = ref(false);
 const fileinput = ref<HTMLInputElement>();

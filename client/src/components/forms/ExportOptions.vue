@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps, defineEmits, computed, watch } from "vue";
+import { ref, computed, watch } from "vue";
 import { useModel } from "../../js/useModel";
 import { ExportOptions } from "../../types";
 

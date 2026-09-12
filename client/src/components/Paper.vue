@@ -28,7 +28,7 @@
 
 <script setup lang="ts">
 import { Format, PaginationStyle } from "grid";
-import { defineProps, ref } from "vue";
+import { ref } from "vue";
 import { computed } from "vue";
 import FontLoader from "./fonts/FontLoader.vue";
 import { getFont } from "../js/useFont";

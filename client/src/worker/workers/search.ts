@@ -1,6 +1,9 @@
-
 import { wordsSearch } from '../utils/words-search';
 import { Grid } from 'grid';
+
+// Bump this token to force a new hashed chunk filename (evicts clients that
+// immutable-cached this worker before the COEP headers were fixed).
+(globalThis as unknown as Record<string, string>).__workerBuild = 'coep-1';
 
 // was the old hasBailed shared array, might be used in autofill.
 onmessage = function (e) {

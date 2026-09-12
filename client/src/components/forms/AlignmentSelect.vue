@@ -1,14 +1,16 @@
 <template>
   <n-form-item :label="$t('forms.alignmentBaseline')" :path="`${rolePrefix}.alignmentBaseline`">
+    <!-- eslint-disable-next-line vue/no-mutating-props -- modelValue is shared by reference with the parent's style object; there is no update:modelValue emit -->
     <n-select v-model:value="modelValue.alignmentBaseline" :options="alignmentBaselineOptions" />
   </n-form-item>
   <n-form-item :label="$t('forms.baselineShift')" :path="`${rolePrefix}.baselineShift`">
+    <!-- eslint-disable-next-line vue/no-mutating-props -- modelValue is shared by reference with the parent's style object; there is no update:modelValue emit -->
     <n-input-number role="format-baselineShift" v-model:value="modelValue.offset" />
   </n-form-item>
 </template>
 <script setup lang="ts">
 import { GridStyle } from 'grid';
-import { ref } from 'vue';
+import { ref } from "vue";
 
 const alignmentBaselineOptions = ref([
   "auto", "baseline", "before-edge", "text-before-edge",

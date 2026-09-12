@@ -21,7 +21,11 @@ export const lang = {
     exit: "Log out",
     login: "Log in",
     newGrid: "New grid",
+    newBook: "New book",
+    createFirstGrid: "Create your first grid",
     newStyle: "New style",
+    reset: "Reset",
+    zoom: "Zoom",
     print: "Print",
     exportsvg: "Export SVG",
     support: "Support MotsFlex",
@@ -32,12 +36,15 @@ export const lang = {
     uploadWords: "Upload words",
     dragdrop: "Drag files here (or click)",
     here: "here",
+    importGrid: "Import grid (JSON)",
   },
   errors: {
-    'no-horizontal-arrow': 'No horizontal arrow',
-    'no-vertical-arrow': 'No vertical arrow',
-    'incomplete-word': 'Incomplete word',
-    'no-definition': 'No definition found',
+    "no-horizontal-arrow": "No horizontal arrow",
+    "no-vertical-arrow": "No vertical arrow",
+    "incomplete-word": "Incomplete word",
+    "no-definition": "No definition found",
+    invalidJson: "Invalid JSON",
+    importFailed: "Import failed",
   },
   titles: {
     newFont: "New Font",
@@ -46,9 +53,11 @@ export const lang = {
     results: "Results",
   },
   forms: {
+    jsonContent: "JSON content",
+    jsonPlaceholder: "Paste your grid JSON here...",
     title: "Title",
     options: "Options",
-    default: 'Default',
+    default: "Default",
     solutions: "Solutions",
     gridSize: "Grid size",
     comment: "Comment",
@@ -63,7 +72,7 @@ export const lang = {
     texts: "Texts",
     highlight: "Highlight",
     splits: "Splits",
-    spaces: 'Spaces',
+    spaces: "Spaces",
     fills: "Fills",
     outBorderSize: "Border size",
     outBorderColor: "Border color",
@@ -78,11 +87,11 @@ export const lang = {
     height: "Height",
     margins: "Margins",
     margin: "Margin",
-    align: 'Alignment',
+    align: "Alignment",
     pagination: "Pagination",
     left: "Left",
-    center: 'Center',
-    startIndex: 'First page index',
+    center: "Center",
+    startIndex: "First page index",
     top: "Top",
     right: "Right",
     bottom: "Bottom",
@@ -107,14 +116,14 @@ export const lang = {
     styles: "Styles",
     solutionStyles: "Solution styles",
     lineSpacing: "Line spacing",
-    baselineShift: 'Baseline',
-    alignmentBaseline: 'Alignment',
+    baselineShift: "Baseline",
+    alignmentBaseline: "Alignment",
     copy: "Copy",
-    reuse: 'Reuse',
+    reuse: "Reuse",
     move: "Move",
-    mode: 'Mode',
+    mode: "Mode",
     target: "Target Book",
-    addWords: 'Add words',
+    addWords: "Add words",
     orientation: "Orientation",
     portrait: "Portrait",
     landscape: "Landscape",
@@ -123,9 +132,42 @@ export const lang = {
     incomplete: "is incomplete",
     nodef: "has no definition",
     noarrow: "has no arrow",
-    toomanyarrows: 'has too many arrows',
+    toomanyarrows: "has too many arrows",
     add: "Add {word} to dictionary",
-    loading: 'Loading...',
+    loading: "Loading...",
+    mode: "Editor mode (Free / Check / Heatmap)",
+    direction: "Typing direction",
+    method: "Suggestion mode",
+    ordering: "Suggestion ordering",
+    reset: "Reset arrows",
+    zoomIn: "Zoom in",
+    zoomOut: "Zoom out",
+    gridSettings: "Grid settings",
+    help: "Keyboard shortcuts",
+    cellSize: "Size of each cell when printed",
+    borderSize: "Thickness of the cell borders",
+    outBorderSize: "Thickness of the outer border",
+    spaceWidth: "Width of the gap between words",
+  },
+  shortcuts: {
+    title: "Keyboard shortcuts",
+    moveAround: "Move around the grid",
+    setDirection: "Change typing direction",
+    toggleDefinition: "Turn a cell into a definition",
+    exitDefinition: "Exit a definition",
+    horizontalSplit: "Add a horizontal space",
+    verticalSplit: "Add a vertical space",
+    switchMethod: "Switch suggestion mode",
+    cycleOrdering: "Cycle suggestion ordering",
+  },
+  empty: {
+    title: "Nothing here yet",
+    hint: "Click Create to get started, or import existing grids.",
+  },
+  collab: {
+    connected: "Connected",
+    connecting: "Connecting…",
+    disconnected: "Disconnected",
   },
   modals: {
     bookTitle: "Book",
@@ -136,20 +178,34 @@ export const lang = {
     wrongpassword: "Wrong password or email",
     passwordsdontmatch: "Passwords don't match",
     passwordtooshort: "Password too short, minimum 6 characters",
-    noGrid: "You don't have any grid yet, please create one before modify styles."
+    noGrid:
+      "You don't have any grid yet, please create one before modify styles.",
+    registerfailed: "Registration failed.",
+    captcharequired: "Please complete the captcha.",
+    serverUnreachable: "Could not reach the server. Check your connection and try again.",
+    resettokeninvalid: "This reset link is invalid or has expired.",
+    passwordresetsuccess: "Your password has been reset. Please sign in.",
   },
   login: {
     title: "Login",
     emal: "Email",
     password: "Password",
     forgotPassword: "Forgot password?",
+    sendResetLink: "Send reset link",
     login: "Login",
     register: "Register",
     localMode: "Continue without account",
     githubLogin: "Login with Github",
   },
+  account: {
+    savedLocally: "Saved on this device",
+    synced: "Synced to cloud",
+    syncCta: "Create an account to access your grids from any device",
+  },
   register: {
     title: "Register",
+    pseudo: "Username",
+    pseudoPlaceholder: "Choose a username",
     email: "Email",
     password: "Password",
     confirmPassword: "Confirm password",
@@ -158,11 +214,15 @@ export const lang = {
   },
   sentemail: {
     title: "Email sent",
-    message: "An email has been sent to {email}. Please follow the instructions in the email to complete the registration process.",
-    redirect: 'Go to login page',
+    message:
+      "An email has been sent to {email}. Please follow the instructions in the email to complete the registration process.",
+    redirect: "Go to login page",
   },
   passwordreset: {
     title: "Reset password",
+    submit: "Reset password",
+    invalidToken: "This reset link is invalid or has expired.",
+    success: "Password reset, redirecting to login...",
   },
   logout: {
     waiting: "Waiting for logout...",
@@ -172,12 +232,105 @@ export const lang = {
     normal: "Free",
     check: "Check",
     heatmap: "Heatmap",
-
+    normalDesc: "Free editing",
+    checkDesc: "Highlight errors in the grid",
+    heatmapDesc: "Word probability heatmap",
+    suggestedCheck: "Grid complete — switch to Check mode",
   },
   help: {
     copygrid: "Duplicate the grid into annother grid",
     movegrid: "Move the grid into annother book",
-    reusegrid: "Reuse the grid into annother book (editing in one book will edit in the other)",
+    reusegrid:
+      "Reuse the grid into annother book (editing in one book will edit in the other)",
+  },
+  plans: {
+    title: "Choose Your Plan",
+    confirmationTitle: "Confirm your choice",
+    proceedToPayment: "Proceed to payment",
+    confirmationMessage: "Are you sure of your choice?",
+    goBack: "Go back",
+    select: "Select Plan",
+    limits: {
+      grids: "Max grids",
+      custom_words: "Max words",
+      styles: "Max styles",
+      books: "Max books",
+      word_lists: "Max word lists",
+      max_list_size: "Max words per list",
+    },
+    billing: {
+      monthly: "Monthly",
+      yearly: "Yearly",
+    },
+  },
+  billing: {
+    completeYourPurchase: "Complete Your Purchase",
+    billingDetails: "Billing Details",
+    paymentDetails: "Payment Details",
+    name: "Name",
+    email: "Email",
+    address: "Address",
+    city: "City",
+    zip: "ZIP Code",
+    cardNumber: "Card Number",
+    expiry: "Expiry Date",
+    cvc: "CVC",
+    requiredField: "This field is required",
+    invalidEmail: "Invalid email address",
+    invalidCardNumber: "Invalid card number",
+    invalidExpiry: "Invalid expiry date",
+    invalidCVC: "Invalid CVC",
+  },
+  groups: {
+    title: "Groups",
+    create: "New Group",
+    createTitle: "Create a Group",
+    editTitle: "Edit Group",
+    name: "Name",
+    description: "Description",
+    members: "members",
+    membersTitle: "Members",
+    addMember: "Add a Member",
+    memberEmailPlaceholder: "member{'@'}example.com",
+    add: "Add",
+    removeMember: "Remove",
+    edit: "Edit",
+    delete: "Delete",
+    leave: "Leave",
+    empty: "You are not in any group yet.",
+    deleteTitle: "Delete group",
+    deleteConfirm: "Delete group \"{name}\"? This cannot be undone.",
+    leaveTitle: "Leave group",
+    leaveConfirm: "Leave group \"{name}\"?",
+    filterMine: "My {resource}",
+    share: "Share with group",
+    notShared: "Not shared",
+    sharedWith: "Shared with",
+    readOnly: "Read-only",
+    roles: {
+      owner: "Owner",
+      admin: "Admin",
+      member: "Member",
+    },
+  },
+  profile: {
+    title: "Profile",
+    email: "Email",
+    pseudo: "Username",
+    pseudoPlaceholder: "Your username",
+    savePseudo: "Save username",
+    changePassword: "Change Password",
+    currentPassword: "Current Password",
+    newPassword: "New Password",
+    confirmPassword: "Confirm Password",
+    updatePassword: "Update Password",
+    billingDetails: "Billing Details",
+    billingName: "Name",
+    billingEmail: "Email",
+    billingAddress: "Address",
+    billingCity: "City",
+    billingZip: "ZIP Code",
+    save: "Save",
   },
   home: {
     nav: {
@@ -202,16 +355,15 @@ export const lang = {
       why: "Why MotsFlex?",
       who: "Who is behind it?",
       contribute: "How to contribute?",
-      support: "Support MotsFlex"
+      support: "Support MotsFlex",
     },
     welcome: {
-      title: 'Welcome to MotsFlex!',
-      p: 'MotsFlex is an open source tool to help you create and print Crosswords',
+      title: "Welcome to MotsFlex!",
+      p: "MotsFlex is an open source tool to help you create and print Crosswords",
     },
     wcid: `MotsFlex is a Crosswords creation tool. It helps you filling up
             the grid with words, and then export it as a PDF file. It can even
-            generate words index and solution pages for you.`
-    ,
+            generate words index and solution pages for you.`,
     gridfilling: `MotsFlex has a powefull suggestion engine, which helps you filling
         up the grid without efforts. Everytime you modify the grid, it tries
         to find the words that fit the best into the grid, and proposes them
@@ -240,8 +392,7 @@ export const lang = {
     grideditor: {
       p: `The editor is the main part of MotsFlex. It has many features and
             shortcuts, which are listed below.`,
-      list:
-        `<li>
+      list: `<li>
                 <b>Turn a cell into definition:</b> Press
                 <kbd class="kbc-button">Esc</kbd>. Press again to turn it back
                 to a normal cell.
@@ -298,11 +449,11 @@ export const lang = {
             <b>Make the cells bigger/smaller when printing:</b> You will
             need to go to the Styles page, and change the
             <em>Cell size</em> property.
-          </li>`
+          </li>`,
     },
     customwords: `Just got to the <em>Words</em> page, and add your words. You can
         also delete them from there. You cannot modify the base
-        dictionnary though. 
+        dictionnary though.
         You might need to refresh the page to get thoose words in your suggestions.`,
     suggestions: {
       one: "Theere are two suggestion modes:",
@@ -314,7 +465,7 @@ export const lang = {
         <em>score</ em >: The first words in the list will be less likely to
           block you.The second mode just suggest you words that fit in the
           grid.
-          `
+          `,
     },
     heatmap: `
     Everytime you change something in the grid, the heatmap is
@@ -328,7 +479,7 @@ export const lang = {
     It is advisable to fill up first the most red cells.
 
     `,
-    languages: `                  
+    languages: `
     For now MotsFlex only supports Français, Español and English. If
     you want to add a new language, please open an issue on
     <a href="https://github.com/Leo-Nicolle/mots-fleches/issues"
@@ -336,20 +487,20 @@ export const lang = {
     >.`,
     langswitch: {
       one: `Just click on the`,
-      two: `icon on the top right of the screen and select the language you want.`
+      two: `icon on the top right of the screen and select the language you want.`,
     },
     about: `Mots flex is an Open Source project (MIT licence). You can find
     the code
     <a href="https://github.com/Leo-Nicolle/mots-fleches"> here</a>.`,
     why: `
-    It all started with a friend wanting to create crossword puzzles. When I saw her doing it 
-    by hand, I started too look on internet for a tool to generate crosswords. I was surprised to see tat 
-    there were only paying solutions, or small free tools that would create sparse crosswords or withoout 
+    It all started with a friend wanting to create crossword puzzles. When I saw her doing it
+    by hand, I started too look on internet for a tool to generate crosswords. I was surprised to see tat
+    there were only paying solutions, or small free tools that would create sparse crosswords or withoout
     printing features etc. Well there were clearly a lack of tool in that field.
     So I started to create MotsFlex, as a suggestions engine at first. A few months later,
     I injured myself doing woodworking. I was stuck at home with a hand in a cast, and I needed
-    to do something. During three weeks I added more features, and published it online. 
-    Since, my hand is back to life, and I continue maintaining and making evolve MotsFlex. 
+    to do something. During three weeks I added more features, and published it online.
+    Since, my hand is back to life, and I continue maintaining and making evolve MotsFlex.
     `,
     who: `
     For now there is only me. But if you want to contribute, you are more than welcome !
@@ -371,8 +522,8 @@ export const lang = {
     MotsFlex is free fow now, and the local mode will remain free, but the online accounts might
     end up to cost me money. I host the grids on <a href="https://supabase.com/"> Supabase</a>,
     for now MotsFlex is on the free tier, but if the number of users increase, I will have to pay
-    for it. So if you want to support MotsFlex, you can: <a href="https://www.buymeacoffee.com/nicolleleo">Buy me a beer</a>. 
+    for it. So if you want to support MotsFlex, you can: <a href="https://www.buymeacoffee.com/nicolleleo">Buy me a beer</a>.
     I will drink it to your health!
-    `
-  }
+    `,
+  },
 };

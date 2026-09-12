@@ -6,7 +6,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps, defineEmits, computed } from "vue";
+import { ref, computed } from "vue";
 /**
  * Form edit a string value like "10px" or "10mm"
  * Has a unit picker and a number input

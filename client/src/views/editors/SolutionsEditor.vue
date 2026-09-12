@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, toRaw, watch } from "vue";
+import { ref, computed, onMounted, toRaw, watch } from "vue";
 import { useRoute } from "vue-router";
 import Layout from "../../layouts/Main.vue";
 import OptionsForm from "../../components/forms/GridStyleForm.vue";
@@ -31,6 +31,7 @@ import NoGrid from "../../components/NoGrid.vue";
 import { Grid, SolutionStyle } from "grid";
 import { defaultExportOptions, ExportOptions } from "../../types";
 import { api } from "../../api";
+import { trackEditingActivity } from '../../js/telemetry';
 /**
  * View to edit solutions options
  */
@@ -49,6 +50,10 @@ const exportOptions = ref<ExportOptions>({
 const indexFirstPage = ref(0);
 const solutionFirstPage = ref(0);
 const saveTimeout = ref(0);
+const groupId = computed(() => {
+  const q = route.query.groupId;
+  return q ? Number(q) : null;
+});
 function fetch() {
   loading.value = true;
   const id = route.params.id as string || 'solution';
@@ -61,8 +66,13 @@ function fetch() {
     : api.getGrids().then((gs) => {
       grids.value = gs;
     });
+  const gid = groupId.value;
+  const getStyle = () =>
+    gid !== null && api.mode === 'remote'
+      ? api.remote.getGroupStyle(gid, id)
+      : api.getStyle(id);
   return promise
-    .then(() => api.db.getStyle(id))
+    .then(() => getStyle())
     .then((s) => {
       style.value = s as SolutionStyle;
       indexFirstPage.value =
@@ -77,6 +87,8 @@ function fetch() {
 }
 
 function save() {
+  trackEditingActivity('style');
+  if (groupId.value !== null) return; // group styles are read-only
   clearTimeout(saveTimeout.value);
   saveTimeout.value = +setTimeout(() => {
     if (!style.value) return;

@@ -4,14 +4,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  defineEmits,
-  defineProps,
-  nextTick,
-  onMounted,
-  watch,
-  ref,
-} from "vue";
+import { nextTick, onMounted, onBeforeUnmount, watch, ref } from "vue";
 import SVGGrid from "./Grid.vue";
 import {
   Grid,
@@ -46,20 +39,22 @@ const thumbnail = ref();
 const canvas = document.createElement("canvas");
 canvas.width = 170;
 canvas.height = 170;
+let timeout: ReturnType<typeof setTimeout> | null = null;
+let unmounted = false;
 function exportSvg(index = 0) {
-  if (!props.grids[index]) {
-    return;
-  }
-  exportingGrid.value.cells.forEach((row, i) => {
+  if (unmounted) return;
+  const grid = props.grids[index];
+  if (!grid || !grid.cells) return;
+  exportingGrid.value.resize(grid.rows, grid.cols);
+  grid.cells.forEach((row, i) => {
     row.forEach((cell, j) => {
-      exportingGrid.value.cells[i][j] = { ...props.grids[index].cells[i][j] };
+      exportingGrid.value.cells[i][j] = { ...cell };
     });
   });
   nextTick(() => {
+    if (unmounted || !thumbnail.value) return;
     value.value.push(new XMLSerializer().serializeToString(thumbnail.value.$el));
-    setTimeout(() => {
-      exportSvg(index + 1);
-    }, 100);
+    timeout = setTimeout(() => exportSvg(index + 1), 100);
   });
 }
 
@@ -68,7 +63,11 @@ watch(() => [props.modelValue, props.grids], () => {
 });
 onMounted(() => {
   exportSvg();
-})
+});
+onBeforeUnmount(() => {
+  unmounted = true;
+  if (timeout) clearTimeout(timeout);
+});
 
 </script>
 

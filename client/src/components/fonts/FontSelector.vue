@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, defineProps, ref, defineEmits } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { api } from "../../api";
 import { TextStyle, Font } from "grid";
 import FontLoader from "./FontLoader.vue";

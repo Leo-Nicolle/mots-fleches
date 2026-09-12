@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps, defineEmits, computed, watchEffect, toRaw, watch } from "vue";
+import { ref, computed, watchEffect, toRaw, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useModel } from "../../js/useModel";
 import { Format } from "grid";

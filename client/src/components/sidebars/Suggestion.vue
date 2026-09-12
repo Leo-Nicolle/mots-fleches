@@ -14,7 +14,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, ref, watchEffect, computed } from "vue";
+import { ref, watchEffect, computed } from "vue";
 
 import { CellProba, Direction, Vec } from "grid";
 import { Method, Ordering } from "../../types";
@@ -135,7 +135,7 @@ function onMouseOut() {
   display: flex;
   flex-direction: row;
   justify-content: center;
-  gap: 2px;
+  gap:6px;
 }
 
 .n-data-table .n-data-table__pagination {

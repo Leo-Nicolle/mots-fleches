@@ -1,20 +1,21 @@
 import { CellProba, Direction, Grid, GridValidity, Vec } from "grid";
 import EventEmitter from "eventemitter3";
-import * as fflate from 'fflate';
+import * as fflate from "fflate";
+import throttle from "lodash.throttle";
 import { api } from "../api";
 import { copyCellProbas } from "./utils/heatmap";
 
 export type Events = {
-  'run-result': CellProba[][];
-  'search-result': string[];
-  'autofill-result': Grid;
-  'bail-result': undefined;
-  'locale-changed': undefined;
-  'start-locale-change': undefined;
-  'searchword-result': string[];
-  'searchdefinition-result': ({ title: string, text: string; }[]);
-  'setuserdefinition-done': undefined;
-  'check-result': GridValidity;
+  "run-result": CellProba[][];
+  "search-result": string[];
+  "autofill-result": Grid;
+  "bail-result": undefined;
+  "locale-changed": undefined;
+  "start-locale-change": undefined;
+  "searchword-result": string[];
+  "searchdefinition-result": { title: string; text: string }[];
+  "setuserdefinition-done": undefined;
+  "check-result": GridValidity;
 };
 
 class WorkerController extends EventEmitter<Events> {
@@ -22,47 +23,81 @@ class WorkerController extends EventEmitter<Events> {
   public suggestionWorker: Worker;
   public definitionWorker: Worker;
   private busy: boolean[] = [false, false];
-  private queues: { type: string, data: string; }[][] = [[], [], []];
-  private flagsBuffer: SharedArrayBuffer;
+  private queues: { type: string; data: string }[][] = [[], [], []];
+  private flagsBuffer: ArrayBuffer | SharedArrayBuffer;
   private flagsArray: Uint8Array;
   private distribution: [number, number][];
   private searchWorkerId = 0;
   private suggestionWorkerId = 1;
   private definitionWorkerId = 2;
-  private locale = '';
+  private locale = "";
   public loadingPromise;
 
   /* setting data */
   /* sending the buffer (copy) to worker */
-  constructor(locale = 'fr-fr') {
+  constructor(locale = "fr-fr") {
     super();
-    this.loadingPromise = new Promise(resolve => setTimeout(resolve, 1000));
+    debugger;
+    this.loadingPromise = new Promise((resolve) => setTimeout(resolve, 1000));
     if (!window.isSecureContext) {
-      throw new Error('Not in a secure context');
+      throw new Error("Not in a secure context");
     }
     if (crossOriginIsolated) {
       this.flagsBuffer = new SharedArrayBuffer(1);
-      this.flagsArray = new Uint8Array(this.flagsBuffer);
-      this.flagsArray[0] = 0;
     } else {
-      throw new Error('SharedArrayBuffer is not supported');
+      console.error("NOT SECRURE");
+      // SharedArrayBuffer requires cross-origin isolation; fall back to a
+      // regular ArrayBuffer so the flag can still be written to.
+      this.flagsBuffer = new ArrayBuffer(1);
     }
+    this.flagsArray = new Uint8Array(this.flagsBuffer);
+    this.flagsArray[0] = 0;
     this.distribution = [];
-    this.searchWorker = new Worker(new URL('./workers/search', import.meta.url), { type: 'module' });
-    this.suggestionWorker = new Worker(new URL('./workers/suggestion', import.meta.url), { type: 'module' });
-    this.definitionWorker = new Worker(new URL('./workers/definition', import.meta.url), { type: 'module' });
-    this.searchWorker.addEventListener('message', (evt) => this.onMessage(this.searchWorkerId, evt));
-    this.suggestionWorker.addEventListener('message', (evt) => this.onMessage(this.suggestionWorkerId, evt));
-    this.definitionWorker.addEventListener('message', (evt) => this.onMessage(this.definitionWorkerId, evt));
+    this.searchWorker = new Worker(
+      new URL("./workers/search", import.meta.url),
+      { type: "module" }
+    );
+    this.suggestionWorker = new Worker(
+      new URL("./workers/suggestion", import.meta.url),
+      { type: "module" }
+    );
+    this.definitionWorker = new Worker(
+      new URL("./workers/definition", import.meta.url),
+      { type: "module" }
+    );
+    this.searchWorker.addEventListener("message", (evt) =>
+      this.onMessage(this.searchWorkerId, evt)
+    );
+    this.suggestionWorker.addEventListener("message", (evt) =>
+      this.onMessage(this.suggestionWorkerId, evt)
+    );
+    this.definitionWorker.addEventListener("message", (evt) =>
+      this.onMessage(this.definitionWorkerId, evt)
+    );
+    // Workers fail silently otherwise: a load/runtime error just leaves
+    // setLocale's Promise.all hanging with no "loaded" message.
+    this.searchWorker.addEventListener("error", (evt) =>
+      console.error("[worker] search failed", evt.message || evt)
+    );
+    this.suggestionWorker.addEventListener("error", (evt) =>
+      console.error("[worker] suggestion failed", evt.message || evt)
+    );
+    this.definitionWorker.addEventListener("error", (evt) =>
+      console.error("[worker] definition failed", evt.message || evt)
+    );
     this.setLocale(locale);
   }
 
   search(grid: Grid, coords: Vec, dir: Direction) {
-    this._postMessage('search',
+    this._postMessage(
+      "search",
       JSON.stringify({
         grid: grid.serialize(),
-        coords, dir
-      }), this.suggestionWorkerId);
+        coords,
+        dir,
+      }),
+      this.suggestionWorkerId
+    );
   }
 
   getDistribution() {
@@ -70,40 +105,60 @@ class WorkerController extends EventEmitter<Events> {
   }
 
   checkGrid(grid: Grid) {
-    this._postMessage('check', JSON.stringify(grid.serialize()), this.searchWorkerId);
+    this._postMessage(
+      "check",
+      JSON.stringify(grid.serialize()),
+      this.searchWorkerId
+    );
   }
 
-  run(grid: Grid) {
-    this._postMessage('run', JSON.stringify(grid.serialize()), this.suggestionWorkerId);
-  }
+  run = throttle((grid: Grid) => {
+    this._postMessage(
+      "run",
+      JSON.stringify(grid.serialize()),
+      this.suggestionWorkerId
+    );
+  }, 200);
 
   autofill(grid: Grid, words: string[]) {
     this.loadingPromise.then(() => {
       //   const data = autoFill(grid, words);
       //   this.emit('autofill-result', Grid.unserialize(data));
-      this._postMessage('autofill', JSON.stringify({
-        grid: grid.serialize(),
-        words
-      }), this.suggestionWorkerId);
+      this._postMessage(
+        "autofill",
+        JSON.stringify({
+          grid: grid.serialize(),
+          words,
+        }),
+        this.suggestionWorkerId
+      );
     });
   }
 
   searchWord(query: string) {
     this.loadingPromise.then(() => {
-      this._postMessage('searchword', query, this.searchWorkerId);
+      this._postMessage("searchword", query, this.searchWorkerId);
     });
   }
 
   searchDefinition(query: string[]) {
     this.loadingPromise.then(() => {
-      this._postMessage('searchdefinition', JSON.stringify(query), this.definitionWorkerId);
+      this._postMessage(
+        "searchdefinition",
+        JSON.stringify(query),
+        this.definitionWorkerId
+      );
     });
   }
   setUserDefinitions(userDefinitions: Map<string, Set<string>>) {
     this.loadingPromise.then(() => {
-      const data = JSON.stringify(Array.from(userDefinitions.entries())
-        .map(([key, value]) => [key, Array.from(value.keys())]));
-      this._postMessage('setuserdefinitions', data, this.definitionWorkerId);
+      const data = JSON.stringify(
+        Array.from(userDefinitions.entries()).map(([key, value]) => [
+          key,
+          Array.from(value.keys()),
+        ])
+      );
+      this._postMessage("setuserdefinitions", data, this.definitionWorkerId);
     });
   }
 
@@ -115,50 +170,58 @@ class WorkerController extends EventEmitter<Events> {
     }
     this.busy[workerId] = true;
     this.flagsArray[0] = 0;
-    const ww = workerId === this.suggestionWorkerId
-      ? this.suggestionWorker
-      : workerId === this.searchWorkerId
+    const ww =
+      workerId === this.suggestionWorkerId
+        ? this.suggestionWorker
+        : workerId === this.searchWorkerId
         ? this.searchWorker
         : this.definitionWorker;
     this.loadingPromise.then(() => {
-      ww.postMessage({ type, data });
+      try {
+        ww.postMessage({ type, data });
+      } catch (err) {
+        this.busy[workerId] = false;
+        console.error(
+          `[worker] ${["search", "suggestion", "definition"][workerId]} postMessage("${type}") failed:`,
+          err
+        );
+      }
     });
-
   }
 
   onMessage(workerId: number, event: MessageEvent) {
     const { type, data } = event.data;
     this.busy[workerId] = false;
-    if (type === 'search-result') {
-      this.emit('search-result', data);
+    if (type === "search-result") {
+      this.emit("search-result", data);
     }
-    if (type === 'check-result') {
-      this.emit('check-result', data);
+    if (type === "check-result") {
+      this.emit("check-result", data);
     }
-    if (type === 'run-result') {
+    if (type === "run-result") {
       copyCellProbas(data);
-      this.emit('run-result', data);
+      this.emit("run-result", data);
     }
-    if (type === 'autofill-result') {
-      this.emit('autofill-result', Grid.unserialize(data));
+    if (type === "autofill-result") {
+      this.emit("autofill-result", Grid.unserialize(data));
     }
-    if (type === 'bail-result') {
-      this.emit('bail-result');
+    if (type === "bail-result") {
+      this.emit("bail-result");
     }
-    if (type == 'searchword-result') {
-      this.emit('searchword-result', data);
+    if (type == "searchword-result") {
+      this.emit("searchword-result", data);
     }
-    if (type == 'searchdefinition-result') {
-      this.emit('searchdefinition-result', data);
+    if (type == "searchdefinition-result") {
+      this.emit("searchdefinition-result", data);
     }
-    if (type == 'setuserdefinitions-result') {
-      this.emit('setuserdefinition-done');
+    if (type == "setuserdefinitions-result") {
+      this.emit("setuserdefinition-done");
     }
     const queue = this.queues[workerId];
     const job = queue.shift();
     if (!job) return;
     // remove all jobs of the same type
-    this.queues[workerId] = queue.filter(q => q.type !== job.type);
+    this.queues[workerId] = queue.filter((q) => q.type !== job.type);
     this._postMessage(job.type, job.data, workerId);
   }
 
@@ -170,83 +233,146 @@ class WorkerController extends EventEmitter<Events> {
 
   private _fetchLocale(locale: string) {
     return fetch(`/${locale}.zip`)
-      .then((response) => response.arrayBuffer())
-      .then((data) => new Promise<{ words: string[], definitions: string; }>((resolve, reject) => {
-        fflate.unzip(new Uint8Array(data), (err, decompressed) => {
-          if (err) {
-            return reject(err);
-          }
-          return resolve({
-            words: new TextDecoder().decode(decompressed['dico.txt']).trim().split(','),
-            definitions: new TextDecoder().decode(decompressed['definitions.txt']).trim()
-          });
-        });
-      }));
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch dictionary: ${response.status} ${response.statusText}`
+          );
+        }
+        return response.arrayBuffer();
+      })
+      .then(
+        (data) =>
+          new Promise<{ words: string[]; definitions: string }>(
+            (resolve, reject) => {
+              fflate.unzip(new Uint8Array(data), (err, decompressed) => {
+                if (err) {
+                  return reject(err);
+                }
+                return resolve({
+                  words: new TextDecoder()
+                    .decode(decompressed["dico.txt"])
+                    .trim()
+                    .split(","),
+                  definitions: new TextDecoder()
+                    .decode(decompressed["definitions.txt"])
+                    .trim(),
+                });
+              });
+            }
+          )
+      );
   }
 
   private promisifiedCall<T>(data: any, workerId: number, event: string) {
-    const worker = workerId === this.suggestionWorkerId
-      ? this.suggestionWorker
-      : workerId === this.searchWorkerId
+    const worker =
+      workerId === this.suggestionWorkerId
+        ? this.suggestionWorker
+        : workerId === this.searchWorkerId
         ? this.searchWorker
         : this.definitionWorker;
-    return new Promise<T>((resolve) => {
+    const name = ["search", "suggestion", "definition"][workerId];
+    return new Promise<T>((resolve, reject) => {
       const listenner = (evt: MessageEvent) => {
         if (evt.data.type === event) {
-          worker.removeEventListener('message', listenner);
+          worker.removeEventListener("message", listenner);
+          worker.removeEventListener("error", onError);
           resolve(evt.data.data);
         }
       };
-      worker.addEventListener('message', listenner);
-      worker.postMessage(data);
+      const onError = (evt: ErrorEvent) => {
+        worker.removeEventListener("message", listenner);
+        worker.removeEventListener("error", onError);
+        reject(
+          new Error(
+            `[worker] ${name} errored before "${event}": ${evt.message || evt}`
+          )
+        );
+      };
+      worker.addEventListener("message", listenner);
+      worker.addEventListener("error", onError);
+      try {
+        worker.postMessage(data);
+      } catch (err) {
+        // Firefox throws "The provided callback is no longer runnable" here
+        // when the worker script never loaded (e.g. missing COEP header on
+        // /assets/ while the page is cross-origin isolated).
+        worker.removeEventListener("message", listenner);
+        worker.removeEventListener("error", onError);
+        reject(
+          new Error(`[worker] ${name} postMessage failed (script not loaded?): ${err}`)
+        );
+      }
     });
   }
 
   setLocale(locale: string) {
-    if (this.locale === locale) return this.loadingPromise
-      .then(() => {
-        this.emit('locale-changed');
+    if (this.locale === locale)
+      return this.loadingPromise.then(() => {
+        this.emit("locale-changed");
       });
     this.locale = locale;
-    this.emit('start-locale-change');
+    this.emit("start-locale-change");
     this.loadingPromise = Promise.all([
       this._fetchLocale(locale),
       api.db.getWords() as Promise<string[]>,
       api.db.getBannedWords() as Promise<string[]>,
     ])
       .then(([{ words, definitions }, userWords, bannedWords]) => {
-        for (let i = 0; i < userWords.length; i++) {
-          words.push(userWords[i]);
-        }
-        return Promise.all([
-          this.promisifiedCall({
-            words, bannedWords
-          }, this.searchWorkerId, 'loaded'),
-          this.promisifiedCall({
-            words, flags: this.flagsBuffer,
-            bannedWords
-          }, this.suggestionWorkerId, 'loaded'),
-          this.promisifiedCall({
-            definitions
-          }, this.definitionWorkerId, 'loaded'),
-        ])
-          .then(() => this.promisifiedCall<[number, number][]>({
-            type: 'distribution'
+      for (let i = 0; i < userWords.length; i++) {
+        words.push(userWords[i]);
+      }
+      return Promise.all([
+        this.promisifiedCall(
+          {
+            words,
+            bannedWords,
           },
+          this.searchWorkerId,
+          "loaded"
+        ),
+        this.promisifiedCall(
+          {
+            words,
+            flags: this.flagsBuffer,
+            bannedWords,
+          },
+          this.suggestionWorkerId,
+          "loaded"
+        ),
+        this.promisifiedCall(
+          {
+            definitions,
+          },
+          this.definitionWorkerId,
+          "loaded"
+        ),
+      ])
+        .then(() =>
+          this.promisifiedCall<[number, number][]>(
+            {
+              type: "distribution",
+            },
             this.searchWorkerId,
-            'distrib-result'
-          ))
-          .then((distribution) => {
-            this.distribution = distribution;
-            return this.emit('locale-changed');
-          })
-          .catch((err) => {
-            this.emit('locale-changed');
-            console.error(err);
-          });
+            "distrib-result"
+          )
+        )
+        .then((distribution) => {
+          this.distribution = distribution;
+          return this.emit("locale-changed");
+        });
+    })
+      .catch((err) => {
+        // Anything above (dictionary fetch, getWords, or a worker that never
+        // reported "loaded") ends up here. Always settle loadingPromise and
+        // fire locale-changed so the app doesn't hang forever.
+        console.error("[worker] setLocale failed:", err);
+        this.emit("locale-changed");
       });
     return this.loadingPromise;
   }
 }
 
-export const workerController = new WorkerController(localStorage.getItem('locale') || 'fr-fr');
+export const workerController = new WorkerController(
+  localStorage.getItem("locale") || "fr-fr"
+);

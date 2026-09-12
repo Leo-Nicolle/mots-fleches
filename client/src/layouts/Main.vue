@@ -3,8 +3,13 @@
     <div class="header">
       <span class="left">
         <span class="menutitle" @click="router.push('/')">
-          <img class="menuicon" src="/icon.svg" />
+          <img class="menuicon" src="/icon.svg" alt="MotsFlex" />
           <span v-if="screenSize !== 'phone'">Motsflex</span>
+        </span>
+        <span v-if="screenSize !== 'phone'" class="header-nav">
+          <n-button text @click="router.push('/grids')">{{ $t("nav.grids") }}</n-button>
+          <n-button text @click="router.push('/books')">{{ $t("nav.books") }}</n-button>
+          <n-button text @click="router.push('/styles')">{{ $t("nav.styles") }}</n-button>
         </span>
         <n-menu v-if="showLoginButton" class="burger" :accordion="true" :mode="'horizontal'" :collapsed="collapsed"
           :collapsed-width="64" :collapsed-icon-size="22" :options="menuOptions" />
@@ -12,15 +17,36 @@
         <slot name="header"> </slot>
       </span>
       <n-breadcrumb v-if="breadcrumbs">
-        <n-breadcrumb-item clickable key="home" href="#/">
+        <n-breadcrumb-item clickable key="home" @click="router.push('/')">
           <n-icon>
             <HomeOutline />
           </n-icon>
         </n-breadcrumb-item>
-        <n-breadcrumb-item v-for="b in breadcrumbs" :clickable="b.to !== undefined" :to="b.to" :key="b.text"
-          :href="b.to">{{ b.text }}</n-breadcrumb-item>
+        <n-breadcrumb-item v-for="b in breadcrumbs" :clickable="b.to !== undefined" :key="b.text"
+          @click="b.to && router.push(b.to)">{{ b.text }}</n-breadcrumb-item>
       </n-breadcrumb>
       <span class="right">
+        <n-tooltip v-if="showLoginButton && dbMode === 'idb'" trigger="hover">
+          <template #trigger>
+            <n-button text class="sync-status" @click="router.push('/login')">
+              <template #icon>
+                <n-icon>
+                  <CloudOfflineOutline />
+                </n-icon>
+              </template>
+              {{ screenSize === "phone" ? "" : $t("account.savedLocally") }}
+            </n-button>
+          </template>
+          {{ $t("account.syncCta") }}
+        </n-tooltip>
+        <n-button v-else-if="showLoginButton && dbMode !== 'idb'" text class="sync-status" disabled>
+          <template #icon>
+            <n-icon>
+              <CloudDoneOutline />
+            </n-icon>
+          </template>
+          {{ screenSize === "phone" ? "" : $t("account.synced") }}
+        </n-button>
         <n-popselect v-model:value="locale" :options="localeOptions">
           <n-button :type="switchingLocale ? 'warning' : ''">
             <template #icon>
@@ -32,14 +58,20 @@
             {{ screenSize === "phone" ? "" : selected?.label }}
           </n-button>
         </n-popselect>
-        <n-button v-if="showLoginButton" strong secondary :type="isSignedIn ? 'warning' : 'primary'"
-          icon-placement="right" @click="isSignedIn ? router.push('/logout') : router.push('/login')">
-          {{ screenSize === "phone" ? '' : $t(isSignedIn ? "buttons.exit" : "buttons.login") }}
+        <n-button v-if="showLoginButton" strong secondary :type="isLoggedIn ? 'warning' : 'primary'"
+          icon-placement="right" @click="isLoggedIn ? router.push('/logout') : router.push('/login')">
+          {{ screenSize === "phone" ? '' : $t(isLoggedIn ? "buttons.exit" : "buttons.login") }}
           <template #icon>
             <n-icon>
               <LogOutOutline />
             </n-icon>
           </template>
+        </n-button>
+        <n-button v-if="isLoggedIn" strong secondary icon-placement="right" @click="router.push('/groups')">
+          {{ $t("groups.title") }}
+        </n-button>
+        <n-button v-if="isLoggedIn" strong secondary icon-placement="right" @click="router.push('/profile')">
+          {{ $t("profile.title") }}
         </n-button>
       </span>
     </div>
@@ -70,22 +102,11 @@
 import { HomeOutline, MenuOutline } from "@vicons/ionicons5";
 import LoaderIcon from "../components/LoaderIcon.vue";
 import type { MenuOption } from "naive-ui";
-import {
-  defineProps,
-  h,
-  ref,
-  defineEmits,
-  computed,
-  watchEffect,
-  withDefaults,
-  onMounted,
-  onBeforeMount,
-  watch,
-  onBeforeUnmount,
-} from "vue";
+import { h, ref, computed, watchEffect, withDefaults, onMounted, onBeforeMount, watch, onBeforeUnmount } from "vue";
 import { RouterLink, useRouter } from "vue-router";
 import { renderIcon } from "../js/utils";
 import { LogOutOutline, LanguageOutline } from "@vicons/ionicons5";
+import { CloudOfflineOutline, CloudDoneOutline } from "@vicons/ionicons5";
 import { i18n, setLanguage } from "../i18n";
 import { workerController } from "../worker";
 import { useResponsive } from "../js/useResponsive";
@@ -113,6 +134,8 @@ const props = withDefaults(
   }
 );
 const isSignedIn = ref(false);
+const dbMode = ref<string>(api.mode);
+const isLoggedIn = computed(() => isSignedIn.value && dbMode.value !== "idb");
 function refreshSignedId() {
   api
     .isSignedIn()
@@ -122,6 +145,7 @@ function refreshSignedId() {
     .catch(() => {
       isSignedIn.value = false;
     });
+  dbMode.value = api.mode;
 }
 const interval = setInterval(() => refreshSignedId(), 10_000);
 const leftWidth = computed(() => {
@@ -203,7 +227,7 @@ function getNavChildren() {
         h(
           RouterLink,
           {
-            to: "/about",
+            to: "/",
           },
           { default: () => i18n.global.t("nav.about") }
         ),
@@ -314,6 +338,13 @@ function onScroll(e: Event) {
   margin-left: 4px;
 }
 
+.header-nav {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  align-items: center;
+}
+
 .header>.right {
   display: flex;
   flex-direction: row;
@@ -353,12 +384,13 @@ nav {
   margin-top: 15px;
   grid-row-start: 2;
   display: grid;
-  grid-template-columns: v-bind(leftWidth) auto;
+  grid-template-columns: v-bind(leftWidth) minmax(0, 1fr);
   grid-template-rows: calc(100vh - 42px);
   grid-column-gap: 15px;
 }
 
 .left-panel {
+  grid-column: 1;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -405,6 +437,8 @@ nav {
 }
 
 .maincontentscroll {
+  grid-column: 2;
+  min-width: 0;
   overflow: scroll;
   padding-bottom: 10px;
   padding-right: 10px;
