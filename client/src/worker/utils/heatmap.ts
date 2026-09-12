@@ -259,7 +259,7 @@ export function getCellProbasAccurate(grid: Grid) {
     ].forEach(({ prev, key, map, prevNodes }) => {
       if (!prev || !prevNodes) {
         return;
-      };
+      }
       for (let i = 0; i < 26; i++) {
         map.set(ACode + i, []);
       }

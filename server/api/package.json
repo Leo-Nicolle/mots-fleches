@@ -4,6 +4,7 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
+    "postinstall": "npm run prisma:generate",
     "predev": "docker compose --env-file ../.env.dev --profile development restart",
     "dev": "nodemon --exec node -r esbuild-register src/index.ts",
     "type-check": "tsc --noEmit",
@@ -53,6 +54,7 @@
     "eslint": "^9.21.0",
     "eslint-config-prettier": "^10.0.2",
     "eslint-plugin-prettier": "^5.2.3",
+    "globals": "^15.14.0",
     "nock": "^14.0.1",
     "nodemon": "^3.1.9",
     "prettier": "^3.5.2",

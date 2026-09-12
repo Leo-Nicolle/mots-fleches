@@ -16,5 +16,5 @@ export const useResponsive = () => {
     screenSize,
     onResize,
     cleanupUseResponsive
-  }
+  };
 };

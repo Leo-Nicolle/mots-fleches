@@ -103,7 +103,7 @@ watch(props.modelValue, () => {
 onMounted(() => {
   fetch()
     .then(() => value.value = []);
-})
+});
 
 </script>
 

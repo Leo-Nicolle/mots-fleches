@@ -263,7 +263,7 @@ function fillupGrid(grid: Grid){
       const { cellProbas } = getCellProbas(cp);
       if (cellProbas.flat().filter(c => c.validH ||c.validV).some(c => c.total === 0)) return null;
       const score = getScore(cellProbas);
-      return{
+      return {
         grid: cp,
         score
       };

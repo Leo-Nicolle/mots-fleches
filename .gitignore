@@ -1,17 +1,13 @@
-client/node_modules/
-client/dist/
-client/public/result*  
+client/public/result*
 client/public/allwords*
 client/public/test-db.json
 client/reports/
-server/node_modules
-server/dist
 server/public
-dist
 node_modules
+dist
+.turbo
 *.zip
 build/
-dist/
 docs/.vuepress/.cache
 docs/.vuepress/.temp
 scripts/api-key.mjs
@@ -28,3 +24,6 @@ server/api/src/routes/admin.ts
 server/api/src/routes/plausible.ts
 server/api/src/middleware/admin.ts
 server/api/src/services/grid-progress.ts
+
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/

@@ -83,7 +83,7 @@ onMounted(() => {
     console.log(menus.value);
     content.value.innerHTML = md.render(res.data);
   });
-})
+});
 
 </script>
 
