@@ -99,7 +99,7 @@ const routes: Array<RouteRecordRaw> = [
     meta: { requiresAuth: false },
   },
   {
-    path: "/passwordreset/:access_token(\\d+)?",
+    path: "/passwordreset/:token?",
     name: "passwordreset",
     component: () => import("../views/auth/PasswordReset.vue"),
     meta: { requiresAuth: false },

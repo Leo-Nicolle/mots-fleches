@@ -1,5 +1,8 @@
-
 import { definitionSearch } from '../utils/definition-search';
+
+// Bump this token to force a new hashed chunk filename (evicts clients that
+// immutable-cached this worker before the COEP headers were fixed).
+(globalThis as unknown as Record<string, string>).__workerBuild = 'coep-1';
 
 onmessage = function (e) {
   const { type, data } = e.data;

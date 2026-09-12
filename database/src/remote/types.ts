@@ -143,6 +143,20 @@ type ApiPostMap = {
     };
     response: { message: string };
   };
+  "/auth/forgot-password": {
+    body: {
+      email: string;
+      turnstileToken?: string;
+    };
+    response: { message: string };
+  };
+  "/auth/reset-password": {
+    body: {
+      token: string;
+      password: string;
+    };
+    response: { message: string };
+  };
   "/group": {
     body: { name: string; description?: string };
     response: { id: number; name: string; description: string | null };

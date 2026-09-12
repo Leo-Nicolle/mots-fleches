@@ -182,6 +182,8 @@ export const lang = {
         registerfailed: "Error al registrarse.",
         captcharequired: "Completa el captcha.",
         serverUnreachable: "No se pudo conectar con el servidor. Comprueba tu conexión e inténtalo de nuevo.",
+        resettokeninvalid: "Este enlace de restablecimiento no es válido o ha caducado.",
+        passwordresetsuccess: "Tu contraseña ha sido restablecida. Por favor, inicia sesión.",
     },
     login: {
         title: "Iniciar sesión",
@@ -191,6 +193,7 @@ export const lang = {
         login: "Iniciar sesión",
         register: "Registrarse",
         forgotPassword: "¿Olvidaste tu contraseña?",
+        sendResetLink: "Enviar enlace de restablecimiento",
         localMode: "Seguir sin autenticar",
         githubLogin: "Iniciar sesión con GitHub",
     },
@@ -216,6 +219,9 @@ export const lang = {
     },
     passwordreset: {
         title: "Restablecer contraseña",
+        submit: "Restablecer contraseña",
+        invalidToken: "Este enlace de restablecimiento no es válido o ha caducado.",
+        success: "Contraseña restablecida, redirigiendo al inicio de sesión...",
     },
     logout: {
         wating: "Esperando a que el servidor se desconecte...",

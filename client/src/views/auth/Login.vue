@@ -4,29 +4,40 @@
       <n-form-item :label="$t('login.email')" path="login">
         <n-input role="login" type="text" placeholder="name@mail.com" v-model:value="email" />
       </n-form-item>
-      <n-form-item :label="$t('login.password')" path="password">
+      <n-form-item v-if="!showForgotPassword" :label="$t('login.password')" path="password">
         <n-input role="password" type="password" placeholder="password" v-model:value="password"></n-input>
       </n-form-item>
-      <span class="forgot-password hidden" @click="onForgotPassword">
+      <span v-if="!showForgotPassword" class="forgot-password" @click="onForgotPassword">
         {{ $t("login.forgotPassword") }}
       </span>
+      <div v-if="showForgotPassword" ref="turnstileRef"></div>
     </template>
     <template #footer>
-      <n-button class="login-btn" type="primary" @click="emailLogin">{{
-        $t("login.login")
-        }}</n-button>
-      <n-button class="login-btn" type="info" @click="createAccount">{{
-        $t("login.register")
-        }}</n-button>
-      <n-button class="login-btn" type="primary" @click="localMode">{{
-        $t("login.localMode")
-        }}</n-button>
+      <template v-if="!showForgotPassword">
+        <n-button class="login-btn" type="primary" @click="emailLogin">{{
+          $t("login.login")
+          }}</n-button>
+        <n-button class="login-btn" type="info" @click="createAccount">{{
+          $t("login.register")
+          }}</n-button>
+        <n-button class="login-btn" type="primary" @click="localMode">{{
+          $t("login.localMode")
+          }}</n-button>
+      </template>
+      <template v-else>
+        <n-button class="login-btn" type="info" @click="showForgotPassword = false">{{
+          $t("register.cancel")
+          }}</n-button>
+        <n-button class="login-btn" type="primary" :disabled="!canSendResetLink" @click="sendResetLink">{{
+          $t("login.sendResetLink")
+          }}</n-button>
+      </template>
     </template>
   </Layout>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed, nextTick } from "vue";
 import { api } from "../../api";
 import Layout from "../../layouts/NotLoggedin.vue";
 import { useRoute, useRouter } from "vue-router";
@@ -38,6 +49,11 @@ const email = ref<string>("");
 const password = ref<string>("");
 const { alert, setAlert } = useAlert();
 const route = useRoute();
+
+const showForgotPassword = ref(false);
+const turnstileRef = ref<HTMLDivElement | null>(null);
+const turnstileToken = ref<string | null>(null);
+const canSendResetLink = computed(() => !!email.value && !!turnstileToken.value);
 
 function redirect() {
   return router.push((route.query.redirect as string) || "/");
@@ -64,14 +80,48 @@ async function emailLogin() {
   }
 }
 
-async function onForgotPassword() {
-  await api.supadb.supabase.auth.signInWithOtp({
-    email: email.value,
-    options: {
-      emailRedirectTo: `${location.origin}/passwordreset/`,
-    },
+function renderTurnstileWidget() {
+  if (!turnstileRef.value || !(window as any).turnstile) return;
+  (window as any).turnstile.render(turnstileRef.value, {
+    sitekey: import.meta.env.VITE_TURNSTILE_SITE_KEY,
+    callback: (token: string) => { turnstileToken.value = token; },
+    "expired-callback": () => { turnstileToken.value = null; },
   });
-  router.push(`/sentemail/${btoa(email.value)}`);
+}
+
+function loadTurnstile() {
+  if ((window as any).turnstile) {
+    renderTurnstileWidget();
+    return;
+  }
+  const script = document.createElement("script");
+  script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+  script.async = true;
+  script.onload = renderTurnstileWidget;
+  document.head.appendChild(script);
+}
+
+async function onForgotPassword() {
+  showForgotPassword.value = true;
+  await nextTick();
+  loadTurnstile();
+}
+
+async function sendResetLink() {
+  if (!email.value) {
+    setAlert("error", "wrongpassword");
+    return;
+  }
+  try {
+    await api.remote.requestPasswordReset(email.value, turnstileToken.value || undefined);
+    router.push(`/sentemail/${btoa(email.value)}`);
+  } catch (e) {
+    console.error(e);
+    const isNetworkError = !(e as any)?.response;
+    setAlert("error", isNetworkError ? "serverUnreachable" : "registerfailed");
+    (window as any).turnstile?.reset();
+    turnstileToken.value = null;
+  }
 }
 
 function createAccount() {
@@ -94,9 +144,5 @@ async function localMode() {
 .forgot-password:hover {
   color: #000;
   text-decoration: underline;
-}
-
-.hidden {
-  display: none;
 }
 </style>

@@ -77,6 +77,14 @@ export class RemoteDB extends Database {
     return this.fetcher.post("/auth/logout");
   }
 
+  public requestPasswordReset(email: string, turnstileToken?: string) {
+    return this.fetcher.post("/auth/forgot-password", { email, turnstileToken });
+  }
+
+  public resetPassword(token: string, password: string) {
+    return this.fetcher.post("/auth/reset-password", { token, password });
+  }
+
   async getGrids() {
     const { data } = await this.fetcher.get("/grids");
     return data;

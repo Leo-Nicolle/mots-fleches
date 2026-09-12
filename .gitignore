@@ -21,6 +21,7 @@ postgres-data/
 .pw-browsers/
 .env.jwt
 .env.turnstile
+.env.mail
 server/.env
 /dashboard
 server/api/src/routes/admin.ts

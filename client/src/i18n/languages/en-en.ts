@@ -183,12 +183,15 @@ export const lang = {
     registerfailed: "Registration failed.",
     captcharequired: "Please complete the captcha.",
     serverUnreachable: "Could not reach the server. Check your connection and try again.",
+    resettokeninvalid: "This reset link is invalid or has expired.",
+    passwordresetsuccess: "Your password has been reset. Please sign in.",
   },
   login: {
     title: "Login",
     emal: "Email",
     password: "Password",
     forgotPassword: "Forgot password?",
+    sendResetLink: "Send reset link",
     login: "Login",
     register: "Register",
     localMode: "Continue without account",
@@ -217,6 +220,9 @@ export const lang = {
   },
   passwordreset: {
     title: "Reset password",
+    submit: "Reset password",
+    invalidToken: "This reset link is invalid or has expired.",
+    success: "Password reset, redirecting to login...",
   },
   logout: {
     waiting: "Waiting for logout...",

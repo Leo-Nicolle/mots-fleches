@@ -62,7 +62,6 @@ model groups {
   customwords     customwords[]
   groupmembers    groupmembers[]
   users           users             @relation(fields: [owner_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  tiers           tiers?            @relation(fields: [tier_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   images          images[]
   payments        payments[]
   styleshares     styleshares[]
@@ -94,19 +93,6 @@ model payments {
   users       users?    @relation(fields: [user_id], references: [id], onUpdate: NoAction)
 }
 
-model tiers {
-  id               Int      @id @default(autoincrement())
-  name             String   @db.VarChar(50)
-  price            Decimal  @db.Decimal(10, 2)
-  max_users        Int?     @default(1)
-  max_grids        Int?
-  max_custom_words Int?
-  max_disk_usage   BigInt?  @default(104857600)
-  features         Json?
-  groups           groups[]
-  users            users[]
-}
-
 model users {
   id                       Int            @id @default(autoincrement())
   email                    String         @unique @db.VarChar(255)
@@ -119,6 +105,8 @@ model users {
   tier_id                  Int?           @default(1)
   refresh_token            String?
   refresh_token_expires_at DateTime?      @db.Timestamp(6)
+  reset_token_hash         String?
+  reset_token_expires_at   DateTime?      @db.Timestamp(6)
   bannedwords              bannedwords[]
   books                    books[]
   crosswords               crosswords[]
@@ -128,7 +116,6 @@ model users {
   groups                   groups[]
   images                   images[]
   payments                 payments[]
-  tiers                    tiers?         @relation(fields: [tier_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   wordlists                wordlists[]
   words                    words[]
   styles                   styles[]

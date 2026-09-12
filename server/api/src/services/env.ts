@@ -13,6 +13,9 @@ if (!process.env.PORT) {
 if(!process.env.TURNSTILE_SECRET_KEY) {
   dotenv({ path: path.resolve('..', '.env.turnstile') });
 }
+if (!process.env.SMTP_HOST) {
+  dotenv({ path: path.resolve('..', '.env.mail') });
+}
 const config = {
   port: process.env.PORT || 3000,
   mode: process.env.MODE || 'production',
@@ -31,6 +34,18 @@ const config = {
   environment: process.env.NODE_ENV || 'development',
   turnstile: {
     secretKey: process.env.TURNSTILE_SECRET_KEY || '',
+  },
+  mail: {
+    host: process.env.SMTP_HOST || '',
+    port: parseInt(process.env.SMTP_PORT || '465', 10),
+    secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === 'true' : true,
+    user: process.env.SMTP_USER || '',
+    password: process.env.SMTP_PASSWORD || '',
+    from: process.env.SMTP_FROM || process.env.SMTP_USER || '',
+  },
+  resetPassword: {
+    tokenExpiresIn: process.env.RESET_PASSWORD_TOKEN_EXPIRES_IN || '30m',
+    clientUrl: process.env.CLIENT_URL || 'http://localhost:5173',
   },
   admin: {
     token: process.env.ADMIN_TOKEN || '',

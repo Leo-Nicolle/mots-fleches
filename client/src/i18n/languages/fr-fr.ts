@@ -184,12 +184,15 @@ export const lang = {
         registerfailed: "Échec de l'inscription.",
         captcharequired: "Veuillez compléter le captcha.",
         serverUnreachable: "Impossible de contacter le serveur. Vérifiez votre connexion et réessayez.",
+        resettokeninvalid: "Ce lien de réinitialisation est invalide ou a expiré.",
+        passwordresetsuccess: "Votre mot de passe a été réinitialisé. Veuillez vous connecter.",
     },
     login: {
         title: "Connexion",
         email: "Email",
         password: "Mot de passe",
         forgotPassword: "Mot de passe oublié ?",
+        sendResetLink: "Envoyer le lien de réinitialisation",
         login: "Connexion",
         register: "Inscription",
         localMode: "Continuer sans connexion",
@@ -217,6 +220,9 @@ export const lang = {
     },
     passwordreset: {
         title: "Réinitialisation du mot de passe",
+        submit: "Réinitialiser le mot de passe",
+        invalidToken: "Ce lien de réinitialisation est invalide ou a expiré.",
+        success: "Mot de passe réinitialisé, redirection vers la connexion...",
     },
     logout: {
         waiting: "Déconnexion en cours...",
