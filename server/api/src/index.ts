@@ -17,11 +17,13 @@ import { setupCollab } from './collab';
 let adminRouter: Router | undefined;
 let plausibleRouter: Router | undefined;
 try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports -- optional module, must not fail statically if absent
   adminRouter = require('./routes/admin').default;
 } catch {
   console.warn('[api] admin routes not found, /api/admin disabled');
 }
 try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports -- optional module, must not fail statically if absent
   plausibleRouter = require('./routes/plausible').default;
 } catch {
   console.warn('[api] plausible routes not found, /api/admin/plausible disabled');
@@ -30,7 +32,7 @@ try {
 const app = express();
 const PORT = config.port || 3000;
 
-// helmet(app);
+helmet(app);
 passport(app);
 app.use(cors());
 

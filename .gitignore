@@ -15,6 +15,7 @@ scripts/plausible-key
 postgres-data/
 *.stripe
 .pw-browsers/
+.env
 .env.jwt
 .env.turnstile
 .env.mail

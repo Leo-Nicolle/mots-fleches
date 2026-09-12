@@ -118,7 +118,7 @@ router.post('/refresh-token', async (req: Request, res: Response) => {
     res.json({
       accessToken: newAccessToken,
     });
-  } catch (error) {
+  } catch {
     res.status(403).json({ error: 'Invalid or expired refresh token' });
   }
 });
@@ -129,8 +129,8 @@ router.post('/logout', authMiddleware, async (req: Request, res: Response) => {
     res.status(400).json({ error: 'Access token is required' });
     return;
   }
-  const decoded = jwt.decode(accessToken) as any;
-  const expiresAt = new Date(decoded.exp * 1000); // JWT exp is in seconds
+  const decoded = jwt.decode(accessToken) as jwt.JwtPayload;
+  const expiresAt = new Date(decoded.exp! * 1000); // JWT exp is in seconds
   // Save access token to blacklist
   try {
     await prisma.tokenblacklist.create({
@@ -148,7 +148,7 @@ router.post('/logout', authMiddleware, async (req: Request, res: Response) => {
       },
     });
     res.status(200).json({ message: 'Logged out successfully' });
-  } catch (error) {
+  } catch {
     res.status(403).json({ error: 'Invalid or expired refresh token' });
   }
 });

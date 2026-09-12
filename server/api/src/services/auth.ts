@@ -19,19 +19,19 @@ export const verifyPassword = async (
 
 export const generateToken = (userId: number): string => {
   return jwt.sign({ userId }, config.auth.jwtSecret, {
-    expiresIn: JWT_EXPIRES_IN as any,
+    expiresIn: JWT_EXPIRES_IN as jwt.SignOptions['expiresIn'],
   });
 };
 
 export const generateAccessToken = (userId: number): string => {
   return jwt.sign({ userId }, config.auth.jwtSecret, {
-    expiresIn: JWT_EXPIRES_IN as any,
+    expiresIn: JWT_EXPIRES_IN as jwt.SignOptions['expiresIn'],
   });
 };
 
 export const generateRefreshToken = (userId: number): string => {
   return jwt.sign({ userId }, config.auth.jwtRefreshSecret, {
-    expiresIn: JWT_REFRESH_EXPIRES_IN as any,
+    expiresIn: JWT_REFRESH_EXPIRES_IN as jwt.SignOptions['expiresIn'],
   });
 };
 
