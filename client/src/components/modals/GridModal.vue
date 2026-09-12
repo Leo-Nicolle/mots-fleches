@@ -63,17 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  defineEmits,
-  nextTick,
-  onMounted,
-  ref,
-  watchEffect,
-  defineModel,
-  watch,
-  toRaw,
-  computed,
-} from "vue";
+import { nextTick, onMounted, ref, watchEffect, defineModel, watch, toRaw, computed } from "vue";
 import { CogOutline as CogIcon } from "@vicons/ionicons5";
 import { Grid } from "grid";
 import generate, { generateExtension } from "../../js/maze-generator";

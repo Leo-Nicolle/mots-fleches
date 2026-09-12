@@ -62,7 +62,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from "vue";
-import { defineProps, defineEmits } from "vue";
+
 import { loadStripe, Stripe, StripeElements } from "@stripe/stripe-js";
 import { NButton, NInput, NForm, NFormItem } from "naive-ui";
 import { api, Plan } from "database";

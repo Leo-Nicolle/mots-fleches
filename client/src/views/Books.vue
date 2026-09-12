@@ -20,7 +20,7 @@
         {{ elt.title ? elt.title : $t("buttons.newBook") }}
       </span>
     </template>
-    <template #card-body="{ elt, i }">
+    <template #card-body>
       <BookOutline class="preview" />
     </template>
     <template v-slot:outside>

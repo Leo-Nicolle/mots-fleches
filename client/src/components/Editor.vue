@@ -90,18 +90,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  defineProps,
-  defineEmits,
-  ref,
-  watchEffect,
-  onMounted,
-  computed,
-  onBeforeUnmount,
-  watch,
-  unref,
-  defineModel
-} from "vue";
+import { ref, watchEffect, onMounted, computed, onBeforeUnmount, watch, unref, defineModel } from "vue";
 import type { CollabStatus, RemoteUser } from '../js/useCollab';
 import {
   AddCircleOutline,

@@ -4,7 +4,7 @@
       autocomplete: 'enabled',
     }" :options="options" :placeholder="$t('forms.addWord')" @keyup="onKeyUp" />
     <div class="words scroll">
-      <span class="autofillword" v-for="(word, i) in words" :key="word" @click="(i) => onDelete(i)">{{ word }}</span>
+      <span class="autofillword" v-for="(word, i) in words" :key="word" @click="onDelete(i)">{{ word }}</span>
     </div>
   </div>
   <span class="run">

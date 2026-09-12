@@ -103,8 +103,8 @@ export class Tree {
   private roots: Node[];
   constructor(size: number) {
     const [min, max] = dico.findLengthInterval(size);
-    let start = min;
-    let end = max;
+    const start = min;
+    const end = max;
     this.roots = getChildren(start, end, 0, size);
   }
 

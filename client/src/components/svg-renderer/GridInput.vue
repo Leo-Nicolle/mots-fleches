@@ -29,7 +29,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineEmits, defineProps, ref, watchEffect } from "vue";
+import { computed, ref, watchEffect } from "vue";
 import {
   Cell,
   Grid,

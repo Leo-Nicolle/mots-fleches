@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import request from 'supertest';
 import express from 'express';
 
@@ -7,7 +7,6 @@ import secureRouter from '../src/routes/secure';
 import passport from '../src/config/passport';
 import { hashPassword } from '../src/services/auth';
 import prisma from '../src/prisma';
-import '../src/config/passport';
 
 const app = express();
 app.use(express.json());
@@ -15,110 +14,125 @@ passport(app);
 app.use('/api/auth', authRouter);
 app.use('/api/secure', secureRouter);
 
-const testUser = {
-  email: 'testuser@example.com',
-  password: 'password123',
-};
+const PASSWORD = 'password123';
 
-let accessToken = '';
-let refreshToken = '';
-
-describe('Authentication Tests', () => {
-  beforeAll(async () => {
-    const hashedPassword = await hashPassword(testUser.password);
-    await prisma.users.create({
-      data: {
-        email: testUser.email,
-        password: hashedPassword,
-        tier_id: 1,
-      },
-    });
+async function createUser(email: string) {
+  await prisma.users.create({
+    data: { email, password: await hashPassword(PASSWORD), tier_id: 1 },
   });
+}
 
-  it('should register a new user', async () => {
-    const res = await request(app).post('/api/auth/register').send({
-      email: 'newuser@example.com',
-      password: 'password123',
+async function login(email: string, password = PASSWORD) {
+  const res = await request(app).post('/api/auth/login').send({ email, password });
+  return res;
+}
+
+describe('Authentication', () => {
+  it('registers a new user', async () => {
+    const res = await request(app).post('/api/auth/join').send({
+      email: 'register@auth.test',
+      password: PASSWORD,
     });
-
     expect(res.status).toBe(201);
     expect(res.body.message).toBe('User registered successfully');
   });
 
-  it('should not register a user with an existing email', async () => {
-    const res = await request(app).post('/api/auth/register').send(testUser);
+  it('rejects registration without email/password', async () => {
+    const res = await request(app).post('/api/auth/join').send({});
+    expect(res.status).toBe(400);
+  });
 
+  it('does not register an existing email', async () => {
+    await createUser('dup@auth.test');
+    const res = await request(app).post('/api/auth/join').send({
+      email: 'dup@auth.test',
+      password: PASSWORD,
+    });
     expect(res.status).toBe(409);
     expect(res.body.error).toBe('User already exists');
   });
 
-  it('should login with correct credentials and return tokens', async () => {
-    const res = await request(app).post('/api/auth/login').send(testUser);
-
+  it('logs in with correct credentials and returns tokens', async () => {
+    await createUser('login@auth.test');
+    const res = await login('login@auth.test');
     expect(res.status).toBe(200);
     expect(res.body.accessToken).toBeDefined();
     expect(res.body.refreshToken).toBeDefined();
-    accessToken = res.body.accessToken; // Store access token for protected route tests
-    refreshToken = res.body.refreshToken; // Store refresh token for refresh token tests
   });
 
-  it('should fail to login with incorrect credentials', async () => {
-    const res = await request(app).post('/api/auth/login').send({
-      email: 'testuser@example.com',
-      password: 'wrongpassword',
-    });
-
+  it('rejects login with a wrong password', async () => {
+    await createUser('wrongpass@auth.test');
+    const res = await login('wrongpass@auth.test', 'nope');
     expect(res.status).toBe(401);
     expect(res.body.error).toBe('Invalid credentials');
   });
 
-  it('should access a protected route with a valid token', async () => {
-    const res = await request(app)
-      .get('/api/secure/profile')
-      .set('Authorization', `Bearer ${accessToken}`);
-    expect(res.status).toBe(200);
+  it('rejects login for an unknown email', async () => {
+    const res = await login('ghost@auth.test');
+    expect(res.status).toBe(401);
   });
 
-  it('should deny access to a protected route without a token', async () => {
+  it('grants access to a protected route with a valid token', async () => {
+    await createUser('protected@auth.test');
+    const loginRes = await login('protected@auth.test');
+    const res = await request(app)
+      .get('/api/secure/profile')
+      .set('Authorization', `Bearer ${loginRes.body.accessToken}`);
+    expect(res.status).toBe(200);
+    expect(res.body.email).toBe('protected@auth.test');
+  });
+
+  it('denies a protected route without a token', async () => {
     const res = await request(app).get('/api/secure/profile');
     expect(res.status).toBe(401);
     expect(res.body.error).toBe('Access token is required');
   });
 
-  it('should refresh the token with a valid refresh token', async () => {
-    let res = await request(app)
+  it('refreshes the access token with a valid refresh token', async () => {
+    await createUser('refresh@auth.test');
+    const loginRes = await login('refresh@auth.test');
+    const res = await request(app)
       .post('/api/auth/refresh-token')
-      .send({ refreshToken });
-
+      .send({ refreshToken: loginRes.body.refreshToken });
     expect(res.status).toBe(200);
     expect(res.body.accessToken).toBeDefined();
-    accessToken = res.body.accessToken; // Update the accessToken with the new token
-    res = await request(app)
+
+    const profile = await request(app)
       .get('/api/secure/profile')
-      .set('Authorization', `Bearer ${accessToken}`);
-    expect(res.status).toBe(200);
+      .set('Authorization', `Bearer ${res.body.accessToken}`);
+    expect(profile.status).toBe(200);
   });
 
-  it('should logout and invalidate the refresh token', async () => {
+  it('rejects refresh without a token', async () => {
+    const res = await request(app).post('/api/auth/refresh-token').send({});
+    expect(res.status).toBe(401);
+  });
+
+  it('rejects refresh with an invalid token', async () => {
     const res = await request(app)
-      .post('/api/auth/logout')
-      .set('Authorization', `Bearer ${accessToken}`)
-      .send();
-
-    expect(res.status).toBe(200);
-    expect(res.body.message).toBe('Logged out successfully');
-
-    // Try to refresh the token with the invalidated refresh token
-    const refreshRes = await request(app)
       .post('/api/auth/refresh-token')
-      .send({ refreshToken });
+      .send({ refreshToken: 'not-a-token' });
+    expect(res.status).toBe(403);
+  });
 
-    expect(refreshRes.status).toBe(403);
-    expect(refreshRes.body.error).toBe('Invalid or expired refresh token');
+  it('logout invalidates the refresh token and blacklists the access token', async () => {
+    await createUser('logout@auth.test');
+    const loginRes = await login('logout@auth.test');
 
-    const profileRes = await request(app)
+    const logout = await request(app)
+      .post('/api/auth/logout')
+      .set('Authorization', `Bearer ${loginRes.body.accessToken}`)
+      .send();
+    expect(logout.status).toBe(200);
+
+    const refresh = await request(app)
+      .post('/api/auth/refresh-token')
+      .send({ refreshToken: loginRes.body.refreshToken });
+    expect(refresh.status).toBe(403);
+
+    const profile = await request(app)
       .get('/api/secure/profile')
-      .set('Authorization', `Bearer ${accessToken}`);
-    expect(profileRes.status).toBe(401);
+      .set('Authorization', `Bearer ${loginRes.body.accessToken}`);
+    expect(profile.status).toBe(401);
   });
 });

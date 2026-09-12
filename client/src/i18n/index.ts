@@ -3,11 +3,11 @@ import { createI18n } from "vue-i18n";
 export function loadLanguages() {
     const context = import.meta.glob("./languages/*.ts", { eager: true });
     const languages: Record<string, any> = {};
-    let langs = Object.keys(context);
-    for (let key of langs) {
+    const langs = Object.keys(context);
+    for (const key of langs) {
         if (key === "./index.ts") return;
-        let lang = context[key].lang;
-        let name = key.replace(/(\.\/languages\/|\.ts)/g, '');
+        const lang = context[key].lang;
+        const name = key.replace(/(\.\/languages\/|\.ts)/g, '');
         languages[name] = lang;
     }
 

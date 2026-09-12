@@ -69,7 +69,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, defineProps, defineEmits } from "vue";
+import { ref, computed } from "vue";
 import { NCard, NButton } from "naive-ui";
 import { type Plan } from "database";
 

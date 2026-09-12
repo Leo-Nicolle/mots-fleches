@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineEmits, defineProps, watch } from "vue";
+import { watch } from "vue";
 import { Grid } from "grid";
 import { useModel } from "../../js/useModel";
 /**

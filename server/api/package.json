@@ -14,9 +14,9 @@
     "start": "node dist/index.js",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write .",
-    "pretest": "docker compose -f ../docker-compose.yml --env-file test/.env.test --profile test up -d --wait && dotenv -e test/.env.test -- prisma db push --skip-generate",
-    "posttest": "docker compose -f ../docker-compose.yml --env-file test/.env.test --profile test down -v",
-    "test": "vitest run -c test/vitest.config.ts "
+    "pretest": "docker compose -f ../docker-compose.yml --env-file ../.env.test --profile test up -d --wait && dotenv -e ../.env.test -- prisma db push --skip-generate",
+    "posttest": "docker compose -f ../docker-compose.yml --env-file ../.env.test --profile test down -v",
+    "test": "NODE_ENV=test vitest run -c test/vitest.config.ts "
   },
   "keywords": [],
   "author": "",

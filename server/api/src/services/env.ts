@@ -1,20 +1,28 @@
 import { config as dotenv } from 'dotenv';
 import path from 'path';
 
-// Load local secrets first (.env is gitignored and holds the real DATABASE_URL).
-dotenv({ path: path.resolve('..', '.env') });
+const isTest = process.env.NODE_ENV === 'test' || Boolean(process.env.VITEST);
 
-if (!process.env.JWT_SECRET) {
-  dotenv({ path: path.resolve('..', '.env.jwt') });
-}
-if (!process.env.PORT) {
-  dotenv({ path: path.resolve('..', '.env.dev') });
-}
-if(!process.env.TURNSTILE_SECRET_KEY) {
-  dotenv({ path: path.resolve('..', '.env.turnstile') });
-}
-if (!process.env.SMTP_HOST) {
-  dotenv({ path: path.resolve('..', '.env.mail') });
+if (isTest) {
+  // Tests load a dedicated env file and must never touch the production
+  // secrets in .env / .env.jwt / .env.turnstile / .env.mail.
+  dotenv({ path: path.resolve('..', '.env.test') });
+} else {
+  // Load local secrets first (.env is gitignored and holds the real DATABASE_URL).
+  dotenv({ path: path.resolve('..', '.env') });
+
+  if (!process.env.JWT_SECRET) {
+    dotenv({ path: path.resolve('..', '.env.jwt') });
+  }
+  if (!process.env.PORT) {
+    dotenv({ path: path.resolve('..', '.env.dev') });
+  }
+  if (!process.env.TURNSTILE_SECRET_KEY) {
+    dotenv({ path: path.resolve('..', '.env.turnstile') });
+  }
+  if (!process.env.SMTP_HOST) {
+    dotenv({ path: path.resolve('..', '.env.mail') });
+  }
 }
 const config = {
   port: process.env.PORT || 3000,

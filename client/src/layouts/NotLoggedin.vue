@@ -24,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, onUnmounted } from "vue";
+import { onUnmounted } from "vue";
 import Layout from "./Main.vue";
 import { useResponsive } from "../js/useResponsive";
 const props = defineProps<{

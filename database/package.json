@@ -20,7 +20,7 @@
     "types": "tsc --d -emitDeclarationOnly --outDir dist/types",
     "lint": "eslint .",
     "type-check": "tsc --noEmit",
-    "test": "echo \"no tests specified for database\""
+    "test": "vitest run"
   },
   "author": "Leo Nicolle",
   "license": "MIT",

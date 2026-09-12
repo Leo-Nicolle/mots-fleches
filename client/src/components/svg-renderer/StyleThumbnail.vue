@@ -5,15 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  defineEmits,
-  defineProps,
-  nextTick,
-  onMounted,
-  watch,
-  ref,
-  computed,
-} from "vue";
+import { nextTick, onMounted, watch, ref, computed } from "vue";
 import SVGGrid from "./Grid.vue";
 import {
   Grid,

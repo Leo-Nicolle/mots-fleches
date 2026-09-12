@@ -62,14 +62,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  ref,
-  defineProps,
-  watchEffect,
-  defineEmits,
-  watch,
-  computed,
-} from "vue";
+import { ref, watchEffect, watch, computed } from "vue";
 import { AddCircleOutline as AddIcon } from "@vicons/ionicons5";
 import Layout from "./Main.vue";
 import { Breadcrumbs } from "../types";

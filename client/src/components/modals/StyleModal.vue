@@ -29,14 +29,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  ref,
-  watchEffect,
-  defineModel,
-  watch,
-  toRaw,
-  computed,
-} from "vue";
+import { ref, watchEffect, defineModel, watch, toRaw, computed } from "vue";
 import { CogOutline as CogIcon } from "@vicons/ionicons5";
 import { GridStyle, SolutionStyle } from "grid";
 import { api } from "../../api";

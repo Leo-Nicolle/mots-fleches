@@ -68,7 +68,7 @@ function getDistribution(grid: Grid, min: number, max: number) {
     }
   }
   const maxD = Math.max(...Object.keys(distribution).map(e => +e));
-  new Array(0, min).fill(0).forEach((_, i) => {
+  [0, min].fill(0).forEach((_, i) => {
     delete distribution[i];
   });
   new Array(Math.max(max, maxD) - Math.min(max, maxD)).fill(0).forEach((_, i) => {

@@ -42,7 +42,7 @@
   </span>
 </template>
 <script setup lang="ts">
-import { defineProps, defineEmits, watch, ref, onMounted } from 'vue';
+import { watch, ref, onMounted } from "vue";
 import {
   ArrowDown,
   ArrowForward,

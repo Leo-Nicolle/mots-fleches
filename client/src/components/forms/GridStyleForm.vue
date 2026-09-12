@@ -82,7 +82,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, watch } from "vue";
+import { watch } from "vue";
 import { useModel } from "../../js/useModel";
 import { GridStyle } from "grid";
 import FormatPicker from "./FormatPicker.vue";

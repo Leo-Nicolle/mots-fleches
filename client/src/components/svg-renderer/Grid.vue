@@ -61,7 +61,7 @@
 
 <script setup lang="ts">
 import FontLoader from "../fonts/FontLoader.vue";
-import { defineEmits, ref, defineProps, computed, nextTick } from "vue";
+import { ref, computed, nextTick } from "vue";
 import { getD } from "../../js/paths";
 import {
   Grid,

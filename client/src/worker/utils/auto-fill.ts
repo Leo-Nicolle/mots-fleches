@@ -60,7 +60,7 @@ export function autoFill(grid: Grid, words: string[]) {
     ...grid.getWords('horizontal').map(b => ({ ...b, direction: 'horizontal' as Direction })),
     ...grid.getWords('vertical').map(b => ({ ...b, direction: 'vertical' as Direction })),
   ].filter((w) => {
-    let isFull = w.cells.every(({ x, y }) => grid.cells[y][x].text.length > 0);
+    const isFull = w.cells.every(({ x, y }) => grid.cells[y][x].text.length > 0);
     const word = w.cells.map(({ x, y }) => grid.cells[y][x].text).join('');
     if (!isFull) return true;
     const idx = words.indexOf(word);
@@ -232,7 +232,7 @@ function fillupGrid(grid: Grid){
   .concat(grid.getWords('vertical')
   .map(c => ({...c, horizontal: false, vertical: true})));
   let i =0;
-  let maxCount = 1000;
+  const maxCount = 1000;
   const queue = [{grid, score: 0}];
   const visited = new Map<string, unknown>();
   visited.set(queue[0].grid.serialize(), queue[0]);

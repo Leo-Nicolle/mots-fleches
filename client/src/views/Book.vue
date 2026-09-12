@@ -37,7 +37,7 @@
         {{ elt.title ? elt.title : $t("buttons.newGrid") }}
       </span>
     </template>
-    <template #card-body="{ elt, i }">
+    <template #card-body="{ i }">
       <div class="preview">
         <span v-if="thumbnails[i]" v-html="thumbnails[i]"></span>
         <img v-else src="/placeholder.png" />

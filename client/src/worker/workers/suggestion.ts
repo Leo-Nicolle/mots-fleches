@@ -9,7 +9,7 @@ import { getWordsSimple } from '../utils/search';
 (globalThis as unknown as Record<string, string>).__workerBuild = 'coep-1';
 
 // was the old hasBailed shared array, might be used in autofill.
-let options = { sharedArray: new Int8Array(1) };
+const options = { sharedArray: new Int8Array(1) };
 onmessage = function (e) {
   const { type, data } = e.data;
   if (e.data.words && e.data.flags) {

@@ -209,7 +209,7 @@ export function getCellProbasAccurate(grid: Grid) {
   }, [] as CellA[][]);
 
 
-  let hasBailed = false;
+  const hasBailed = false;
   (["horizontal", "vertical"] as Direction[]).forEach((dir) => {
     grid
       .getWords(dir)

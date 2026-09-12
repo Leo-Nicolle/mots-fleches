@@ -102,19 +102,7 @@
 import { HomeOutline, MenuOutline } from "@vicons/ionicons5";
 import LoaderIcon from "../components/LoaderIcon.vue";
 import type { MenuOption } from "naive-ui";
-import {
-  defineProps,
-  h,
-  ref,
-  defineEmits,
-  computed,
-  watchEffect,
-  withDefaults,
-  onMounted,
-  onBeforeMount,
-  watch,
-  onBeforeUnmount,
-} from "vue";
+import { h, ref, computed, watchEffect, withDefaults, onMounted, onBeforeMount, watch, onBeforeUnmount } from "vue";
 import { RouterLink, useRouter } from "vue-router";
 import { renderIcon } from "../js/utils";
 import { LogOutOutline, LanguageOutline } from "@vicons/ionicons5";

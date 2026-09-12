@@ -14,12 +14,11 @@
           :focus="nullCell"
           :style="style"
         />
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { defineProps, watchEffect, ref } from "vue";
+import { watchEffect, ref } from "vue";
 import SVGGrid from "./svg-renderer/Grid.vue";
 import { Grid, GridStyle, nullCell } from "grid";
 import { defaultExportOptions } from "../types";

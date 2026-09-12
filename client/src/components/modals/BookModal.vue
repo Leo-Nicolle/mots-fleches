@@ -55,7 +55,7 @@ import type { GroupSummary } from 'database';
 import { SettingsOutline } from '@vicons/ionicons5';
 import { api } from '../../api';
 import { isSolutionStyle } from "grid";
-import { ref, toRaw, defineEmits, computed } from "vue";
+import { ref, toRaw, computed } from "vue";
 import { SelectOption } from 'naive-ui';
 const book = defineModel({
   type: Object as () => Book,

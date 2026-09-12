@@ -1,9 +1,9 @@
 import fs from 'fs/promises';
 import path from 'path';
 
-// eslint-disable-next-line no-undef
+ 
 const svgsFolder = 'dist/test/svg/';
-// eslint-disable-next-line no-undef
+ 
 const reportFolder = 'reports/svg-report';
 
 const htmlTemplate = `
@@ -40,7 +40,7 @@ type Case = {
 };
 
 export default class SVGReporter {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+   
   async onFinished(files, errors) {
     await Promise.all([
       fs.readdir(svgsFolder),

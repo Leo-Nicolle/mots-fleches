@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, watch, toRaw } from "vue";
+import { watch, toRaw } from "vue";
 import FontSelector from "../fonts/FontSelector.vue";
 import PaginationStyle from "./PaginationStyle.vue";
 import MarginForm from "./MarginForm.vue";

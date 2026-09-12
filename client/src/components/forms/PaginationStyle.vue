@@ -9,7 +9,7 @@
   <MarginForm v-model="value.margin" margin-label :role-prefix="`${rolePrefix}-margin`" />
 </template>
 <script setup lang="ts">
-import { defineProps, defineEmits, watch, ref } from "vue";
+import { watch, ref } from "vue";
 import { useModel } from "../../js/useModel";
 import { PaginationStyle } from "grid";
 import FontSelector from "../fonts/FontSelector.vue";

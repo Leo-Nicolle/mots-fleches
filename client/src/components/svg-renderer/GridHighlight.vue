@@ -18,7 +18,7 @@
     <span class="heatmap" v-if="mode === 'heatmap'">
       <canvas ref="heatmapref" />
     </span>
-    <span v-for="({ style, key, problem }, i) in highlights" :class="`problem ${problem}`" :key="key" :style="style">
+    <span v-for="{ style, key, problem } in highlights" :class="`problem ${problem}`" :key="key" :style="style">
     </span>
     <span class="gridhighlight" v-if="visible && tooltip">
       <span class="highlight"> </span>
@@ -45,15 +45,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  computed,
-  defineEmits,
-  defineProps,
-  ref,
-  toRaw,
-  watch,
-  watchEffect,
-} from "vue";
+import { computed, ref, toRaw, watch, watchEffect } from "vue";
 import {
   Cell,
   CellProba,

@@ -14,7 +14,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, ref, watchEffect, computed } from "vue";
+import { ref, watchEffect, computed } from "vue";
 
 import { CellProba, Direction, Vec } from "grid";
 import { Method, Ordering } from "../../types";

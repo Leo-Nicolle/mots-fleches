@@ -33,6 +33,7 @@
     "postbuild": "node scripts/postbuild.mjs",
     "lint": "turbo run lint",
     "test": "turbo run test",
+    "test:e2e": "cd client && playwright test",
     "type-check": "turbo run type-check",
     "dev": "turbo run dev --parallel",
     "doc:grid": "cd grid && typedoc --plugin typedoc-plugin-markdown --out ../docs/grid src/index.ts",

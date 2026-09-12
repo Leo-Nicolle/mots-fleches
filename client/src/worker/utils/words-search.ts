@@ -31,7 +31,7 @@ export class WordsSearch {
           .trim()
           .normalize("NFD")
           .replace(/[\u0300-\u036f]/g, "")
-          .replace(/ ?\'?-?/g, "")
+          .replace(/ ?'?-?/g, "")
           .toUpperCase()
       )
       .forEach((word) => {

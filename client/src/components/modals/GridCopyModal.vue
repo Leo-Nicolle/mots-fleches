@@ -33,7 +33,7 @@
 <script setup lang="ts">
 import { api } from '../../api';
 import { useI18n } from "vue-i18n";
-import { ref, defineProps, defineEmits, computed } from "vue";
+import { ref, computed } from "vue";
 import { useRoute } from 'vue-router';
 import InfoPopup from '../InfoPopup.vue';
 const props = defineProps<{
