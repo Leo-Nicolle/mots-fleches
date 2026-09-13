@@ -9,6 +9,12 @@ export type Preferences = {
     verticalSplit: string;
     changeMode: string;
   };
+  editing: {
+    autoLayoutDefinitions: boolean;
+  };
+  tips:{
+    hasSeenAutoLayoutTip: boolean;
+  }
 };
 type Events = {
   update: [Preferences];
@@ -22,6 +28,12 @@ const defaults: Preferences = {
     verticalSplit: "|",
     changeMode: "Space",
   },
+  editing: {
+    autoLayoutDefinitions: false,
+  },
+  tips: {
+    hasSeenAutoLayoutTip: false,
+  }
 };
 
 class Prefs extends EventEmmiter<Events> {
@@ -29,10 +41,17 @@ class Prefs extends EventEmmiter<Events> {
   constructor() {
     super();
   }
-  load() {
-    return localStorage.getItem("motsflex-preferences")
-      ? JSON.parse(localStorage.getItem("motsflex-preferences")!)
-      : structuredClone(defaults);
+  load(): Preferences {
+    const stored = localStorage.getItem("motsflex-preferences");
+    if (!stored) return structuredClone(defaults);
+    const parsed = JSON.parse(stored);
+    // Merge one level deep so preferences saved before a new category (e.g.
+    // "editing") existed don't leave it missing and crash `get`.
+    const merged = structuredClone(defaults);
+    for (const key of Object.keys(merged) as (keyof Preferences)[]) {
+      Object.assign(merged[key], parsed[key]);
+    }
+    return merged;
   }
   save() {
     localStorage.setItem("motsflex-preferences", JSON.stringify(this.preferences));
@@ -43,7 +62,7 @@ class Prefs extends EventEmmiter<Events> {
   set(str: string | Partial<Preferences>, value?: any) {
     if (typeof str === 'object') {
       this.preferences = { ...this.preferences, ...str };
-    } else if (value) {
+    } else if (value !== undefined) {
       const keys = str.split('.');
       const lastKey = keys.pop()!;
       const parent = keys.reduce((acc, cur) => acc[cur], this.preferences);

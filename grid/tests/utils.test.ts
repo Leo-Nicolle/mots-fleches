@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { Grid } from '../src/Grid';
+import { Grid, normalizeDefinitionText } from '../src/Grid';
 import {
   parse,
   format,
@@ -84,6 +84,31 @@ describe('definition text helpers', () => {
     expect(positions).toHaveLength(3);
     expect(positions[2]).toEqual({ x: 0.5, y: 1 });
     expect(splitPosition(defCell('a\n\nb'))).toBe(0.5);
+  });
+});
+
+describe('normalizeDefinitionText', () => {
+  it('leaves already-clean text untouched', () => {
+    expect(normalizeDefinitionText('a\nb')).toBe('a\nb');
+    expect(normalizeDefinitionText('a\n\nb')).toBe('a\n\nb');
+  });
+
+  it('collapses a run of 3+ newlines to a single split', () => {
+    expect(normalizeDefinitionText('a\n\n\nb')).toBe('a\n\nb');
+    expect(normalizeDefinitionText('a\n\n\n\nb')).toBe('a\n\nb');
+  });
+
+  it('keeps only the last split when several gaps are present', () => {
+    expect(normalizeDefinitionText('a\n\nb\n\nc')).toBe('a\nb\n\nc');
+    expect(normalizeDefinitionText('a\n\nb\n\nc\n\nd')).toBe('a\nb\nc\n\nd');
+  });
+
+  it('is idempotent', () => {
+    const inputs = ['a\n\n\nb', 'a\n\nb\n\nc', 'a\nb', 'a\n\nb'];
+    for (const input of inputs) {
+      const once = normalizeDefinitionText(input);
+      expect(normalizeDefinitionText(once)).toBe(once);
+    }
   });
 });
 

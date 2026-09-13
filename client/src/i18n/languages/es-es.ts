@@ -137,6 +137,8 @@ export const lang = {
         loading: "Cargando...",
         mode: "Modo del editor (Libre / Verificación / Probabilidad)",
         direction: "Dirección de escritura",
+        autoLayout: "Ajustar automáticamente el texto de la definición",
+        autoLayoutNew: "¡Nuevo! Ajuste automático del texto de la definición — pruébalo",
         method: "Modo de sugerencia",
         ordering: "Orden de las sugerencias",
         reset: "Restablecer flechas",

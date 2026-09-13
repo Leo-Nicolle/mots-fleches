@@ -138,6 +138,8 @@ export const lang = {
         loading: "Chargement...",
         mode: "Mode de l'éditeur (Libre / Vérification / Probabilités)",
         direction: "Direction de saisie",
+        autoLayout: "Retour à la ligne automatique",
+        autoLayoutNew: "Nouveau ! Retour à la ligne automatique pour les définitions — essayez-le",
         method: "Mode de suggestion",
         ordering: "Ordre des suggestions",
         reset: "Réinitialiser les flèches",

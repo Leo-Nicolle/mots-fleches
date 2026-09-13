@@ -137,6 +137,8 @@ export const lang = {
     loading: "Loading...",
     mode: "Editor mode (Free / Check / Heatmap)",
     direction: "Typing direction",
+    autoLayout: "Auto-wrap definition text to fit the cell",
+    autoLayoutNew: "New! Auto-wrap definition text to fit the cell — give it a try",
     method: "Suggestion mode",
     ordering: "Suggestion ordering",
     reset: "Reset arrows",

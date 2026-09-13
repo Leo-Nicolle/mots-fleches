@@ -7,6 +7,14 @@
           ? cell.suggestion
           : ''
         " :rows="cell.definition ? 5 : 1" :class="getCellClass(cell, cell)" />
+    <!--
+      The split divider relies on `.grid-input`'s containing block, which is
+      only established because it already has a non-"none" `transform` (see
+      the style block below) — removing that transform would silently break
+      its absolute positioning too.
+    -->
+    <div class="split-divider" v-if="cell.definition && isSplited(cell)" :style="{ top: splitTop }"
+      aria-hidden="true"></div>
     <div class="handles" v-if="cell.definition">
       <n-popover v-for="(handle, k) in handles" :key="k" trigger="hover">
         <template #trigger>
@@ -29,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watchEffect } from "vue";
+import { computed, nextTick, ref, watchEffect } from "vue";
 import {
   Cell,
   Grid,
@@ -40,6 +48,7 @@ import {
   nullCell,
   isSplited,
   parse,
+  splitPosition,
   ArrowDir,
   outerBorderWidth,
   arrowPositions,
@@ -49,6 +58,7 @@ import { getD } from "../../js/paths";
 import { matches } from "../../js/shortcuts";
 import { Handle } from "../../types";
 import { useSvgSizes, useTransform } from "./utils";
+import { layoutDefinitionText } from "../../js/definitionLayout";
 /**
  * Component to type text on the grid
  */
@@ -99,6 +109,13 @@ const defBackgroundColor = computed(
   () => props.style.definition.backgroundColor
 );
 const transform = computed(() => useTransform(props, props.cell));
+/**
+ * Vertical position (in px, cell-local) of the split divider, matching the
+ * ratio the real SVG render (Grid.vue's `splits` computed) uses.
+ */
+const splitTop = computed(
+  () => `${splitPosition(props.cell) * cellWidth(props.style) * props.zoom}px`
+);
 /**
  * Step in a direction until landing on a non-definition cell (or out of bounds).
  */
@@ -198,14 +215,27 @@ function prevWordStart(cell: Cell, direction: Direction): Cell | null {
 
 function onChange(evt: Event) {
   const { x, y } = props.cell;
-  let text = (evt.target as HTMLInputElement).value || "";
+  const textarea = evt.target as HTMLTextAreaElement;
+  let text = textarea.value || "";
   if (text.includes("_") || text.includes("|")) {
     text = text.replace("_", "").replace("|", "");
-    (evt.target as HTMLInputElement).value = props.cell.text;
+    textarea.value = props.cell.text;
     return;
   }
   if (!props.cell.definition) {
     text = text.trim().slice(-1).toUpperCase();
+  } else {
+    // Keep the caret where the user left it: normalizing/auto-wrapping only
+    // ever swaps existing spaces/newlines for one another (or, when
+    // hyphenating an overlong word, adds a "-"), so the original offset
+    // mostly stays valid post-layout — good enough for a live-typing caret.
+    const caret = textarea.selectionStart ?? text.length;
+    text = layoutDefinitionText(text, props.style, props.zoom);
+    nextTick(() => {
+      if (document.activeElement === textarea) {
+        textarea.setSelectionRange(caret, caret);
+      }
+    });
   }
   props.grid.setText({ x, y }, text);
   emit("update");
@@ -269,6 +299,7 @@ function onKeyup(evt: KeyboardEvent) {
   if (evt.canceled) return;
   // escape to toggle definition
   if (matches(evt, "toggleDefinition")) {
+    if (!props.grid.isValid(props.cell)) return;
     props.grid.setDefinition(props.cell, !props.cell.definition);
     props.grid.setText(props.cell, "");
     emit("update");
@@ -353,7 +384,7 @@ const handles = computed<Handle[]>(() => {
 });
 function onLooseFocus(evt: FocusEvent) {
   if (Grid.equal(props.cell, nullCell)) return;
-  evt.target.focus();
+  (evt.target as HTMLElement).focus();
 }
 
 watchEffect(() => {
@@ -428,6 +459,15 @@ textarea:focus-visible {
   border-radius: 50%;
   z-index: 100;
   background: #333;
+}
+
+.split-divider {
+  position: absolute;
+  left: 0;
+  width: v-bind(cellSize);
+  height: 0;
+  border-top: 2px dashed #2f6fed;
+  z-index: 4;
 }
 
 .rightdown {

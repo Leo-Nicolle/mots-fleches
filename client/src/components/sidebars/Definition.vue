@@ -21,11 +21,13 @@ import { ref, onMounted, watch, watchEffect } from "vue";
 import { workerController } from "../../worker";
 
 import throttle from "lodash.throttle";
-import { Cell, Grid, Direction, Vec } from "grid";
+import { Cell, Grid, Direction, GridStyle, Vec } from "grid";
+import { layoutDefinitionText } from "../../js/definitionLayout";
 const props = defineProps<{
   grid: Grid;
   focus: Cell;
   dir: Direction;
+  style: GridStyle;
 }>();
 const results = ref<{ title: string; texts: string[]; }[]>([]);
 const busy = ref(false);
@@ -88,7 +90,8 @@ function onSetDefinition(event: MouseEvent, text: string) {
   event.preventDefault();
   event.stopPropagation();
   const t = props.focus.text;
-  props.grid.setText(props.focus, `${t}${t.length ? '\n' : ''}${text}`);
+  const combined = `${t}${t.length ? '\n' : ''}${text}`;
+  props.grid.setText(props.focus, layoutDefinitionText(combined, props.style));
 }
 watch(() => [props.focus.x, props.focus.y, props.focus.arrows[0],
 props.focus.arrows[1], props.focus.arrows[2], props.dir], () => {

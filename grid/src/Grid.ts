@@ -27,6 +27,24 @@ export function isSplited(cell: Cell) {
 }
 
 /**
+ * Normalizes a definition cell's raw text so the single-split invariant
+ * always holds: collapses runs of 3+ consecutive newlines (accidental
+ * double-Enter) down to a single split marker "\n\n", and if more than one
+ * "\n\n" gap remains, keeps only the last one as the real split and
+ * demotes every earlier one to a plain "\n".
+ * @param text raw definition text
+ * @returns normalized text with at most one split
+ */
+export function normalizeDefinitionText(text: string): string {
+  const collapsed = text.replace(/\n{3,}/g, "\n\n");
+  const segments = collapsed.split("\n\n");
+  if (segments.length <= 2) return collapsed;
+  const last = segments[segments.length - 1];
+  const rest = segments.slice(0, -1).join("\n");
+  return `${rest}\n\n${last}`;
+}
+
+/**
  * Grid class
  * Represents a grid
  * has many helper functions to manipulate the grid
@@ -162,7 +180,7 @@ export class Grid {
   setText({ x, y }: Vec, value: string) {
     const cell = this.cells[y][x];
     if (cell.definition) {
-      cell.text = value;
+      cell.text = normalizeDefinitionText(value);
     } else {
       cell.text = value.slice(-1);
     }

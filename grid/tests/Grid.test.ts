@@ -124,6 +124,27 @@ describe('setDefinition / setText / setWord', () => {
     expect(g.cells[0][0].text).toBe('ABC');
   });
 
+  it('setText normalizes an accidental triple newline into a single split', () => {
+    const g = new Grid(1, 1);
+    g.setDefinition({ x: 0, y: 0 }, true);
+    g.setText({ x: 0, y: 0 }, 'a\n\n\nb');
+    expect(g.cells[0][0].text).toBe('a\n\nb');
+  });
+
+  it('setText keeps only the last split when several gaps are typed', () => {
+    const g = new Grid(1, 1);
+    g.setDefinition({ x: 0, y: 0 }, true);
+    g.setText({ x: 0, y: 0 }, 'a\n\nb\n\nc');
+    expect(g.cells[0][0].text).toBe('a\nb\n\nc');
+  });
+
+  it('setText leaves an already-valid single split untouched', () => {
+    const g = new Grid(1, 1);
+    g.setDefinition({ x: 0, y: 0 }, true);
+    g.setText({ x: 0, y: 0 }, 'a\n\nb');
+    expect(g.cells[0][0].text).toBe('a\n\nb');
+  });
+
   it('setWord writes one letter per cell horizontally and clears suggestions', () => {
     const g = new Grid(1, 3);
     g.suggest(['XXX'], [{ x: 0, y: 0 }], ['horizontal']);

@@ -21,13 +21,14 @@
           </span>
         </span>
         <ModeControl v-model:mode="highlightMode" :suggested="suggestedMode" />
-        <Buttons v-model:dir="dir" v-model:method="method" v-model:ordering="ordering" :mode="highlightMode"></Buttons>
+        <Buttons v-model:dir="dir" v-model:method="method" v-model:ordering="ordering" :mode="highlightMode"
+          :is-definition="focus.definition"></Buttons>
         <Autofill v-if="highlightMode === 'autofill'" :grid="grid" />
         <Suggestion v-else-if="!focus.definition" :point="focus" :dir="dir" :grid-id="grid.id" :method="method"
           :ordering="ordering" :cellProbas="cellProbas" :searchResult="searchResult" :loading="isLoadingSuggestions"
           @hover="onHover" @click="onClick" @mouseout="onMouseOut">
         </Suggestion>
-        <Definition v-else-if="focus.definition" :grid="grid" :focus="focus" :dir="dir" />
+        <Definition v-else-if="focus.definition" :grid="grid" :focus="focus" :dir="dir" :style="style" />
       </div>
     </template>
     <template #body>

@@ -13,11 +13,19 @@ export function cellAndBorderSize(props: Props, scale = 1) {
 export function cellSize(props: Props, scale = 1) {
   return `${cellWidth(props.style) * (props.zoom || 1) * scale}px`;
 }
+/**
+ * Effective font size (px) for a definition cell's text, at a given zoom.
+ * Shared by useSvgSizes (on-grid rendering) and definitionLayout.ts's
+ * auto-wrap (which needs the exact same size to measure text correctly).
+ */
+export function definitionFontSize(style: GridStyle, zoom = 1) {
+  return +Number(style.grid.cellSize / 4 * style.definition.size * zoom).toFixed(1);
+}
 export function useSvgSizes(props: Props) {
   const cellSizeC = computed(() => cellSize(props));
   const textSize = computed(() => props.style.grid.cellSize * (props.zoom || 1));
   const textFont = computed(() => `${textSize.value}px roboto`);
-  const defSize = computed(() => +Number(props.style.grid.cellSize / 4 * props.style.definition.size * (props.zoom || 1)).toFixed(1));
+  const defSize = computed(() => definitionFontSize(props.style, props.zoom || 1));
   const defFont = computed(() => `${defSize.value}px ${props.style.definition.family}`);
 
   return {
