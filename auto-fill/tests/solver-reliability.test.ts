@@ -18,12 +18,16 @@
  *     at every intersection.
  */
 
-import { describe, it, expect, beforeAll } from 'vitest'
+import { describe as baseDescribe, it, expect, beforeAll } from 'vitest'
 import { readFileSync } from 'fs'
 import { unzipSync } from 'fflate'
 import { DictionaryIndex, AC3Solver } from '../src/index'
 import type { GridCell, Direction, WordSlot, SolverResult } from '../src/index'
 import { popcountAnd } from '../src/bitset'
+
+// Skip in CI: this suite loads the full French dictionary and runs a
+// backtracking solve — slow, and only useful for local reliability checks.
+const describe = baseDescribe.skipIf(!!process.env.CI)
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
 

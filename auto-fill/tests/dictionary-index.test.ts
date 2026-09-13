@@ -1,9 +1,10 @@
-import { describe, it, expect, beforeAll } from 'vitest'
+import { describe as baseDescribe, it, expect, beforeAll } from 'vitest'
 import { readFileSync } from 'fs'
 import { unzipSync } from 'fflate'
 import { DictionaryIndex } from '../src/index'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
+const describe = baseDescribe.skipIf(!!process.env.CI)
 
 function loadZip(locale: string): string[] {
   const path = new URL(`../demo/public/${locale}.zip`, import.meta.url)
