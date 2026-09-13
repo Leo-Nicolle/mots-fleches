@@ -69,6 +69,7 @@ import {
 import { Direction } from "grid";
 import { Method, Mode, Ordering } from "../../types";
 import preferences from "../../js/preferences";
+import { postEvent } from "../../js/telemetry";
 
 const buttons = ref<Set<string>>(new Set());
 const orderings = ref<Ordering[]>(['best', 'alpha', 'inverse-alpha', 'random']);
@@ -144,6 +145,7 @@ watch(() => props.isDefinition, () => {
 const autoLayoutEnabled = ref<boolean>(!!preferences.get("editing.autoLayoutDefinitions"));
 watch(autoLayoutEnabled, (value) => {
   preferences.set("editing.autoLayoutDefinitions", value);
+  postEvent("auto-layout-toggle", { props: { enabled: value } });
 });
 
 /**
