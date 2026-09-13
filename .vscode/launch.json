@@ -19,9 +19,15 @@
       "name": "Debug Server Test File",
       "autoAttachChildProcesses": true,
       "skipFiles": [],
-      "cwd": "${workspaceRoot}/server",
-      "program": "${workspaceRoot}/server/node_modules/vitest/vitest.mjs",
-      "args": ["--config", "vitest.config.ts", "run", "${relativeFile}", "-u"],
+      "cwd": "${workspaceRoot}/server/api",
+      "program": "${workspaceRoot}/server/api/node_modules/vitest/vitest.mjs",
+      "args": [
+        "--config",
+        "test/vitest.config.ts",
+        "run",
+        "${relativeFile}",
+        "-u"
+      ],
       "smartStep": true,
       "console": "integratedTerminal"
     }

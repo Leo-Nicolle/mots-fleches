@@ -68,7 +68,7 @@ function getDistribution(grid: Grid, min: number, max: number) {
     }
   }
   const maxD = Math.max(...Object.keys(distribution).map(e => +e));
-  new Array(0, min).fill(0).forEach((_, i) => {
+  [0, min].fill(0).forEach((_, i) => {
     delete distribution[i];
   });
   new Array(Math.max(max, maxD) - Math.min(max, maxD)).fill(0).forEach((_, i) => {
@@ -88,17 +88,19 @@ function getDistribution(grid: Grid, min: number, max: number) {
  * Not too sure it is the right way of randomizing
  * @param param0 
  */
-function placeDefinition({ scaledDistib, grid, minWord, maxWord }: {
+function placeDefinition({ scaledDistib, grid, minWord, maxWord, allowed }: {
   scaledDistib: Record<string, number>;
   minWord: number;
   maxWord: number;
-  grid: Grid
+  grid: Grid;
+  allowed?: (x: number, y: number) => boolean;
 }) {
   const { rows, cols, cells } = grid;
+  const canCut = allowed || (() => true);
   const lengths = new Array(rows).fill(0)
     .map((_, y) => new Array(cols).fill(0)
       .map((cell, x) => {
-        if (cells[y][x].definition) return;
+        if (cells[y][x].definition || !canCut(x, y)) return;
         const lengthLeft = getLength({ vec: { x: -1, y: 0 }, cells, pos: { x, y } });
         const lengthRight = getLength({ vec: { x: 1, y: 0 }, cells, pos: { x, y } });
         const lengthTop = getLength({ vec: { x: 0, y: -1 }, cells, pos: { x, y } });
@@ -170,6 +172,21 @@ function placeDefinition({ scaledDistib, grid, minWord, maxWord }: {
   }
 }
 
+/**
+ * Scale a word-length distribution to probabilities in [0;1], limited to a max length.
+ */
+function scaleDistribution(distribution: [number, number][], maxLength: number): Record<string, number> {
+  const total = distribution
+    .slice(2, maxLength + 1)
+    .reduce((acc, [_, e]) => acc + e, 0);
+  return distribution
+    .slice(2, maxLength + 1)
+    .reduce((acc, [key, value]) => {
+      acc[key] = value / total;
+      return acc;
+    }, {} as Record<string, number>);
+}
+
 export default function generate({ grid, distribution }: {
   distribution: [number, number][];
   grid: Grid
@@ -178,17 +195,7 @@ export default function generate({ grid, distribution }: {
   const maxWord = Math.max(...distribution.map(([l]) => l));
 
   const { rows, cols } = grid;
-  // Sum of all the probabilities of each length
-  const total = distribution
-    .slice(minWord, Math.max(rows, cols) + 1)
-    .reduce((acc, [_, e]) => acc + e, 0);
-  // scale it to [0;1]  
-  const scaledDistib = distribution
-    .slice(minWord, Math.max(rows, cols) + 1)
-    .reduce((acc, [key, value]) => {
-      acc[key] = value / total;
-      return acc;
-    }, {} as Record<string, number>);
+  const scaledDistib = scaleDistribution(distribution, Math.max(rows, cols));
 
   for (let i = 0; i < cols; i += 2) {
     grid.setDefinition({ x: i, y: 0 }, true);
@@ -198,6 +205,52 @@ export default function generate({ grid, distribution }: {
   }
   for (let i = 0; i < grid.rows; i++) {
     placeDefinition({ minWord, scaledDistib, grid, maxWord });
+  }
+  return grid;
+}
+
+/**
+ * Extend the definition pattern of a resized grid onto its newly added
+ * rows/columns, while leaving the pre-existing cells untouched.
+ * @param grid the already-resized grid
+ * @param distribution word-length distribution
+ * @param oldRows number of rows before the resize
+ * @param oldCols number of columns before the resize
+ */
+export function generateExtension({ grid, distribution, oldRows, oldCols }: {
+  distribution: [number, number][];
+  grid: Grid;
+  oldRows: number;
+  oldCols: number;
+}) {
+  const minWord = 2;
+  const maxWord = Math.max(...distribution.map(([l]) => l));
+  const { rows, cols } = grid;
+  const scaledDistib = scaleDistribution(distribution, Math.max(rows, cols));
+
+  const allowed = (x: number, y: number) => x >= oldCols || y >= oldRows;
+
+  // Continue the staircase pattern on the newly added top-row / left-column cells.
+  for (let x = Math.max(oldCols, 0); x < cols; x++) {
+    if (x % 2 === 0) grid.setDefinition({ x, y: 0 }, true);
+  }
+  for (let y = Math.max(oldRows, 0); y < rows; y++) {
+    if (y % 2 === 0) grid.setDefinition({ x: 0, y }, true);
+  }
+
+  // Estimate how many definition cells to add from the existing density.
+  let defs = 0;
+  for (let y = 0; y < oldRows; y++) {
+    for (let x = 0; x < oldCols; x++) {
+      if (grid.cells[y][x].definition) defs++;
+    }
+  }
+  const oldArea = Math.max(1, oldRows * oldCols);
+  const newArea = rows * cols - oldRows * oldCols;
+  const target = Math.round((defs / oldArea) * newArea);
+
+  for (let i = 0; i < target; i++) {
+    placeDefinition({ minWord, scaledDistib, grid, maxWord, allowed });
   }
   return grid;
 }

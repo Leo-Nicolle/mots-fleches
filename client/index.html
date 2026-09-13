@@ -1,21 +1,90 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
-<head>
-  <meta charset="UTF-8" />
-  <link rel="icon" href="/icon.ico" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:wght@500&display=swap" rel="stylesheet">
-  <title>Mots Flex</title>
-  <style>
-  </style>
-</head>
+    <title>MotsFlex — Générateur de mots fléchés et mots croisés en ligne</title>
+    <meta
+      name="description"
+      content="MotsFlex est un générateur de mots fléchés et de mots croisés gratuit et open source. Remplissez vos grilles automatiquement, éditez les définitions et exportez en PDF ou SVG."
+    />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href="https://motsflex.com/" />
+    <meta name="author" content="MotsFlex" />
+    <meta name="theme-color" content="#1a73e8" />
 
-<body>
-  <div id="app"></div>
-  <script type="module" src="/src/main.ts"></script>
-</body>
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="MotsFlex" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:title" content="MotsFlex — Générateur de mots fléchés et mots croisés" />
+    <meta
+      property="og:description"
+      content="Créez, remplissez et exportez vos grilles de mots fléchés et mots croisés en ligne. Gratuit et open source."
+    />
+    <meta property="og:url" content="https://motsflex.com/" />
+    <meta property="og:image" content="https://motsflex.com/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="MotsFlex — générateur de mots fléchés" />
 
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="MotsFlex — Générateur de mots fléchés et mots croisés" />
+    <meta
+      name="twitter:description"
+      content="Créez, remplissez et exportez vos grilles de mots fléchés et mots croisés en ligne. Gratuit et open source."
+    />
+    <meta name="twitter:image" content="https://motsflex.com/og-image.png" />
+    <meta name="twitter:image:alt" content="MotsFlex — générateur de mots fléchés" />
+
+    <!-- Icons & PWA -->
+    <link rel="icon" href="/icon.ico" sizes="any" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:wght@500&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Structured data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "MotsFlex",
+        "url": "https://motsflex.com/",
+        "description": "Générateur de mots fléchés et de mots croisés en ligne : remplissage automatique, édition des définitions, export PDF et SVG.",
+        "applicationCategory": "DesignApplication",
+        "operatingSystem": "Any",
+        "inLanguage": ["fr", "en", "es"],
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "EUR"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "MotsFlex",
+          "url": "https://motsflex.com",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://motsflex.com/icon.svg"
+          }
+        }
+      }
+    </script>
+  </head>
+
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
 </html>

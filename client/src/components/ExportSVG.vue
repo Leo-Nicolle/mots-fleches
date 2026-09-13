@@ -14,12 +14,11 @@
           :focus="nullCell"
           :style="style"
         />
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { defineProps, watchEffect, ref } from "vue";
+import { watchEffect, ref } from "vue";
 import SVGGrid from "./svg-renderer/Grid.vue";
 import { Grid, GridStyle, nullCell } from "grid";
 import { defaultExportOptions } from "../types";
@@ -37,7 +36,7 @@ const style = ref<GridStyle>();
 const exporter = ref<HTMLDivElement>();
 
 watchEffect(() => {
-  api.db.getStyle(props.grid.styleId).then((opts) => {
+  api.getStyle(props.grid.styleId).then((opts) => {
     style.value = opts;
   });
 });

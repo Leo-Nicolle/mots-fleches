@@ -36,7 +36,7 @@
 import SVGGrid from "../svg-renderer/Grid.vue";
 import ExportOptionsForm from "../forms/ExportOptions.vue";
 import { Grid, GridStyle, SolutionStyle, nullCell } from "grid";
-import { ref, defineProps, watch, nextTick } from "vue";
+import { ref, watch, nextTick } from "vue";
 import { ExportOptions, defaultExportOptions } from "../../types";
 import { postEvent } from "../../js/telemetry";
 

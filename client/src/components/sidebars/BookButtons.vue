@@ -8,7 +8,7 @@
 
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router';
-import { defineProps } from 'vue';
+
 import BookModal from '../modals/BookModal.vue';
 import { GridStyle, SolutionStyle } from 'grid';
 import { Book } from 'database';

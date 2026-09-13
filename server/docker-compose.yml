@@ -1,0 +1,75 @@
+services:
+  db:
+    image: postgres:17
+    container_name: ${CONTAINER_NAME}-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ${POSTGRES_DATA}
+      - ./db/init-scripts:/docker-entrypoint-initdb.d:ro # Updated path for init scripts
+    networks:
+      - internal-network # Internal network for inter-service communication
+    ports:
+      - ${DB_PORT}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    profiles:
+      - production
+      - development
+      - test
+
+  # API service - Run only in production
+  api:
+    build:
+      context: ./api # Path to API source
+      dockerfile: Dockerfile # Use the Dockerfile in the API directory
+    container_name: ${CONTAINER_NAME}-api
+    restart: unless-stopped
+    env_file:
+      - .env
+      - .env.jwt
+      - .env.turnstile
+      - .env.mail
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB}
+      PORT: 3000
+      MODE: production
+      PLAUSIBLE_API_BASE: http://host.docker.internal:8000
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${DB_HOST}:5432/${POSTGRES_DB}?schema=public
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "${API_PORT:-5480}:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - internal-network # Use the same internal network
+    profiles:
+      - production # Run only in production
+
+  # Adminer service - Run only in development
+  adminer:
+    image: adminer
+    container_name: ${CONTAINER_NAME}-adminer
+    restart: unless-stopped
+    ports:
+      - ${ADMINER_PORT}:8080
+    networks:
+      - internal-network
+    profiles:
+      - development # Run only in development
+      - test
+
+networks:
+  internal-network:
+    driver: bridge # Default network type for isolation

@@ -32,3 +32,28 @@ npm i
 npm run dev
 ```
 Make a PR, I would be happy :).
+
+## SEO & prerendering
+
+The public pages (`/` and `/changelog`) are pre-rendered to static HTML at build
+time (see `scripts/prerender.mjs`) so search engines can index them without
+running JavaScript. This uses a headless Chromium via Playwright.
+
+**One-time setup** — install the browser into the workspace:
+
+```sh
+PLAYWRIGHT_BROWSERS_PATH=$PWD/.pw-browsers npx playwright install chromium
+```
+
+`npm run build` now runs `vite build` then `npm run prerender` automatically.
+
+**SEO images** (`og-image.png`, `apple-touch-icon.png`) are generated from
+`client/public/icon.svg` — regenerate them after changing the icon:
+
+```sh
+npm run generate:seo-images
+```
+
+The SEO metadata lives in `client/index.html` (defaults) and
+`client/src/js/seo.ts` (per-route titles/descriptions), and the crawl files are
+in `client/public/{robots.txt,sitemap.xml,site.webmanifest}`.

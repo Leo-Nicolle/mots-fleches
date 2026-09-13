@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, ref } from "vue";
+import { ref } from "vue";
 import { Grid, GridStyle, SolutionStyle } from "grid";
 import { computed } from "vue";
 import { defaultExportOptions, ExportOptions } from "../types";

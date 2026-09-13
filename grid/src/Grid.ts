@@ -127,6 +127,18 @@ export class Grid {
   }
 
   /**
+   * Resets every cell of the grid to a fresh, empty, non-definition cell
+   * while keeping the current dimensions.
+   */
+  clear(): void {
+    for (let y = 0; y < this.rows; y++) {
+      for (let x = 0; x < this.cols; x++) {
+        this.cells[y][x] = Grid.newCell(x, y);
+      }
+    }
+  }
+
+  /**
    * Set the cell at the given coordinates as a definition cell (or not)
    * @param coordinates
    * @param value true to make it a definition cell, false to make it a normal cell 
@@ -376,13 +388,26 @@ export class Grid {
     } else {
       state = s;
     }
-    const { rows, cols, comment, title, id, cells, created, styleId } = state;
+    const { comment, title, id, cells, created, styleId } = state;
+    // Recover from corrupted rows/cols by falling back to the cells dimensions.
+    const rows =
+      typeof state.rows === "number" && Number.isFinite(state.rows) && state.rows > 0
+        ? state.rows
+        : (cells && cells.length) || 0;
+    const cols =
+      typeof state.cols === "number" && Number.isFinite(state.cols) && state.cols > 0
+        ? state.cols
+        : (cells && cells[0] && cells[0].length) || 0;
     const res = new Grid(rows, cols, id);
     cells.forEach((row, i) => {
       row.forEach((cell, j) => {
         cell.highlighted = false;
         cell.suggestion = '';
-        res.cells[i][j] = cell;
+        if (!res.cells[i]) return;
+        res.cells[i][j] = {
+          ...res.cells[i][j],
+          ...cell
+        }
       });
     });
     res.title = title;

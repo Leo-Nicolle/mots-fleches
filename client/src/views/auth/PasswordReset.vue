@@ -13,7 +13,7 @@
         $t("register.cancel")
       }}</n-button>
       <n-button class="register-btn" type="primary" @click="register">{{
-        $t("register.send")
+        $t("passwordreset.submit")
       }}</n-button>
     </template>
   </Layout>
@@ -26,41 +26,29 @@ import { useAlert } from "../../js/useAlert";
 import Layout from "../../layouts/NotLoggedin.vue";
 import { useRoute, useRouter } from "vue-router";
 const router = useRouter();
+const route = useRoute();
 const password = ref<string>("");
 const passwordcheck = ref<string>("");
 const { alert, setAlert } = useAlert();
-const route = useRoute();
-const [key, hash] = location.hash.split("=");
-async function register(method: string) {
+const token = route.params.token as string;
+
+async function register() {
+  if (!token) {
+    return setAlert("error", "resettokeninvalid");
+  }
   if (password.value !== passwordcheck.value) {
     return setAlert("error", "passwordsdontmatch");
   }
   if (password.value.length < 6) {
     return setAlert("error", "passwordtooshort");
   }
-  const { data, error } = await api.supadb.supabase.auth.updateUser({
-    password: password.value,
-  });
-  if (error) {
-    console.log(
-      "Error: ",
-      error.cause,
-      error.message,
-      error.name,
-      error.status
-    );
-    const id = error.message.includes(
-      "Password should be at least 6 characters"
-    )
-      ? "passwordtooshort"
-      : "wrongpassword";
-    alert.value = { type: "error", id };
-    setTimeout(() => {
-      alert.value = false;
-    }, 3000);
-  } else {
-    api.mode = "supadb";
-    router.push("/");
+  try {
+    await api.remote.resetPassword(token, password.value);
+    setAlert("success", "passwordresetsuccess");
+    setTimeout(() => router.push("/login"), 2000);
+  } catch (e) {
+    const isNetworkError = !(e as any)?.response;
+    setAlert("error", isNetworkError ? "serverUnreachable" : "resettokeninvalid");
   }
 }
 async function cancel() {
@@ -69,7 +57,7 @@ async function cancel() {
 </script>
 
 <style>
-.footer {
+.auth-footer {
   justify-content: space-between;
 }
 </style>

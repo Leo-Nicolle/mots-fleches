@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from "vue";
+
 import SVGGrid from "./svg-renderer/Grid.vue";
 import Paper from "./Paper.vue";
 import { Grid, GridStyle, nullCell, PaginationStyle } from "grid";

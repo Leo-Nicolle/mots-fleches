@@ -29,7 +29,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineEmits, defineProps, ref, watchEffect } from "vue";
+import { computed, ref, watchEffect } from "vue";
 import {
   Cell,
   Grid,
@@ -46,6 +46,7 @@ import {
 } from "grid";
 import { getCellClass } from "../../js/utils";
 import { getD } from "../../js/paths";
+import { matches } from "../../js/shortcuts";
 import { Handle } from "../../types";
 import { useSvgSizes, useTransform } from "./utils";
 /**
@@ -98,6 +99,103 @@ const defBackgroundColor = computed(
   () => props.style.definition.backgroundColor
 );
 const transform = computed(() => useTransform(props, props.cell));
+/**
+ * Step in a direction until landing on a non-definition cell (or out of bounds).
+ */
+function stepText(cell: Cell, direction: Direction, inc: 1 | -1): Cell {
+  let next =
+    inc > 0
+      ? props.grid.increment(cell, direction)
+      : props.grid.decrement(cell, direction);
+  while (props.grid.isValid(next) && next.definition) {
+    next =
+      inc > 0
+        ? props.grid.increment(next, direction)
+        : props.grid.decrement(next, direction);
+  }
+  return next;
+}
+
+/**
+ * First cell of each word within a line (row for horizontal, column for vertical).
+ */
+function wordStartsInLine(lineIndex: number, direction: Direction): Cell[] {
+  const starts: Cell[] = [];
+  const horizontal = direction === "horizontal";
+  const len = horizontal ? props.grid.cols : props.grid.rows;
+  let inWord = false;
+  for (let i = 0; i < len; i++) {
+    const c = horizontal
+      ? props.grid.getCell({ x: i, y: lineIndex })
+      : props.grid.getCell({ x: lineIndex, y: i });
+    if (!c.definition && !inWord) {
+      starts.push(c);
+      inWord = true;
+    } else if (c.definition) {
+      inWord = false;
+    }
+  }
+  return starts;
+}
+
+/**
+ * First word of the next (or previous) line in a direction.
+ */
+function nextLineWordStart(
+  cell: Cell,
+  direction: Direction,
+  step: 1 | -1
+): Cell | null {
+  const horizontal = direction === "horizontal";
+  const line = horizontal ? cell.y : cell.x;
+  const max = horizontal ? props.grid.rows : props.grid.cols;
+  for (let l = line + step; step > 0 ? l < max : l >= 0; l += step) {
+    const starts = wordStartsInLine(l, direction);
+    if (starts.length) return step > 0 ? starts[0] : starts[starts.length - 1];
+  }
+  return null;
+}
+
+/**
+ * First cell of the next word in a direction (skipping the definition cells),
+ * wrapping to the next line/column when the current one is exhausted.
+ */
+function nextWordStart(cell: Cell, direction: Direction): Cell | null {
+  let next = props.grid.increment(cell, direction);
+  while (props.grid.isValid(next) && !next.definition) {
+    next = props.grid.increment(next, direction);
+  }
+  while (props.grid.isValid(next) && next.definition) {
+    next = props.grid.increment(next, direction);
+  }
+  if (props.grid.isValid(next) && !next.definition) return next;
+  return nextLineWordStart(cell, direction, 1);
+}
+
+/**
+ * First cell of the previous word in a direction (skipping the definition cells),
+ * wrapping to the previous line/column when the current one is exhausted.
+ */
+function prevWordStart(cell: Cell, direction: Direction): Cell | null {
+  let next = props.grid.decrement(cell, direction);
+  while (props.grid.isValid(next) && !next.definition) {
+    next = props.grid.decrement(next, direction);
+  }
+  while (props.grid.isValid(next) && next.definition) {
+    next = props.grid.decrement(next, direction);
+  }
+  if (props.grid.isValid(next) && !next.definition) {
+    let start = next;
+    let prev = props.grid.decrement(start, direction);
+    while (props.grid.isValid(prev) && !prev.definition) {
+      start = prev;
+      prev = props.grid.decrement(start, direction);
+    }
+    return start;
+  }
+  return nextLineWordStart(cell, direction, -1);
+}
+
 function onChange(evt: Event) {
   const { x, y } = props.cell;
   let text = (evt.target as HTMLInputElement).value || "";
@@ -114,27 +212,52 @@ function onChange(evt: Event) {
   if (props.grid.isDefinition(props.cell)) {
     return;
   }
-  const next = text.length
-    ? props.grid.increment(props.cell, props.dir)
-    : props.grid.decrement(props.cell, props.dir);
-  if (!props.grid.isValid(next) || next.definition) return;
-  emit("focus", next);
+  if (text.length) {
+    const next = props.grid.increment(props.cell, props.dir);
+    if (!props.grid.isValid(next)) return;
+    if (next.definition) {
+      // word just completed: jump to the next word instead of stopping
+      const start = nextWordStart(props.cell, props.dir);
+      if (start) emit("focus", start);
+      return;
+    }
+    emit("focus", next);
+  } else {
+    const next = stepText(props.cell, props.dir, -1);
+    if (props.grid.isValid(next)) emit("focus", next);
+  }
 }
 let shouldGoBackwards = false;
 function onKeydown(evt: KeyboardEvent) {
   let text = (evt.target as HTMLInputElement).value || "";
+  if (!props.cell.definition) {
+    if (evt.key === "Enter") {
+      evt.preventDefault();
+      const next = nextWordStart(props.cell, props.dir);
+      if (next) emit("focus", next);
+      return;
+    }
+    if (evt.key === "Tab") {
+      evt.preventDefault();
+      const next = evt.shiftKey
+        ? prevWordStart(props.cell, props.dir)
+        : nextWordStart(props.cell, props.dir);
+      if (next) emit("focus", next);
+      return;
+    }
+  }
   if (props.cell.definition || text.length || evt.code !== "Backspace") return;
   // go backwards on backspace keydown if the cell is empty
   shouldGoBackwards = true;
 }
 function onKeyup(evt: KeyboardEvent) {
   // | and _ are used to toggle spaceH and spaceV
-  if (evt.key === "|") {
+  if (matches(evt, "verticalSplit")) {
     props.grid.setSpaceH(props.cell, !props.cell.spaceH);
     emit("update");
     return;
   }
-  if (evt.key === "_") {
+  if (matches(evt, "horizontalSplit")) {
     props.grid.setSpaceV(props.cell, !props.cell.spaceV);
     emit("update");
     return;
@@ -145,7 +268,7 @@ function onKeyup(evt: KeyboardEvent) {
   // @ts-ignore
   if (evt.canceled) return;
   // escape to toggle definition
-  if (evt.key === "Escape") {
+  if (matches(evt, "toggleDefinition")) {
     props.grid.setDefinition(props.cell, !props.cell.definition);
     props.grid.setText(props.cell, "");
     emit("update");
@@ -153,13 +276,13 @@ function onKeyup(evt: KeyboardEvent) {
   }
   if (shouldGoBackwards) {
     shouldGoBackwards = false;
-    const next = props.grid.decrement(props.cell, props.dir);
+    const next = stepText(props.cell, props.dir, -1);
     if (!props.grid.isValid(next)) return;
     emit("focus", next);
     return;
   }
   // ctrl + enter to moveout from definition
-  if (props.cell.definition && evt.key === "Enter" && evt.ctrlKey) {
+  if (props.cell.definition && matches(evt, "exitDefinition")) {
     let next = props.grid.increment(props.cell, props.dir);
     if (!props.grid.isValid(next)) {
       next = props.grid.decrement(props.cell, props.dir);
@@ -172,28 +295,28 @@ function onKeyup(evt: KeyboardEvent) {
     }
     return emit("focus", next);
   }
-  // arrows to move around in the grid
+  // arrows to move around in the grid (skipping definition cells)
   if (!props.cell.definition) {
     if (evt.key === "ArrowUp") {
-      const next = props.grid.decrement(props.cell, "vertical");
+      const next = stepText(props.cell, "vertical", -1);
       if (props.grid.isValid(next)) {
         return emit("focus", next);
       }
     }
     if (evt.key === "ArrowDown") {
-      const next = props.grid.increment(props.cell, "vertical");
+      const next = stepText(props.cell, "vertical", 1);
       if (props.grid.isValid(next)) {
         return emit("focus", next);
       }
     }
     if (evt.key === "ArrowLeft") {
-      const next = props.grid.decrement(props.cell, "horizontal");
+      const next = stepText(props.cell, "horizontal", -1);
       if (props.grid.isValid(next)) {
         return emit("focus", next);
       }
     }
     if (evt.key === "ArrowRight") {
-      const next = props.grid.increment(props.cell, "horizontal");
+      const next = stepText(props.cell, "horizontal", 1);
       if (props.grid.isValid(next)) {
         return emit("focus", next);
       }

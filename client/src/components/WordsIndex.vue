@@ -8,7 +8,7 @@
       bodyClass="body-index">
       <span class="words" ref="wordsContainer"
         :style="i === layout.wordsPerPage.length - 1 ? { height: `${layout.lastPageHeight}px` } : null">
-        <span v-for="(word, j) in words" :class="typeof word === 'number' ? 'size' : 'word'" :key="word">
+        <span v-for="word in words" :class="typeof word === 'number' ? 'size' : 'word'" :key="word">
           {{ word }}
         </span>
       </span>
@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, ref, defineEmits, watch } from "vue";
+import { ref, watch } from "vue";
 import { Grid, getAllWords, SolutionStyle, Format } from "grid";
 import { computed } from "vue";
 import Paper from "./Paper.vue";

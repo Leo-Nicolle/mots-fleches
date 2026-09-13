@@ -16,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits } from "vue";
+
 import SVGGrid from "./svg-renderer/Grid.vue";
 import Paper from "./Paper.vue";
 import FontLoader from "./fonts/FontLoader.vue";

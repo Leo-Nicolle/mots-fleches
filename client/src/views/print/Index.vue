@@ -22,7 +22,7 @@ function fetch() {
     .then((gs) => {
       grids.value = gs;
     })
-    .then(() => api.db.getStyle("solution"))
+    .then(() => api.getStyle("solution"))
     .then((s) => {
       style.value = s as SolutionStyle;
     })

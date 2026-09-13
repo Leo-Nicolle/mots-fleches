@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, onMounted, ref } from "vue";
+import { onMounted, ref } from "vue";
 import { watch } from "vue";
 import { loadFont } from "./load-font";
 import axios from "axios";

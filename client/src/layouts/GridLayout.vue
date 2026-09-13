@@ -8,6 +8,10 @@
     </template>
     <template v-slot:body>
       <div class="wrapper">
+        <div v-if="!eltList.length" class="empty-state">
+          <h3>{{ $t("empty.title") }}</h3>
+          <p>{{ $t("empty.hint") }}</p>
+        </div>
         <n-card v-if="hasCreateButton" @click="onCreate" :title="$t('buttons.create')">
           <template #default>
             <div class="card-body">
@@ -58,14 +62,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  ref,
-  defineProps,
-  watchEffect,
-  defineEmits,
-  watch,
-  computed,
-} from "vue";
+import { ref, watchEffect, watch, computed } from "vue";
 import { AddCircleOutline as AddIcon } from "@vicons/ionicons5";
 import Layout from "./Main.vue";
 import { Breadcrumbs } from "../types";
@@ -165,7 +162,20 @@ watch(selectedElements, () => {
   width: 100%;
 }
 
-.n-card {
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px 20px;
+  color: #888;
+}
+
+.empty-state h3 {
+  margin: 0 0 8px;
+  font-size: 1.4em;
+  color: inherit;
+}
+
+.wrapper .n-card {
   box-shadow: 4px 4px 7px #ddd;
   height: 350px;
 }
@@ -188,14 +198,14 @@ watch(selectedElements, () => {
   max-width: 295px;
 }
 
-.n-card__content {
+.wrapper .n-card__content {
   display: flex;
   flex-direction: column;
   align-items: center;
   cursor: pointer;
 }
 
-.n-card-cover {
+.wrapper .n-card-cover {
   display: flex;
   flex-direction: column;
   align-items: center;

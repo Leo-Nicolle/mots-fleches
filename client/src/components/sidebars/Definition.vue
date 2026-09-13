@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, ref, onMounted, watch, watchEffect } from "vue";
+import { ref, onMounted, watch, watchEffect } from "vue";
 import { workerController } from "../../worker";
 
 import throttle from "lodash.throttle";

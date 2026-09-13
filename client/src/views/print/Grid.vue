@@ -27,7 +27,7 @@ function fetch() {
     .getGrid(route.query.id as string)
     .then((g) => {
       grid.value = g as Grid;
-      return api.db.getStyle(grid.value.styleId);
+      return api.getStyle(grid.value.styleId);
     })
     .then((s) => {
       style.value = s;

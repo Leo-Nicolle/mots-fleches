@@ -11,7 +11,7 @@
 </template>
 <script setup lang="ts">
 import { Help } from '@vicons/ionicons5';
-import { defineProps } from 'vue';
+
 const props = defineProps<{
   info?: string;
 }>();

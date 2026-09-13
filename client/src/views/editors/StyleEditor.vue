@@ -19,16 +19,17 @@
 <script setup lang="ts">
 import GridPaper from "../../components/GridPaper.vue";
 import GridStyleForm from "../../components/forms/GridStyleForm.vue";
-import Loading from "../../components/Loading.vue";
 import GridForm from "../../components/forms/GridForm.vue";
+import Loading from "../../components/Loading.vue";
 import Layout from "../../layouts/Main.vue";
 import NoGrid from "../../components/NoGrid.vue";
 import { defaultExportOptions } from "../../types";
 import { Grid, GridStyle } from "grid";
-import { ref, onMounted, toRaw } from "vue";
+import { ref, computed, onMounted, toRaw, watch } from "vue";
 import { useRoute } from "vue-router";
 import { api } from "../../api";
-import { watch } from "vue";
+import { trackEditingActivity } from '../../js/telemetry';
+import { createStyleTemplateGrid } from '../../js/template-grid';
 /**
  * View to edit a grid style
  */
@@ -37,12 +38,20 @@ const style = ref<GridStyle>();
 const saveTimeout = ref(0);
 const loading = ref(true);
 const route = useRoute();
+const groupId = computed(() => {
+  const q = route.query.groupId;
+  return q ? parseInt(q as string) : null;
+});
+
 function fetch() {
   loading.value = true;
   const id = route.params.id as string || 'default';
-  return Promise.all([api.getGrids(), api.db.getStyle(id)])
-    .then(([grids, opts]) => {
-      grid.value = grids[0];
+  const stylePromise = groupId.value !== null && api.mode === 'remote'
+    ? api.remote.getGroupStyle(groupId.value, id)
+    : api.getStyle(id);
+  return Promise.all([stylePromise, createStyleTemplateGrid()])
+    .then(([opts, template]) => {
+      grid.value = template;
       style.value = opts;
     })
     .catch((e) => {
@@ -54,6 +63,8 @@ function fetch() {
 }
 
 function onUpdate() {
+  trackEditingActivity('style');
+  if (groupId.value !== null) return; // group styles are read-only
   clearTimeout(saveTimeout.value);
   saveTimeout.value = setTimeout(() => {
     if (!style.value) return;
